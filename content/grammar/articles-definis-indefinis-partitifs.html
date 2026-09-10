@@ -1,0 +1,61 @@
+<div id="french-articles-app" style="font-family: system-ui, -apple-system, sans-serif; max-width: 100%; margin: 0 auto; space-y: 6px;">
+    
+    <!-- Introduction & Gender Rule -->
+    <div style="background: #ffffff; border: 1px solid #cbd5e1; padding: 18px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+        <h3 style="color: #1e1b4b; font-size: 16px; font-weight: bold; margin-top: 0; margin-bottom: 4px;">📖 French Articles & Gender Rules</h3>
+        <p style="color: #64748b; font-size: 12px; margin-bottom: 12px;">Master definite, indefinite, and partitive articles along with essential grammar exceptions.</p>
+        
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 12px; border-radius: 8px; font-size: 12px; color: #334155; line-height: 1.5;">
+            <strong>Gender Rule:</strong> Nouns or adjectives ending in <code style="background: #e2e8f0; padding: 2px 4px; border-radius: 4px;">-e</code> are typically feminine. Exceptions must be memorized (e.g., <em>le livre</em> ends in -e but is masculine).
+        </div>
+    </div>
+
+    <!-- Article Categories Grid -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin-bottom: 20px;">
+        
+        <!-- Indefinite Articles -->
+        <div style="background: #ffffff; border: 1px solid #cbd5e1; padding: 16px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+            <h4 style="color: #4338ca; font-size: 14px; font-weight: bold; margin-top: 0; margin-bottom: 8px;">1. Indefinite Articles ("a / an / some")</h4>
+            <ul style="margin: 0; padding-left: 18px; font-size: 12px; color: #334155; line-height: 1.6;">
+                <li><strong onclick="speakText('un')" style="cursor: pointer; color: #312e81;">un</strong> (masculine singular)</li>
+                <li><strong onclick="speakText('une')" style="cursor: pointer; color: #312e81;">une</strong> (feminine singular)</li>
+                <li><strong onclick="speakText('des')" style="cursor: pointer; color: #312e81;">des</strong> (plural)</li>
+            </ul>
+        </div>
+
+        <!-- Definite Articles -->
+        <div style="background: #ffffff; border: 1px solid #cbd5e1; padding: 16px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+            <h4 style="color: #4338ca; font-size: 14px; font-weight: bold; margin-top: 0; margin-bottom: 8px;">2. Definite Articles ("the")</h4>
+            <ul style="margin: 0; padding-left: 18px; font-size: 12px; color: #334155; line-height: 1.6;">
+                <li><strong onclick="speakText('le')" style="cursor: pointer; color: #312e81;">le</strong> (masculine singular)</li>
+                <li><strong onclick="speakText('la')" style="cursor: pointer; color: #312e81;">la</strong> (feminine singular)</li>
+                <li><strong onclick="speakText('les')" style="cursor: pointer; color: #312e81;">les</strong> (plural)</li>
+                <li><strong onclick="speakText('l’')" style="cursor: pointer; color: #312e81;">l’</strong> (singular before a vowel sound)</li>
+            </ul>
+        </div>
+
+        <!-- Partitive Articles -->
+        <div style="background: #ffffff; border: 1px solid #cbd5e1; padding: 16px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+            <h4 style="color: #4338ca; font-size: 14px; font-weight: bold; margin-top: 0; margin-bottom: 8px;">3. Partitive Articles ("some" / uncountable)</h4>
+            <ul style="margin: 0; padding-left: 18px; font-size: 12px; color: #334155; line-height: 1.6;">
+                <li><strong onclick="speakText('du')" style="cursor: pointer; color: #312e81;">du</strong> (masculine singular)</li>
+                <li><strong onclick="speakText('de la')" style="cursor: pointer; color: #312e81;">de la</strong> (feminine singular)</li>
+                <li><strong onclick="speakText('d’')" style="cursor: pointer; color: #312e81;">d’</strong> (before a vowel sound)</li>
+                <li><strong onclick="speakText('des')" style="cursor: pointer; color: #312e81;">des</strong> (plural uncountable)</li>
+            </ul>
+        </div>
+
+    </div>
+
+    <!-- Special Rules Box -->
+    <div style="background: #eef2ff; border: 1px solid #c7d2fe; padding: 16px; border-radius: 12px; font-size: 12px; color: #312e81; line-height: 1.6;">
+        <h4 style="font-size: 13px; font-weight: bold; margin-top: 0; margin-bottom: 8px; color: #3730a3;">⚡ Essential Grammar Rules</h4>
+        <p style="margin: 0 0 8px;">
+            <strong>Preference Rule:</strong> Verbs of preference (<span onclick="speakText('aimer')" style="cursor: pointer; text-decoration: underline;">aimer</span>, <span onclick="speakText('adorer')" style="cursor: pointer; text-decoration: underline;">adorer</span>, <span onclick="speakText('préférer')" style="cursor: pointer; text-decoration: underline;">préférer</span>, <span onclick="speakText('détester')" style="cursor: pointer; text-decoration: underline;">détester</span>) always take definite articles instead of partitive articles.
+        </p>
+        <p style="margin: 0;">
+            <strong>Negation Rule:</strong> Indefinite and partitive articles change to <code style="background: #c7d2fe; padding: 2px 4px; border-radius: 4px;">de</code> / <code style="background: #c7d2fe; padding: 2px 4px; border-radius: 4px;">d’</code> in negative sentences. Definite articles do not change.
+        </p>
+    </div>
+
+</div>
