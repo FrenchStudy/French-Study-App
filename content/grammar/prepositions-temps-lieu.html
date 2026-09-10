@@ -1,0 +1,153 @@
+<div class="space-y-6 text-xs text-slate-700">
+    
+    <!-- Section 1: Introduction & Overview -->
+    <div class="bg-indigo-50 border border-indigo-100 p-4 rounded-xl space-y-2">
+        <h3 class="font-bold text-sm text-indigo-900">📍 Les Prépositions de Lieu (Villes, Pays & Lieux)</h3>
+        <p class="text-indigo-700 leading-relaxed">
+            Tableau complet des prépositions françaises selon la catégorie, le genre, le nombre et l'initiale, incluant la préposition spéciale « chez ». Cliquez sur n'importe quel élément pour écouter sa prononciation native.
+        </p>
+    </div>
+
+    <!-- Section 2: Interactive Styled HTML Table with Icons & Examples -->
+    <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs">
+                <thead>
+                    <tr class="bg-slate-100/70 border-b border-slate-200 text-slate-500 uppercase tracking-wider text-[10px]">
+                        <th class="p-3 font-bold">Category</th>
+                        <th class="p-3 font-bold">Type</th>
+                        <th class="p-3 font-bold">To (Destination)</th>
+                        <th class="p-3 font-bold">From (Origin)</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 text-slate-700">
+                    
+                    <!-- City Group -->
+                    <tr class="hover:bg-slate-50/80 transition">
+                        <td class="p-3 font-bold text-slate-900 align-top bg-slate-50/40" rowspan="4">City</td>
+                        <td class="p-3 text-slate-600 font-medium">Plural</td>
+                        <td class="p-3 font-mono text-slate-400">N/A</td>
+                        <td class="p-3 font-mono text-slate-400">N/A</td>
+                    </tr>
+                    <tr class="hover:bg-slate-50/80 transition">
+                        <td class="p-3 text-slate-600 font-medium">Starts with Vowel/H</td>
+                        <td class="p-3 font-medium text-indigo-600 cursor-pointer hover:underline" onclick="event.stopPropagation(); speakText('à, par exemple, à Paris')">
+                            <span class="inline-flex items-center gap-1.5">🔊 à <span class="text-[10px] text-slate-400 font-normal">(ex: à Paris)</span></span>
+                        </td>
+                        <td class="p-3 font-medium text-indigo-600 cursor-pointer hover:underline" onclick="event.stopPropagation(); speakText('d, par exemple, d Indore')">
+                            <span class="inline-flex items-center gap-1.5">🔊 d' <span class="text-[10px] text-slate-400 font-normal">(ex: d'Indore)</span></span>
+                        </td>
+                    </tr>
+                    <tr class="hover:bg-slate-50/80 transition">
+                        <td class="p-3 text-slate-600 font-medium">F.S</td>
+                        <td class="p-3 font-medium text-indigo-600 cursor-pointer hover:underline" onclick="event.stopPropagation(); speakText('à, par exemple, à Paris')">
+                            <span class="inline-flex items-center gap-1.5">🔊 à <span class="text-[10px] text-slate-400 font-normal">(ex: à Paris)</span></span>
+                        </td>
+                        <td class="p-3 font-medium text-indigo-600 cursor-pointer hover:underline" onclick="event.stopPropagation(); speakText('de, par exemple, de Paris')">
+                            <span class="inline-flex items-center gap-1.5">🔊 de <span class="text-[10px] text-slate-400 font-normal">(ex: de Paris)</span></span>
+                        </td>
+                    </tr>
+                    <tr class="hover:bg-slate-50/80 transition border-b border-slate-200">
+                        <td class="p-3 text-slate-600 font-medium">M.S.</td>
+                        <td class="p-3 font-medium text-indigo-600 cursor-pointer hover:underline" onclick="event.stopPropagation(); speakText('à, par exemple, à Paris')">
+                            <span class="inline-flex items-center gap-1.5">🔊 à <span class="text-[10px] text-slate-400 font-normal">(ex: à Paris)</span></span>
+                        </td>
+                        <td class="p-3 font-medium text-indigo-600 cursor-pointer hover:underline" onclick="event.stopPropagation(); speakText('de, par exemple, de Paris')">
+                            <span class="inline-flex items-center gap-1.5">🔊 de <span class="text-[10px] text-slate-400 font-normal">(ex: de Paris)</span></span>
+                        </td>
+                    </tr>
+
+                    <!-- Country Group -->
+                    <tr class="hover:bg-slate-50/80 transition">
+                        <td class="p-3 font-bold text-slate-900 align-top bg-slate-50/40" rowspan="4">Country</td>
+                        <td class="p-3 text-slate-600 font-medium">Plural</td>
+                        <td class="p-3 font-medium text-indigo-600 cursor-pointer hover:underline" onclick="event.stopPropagation(); speakText('aux, par exemple, aux États-Unis')">
+                            <span class="inline-flex items-center gap-1.5">🔊 aux <span class="text-[10px] text-slate-400 font-normal">(ex: aux États-Unis)</span></span>
+                        </td>
+                        <td class="p-3 font-medium text-indigo-600 cursor-pointer hover:underline" onclick="event.stopPropagation(); speakText('des, par exemple, des Pays-Bas')">
+                            <span class="inline-flex items-center gap-1.5">🔊 des <span class="text-[10px] text-slate-400 font-normal">(ex: des Pays-Bas)</span></span>
+                        </td>
+                    </tr>
+                    <tr class="hover:bg-slate-50/80 transition">
+                        <td class="p-3 text-slate-600 font-medium">Starts with Vowel/H</td>
+                        <td class="p-3 font-medium text-indigo-600 cursor-pointer hover:underline" onclick="event.stopPropagation(); speakText('en, par exemple, en Inde')">
+                            <span class="inline-flex items-center gap-1.5">🔊 en <span class="text-[10px] text-slate-400 font-normal">(ex: en Inde)</span></span>
+                        </td>
+                        <td class="p-3 font-medium text-indigo-600 cursor-pointer hover:underline" onclick="event.stopPropagation(); speakText('d, par exemple, d Inde')">
+                            <span class="inline-flex items-center gap-1.5">🔊 d' <span class="text-[10px] text-slate-400 font-normal">(ex: d'Inde)</span></span>
+                        </td>
+                    </tr>
+                    <tr class="hover:bg-slate-50/80 transition">
+                        <td class="p-3 text-slate-600 font-medium">F.S</td>
+                        <td class="p-3 font-medium text-indigo-600 cursor-pointer hover:underline" onclick="event.stopPropagation(); speakText('en, par exemple, en France')">
+                            <span class="inline-flex items-center gap-1.5">🔊 en <span class="text-[10px] text-slate-400 font-normal">(ex: en France)</span></span>
+                        </td>
+                        <td class="p-3 font-medium text-indigo-600 cursor-pointer hover:underline" onclick="event.stopPropagation(); speakText('de, par exemple, de France')">
+                            <span class="inline-flex items-center gap-1.5">🔊 de <span class="text-[10px] text-slate-400 font-normal">(ex: de France)</span></span>
+                        </td>
+                    </tr>
+                    <tr class="hover:bg-slate-50/80 transition border-b border-slate-200">
+                        <td class="p-3 text-slate-600 font-medium">M.S.</td>
+                        <td class="p-3 font-medium text-indigo-600 cursor-pointer hover:underline" onclick="event.stopPropagation(); speakText('au, par exemple, au Japon')">
+                            <span class="inline-flex items-center gap-1.5">🔊 au <span class="text-[10px] text-slate-400 font-normal">(ex: au Japon)</span></span>
+                        </td>
+                        <td class="p-3 font-medium text-indigo-600 cursor-pointer hover:underline" onclick="event.stopPropagation(); speakText('du, par exemple, du Danemark')">
+                            <span class="inline-flex items-center gap-1.5">🔊 du <span class="text-[10px] text-slate-400 font-normal">(ex: du Danemark)</span></span>
+                        </td>
+                    </tr>
+
+                    <!-- Common Places Group -->
+                    <tr class="hover:bg-slate-50/80 transition">
+                        <td class="p-3 font-bold text-slate-900 align-top bg-slate-50/40" rowspan="4">Common Places in a City</td>
+                        <td class="p-3 text-slate-600 font-medium">Plural</td>
+                        <td class="p-3 font-medium text-indigo-600 cursor-pointer hover:underline" onclick="event.stopPropagation(); speakText('aux, par exemple, aux monuments')">
+                            <span class="inline-flex items-center gap-1.5">🔊 aux <span class="text-[10px] text-slate-400 font-normal">(ex: aux monuments)</span></span>
+                        </td>
+                        <td class="p-3 font-medium text-indigo-600 cursor-pointer hover:underline" onclick="event.stopPropagation(); speakText('des, par exemple, des monuments')">
+                            <span class="inline-flex items-center gap-1.5">🔊 des <span class="text-[10px] text-slate-400 font-normal">(ex: des monuments)</span></span>
+                        </td>
+                    </tr>
+                    <tr class="hover:bg-slate-50/80 transition">
+                        <td class="p-3 text-slate-600 font-medium">Starts with Vowel/H</td>
+                        <td class="p-3 font-medium text-indigo-600 cursor-pointer hover:underline" onclick="event.stopPropagation(); speakText('à l hôpital, par exemple, à l hôpital')">
+                            <span class="inline-flex items-center gap-1.5">🔊 à l' <span class="text-[10px] text-slate-400 font-normal">(ex: à l'hôpital)</span></span>
+                        </td>
+                        <td class="p-3 font-medium text-indigo-600 cursor-pointer hover:underline" onclick="event.stopPropagation(); speakText('de l hôpital, par exemple, de l hôpital')">
+                            <span class="inline-flex items-center gap-1.5">🔊 de l' <span class="text-[10px] text-slate-400 font-normal">(ex: de l'hôpital)</span></span>
+                        </td>
+                    </tr>
+                    <tr class="hover:bg-slate-50/80 transition">
+                        <td class="p-3 text-slate-600 font-medium">F.S</td>
+                        <td class="p-3 font-medium text-indigo-600 cursor-pointer hover:underline" onclick="event.stopPropagation(); speakText('à la boulangerie, par exemple, à la boulangerie')">
+                            <span class="inline-flex items-center gap-1.5">🔊 à la <span class="text-[10px] text-slate-400 font-normal">(ex: à la boulangerie)</span></span>
+                        </td>
+                        <td class="p-3 font-medium text-indigo-600 cursor-pointer hover:underline" onclick="event.stopPropagation(); speakText('de la banque, par exemple, de la banque')">
+                            <span class="inline-flex items-center gap-1.5">🔊 de la <span class="text-[10px] text-slate-400 font-normal">(ex: de la banque)</span></span>
+                        </td>
+                    </tr>
+                    <tr class="hover:bg-slate-50/80 transition border-b border-slate-200">
+                        <td class="p-3 text-slate-600 font-medium">M.S.</td>
+                        <td class="p-3 font-medium text-indigo-600 cursor-pointer hover:underline" onclick="event.stopPropagation(); speakText('au supermarché, par exemple, au supermarché')">
+                            <span class="inline-flex items-center gap-1.5">🔊 au <span class="text-[10px] text-slate-400 font-normal">(ex: au supermarché)</span></span>
+                        </td>
+                        <td class="p-3 font-medium text-indigo-600 cursor-pointer hover:underline" onclick="event.stopPropagation(); speakText('du supermarché, par exemple, du supermarché')">
+                            <span class="inline-flex items-center gap-1.5">🔊 du <span class="text-[10px] text-slate-400 font-normal">(ex: du supermarché)</span></span>
+                        </td>
+                    </tr>
+
+                    <!-- Special Case: Person / Professional (Chez) -->
+                    <tr class="hover:bg-slate-50/80 transition">
+                        <td class="p-3 font-bold text-slate-900 align-top bg-slate-50/40" rowspan="1">People / Profession (« Chez »)</td>
+                        <td class="p-3 text-slate-600 font-medium">N/A (Person)</td>
+                        <td class="p-3 font-medium text-indigo-600 cursor-pointer hover:underline" onclick="event.stopPropagation(); speakText('chez, par exemple, chez le médecin')">
+                            <span class="inline-flex items-center gap-1.5">🔊 chez <span class="text-[10px] text-slate-400 font-normal">(ex: chez le médecin)</span></span>
+                        </td>
+                        <td class="p-3 font-mono text-slate-400">N/A</td>
+                    </tr>
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
