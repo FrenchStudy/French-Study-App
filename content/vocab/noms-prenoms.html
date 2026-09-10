@@ -1,0 +1,37 @@
+<div class="space-y-6 text-xs text-slate-700">
+    
+    <!-- Section 1: Introduction -->
+    <div class="bg-indigo-50 border border-indigo-100 p-4 rounded-xl space-y-1.5">
+        <h3 class="font-bold text-sm text-indigo-900">👤 Noms et prénoms (Identity & Introductions)</h3>
+        <p class="text-indigo-700 leading-relaxed">En français, la distinction entre le prénom (first name) et le nom de famille (last name) est essentielle lors des présentations administratives ou informelles. Cliquez sur une carte pour écouter sa prononciation :</p>
+    </div>
+
+    <!-- Interactive Vocabulary Cards Grid -->
+    <div class="space-y-2">
+        <h4 class="font-bold uppercase tracking-wider text-slate-400 text-[10px]">Vocabulaire clé & Formules</h4>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div onclick="event.stopPropagation(); speakText('Le prénom')" class="bg-white border border-slate-200 p-3 rounded-xl cursor-pointer hover:bg-indigo-50 hover:border-indigo-300 transition shadow-sm space-y-1">
+                <div class="font-bold text-slate-900">Le prénom</div>
+                <div class="text-slate-500">First name / Given name</div>
+            </div>
+            <div onclick="event.stopPropagation(); speakText('Le nom de famille')" class="bg-white border border-slate-200 p-3 rounded-xl cursor-pointer hover:bg-indigo-50 hover:border-indigo-300 transition shadow-sm space-y-1">
+                <div class="font-bold text-slate-900">Le nom de famille</div>
+                <div class="text-slate-500">Last name / Surname</div>
+            </div>
+            <div onclick="event.stopPropagation(); speakText('Comment vous appelez-vous ?')" class="bg-white border border-slate-200 p-3 rounded-xl cursor-pointer hover:bg-indigo-50 hover:border-indigo-300 transition shadow-sm space-y-1">
+                <div class="font-bold text-indigo-600">Comment vous appelez-vous ?</div>
+                <div class="text-slate-500">What is your name? (Formal)</div>
+            </div>
+            <div onclick="event.stopPropagation(); speakText('Je m\'appelle')" class="bg-white border border-slate-200 p-3 rounded-xl cursor-pointer hover:bg-indigo-50 hover:border-indigo-300 transition shadow-sm space-y-1">
+                <div class="font-bold text-indigo-600">Je m'appelle...</div>
+                <div class="text-slate-500">My name is...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Administrative Usage Tip Box -->
+    <div class="bg-amber-50 border border-amber-200/60 p-4 rounded-xl space-y-1">
+        <h4 class="font-bold text-amber-900 uppercase tracking-wide text-[11px]">💡 Règle administrative</h4>
+        <p class="text-amber-800 leading-relaxed">Dans les documents officiels en France, le nom de famille s'écrit généralement en <strong class="text-amber-950">majuscules</strong> (ex: Jean DUPONT) afin de le distinguer clairement du prénom.</p>
+    </div>
+</div>

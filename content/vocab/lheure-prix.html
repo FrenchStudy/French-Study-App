@@ -1,0 +1,58 @@
+<div id="french-clock-app" style="font-family: system-ui, -apple-system, sans-serif; max-width: 100%; margin: 0 auto; space-y: 6px;">
+    
+    <!-- Interactive Clock Module First -->
+    <div style="background: #ffffff; border: 1px solid #cbd5e1; padding: 18px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+        <h3 style="color: #1e1b4b; font-size: 16px; font-weight: bold; margin-top: 0; margin-bottom: 4px;">🕒 Atelier de l'Heure Interactif</h3>
+        <p style="color: #64748b; font-size: 12px; margin-bottom: 16px;">Modifiez l'heure et les minutes pour calculer instantanément la lecture correcte en français.</p>
+        
+        <div style="display: flex; gap: 12px; margin-bottom: 16px;">
+            <div style="flex: 1;">
+                <label style="display: block; font-weight: bold; font-size: 11px; margin-bottom: 6px; color: #475569; text-transform: uppercase;">Heure (0–23) :</label>
+                <input id="fc-hour" type="number" value="8" min="0" max="23" style="width: 100%; padding: 11px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 16px; font-weight: bold; text-align: center; box-sizing: border-box;">
+            </div>
+            <div style="flex: 1;">
+                <label style="display: block; font-weight: bold; font-size: 11px; margin-bottom: 6px; color: #475569; text-transform: uppercase;">Minutes (0–59) :</label>
+                <input id="fc-min" type="number" value="15" min="0" max="59" style="width: 100%; padding: 11px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 16px; font-weight: bold; text-align: center; box-sizing: border-box;">
+            </div>
+        </div>
+
+        <div style="background: #eef2ff; border: 1px solid #c7d2fe; padding: 14px; border-radius: 12px; text-align: center;">
+            <div style="font-size: 10px; font-weight: bold; color: #4338ca; text-transform: uppercase; margin-bottom: 4px;">Lecture dynamique (Quart, Moins, etc.)</div>
+            <div id="fc-out-current" style="font-weight: bold; color: #312e81; font-size: 15px; cursor: pointer;" onclick="speakText(this.innerText)">Il est huit heures et quart du matin.</div>
+        </div>
+    </div>
+
+    <!-- Text & Different Ways of Expressing Time -->
+    <div style="padding: 16px; background: #f8fafc; border-radius: 12px; border: 1px solid #cbd5e1;">
+        <p style="font-size: 14px; font-weight: bold; color: #1e1b4b; margin: 0 0 10px;">📖 Formules et Expressions de l'Heure :</p>
+        
+        <div style="font-size: 12px; color: #334155; line-height: 1.6; space-y: 6px;">
+            <p style="margin: 0 0 4px;" class="cursor-pointer hover:bg-slate-100 p-1 rounded transition">• <strong>Il est # heure(s) #</strong></p>
+            <p style="margin: 0 0 4px;" class="cursor-pointer hover:bg-slate-100 p-1 rounded transition">• <strong>Il est # heure(s) et quart</strong></p>
+            <p style="margin: 0 0 4px;" class="cursor-pointer hover:bg-slate-100 p-1 rounded transition">• <strong>Il est # heure(s) et demi(e)</strong></p>
+            <p style="margin: 0 0 8px;" class="cursor-pointer hover:bg-slate-100 p-1 rounded transition">• <strong>Il est # heure(s) moins (le) quart</strong></p>
+            
+            <div style="margin: 8px 0; padding-left: 10px; border-left: 2px solid #94a3b8;">
+                <p style="margin: 2px 0;">• <strong>du matin</strong> <span style="color: #64748b;">(in the morning)</span></p>
+                <p style="margin: 2px 0;">• <strong>de l'après-midi</strong> <span style="color: #64748b;">(in the afternoon)</span></p>
+                <p style="margin: 2px 0;">• <strong>du soir</strong> <span style="color: #64748b;">(in the evening)</span></p>
+            </div>
+
+            <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 10px 0;">
+            
+            <p style="font-weight: bold; color: #4338ca; margin: 6px 0;">Minutes & Fractions :</p>
+            <p style="margin: 2px 0;">• For minutes up to 30, just say the number of minutes after the hour:</p>
+            <p style="margin: 2px 0; padding-left: 10px;">— <strong>Il est neuf heures dix</strong> <span style="color: #64748b;">(It’s 9:10)</span></p>
+            <p style="margin: 2px 0; padding-left: 10px;">— <strong>Il est neuf heures vingt-cinq</strong> <span style="color: #64748b;">(It’s 9:25)</span></p>
+            <p style="margin: 4px 0;">• The half hour is expressed by <strong>et demi(e)</strong>. You can also just say <strong>trente</strong>.</p>
+
+            <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 10px 0;">
+            
+            <p style="font-weight: bold; color: #4338ca; margin: 6px 0;">What the time is vs. at what time something happens:</p>
+            <p style="margin: 2px 0;">— Quelle heure est-il ? <span style="color: #64748b;">(What time is it?)</span></p>
+            <p style="margin: 2px 0;">— Il est neuf heures. <span style="color: #64748b;">(It’s nine o’clock.)</span></p>
+            <p style="margin: 2px 0;">— À quelle heure commence ton cours de sociologie ? <span style="color: #64748b;">(At what time does your sociology class begin?)</span></p>
+            <p style="margin: 2px 0;">— Il commence à dix heures. <span style="color: #64748b;">(It begins at ten o’clock.)</span></p>
+        </div>
+    </div>
+</div>

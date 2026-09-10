@@ -1,0 +1,61 @@
+<div class="space-y-6 text-xs text-slate-700">
+    
+    <!-- Section 1: Base Numbers -->
+    <div>
+        <h3 class="font-bold text-sm text-slate-900 mb-2">🔢 Les nombres de 0 à 22</h3>
+        <p class="leading-relaxed mb-3">Maîtriser le comptage de base est indispensable pour donner son numéro, son âge ou faire des achats. Cliquez sur un nombre pour écouter sa prononciation :</p>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <div onclick="speakText('zéro')" class="bg-slate-50 border p-2 rounded-lg text-center shadow-sm cursor-pointer hover:bg-indigo-50 hover:border-indigo-300 transition">0 - Zéro</div>
+            <div onclick="speakText('un')" class="bg-slate-50 border p-2 rounded-lg text-center shadow-sm cursor-pointer hover:bg-indigo-50 hover:border-indigo-300 transition">1 - Un</div>
+            <div onclick="speakText('deux')" class="bg-slate-50 border p-2 rounded-lg text-center shadow-sm cursor-pointer hover:bg-indigo-50 hover:border-indigo-300 transition">2 - Deux</div>
+            <div onclick="speakText('trois')" class="bg-slate-50 border p-2 rounded-lg text-center shadow-sm cursor-pointer hover:bg-indigo-50 hover:border-indigo-300 transition">3 - Trois</div>
+            <div onclick="speakText('quatre')" class="bg-slate-50 border p-2 rounded-lg text-center shadow-sm cursor-pointer hover:bg-indigo-50 hover:border-indigo-300 transition">4 - Quatre</div>
+            <div onclick="speakText('cinq')" class="bg-slate-50 border p-2 rounded-lg text-center shadow-sm cursor-pointer hover:bg-indigo-50 hover:border-indigo-300 transition">5 - Cinq</div>
+            <div onclick="speakText('six')" class="bg-slate-50 border p-2 rounded-lg text-center shadow-sm cursor-pointer hover:bg-indigo-50 hover:border-indigo-300 transition">6 - Six</div>
+            <div onclick="speakText('sept')" class="bg-slate-50 border p-2 rounded-lg text-center shadow-sm cursor-pointer hover:bg-indigo-50 hover:border-indigo-300 transition">7 - Sept</div>
+            <div onclick="speakText('huit')" class="bg-slate-50 border p-2 rounded-lg text-center shadow-sm cursor-pointer hover:bg-indigo-50 hover:border-indigo-300 transition">8 - Huit</div>
+            <div onclick="speakText('neuf')" class="bg-slate-50 border p-2 rounded-lg text-center shadow-sm cursor-pointer hover:bg-indigo-50 hover:border-indigo-300 transition">9 - Neuf</div>
+            <div onclick="speakText('dix')" class="bg-slate-50 border p-2 rounded-lg text-center shadow-sm font-semibold cursor-pointer hover:bg-indigo-50 hover:border-indigo-300 transition">10 - Dix</div>
+            <div onclick="speakText('onze')" class="bg-slate-50 border p-2 rounded-lg text-center shadow-sm cursor-pointer hover:bg-indigo-50 hover:border-indigo-300 transition">11 - Onze</div>
+            <div onclick="speakText('douze')" class="bg-slate-50 border p-2 rounded-lg text-center shadow-sm cursor-pointer hover:bg-indigo-50 hover:border-indigo-300 transition">12 - Douze</div>
+            <div onclick="speakText('treize')" class="bg-slate-50 border p-2 rounded-lg text-center shadow-sm cursor-pointer hover:bg-indigo-50 hover:border-indigo-300 transition">13 - Treize</div>
+            <div onclick="speakText('quatorze')" class="bg-slate-50 border p-2 rounded-lg text-center shadow-sm cursor-pointer hover:bg-indigo-50 hover:border-indigo-300 transition">14 - Quatorze</div>
+            <div onclick="speakText('quinze')" class="bg-slate-50 border p-2 rounded-lg text-center shadow-sm cursor-pointer hover:bg-indigo-50 hover:border-indigo-300 transition">15 - Quinze</div>
+            <div onclick="speakText('seize')" class="bg-slate-50 border p-2 rounded-lg text-center shadow-sm cursor-pointer hover:bg-indigo-50 hover:border-indigo-300 transition">16 - Seize</div>
+            <div onclick="speakText('dix-sept')" class="bg-slate-50 border p-2 rounded-lg text-center shadow-sm cursor-pointer hover:bg-indigo-50 hover:border-indigo-300 transition">17 - Dix-sept</div>
+            <div onclick="speakText('dix-huit')" class="bg-slate-50 border p-2 rounded-lg text-center shadow-sm cursor-pointer hover:bg-indigo-50 hover:border-indigo-300 transition">18 - Dix-huit</div>
+            <div onclick="speakText('dix-neuf')" class="bg-slate-50 border p-2 rounded-lg text-center shadow-sm cursor-pointer hover:bg-indigo-50 hover:border-indigo-300 transition">19 - Dix-neuf</div>
+            <div onclick="speakText('vingt')" class="bg-indigo-50 border border-indigo-100 text-indigo-700 p-2 rounded-lg text-center shadow-sm font-bold cursor-pointer hover:bg-indigo-100 transition">20 - Vingt</div>
+            <div onclick="speakText('vingt-et-un')" class="bg-slate-50 border p-2 rounded-lg text-center shadow-sm cursor-pointer hover:bg-indigo-50 hover:border-indigo-300 transition">21 - Vingt-et-un</div>
+            <div onclick="speakText('vingt-deux')" class="bg-slate-50 border p-2 rounded-lg text-center shadow-sm cursor-pointer hover:bg-indigo-50 hover:border-indigo-300 transition">22 - Vingt-deux</div>
+        </div>
+    </div>
+
+    <!-- Section 2: Tens and Large Numbers -->
+    <div>
+        <h3 class="font-bold text-sm text-slate-900 mb-2">📈 Les dizaines et grands nombres</h3>
+        <p class="leading-relaxed mb-3">Faites attention aux particularités françaises comme "soixante-dix" (70) et "quatre-vingts" (80).</p>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <div onclick="speakText('trente')" class="bg-slate-50 border p-2 rounded-lg text-center shadow-sm font-semibold cursor-pointer hover:bg-indigo-50 hover:border-indigo-300 transition">30 - Trente</div>
+            <div onclick="speakText('trente-cinq')" class="bg-slate-50 border p-2 rounded-lg text-center shadow-sm cursor-pointer hover:bg-indigo-50 hover:border-indigo-300 transition">35 - Trente-cinq</div>
+            <div onclick="speakText('quarante')" class="bg-slate-50 border p-2 rounded-lg text-center shadow-sm font-semibold cursor-pointer hover:bg-indigo-50 hover:border-indigo-300 transition">40 - Quarante</div>
+            <div onclick="speakText('cinquante')" class="bg-slate-50 border p-2 rounded-lg text-center shadow-sm font-semibold cursor-pointer hover:bg-indigo-50 hover:border-indigo-300 transition">50 - Cinquante</div>
+            <div onclick="speakText('soixante')" class="bg-slate-50 border p-2 rounded-lg text-center shadow-sm font-semibold cursor-pointer hover:bg-indigo-50 hover:border-indigo-300 transition">60 - Soixante</div>
+            
+            <div onclick="speakText('soixante-dix')" class="bg-amber-50 border border-amber-200 text-amber-800 p-2 rounded-lg text-center shadow-sm font-bold cursor-pointer hover:bg-amber-100 transition">70 - Soixante-dix</div>
+            <div onclick="speakText('soixante-et-onze')" class="bg-amber-50 border border-amber-200 text-amber-800 p-2 rounded-lg text-center shadow-sm cursor-pointer hover:bg-amber-100 transition">71 - Soixante-et-onze</div>
+            <div onclick="speakText('soixante-douze')" class="bg-amber-50 border border-amber-200 text-amber-800 p-2 rounded-lg text-center shadow-sm cursor-pointer hover:bg-amber-100 transition">72 - Soixante-douze</div>
+            
+            <div onclick="speakText('quatre-vingts')" class="bg-rose-50 border border-rose-200 text-rose-800 p-2 rounded-lg text-center shadow-sm font-bold cursor-pointer hover:bg-rose-100 transition">80 - Quatre-vingts</div>
+            <div onclick="speakText('quatre-vingt-un')" class="bg-rose-50 border border-rose-200 text-rose-800 p-2 rounded-lg text-center shadow-sm cursor-pointer hover:bg-rose-100 transition">81 - Quatre-vingt-un</div>
+            
+            <div onclick="speakText('quatre-vingt-dix')" class="bg-emerald-50 border border-emerald-200 text-emerald-800 p-2 rounded-lg text-center shadow-sm font-bold cursor-pointer hover:bg-emerald-100 transition">90 - Quatre-vingt-dix</div>
+            <div onclick="speakText('quatre-vingt-onze')" class="bg-emerald-50 border border-emerald-200 text-emerald-800 p-2 rounded-lg text-center shadow-sm cursor-pointer hover:bg-emerald-100 transition">91 - Quatre-vingt-onze</div>
+            
+            <div onclick="speakText('cent')" class="bg-indigo-50 border border-indigo-100 text-indigo-700 p-2 rounded-lg text-center shadow-sm font-bold cursor-pointer hover:bg-indigo-100 transition">100 - Cent</div>
+            <div onclick="speakText('deux cents')" class="bg-slate-50 border p-2 rounded-lg text-center shadow-sm cursor-pointer hover:bg-indigo-50 hover:border-indigo-300 transition">200 - Deux cents</div>
+            <div onclick="speakText('mille')" class="bg-indigo-50 border border-indigo-100 text-indigo-700 p-2 rounded-lg text-center shadow-sm font-bold cursor-pointer hover:bg-indigo-100 transition">1 000 - Mille</div>
+            <div onclick="speakText('un million')" class="bg-indigo-600 text-white p-2 rounded-lg text-center shadow-sm font-bold cursor-pointer hover:bg-indigo-700 transition">1 000 000 - Un million</div>
+        </div>
+    </div>
+</div>

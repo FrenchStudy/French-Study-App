@@ -1,0 +1,37 @@
+<div class="space-y-6 text-xs text-slate-700">
+    
+    <!-- Section 1: Introduction -->
+    <div class="bg-indigo-50 border border-indigo-100 p-4 rounded-xl space-y-1.5">
+        <h3 class="font-bold text-sm text-indigo-900">📍 L'Adresse (Addresses & Locations)</h3>
+        <p class="text-indigo-700 leading-relaxed">Savoir donner ou écrire son adresse est indispensable pour remplir des formulaires ou se repérer en France. Cliquez sur une carte pour écouter sa prononciation :</p>
+    </div>
+
+    <!-- Interactive Vocabulary Cards Grid -->
+    <div class="space-y-2">
+        <h4 class="font-bold uppercase tracking-wider text-slate-400 text-[10px]">Vocabulaire de la rue</h4>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div onclick="event.stopPropagation(); speakText('La rue')" class="bg-white border border-slate-200 p-3 rounded-xl cursor-pointer hover:bg-indigo-50 hover:border-indigo-300 transition shadow-sm space-y-1">
+                <div class="font-bold text-slate-900">La rue</div>
+                <div class="text-slate-500">Street</div>
+            </div>
+            <div onclick="event.stopPropagation(); speakText('Le numéro')" class="bg-white border border-slate-200 p-3 rounded-xl cursor-pointer hover:bg-indigo-50 hover:border-indigo-300 transition shadow-sm space-y-1">
+                <div class="font-bold text-slate-900">Le numéro</div>
+                <div class="text-slate-500">Number / House number</div>
+            </div>
+            <div onclick="event.stopPropagation(); speakText('Le code postal')" class="bg-white border border-slate-200 p-3 rounded-xl cursor-pointer hover:bg-indigo-50 hover:border-indigo-300 transition shadow-sm space-y-1">
+                <div class="font-bold text-indigo-600">Le code postal</div>
+                <div class="text-slate-500">Postal code (ex: 75001 pour Paris)</div>
+            </div>
+            <div onclick="event.stopPropagation(); speakText('La ville')" class="bg-white border border-slate-200 p-3 rounded-xl cursor-pointer hover:bg-indigo-50 hover:border-indigo-300 transition shadow-sm space-y-1">
+                <div class="font-bold text-indigo-600">La ville</div>
+                <div class="text-slate-500">City / Town</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Address Format Tip Box -->
+    <div class="bg-amber-50 border border-amber-200/60 p-4 rounded-xl space-y-1">
+        <h4 class="font-bold text-amber-900 uppercase tracking-wide text-[11px]">💡 Format d'adresse en France</h4>
+        <p class="text-amber-800 leading-relaxed">L'ordre standard sur une enveloppe ou un formulaire est : <strong class="text-amber-950">Numéro + Type de voie + Nom de la rue</strong>, suivi de la ligne du <strong class="text-amber-950">Code postal et de la Ville</strong> (ex: 12 rue de la Paix, 75001 Paris).</p>
+    </div>
+</div>

@@ -1,0 +1,207 @@
+<div class="space-y-6 text-xs text-slate-700">
+    
+    <!-- Section 1: Introduction & Overview -->
+    <div class="bg-indigo-50 border border-indigo-100 p-4 rounded-xl space-y-2">
+        <h3 class="font-bold text-sm text-indigo-900">👨‍👩‍👧‍👦 La Famille (Extended Tree)</h3>
+        <p class="text-indigo-700 leading-relaxed">
+            Click any relative to instantly hear audio and practice speech.
+        </p>
+    </div>
+
+    <!-- Section 2: Visual Family Tree Diagram with Clickable Nodes -->
+    <div class="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm space-y-8">
+        
+        <!-- Generation 1: Grandparents -->
+        <div class="space-y-3">
+            <h4 class="text-[10px] font-bold uppercase tracking-wider text-slate-400 text-center">Génération 1 : Grands-parents</h4>
+            <div class="flex flex-wrap justify-center gap-6">
+                
+                <div onclick="speakText('la grand-mère')" class="bg-slate-50 border border-slate-200 hover:border-indigo-400 hover:bg-indigo-50 p-4 rounded-2xl cursor-pointer transition text-center space-y-2 w-36 shadow-sm group">
+                    <div class="w-16 h-16 mx-auto rounded-full bg-indigo-100 border-2 border-indigo-200 flex items-center justify-center text-2xl shadow-inner">👵</div>
+                    <div>
+                        <div class="font-bold text-slate-900 group-hover:text-indigo-600 text-xs">la grand-mère</div>
+                        <div class="text-[10px] text-slate-500">grandmother</div>
+                    </div>
+                    <span class="text-[10px] text-indigo-600">🔊 Écouter</span>
+                </div>
+
+                <div onclick="speakText('le grand-père')" class="bg-slate-50 border border-slate-200 hover:border-indigo-400 hover:bg-indigo-50 p-4 rounded-2xl cursor-pointer transition text-center space-y-2 w-36 shadow-sm group">
+                    <div class="w-16 h-16 mx-auto rounded-full bg-indigo-100 border-2 border-indigo-200 flex items-center justify-center text-2xl shadow-inner">👴</div>
+                    <div>
+                        <div class="font-bold text-slate-900 group-hover:text-indigo-600 text-xs">le grand-père</div>
+                        <div class="text-[10px] text-slate-500">grandfather</div>
+                    </div>
+                    <span class="text-[10px] text-indigo-600">🔊 Écouter</span>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="flex justify-center"><div class="w-0.5 h-6 bg-slate-200"></div></div>
+
+        <!-- Generation 2: Parents, Aunts, Uncles & In-laws -->
+        <div class="space-y-3">
+            <h4 class="text-[10px] font-bold uppercase tracking-wider text-slate-400 text-center">Génération 2 : Parents, Oncles, Tantes & Beaux-frères/belles-sœurs</h4>
+            <div class="flex flex-wrap justify-center gap-4">
+                
+                <div onclick="speakText('l oncle')" class="bg-slate-50 border border-slate-200 hover:border-indigo-400 hover:bg-indigo-50 p-3 rounded-2xl cursor-pointer transition text-center space-y-2 w-32 shadow-sm group">
+                    <div class="w-14 h-14 mx-auto rounded-full bg-indigo-100 border-2 border-indigo-200 flex items-center justify-center text-xl shadow-inner">🧔</div>
+                    <div>
+                        <div class="font-bold text-slate-900 group-hover:text-indigo-600 text-xs">l'oncle</div>
+                        <div class="text-[10px] text-slate-500">uncle</div>
+                    </div>
+                    <span class="text-[10px] text-indigo-600">🔊</span>
+                </div>
+
+                <div onclick="speakText('la tante')" class="bg-slate-50 border border-slate-200 hover:border-indigo-400 hover:bg-indigo-50 p-3 rounded-2xl cursor-pointer transition text-center space-y-2 w-32 shadow-sm group">
+                    <div class="w-14 h-14 mx-auto rounded-full bg-indigo-100 border-2 border-indigo-200 flex items-center justify-center text-xl shadow-inner">👩‍🦰</div>
+                    <div>
+                        <div class="font-bold text-slate-900 group-hover:text-indigo-600 text-xs">la tante</div>
+                        <div class="text-[10px] text-slate-500">aunt</div>
+                    </div>
+                    <span class="text-[10px] text-indigo-600">🔊</span>
+                </div>
+
+                <div onclick="speakText('le père')" class="bg-slate-50 border border-slate-200 hover:border-indigo-400 hover:bg-indigo-50 p-3 rounded-2xl cursor-pointer transition text-center space-y-2 w-32 shadow-sm group">
+                    <div class="w-14 h-14 mx-auto rounded-full bg-indigo-100 border-2 border-indigo-200 flex items-center justify-center text-xl shadow-inner">👨</div>
+                    <div>
+                        <div class="font-bold text-slate-900 group-hover:text-indigo-600 text-xs">le père</div>
+                        <div class="text-[10px] text-slate-500">father</div>
+                    </div>
+                    <span class="text-[10px] text-indigo-600">🔊</span>
+                </div>
+
+                <div onclick="speakText('la mère')" class="bg-slate-50 border border-slate-200 hover:border-indigo-400 hover:bg-indigo-50 p-3 rounded-2xl cursor-pointer transition text-center space-y-2 w-32 shadow-sm group">
+                    <div class="w-14 h-14 mx-auto rounded-full bg-indigo-100 border-2 border-indigo-200 flex items-center justify-center text-xl shadow-inner">👩</div>
+                    <div>
+                        <div class="font-bold text-slate-900 group-hover:text-indigo-600 text-xs">la mère</div>
+                        <div class="text-[10px] text-slate-500">mother</div>
+                    </div>
+                    <span class="text-[10px] text-indigo-600">🔊</span>
+                </div>
+
+                <div onclick="speakText('le beau-frère')" class="bg-slate-50 border border-slate-200 hover:border-indigo-400 hover:bg-indigo-50 p-3 rounded-2xl cursor-pointer transition text-center space-y-2 w-32 shadow-sm group">
+                    <div class="w-14 h-14 mx-auto rounded-full bg-indigo-100 border-2 border-indigo-200 flex items-center justify-center text-xl shadow-inner">👨‍💼</div>
+                    <div>
+                        <div class="font-bold text-slate-900 group-hover:text-indigo-600 text-xs">le beau-frère</div>
+                        <div class="text-[10px] text-slate-500">brother-in-law</div>
+                    </div>
+                    <span class="text-[10px] text-indigo-600">🔊</span>
+                </div>
+
+                <div onclick="speakText('la belle-sœur')" class="bg-slate-50 border border-slate-200 hover:border-indigo-400 hover:bg-indigo-50 p-3 rounded-2xl cursor-pointer transition text-center space-y-2 w-32 shadow-sm group">
+                    <div class="w-14 h-14 mx-auto rounded-full bg-indigo-100 border-2 border-indigo-200 flex items-center justify-center text-xl shadow-inner">👩‍💼</div>
+                    <div>
+                        <div class="font-bold text-slate-900 group-hover:text-indigo-600 text-xs">la belle-sœur</div>
+                        <div class="text-[10px] text-slate-500">sister-in-law</div>
+                    </div>
+                    <span class="text-[10px] text-indigo-600">🔊</span>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="flex justify-center"><div class="w-0.5 h-6 bg-slate-200"></div></div>
+
+        <!-- Generation 3: Couples, Siblings, Cousins, Nephews/Niecse & Kids -->
+        <div class="space-y-3">
+            <h4 class="text-[10px] font-bold uppercase tracking-wider text-slate-400 text-center">Génération 3 : Conjoints, Fratrie, Cousins, Neveux & Enfants</h4>
+            <div class="flex flex-wrap justify-center gap-4">
+                
+                <div onclick="speakText('le mari')" class="bg-slate-50 border border-slate-200 hover:border-indigo-400 hover:bg-indigo-50 p-3 rounded-2xl cursor-pointer transition text-center space-y-2 w-32 shadow-sm group">
+                    <div class="w-14 h-14 mx-auto rounded-full bg-indigo-100 border-2 border-indigo-200 flex items-center justify-center text-xl shadow-inner">🤵</div>
+                    <div>
+                        <div class="font-bold text-slate-900 group-hover:text-indigo-600 text-xs">le mari</div>
+                        <div class="text-[10px] text-slate-500">husband</div>
+                    </div>
+                    <span class="text-[10px] text-indigo-600">🔊</span>
+                </div>
+
+                <div onclick="speakText('la femme')" class="bg-slate-50 border border-slate-200 hover:border-indigo-400 hover:bg-indigo-50 p-3 rounded-2xl cursor-pointer transition text-center space-y-2 w-32 shadow-sm group">
+                    <div class="w-14 h-14 mx-auto rounded-full bg-indigo-100 border-2 border-indigo-200 flex items-center justify-center text-xl shadow-inner">👰</div>
+                    <div>
+                        <div class="font-bold text-slate-900 group-hover:text-indigo-600 text-xs">la femme</div>
+                        <div class="text-[10px] text-slate-500">wife</div>
+                    </div>
+                    <span class="text-[10px] text-indigo-600">🔊</span>
+                </div>
+
+                <div onclick="speakText('le frère')" class="bg-slate-50 border border-slate-200 hover:border-indigo-400 hover:bg-indigo-50 p-3 rounded-2xl cursor-pointer transition text-center space-y-2 w-32 shadow-sm group">
+                    <div class="w-14 h-14 mx-auto rounded-full bg-indigo-100 border-2 border-indigo-200 flex items-center justify-center text-xl shadow-inner">👦</div>
+                    <div>
+                        <div class="font-bold text-slate-900 group-hover:text-indigo-600 text-xs">le frère</div>
+                        <div class="text-[10px] text-slate-500">brother</div>
+                    </div>
+                    <span class="text-[10px] text-indigo-600">🔊</span>
+                </div>
+
+                <div onclick="speakText('la sœur')" class="bg-slate-50 border border-slate-200 hover:border-indigo-400 hover:bg-indigo-50 p-3 rounded-2xl cursor-pointer transition text-center space-y-2 w-32 shadow-sm group">
+                    <div class="w-14 h-14 mx-auto rounded-full bg-indigo-100 border-2 border-indigo-200 flex items-center justify-center text-xl shadow-inner">👧</div>
+                    <div>
+                        <div class="font-bold text-slate-900 group-hover:text-indigo-600 text-xs">la sœur</div>
+                        <div class="text-[10px] text-slate-500">sister</div>
+                    </div>
+                    <span class="text-[10px] text-indigo-600">🔊</span>
+                </div>
+
+                <div onclick="speakText('le cousin')" class="bg-slate-50 border border-slate-200 hover:border-indigo-400 hover:bg-indigo-50 p-3 rounded-2xl cursor-pointer transition text-center space-y-2 w-32 shadow-sm group">
+                    <div class="w-14 h-14 mx-auto rounded-full bg-indigo-100 border-2 border-indigo-200 flex items-center justify-center text-xl shadow-inner">👦</div>
+                    <div>
+                        <div class="font-bold text-slate-900 group-hover:text-indigo-600 text-xs">le cousin</div>
+                        <div class="text-[10px] text-slate-500">cousin</div>
+                    </div>
+                    <span class="text-[10px] text-indigo-600">🔊</span>
+                </div>
+
+                <div onclick="speakText('le neveu')" class="bg-slate-50 border border-slate-200 hover:border-indigo-400 hover:bg-indigo-50 p-3 rounded-2xl cursor-pointer transition text-center space-y-2 w-32 shadow-sm group">
+                    <div class="w-14 h-14 mx-auto rounded-full bg-indigo-100 border-2 border-indigo-200 flex items-center justify-center text-xl shadow-inner">🧒</div>
+                    <div>
+                        <div class="font-bold text-slate-900 group-hover:text-indigo-600 text-xs">le neveu</div>
+                        <div class="text-[10px] text-slate-500">nephew</div>
+                    </div>
+                    <span class="text-[10px] text-indigo-600">🔊</span>
+                </div>
+
+                <div onclick="speakText('la nièce')" class="bg-slate-50 border border-slate-200 hover:border-indigo-400 hover:bg-indigo-50 p-3 rounded-2xl cursor-pointer transition text-center space-y-2 w-32 shadow-sm group">
+                    <div class="w-14 h-14 mx-auto rounded-full bg-indigo-100 border-2 border-indigo-200 flex items-center justify-center text-xl shadow-inner">👧</div>
+                    <div>
+                        <div class="font-bold text-slate-900 group-hover:text-indigo-600 text-xs">la nièce</div>
+                        <div class="text-[10px] text-slate-500">niece</div>
+                    </div>
+                    <span class="text-[10px] text-indigo-600">🔊</span>
+                </div>
+
+                <!-- Kids / Children added here -->
+                <div onclick="speakText('les enfants')" class="bg-slate-50 border border-slate-200 hover:border-indigo-400 hover:bg-indigo-50 p-3 rounded-2xl cursor-pointer transition text-center space-y-2 w-32 shadow-sm group">
+                    <div class="w-14 h-14 mx-auto rounded-full bg-indigo-100 border-2 border-indigo-200 flex items-center justify-center text-xl shadow-inner">👶</div>
+                    <div>
+                        <div class="font-bold text-slate-900 group-hover:text-indigo-600 text-xs">les enfants</div>
+                        <div class="text-[10px] text-slate-500">children / kids</div>
+                    </div>
+                    <span class="text-[10px] text-indigo-600">🔊</span>
+                </div>
+
+                <div onclick="speakText('le fils')" class="bg-slate-50 border border-slate-200 hover:border-indigo-400 hover:bg-indigo-50 p-3 rounded-2xl cursor-pointer transition text-center space-y-2 w-32 shadow-sm group">
+                    <div class="w-14 h-14 mx-auto rounded-full bg-indigo-100 border-2 border-indigo-200 flex items-center justify-center text-xl shadow-inner">👦</div>
+                    <div>
+                        <div class="font-bold text-slate-900 group-hover:text-indigo-600 text-xs">le fils</div>
+                        <div class="text-[10px] text-slate-500">son</div>
+                    </div>
+                    <span class="text-[10px] text-indigo-600">🔊</span>
+                </div>
+
+                <div onclick="speakText('la fille')" class="bg-slate-50 border border-slate-200 hover:border-indigo-400 hover:bg-indigo-50 p-3 rounded-2xl cursor-pointer transition text-center space-y-2 w-32 shadow-sm group">
+                    <div class="w-14 h-14 mx-auto rounded-full bg-indigo-100 border-2 border-indigo-200 flex items-center justify-center text-xl shadow-inner">👧</div>
+                    <div>
+                        <div class="font-bold text-slate-900 group-hover:text-indigo-600 text-xs">la fille</div>
+                        <div class="text-[10px] text-slate-500">daughter</div>
+                    </div>
+                    <span class="text-[10px] text-indigo-600">🔊</span>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+</div>

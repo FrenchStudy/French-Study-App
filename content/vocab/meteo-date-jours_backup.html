@@ -9,83 +9,77 @@
             <div style="flex: 1; min-width: 120px;">
                 <label style="display: block; font-weight: bold; font-size: 11px; margin-bottom: 6px; color: #475569; text-transform: uppercase;">Day of the week:</label>
                 <select id="meteo-day" onchange="updateMeteo()" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; background: #fff;">
-                    <option value="lundi">lundi</option>
-                    <option value="mardi">mardi</option>
-                    <option value="mercredi" selected>mercredi</option>
-                    <option value="jeudi">jeudi</option>
-                    <option value="vendredi">vendredi</option>
-                    <option value="samedi">samedi</option>
-                    <option value="dimanche">dimanche</option>
+                    <option value="lundi">Lundi (Monday)</option>
+                    <option value="mardi">Mardi (Tuesday)</option>
+                    <option value="mercredi">Mercredi (Wednesday)</option>
+                    <option value="jeudi">Jeudi (Thursday)</option>
+                    <option value="vendredi">Vendredi (Friday)</option>
+                    <option value="samedi">Samedi (Saturday)</option>
+                    <option value="dimanche">Dimanche (Sunday)</option>
                 </select>
             </div>
-            
             <div style="flex: 1; min-width: 120px;">
                 <label style="display: block; font-weight: bold; font-size: 11px; margin-bottom: 6px; color: #475569; text-transform: uppercase;">Month:</label>
                 <select id="meteo-month" onchange="updateMeteo()" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; background: #fff;">
                     <option value="janvier">janvier</option>
                     <option value="février">février</option>
-                    <option value="mars" selected>mars</option>
+                    <option value="mars">mars</option>
                     <option value="avril">avril</option>
                     <option value="mai">mai</option>
                     <option value="juin">juin</option>
                     <option value="juillet">juillet</option>
-                    <option value="août">août</option>
+                    <option value="août" selected>août</option>
                     <option value="septembre">septembre</option>
                     <option value="octobre">octobre</option>
                     <option value="novembre">novembre</option>
                     <option value="décembre">décembre</option>
                 </select>
             </div>
-
             <div style="flex: 1; min-width: 140px;">
                 <label style="display: block; font-weight: bold; font-size: 11px; margin-bottom: 6px; color: #475569; text-transform: uppercase;">Weather condition:</label>
                 <select id="meteo-condition" onchange="updateMeteo()" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; background: #fff;">
-                    <option value="il fait beau">Il fait beau</option>
-                    <option value="il fait mauvais" selected>Il fait mauvais</option>
-                    <option value="il pleut">Il pleut</option>
-                    <option value="il neige">Il neige</option>
-                    <option value="il y a du soleil">Il y a du soleil</option>
-                    <option value="il y a du vent">Il y a du vent</option>
+                    <option value="Il fait beau">Il fait beau (It's nice weather)</option>
+                    <option value="Il fait mauvais">Il fait mauvais (It's bad weather)</option>
+                    <option value="Il pleut">Il pleut (It's raining)</option>
+                    <option value="Il neige">Il neige (It's snowing)</option>
+                    <option value="Il y a du soleil">Il y a du soleil (It's sunny)</option>
+                    <option value="Il y a du vent">Il y a du vent (It's windy)</option>
                 </select>
             </div>
         </div>
 
         <div style="background: #eef2ff; border: 1px solid #c7d2fe; padding: 14px; border-radius: 12px; text-align: center;">
             <div style="font-size: 10px; font-weight: bold; color: #4338ca; text-transform: uppercase; margin-bottom: 4px;">Dynamic Output (Click to Listen)</div>
-            <div id="meteo-output" style="font-weight: bold; color: #312e81; font-size: 14px; cursor: pointer;" onclick="speakText(this.innerText)">Aujourd'hui, nous sommes mercredi de mars et il fait mauvais.</div>
+            <div id="meteo-output" style="font-weight: bold; color: #312e81; font-size: 14px; cursor: pointer;" onclick="speakText(this.innerText)">Aujourd'hui, nous sommes lundi, d'août et il fait beau.</div>
         </div>
     </div>
 
     <!-- Reference Study Guide -->
     <div style="padding: 16px; background: #f8fafc; border-radius: 12px; border: 1px solid #cbd5e1;">
         <p style="font-size: 14px; font-weight: bold; color: #1e1b4b; margin: 0 0 10px;">📖 Days, Dates & Weather Guide:</p>
+        
         <div style="font-size: 12px; color: #334155; line-height: 1.6;">
             <p style="margin: 0 0 4px;">• <strong>Quel jour sommes-nous ?</strong> <span style="color: #64748b;">(What day is it?)</span></p>
             <p style="margin: 0 0 8px;">• <strong>Nous sommes lundi, le 31 août.</strong> <span style="color: #64748b;">(It is Monday, August 31st.)</span></p>
+            
+            <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 10px 0;">
+            
+            <p style="font-weight: bold; color: #4338ca; margin: 4px 0;">Asking about the weather:</p>
+            <p style="margin: 2px 0;">— <strong>Quel temps fait-il ?</strong> <span style="color: #64748b;">(What's the weather like?)</span></p>
+            <p style="margin: 2px 0;">— <strong>Il fait beau / Il fait mauvais</strong> <span style="color: #64748b;">(It's nice / bad weather)</span></p>
         </div>
     </div>
 </div>
 
 <script>
     function updateMeteo() {
-        const dayEl = document.getElementById('meteo-day');
-        const monthEl = document.getElementById('meteo-month');
-        const conditionEl = document.getElementById('meteo-condition');
-        const outputEl = document.getElementById('meteo-output');
-
-        if (!dayEl || !monthEl || !conditionEl || !outputEl) return;
-
-        const day = dayEl.value;
-        const month = monthEl.value;
-        const condition = conditionEl.value;
+        const day = document.getElementById('meteo-day').value;
+        const month = document.getElementById('meteo-month').value;
+        const condition = document.getElementById('meteo-condition').value;
         
-        // Handle proper French contraction for vowel-starting months (avril, août, octobre)
         const vowelMonths = ['avril', 'août', 'octobre'];
         const prefix = vowelMonths.includes(month.toLowerCase()) ? "d'" : "de ";
         
-        outputEl.innerText = `Aujourd'hui, nous sommes ${day} ${prefix}${month} et ${condition}.`;
+        document.getElementById('meteo-output').innerText = `Aujourd'hui, nous sommes ${day}, ${prefix} ${month} et ${condition.toLowerCase()}.`;
     }
-
-    // Force initialization call
-    updateMeteo();
 </script>
