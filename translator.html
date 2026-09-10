@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="fr" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <title>Atelier de Français - Universal Translator & Grammar Suite</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="h-full bg-slate-100 flex flex-col overflow-hidden font-sans">
+
+    <!-- Top Sticky Navigation Header -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-50 shrink-0">
+        <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-1 sm:space-x-2 text-xs font-semibold overflow-x-auto py-2">
+                <a href="index.html" class="text-slate-600 hover:text-indigo-600 hover:bg-slate-100 px-3 py-1.5 rounded-lg transition">Dashboard</a>
+                <a href="syllabus.html" class="text-slate-600 hover:text-indigo-600 hover:bg-slate-100 px-3 py-1.5 rounded-lg transition">Syllabus</a>
+                <a href="lesson.html" class="text-slate-600 hover:text-indigo-600 hover:bg-slate-100 px-3 py-1.5 rounded-lg transition">Lesson</a>
+                <a href="vocab.html" class="text-slate-600 hover:text-indigo-600 hover:bg-slate-100 px-3 py-1.5 rounded-lg transition">Vocab</a>
+                <a href="conjugations.html" class="text-slate-600 hover:text-indigo-600 hover:bg-slate-100 px-3 py-1.5 rounded-lg transition">Conjugations</a>
+                <a href="reading.html" class="text-slate-600 hover:text-indigo-600 hover:bg-slate-100 px-3 py-1.5 rounded-lg transition">Reading</a>
+                <a href="listening.html" class="text-slate-600 hover:text-indigo-600 hover:bg-slate-100 px-3 py-1.5 rounded-lg transition">Listening</a>
+                <a href="writing.html" class="text-slate-600 hover:text-indigo-600 hover:bg-slate-100 px-3 py-1.5 rounded-lg transition">Writing</a>
+                <a href="speaking.html" class="text-slate-600 hover:text-indigo-600 hover:bg-slate-100 px-3 py-1.5 rounded-lg transition">Speaking</a>
+                <a href="translator.html" class="bg-indigo-600 text-white px-3 py-1.5 rounded-lg shadow-sm transition">Translator</a>
+                <a href="admin.html" class="text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 px-3 py-1.5 rounded-lg transition font-bold">Administration</a>
+            </div>
+            <div class="flex items-center space-x-2">
+                <span class="text-xs text-slate-400 font-medium">Traducteur Dynamique IA</span>
+                <button id="logoutBtn" class="text-slate-600 hover:text-red-600 hover:bg-slate-100 px-3 py-1.5 rounded-lg transition">Logout</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Workspace Layout -->
+    <div class="flex-1 flex overflow-hidden relative">
+        <main class="flex-1 flex overflow-hidden">
+            <div class="flex-1 overflow-y-auto p-6 space-y-6 relative max-w-5xl mx-auto w-full">
+                
+                <!-- Toolbar Selector -->
+                <div class="bg-white border border-slate-200 p-4 rounded-2xl shadow-sm flex items-center justify-between">
+                    <div class="flex items-center space-x-3 flex-1">
+                        <select id="source-lang-select" onchange="updateLanguageMode()" class="text-xs font-bold text-slate-700 bg-slate-50 border border-slate-200 px-3 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            <option value="fr">🇫🇷 Français</option>
+                            <option value="en">🇬🇧 English</option>
+                        </select>
+                        <button onclick="swapLanguages()" class="bg-slate-100 hover:bg-slate-200 text-slate-600 p-2 rounded-xl text-xs transition font-bold" title="Inverser les langues">⇄</button>
+                        <select id="target-lang-select" disabled class="text-xs font-bold text-slate-700 bg-slate-100 border border-slate-200 px-3 py-2 rounded-xl">
+                            <option value="en">🇬🇧 English</option>
+                        </select>
+                    </div>
+                    <button onclick="saveTranslationToHistory()" class="text-xs bg-emerald-50 text-emerald-600 border border-emerald-200 px-3 py-2 rounded-xl font-bold hover:bg-emerald-100 transition">💾 Enregistrer dans Vocab</button>
+                </div>
+
+                <!-- Dual Box Input / Output Grid with Symmetrical Height Layout -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-stretch">
+                    
+                    <!-- Source Box (Input) -->
+                    <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm flex flex-col justify-between">
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between">
+                                <span id="source-header-label" class="text-[11px] font-bold uppercase tracking-wide text-slate-400">Texte Source (FR)</span>
+                                <button onclick="clearInput()" class="text-[10px] text-rose-500 hover:underline">Effacer</button>
+                            </div>
+                            <textarea id="translator-input" rows="4" class="w-full text-sm text-slate-800 bg-slate-50 border border-slate-200 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none" placeholder="Tapez n'importe quel mot ou phrase ici..." oninput="triggerOnTheFlyTranslation()">Bonjour, comment puis-je analyser cette phrase ?</textarea>
+                            
+                            <!-- French Accent Toolbar -->
+                            <div id="french-accents-bar" class="flex flex-wrap gap-1 pt-1">
+                                <button type="button" onclick="insertAccent('é')" class="bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 text-slate-700 font-bold px-2 py-1 rounded text-xs transition">é</button>
+                                <button type="button" onclick="insertAccent('à')" class="bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 text-slate-700 font-bold px-2 py-1 rounded text-xs transition">à</button>
+                                <button type="button" onclick="insertAccent('è')" class="bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 text-slate-700 font-bold px-2 py-1 rounded text-xs transition">è</button>
+                                <button type="button" onclick="insertAccent('ù')" class="bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 text-slate-700 font-bold px-2 py-1 rounded text-xs transition">ù</button>
+                                <button type="button" onclick="insertAccent('ç')" class="bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 text-slate-700 font-bold px-2 py-1 rounded text-xs transition">ç</button>
+                                <button type="button" onclick="insertAccent('ê')" class="bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 text-slate-700 font-bold px-2 py-1 rounded text-xs transition">ê</button>
+                                <button type="button" onclick="insertAccent('ë')" class="bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 text-slate-700 font-bold px-2 py-1 rounded text-xs transition">ë</button>
+                                <button type="button" onclick="insertAccent('î')" class="bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 text-slate-700 font-bold px-2 py-1 rounded text-xs transition">î</button>
+                                <button type="button" onclick="insertAccent('ô')" class="bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 text-slate-700 font-bold px-2 py-1 rounded text-xs transition">ô</button>
+                                <button type="button" onclick="insertAccent('œ')" class="bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 text-slate-700 font-bold px-2 py-1 rounded text-xs transition">œ</button>
+                                <button type="button" onclick="insertAccent('«')" class="bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 text-slate-700 font-bold px-2 py-1 rounded text-xs transition">«</button>
+                                <button type="button" onclick="insertAccent('»')" class="bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 text-slate-700 font-bold px-2 py-1 rounded text-xs transition">»</button>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center space-x-2 pt-3 border-t border-slate-100 mt-3">
+                            <button onclick="speakSourceText()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center space-x-1"><span>🔊</span><span>Écouter</span></button>
+                            <button onclick="toggleVoiceRecognition()" id="mic-btn" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center space-x-1"><span>🎙️</span><span>Parler</span></button>
+                        </div>
+                    </div>
+
+                    <!-- Target Box (Output with Mirror Layout for Symmetry) -->
+                    <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm flex flex-col justify-between">
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between">
+                                <span id="target-header-label" class="text-[11px] font-bold uppercase tracking-wide text-slate-400">Traduction (EN)</span>
+                                <span class="text-[10px] bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded font-semibold">Généré par IA</span>
+                            </div>
+                            
+                            <div id="translator-output" class="w-full text-sm font-normal text-slate-800 bg-slate-50 border border-slate-200 rounded-xl p-3 min-h-[115px] overflow-y-auto">
+                                Traduction en direct...
+                            </div>
+
+                            <!-- Invisible Spacer matching the exact height/padding of the accents bar to preserve perfect box height symmetry -->
+                            <div id="target-spacer-bar" class="invisible pt-1 select-none flex flex-wrap gap-1" aria-hidden="true">
+                                <button type="button" class="px-2 py-1 text-xs">placeholder</button>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center space-x-2 pt-3 border-t border-slate-100 mt-3">
+                            <button onclick="speakTargetText()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center space-x-1"><span>🔊</span><span>Écouter</span></button>
+                            <button onclick="copyTargetText()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center space-x-1"><span>📋</span><span>Copier</span></button>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Comprehensive Breakdown & Dictionary Insights Panel -->
+                <div class="bg-white border border-slate-200 rounded-2xl p-6 space-y-4 shadow-sm">
+                    <div class="flex items-center space-x-2 border-b border-slate-100 pb-3">
+                        <span class="text-indigo-600 font-bold">📚</span>
+                        <h3 class="text-xs font-bold text-slate-900 uppercase tracking-wide">Analyse Morphologique & Grammaticale (Générée en direct)</h3>
+                    </div>
+                    <div id="translator-insights-container" class="space-y-3 text-xs text-slate-700">
+                        <p class="text-slate-400 italic">Entrez un texte ci-dessus pour générer l'analyse linguistique instantanée.</p>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- AI Grammar Tutor Sidebar -->
+            <section class="w-96 bg-white border-l border-slate-200 flex flex-col shrink-0">
+                <div class="p-4 border-b border-slate-100 flex items-center justify-between">
+                    <span class="text-xs font-bold uppercase tracking-wider text-slate-600">🤖 Tuteur Grammatical IA</span>
+                    <span class="text-[10px] bg-emerald-50 text-emerald-600 font-semibold px-2 py-0.5 rounded">En ligne</span>
+                </div>
+                
+                <div id="ai-chat-box" class="flex-1 p-4 overflow-y-auto space-y-3">
+                    <div class="bg-slate-50 border border-slate-100 p-3 rounded-xl text-xs text-slate-700 space-y-2">
+                        <p>Bonjour ! Posez-moi des questions sur les nuances de traduction, les genres ou les structures de prépositions de votre texte :</p>
+                    </div>
+                </div>
+
+                <div class="p-3 bg-slate-50 border-t border-slate-100 flex flex-wrap gap-1.5">
+                    <button onclick="sendPresetPrompt('Expliquez la structure grammaticale de mon texte.')" class="text-[10px] bg-white border border-slate-200 text-slate-700 px-2.5 py-1 rounded-lg hover:bg-indigo-50 hover:text-indigo-600 transition font-medium">💡 Analyser la structure</button>
+                    <button onclick="sendPresetPrompt('Quelles sont les règles des prépositions utilisées ici ?')" class="text-[10px] bg-white border border-slate-200 text-slate-700 px-2.5 py-1 rounded-lg hover:bg-indigo-50 hover:text-indigo-600 transition font-medium">⚠️ Règles de préposition</button>
+                </div>
+
+                <div class="p-3 border-t border-slate-100">
+                    <div class="flex items-center space-x-2">
+                        <input type="text" id="ai-input" placeholder="Posez une question..." class="flex-1 text-xs px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500" onkeydown="if(event.key==='Enter')sendAIChat()">
+                        <button onclick="sendAIChat()" class="bg-indigo-600 text-white p-2.5 rounded-xl text-xs font-bold hover:bg-indigo-700 transition">➔</button>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Script Integration -->
+    <script>
+        const SUPABASE_URL = 'https://bkawfexaikntyivqvetk.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrYXdmZXhhaWtudHlpdnF2ZXRrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcyMDU3ODAsImV4cCI6MjEwMjc4MTc4MH0.8YYkD8pzn97DeqA-o83KoGQ4yHb6WT1HB4DcoPPAMwA';
+        
+        if (!window.mySupabase) {
+            window.mySupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+                db: { schema: 'French-schema' }
+            });
+        }
+        const db = window.mySupabase;
+
+        function updateLanguageMode() {
+            const srcLang = document.getElementById('source-lang-select').value;
+            const targetSel = document.getElementById('target-lang-select');
+            const sourceHeader = document.getElementById('source-header-label');
+            const targetHeader = document.getElementById('target-header-label');
+            const accentsBar = document.getElementById('french-accents-bar');
+            const targetSpacerBar = document.getElementById('target-spacer-bar');
+
+            if (srcLang === 'fr') {
+                targetSel.innerHTML = '<option value="en">🇬🇧 English</option>';
+                sourceHeader.innerText = 'Texte Source (FR)';
+                targetHeader.innerText = 'Traduction (EN)';
+                accentsBar.style.display = 'flex';
+                targetSpacerBar.style.display = 'flex';
+            } else {
+                targetSel.innerHTML = '<option value="fr">🇫🇷 Français</option>';
+                sourceHeader.innerText = 'Source Text (EN)';
+                targetHeader.innerText = 'Traduction (FR)';
+                accentsBar.style.display = 'none';
+                targetSpacerBar.style.display = 'none';
+            }
+            triggerOnTheFlyTranslation();
+        }
+
+        function swapLanguages() {
+            const srcSel = document.getElementById('source-lang-select');
+            srcSel.value = (srcSel.value === 'fr') ? 'en' : 'fr';
+            updateLanguageMode();
+        }
+
+        function insertAccent(char) {
+            const input = document.getElementById('translator-input');
+            const start = input.selectionStart;
+            const end = input.selectionEnd;
+            const val = input.value;
+            input.value = val.substring(0, start) + char + val.substring(end);
+            input.selectionStart = input.selectionEnd = start + char.length;
+            input.focus();
+            triggerOnTheFlyTranslation();
+        }
+
+        function clearInput() {
+            document.getElementById('translator-input').value = '';
+            document.getElementById('translator-output').innerText = '';
+            document.getElementById('translator-insights-container').innerHTML = '<p class="text-slate-400 italic">Entrez un texte pour voir les définitions.</p>';
+        }
+
+        async function triggerOnTheFlyTranslation() {
+            const text = document.getElementById('translator-input').value.trim();
+            const outputEl = document.getElementById('translator-output');
+            const insightsContainer = document.getElementById('translator-insights-container');
+            const srcLang = document.getElementById('source-lang-select').value;
+
+            if (!text) {
+                outputEl.innerText = "";
+                insightsContainer.innerHTML = '<p class="text-slate-400 italic">Entrez un texte pour voir les définitions.</p>';
+                return;
+            }
+
+            outputEl.innerText = "Traduction en cours...";
+            insightsContainer.innerHTML = '<p class="text-slate-400 italic">Analyse morphologique par l\'IA...</p>';
+
+            const apiUrl = localStorage.getItem('ai_api_url') || "https://api.groq.com/openai/v1/chat/completions";
+            const apiKey = localStorage.getItem('ai_api_key') || "";
+            const modelName = localStorage.getItem('ai_model_name') || "openai/gpt-oss-120b";
+
+            if (!apiKey) {
+                outputEl.innerText = "Erreur: Clé API manquante. Veuillez la configurer dans l'Administration.";
+                insightsContainer.innerHTML = '<p class="text-rose-500 font-semibold">Configuration requise : Veuillez renseigner votre clé API dans le panneau d\'administration.</p>';
+                return;
+            }
+
+            try {
+                const isFrToEn = (srcLang === 'fr');
+                const prompt = isFrToEn 
+                    ? `Translate the French text "${text}" into English and provide a grammatical breakdown of key terms (such as prepositions, verbs, or articles). Output strictly as valid JSON with keys: 'translation' (string), and 'insights' (array of objects with 'category' string, 'primary' string, 'details' string). No markdown codeblocks.`
+                    : `Translate the English text "${text}" into French and provide grammatical insights. Output strictly as valid JSON with keys: 'translation' (string), and 'insights' (array of objects with 'category' string, 'primary' string, 'details' string). No markdown codeblocks.`;
+
+                const res = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+                    body: JSON.stringify({
+                        model: modelName,
+                        messages: [{ role: "system", content: "You are a bilingual linguistic assistant returning raw JSON." }, { role: "user", content: prompt }],
+                        temperature: 0.3
+                    })
+                });
+
+                if (!res.ok) {
+                    throw new Error(`Erreur HTTP: ${res.status}`);
+                }
+
+                const data = await res.json();
+                let raw = data.choices?.[0]?.message?.content || "";
+                raw = raw.replace(/```json/g, '').replace(/```/g, '').trim();
+                const result = JSON.parse(raw);
+
+                outputEl.innerText = result.translation || "---";
+
+                let html = '';
+                if (result.insights && result.insights.length > 0) {
+                    result.insights.forEach(item => {
+                        html += `
+                            <div class="border-b border-slate-100 pb-2 mb-2">
+                                <span class="text-[10px] font-bold uppercase tracking-wide bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded">${item.category}</span>
+                                <div class="font-bold text-slate-900 mt-1">${item.primary}</div>
+                                <div class="text-slate-600">${item.details}</div>
+                            </div>
+                        `;
+                    });
+                } else {
+                    html = '<p class="text-slate-500">Aucune nuance supplémentaire disponible.</p>';
+                }
+                insightsContainer.innerHTML = html;
+
+            } catch (err) {
+                console.error(err);
+                outputEl.innerText = "Erreur de traduction en direct.";
+                insightsContainer.innerHTML = `<p class="text-rose-500 font-semibold">Impossible de joindre le service IA : ${err.message}. Vérifiez votre clé API dans l'Administration.</p>`;
+            }
+        }
+
+        function speakSourceText() {
+            const text = document.getElementById('translator-input').value;
+            const lang = document.getElementById('source-lang-select').value === 'fr' ? 'fr-FR' : 'en-US';
+            playSpeech(text, lang);
+        }
+
+        function speakTargetText() {
+            const text = document.getElementById('translator-output').innerText;
+            const lang = document.getElementById('source-lang-select').value === 'fr' ? 'en-US' : 'fr-FR';
+            playSpeech(text, lang);
+        }
+
+        function playSpeech(text, lang) {
+            if (!('speechSynthesis' in window)) return;
+            window.speechSynthesis.cancel();
+            const u = new SpeechSynthesisUtterance(text);
+            u.lang = lang;
+            window.speechSynthesis.speak(u);
+        }
+
+        function copyTargetText() {
+            const text = document.getElementById('translator-output').innerText;
+            navigator.clipboard.writeText(text);
+            alert("📋 Traduction copiée dans le presse-papier !");
+        }
+
+        let recognitionInstance = null;
+        let isListeningVoice = false;
+
+        function toggleVoiceRecognition() {
+            const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRec) {
+                alert("La reconnaissance vocale nécessite Google Chrome.");
+                return;
+            }
+
+            const micBtn = document.getElementById('mic-btn');
+            const inputField = document.getElementById('translator-input');
+
+            if (!isListeningVoice) {
+                recognitionInstance = new SpeechRec();
+                recognitionInstance.lang = document.getElementById('source-lang-select').value === 'fr' ? 'fr-FR' : 'en-US';
+                recognitionInstance.interimResults = false;
+
+                recognitionInstance.onstart = () => {
+                    isListeningVoice = true;
+                    micBtn.innerHTML = "⏹️ Arrêter";
+                    micBtn.className = "bg-rose-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition animate-pulse";
+                };
+
+                recognitionInstance.onresult = (event) => {
+                    inputField.value = event.results[0][0].transcript;
+                    triggerOnTheFlyTranslation();
+                };
+
+                recognitionInstance.onerror = () => stopMicUI();
+                recognitionInstance.onend = () => stopMicUI();
+
+                recognitionInstance.start();
+            } else {
+                if (recognitionInstance) recognitionInstance.stop();
+                stopMicUI();
+            }
+        }
+
+        function stopMicUI() {
+            isListeningVoice = false;
+            const micBtn = document.getElementById('mic-btn');
+            if (micBtn) {
+                micBtn.innerHTML = "🎙️ Parler";
+                micBtn.className = "bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center space-x-1";
+            }
+        }
+
+        async function saveTranslationToHistory() {
+            const { data: { user }, error: userError } = await db.auth.getUser();
+            if (userError || !user) {
+                alert("Veuillez vous connecter pour sauvegarder votre recherche.");
+                window.location.href = 'login.html';
+                return;
+            }
+
+            const { error } = await db
+                .from('user_progress')
+                .upsert({
+                    user_id: user.id,
+                    module_type: 'translator',
+                    module_id: 'dynamic-translation',
+                    completed: true,
+                    updated_at: new Date()
+                }, { onConflict: 'user_id, module_type, module_id' });
+
+            if (error) {
+                alert("Erreur lors de la sauvegarde.");
+            } else {
+                alert("💾 Terme enregistré dans votre progression !");
+            }
+        }
+
+        function sendPresetPrompt(promptText) {
+            const input = document.getElementById('ai-input');
+            if (input) {
+                input.value = promptText;
+                sendAIChat();
+            }
+        }
+
+        async function sendAIChat() {
+            const input = document.getElementById('ai-input');
+            const chatBox = document.getElementById('ai-chat-box');
+            if (!input || !input.value.trim() || !chatBox) return;
+
+            const userText = input.value.trim();
+            const sourceText = document.getElementById('translator-input').value || "général";
+
+            const userMsg = document.createElement('div');
+            userMsg.className = 'bg-indigo-50 border border-indigo-100 p-3 rounded-xl text-xs text-indigo-900 ml-4 shadow-sm';
+            userMsg.innerText = userText;
+            chatBox.appendChild(userMsg);
+            input.value = '';
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            const typingMsg = document.createElement('div');
+            typingMsg.id = 'ai-typing';
+            typingMsg.className = 'bg-slate-50 border border-slate-100 p-3 rounded-xl text-xs text-slate-500 mr-4 italic';
+            typingMsg.innerText = '🤖 Le tuteur analyse votre question...';
+            chatBox.appendChild(typingMsg);
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            const apiUrl = localStorage.getItem('ai_api_url') || "https://api.groq.com/openai/v1/chat/completions";
+            const apiKey = localStorage.getItem('ai_api_key') || "";
+            const modelName = localStorage.getItem('ai_model_name') || "openai/gpt-oss-120b";
+
+            try {
+                const res = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+                    body: JSON.stringify({
+                        model: modelName,
+                        messages: [
+                            { role: "system", content: `You are an expert bilingual French tutor. Answer questions regarding this text/term: "${sourceText}". Keep answers clear and pedagogical.` },
+                            { role: "user", content: userText }
+                        ],
+                        temperature: 0.7
+                    })
+                });
+
+                const data = await res.json();
+                document.getElementById('ai-typing')?.remove();
+
+                let aiReply = data.choices?.[0]?.message?.content || "Réponse non disponible.";
+
+                const aiMsg = document.createElement('div');
+                aiMsg.className = 'bg-slate-50 border border-slate-200 p-3.5 rounded-2xl text-xs text-slate-700 mr-4 shadow-sm space-y-2';
+                aiMsg.innerHTML = `🤖 <strong>Tuteur :</strong><br>${aiReply.replace(/\n/g, '<br>')}`;
+                chatBox.appendChild(aiMsg);
+                chatBox.scrollTop = chatBox.scrollHeight;
+            } catch (err) {
+                document.getElementById('ai-typing')?.remove();
+            }
+        }
+
+        // Trigger initial run
+        updateLanguageMode();
+    </script>
+</body>
+</html>

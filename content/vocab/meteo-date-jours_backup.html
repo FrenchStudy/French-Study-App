@@ -1,0 +1,85 @@
+<div id="french-meteo-app" style="font-family: system-ui, -apple-system, sans-serif; max-width: 100%; margin: 0 auto;">
+    
+    <!-- Interactive Weather & Date Generator -->
+    <div style="background: #ffffff; border: 1px solid #cbd5e1; padding: 18px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+        <h3 style="color: #1e1b4b; font-size: 16px; font-weight: bold; margin-top: 0; margin-bottom: 4px;">🌤️ Interactive Weather & Date Builder</h3>
+        <p style="color: #64748b; font-size: 12px; margin-bottom: 16px;">Select a day, month, and weather condition to see how they are expressed in French.</p>
+        
+        <div style="display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap;">
+            <div style="flex: 1; min-width: 120px;">
+                <label style="display: block; font-weight: bold; font-size: 11px; margin-bottom: 6px; color: #475569; text-transform: uppercase;">Day of the week:</label>
+                <select id="meteo-day" onchange="updateMeteo()" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; background: #fff;">
+                    <option value="lundi">Lundi (Monday)</option>
+                    <option value="mardi">Mardi (Tuesday)</option>
+                    <option value="mercredi">Mercredi (Wednesday)</option>
+                    <option value="jeudi">Jeudi (Thursday)</option>
+                    <option value="vendredi">Vendredi (Friday)</option>
+                    <option value="samedi">Samedi (Saturday)</option>
+                    <option value="dimanche">Dimanche (Sunday)</option>
+                </select>
+            </div>
+            <div style="flex: 1; min-width: 120px;">
+                <label style="display: block; font-weight: bold; font-size: 11px; margin-bottom: 6px; color: #475569; text-transform: uppercase;">Month:</label>
+                <select id="meteo-month" onchange="updateMeteo()" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; background: #fff;">
+                    <option value="janvier">janvier</option>
+                    <option value="février">février</option>
+                    <option value="mars">mars</option>
+                    <option value="avril">avril</option>
+                    <option value="mai">mai</option>
+                    <option value="juin">juin</option>
+                    <option value="juillet">juillet</option>
+                    <option value="août" selected>août</option>
+                    <option value="septembre">septembre</option>
+                    <option value="octobre">octobre</option>
+                    <option value="novembre">novembre</option>
+                    <option value="décembre">décembre</option>
+                </select>
+            </div>
+            <div style="flex: 1; min-width: 140px;">
+                <label style="display: block; font-weight: bold; font-size: 11px; margin-bottom: 6px; color: #475569; text-transform: uppercase;">Weather condition:</label>
+                <select id="meteo-condition" onchange="updateMeteo()" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; background: #fff;">
+                    <option value="Il fait beau">Il fait beau (It's nice weather)</option>
+                    <option value="Il fait mauvais">Il fait mauvais (It's bad weather)</option>
+                    <option value="Il pleut">Il pleut (It's raining)</option>
+                    <option value="Il neige">Il neige (It's snowing)</option>
+                    <option value="Il y a du soleil">Il y a du soleil (It's sunny)</option>
+                    <option value="Il y a du vent">Il y a du vent (It's windy)</option>
+                </select>
+            </div>
+        </div>
+
+        <div style="background: #eef2ff; border: 1px solid #c7d2fe; padding: 14px; border-radius: 12px; text-align: center;">
+            <div style="font-size: 10px; font-weight: bold; color: #4338ca; text-transform: uppercase; margin-bottom: 4px;">Dynamic Output (Click to Listen)</div>
+            <div id="meteo-output" style="font-weight: bold; color: #312e81; font-size: 14px; cursor: pointer;" onclick="speakText(this.innerText)">Aujourd'hui, nous sommes lundi, d'août et il fait beau.</div>
+        </div>
+    </div>
+
+    <!-- Reference Study Guide -->
+    <div style="padding: 16px; background: #f8fafc; border-radius: 12px; border: 1px solid #cbd5e1;">
+        <p style="font-size: 14px; font-weight: bold; color: #1e1b4b; margin: 0 0 10px;">📖 Days, Dates & Weather Guide:</p>
+        
+        <div style="font-size: 12px; color: #334155; line-height: 1.6;">
+            <p style="margin: 0 0 4px;">• <strong>Quel jour sommes-nous ?</strong> <span style="color: #64748b;">(What day is it?)</span></p>
+            <p style="margin: 0 0 8px;">• <strong>Nous sommes lundi, le 31 août.</strong> <span style="color: #64748b;">(It is Monday, August 31st.)</span></p>
+            
+            <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 10px 0;">
+            
+            <p style="font-weight: bold; color: #4338ca; margin: 4px 0;">Asking about the weather:</p>
+            <p style="margin: 2px 0;">— <strong>Quel temps fait-il ?</strong> <span style="color: #64748b;">(What's the weather like?)</span></p>
+            <p style="margin: 2px 0;">— <strong>Il fait beau / Il fait mauvais</strong> <span style="color: #64748b;">(It's nice / bad weather)</span></p>
+        </div>
+    </div>
+</div>
+
+<script>
+    function updateMeteo() {
+        const day = document.getElementById('meteo-day').value;
+        const month = document.getElementById('meteo-month').value;
+        const condition = document.getElementById('meteo-condition').value;
+        
+        const vowelMonths = ['avril', 'août', 'octobre'];
+        const prefix = vowelMonths.includes(month.toLowerCase()) ? "d'" : "de ";
+        
+        document.getElementById('meteo-output').innerText = `Aujourd'hui, nous sommes ${day}, ${prefix} ${month} et ${condition.toLowerCase()}.`;
+    }
+</script>

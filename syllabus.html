@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>French Study App - Complete Curriculum & Syllabus</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen flex flex-col justify-between">
+
+    <!-- Header & Navigation -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-50 shrink-0">
+        <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-1 sm:space-x-2 text-xs font-semibold overflow-x-auto py-2">
+                <a href="index.html" class="text-slate-600 hover:text-indigo-600 hover:bg-slate-100 px-3 py-1.5 rounded-lg transition">Dashboard</a>
+                <a href="syllabus.html" class="bg-indigo-600 text-white px-3 py-1.5 rounded-lg shadow-sm transition">Syllabus</a>
+                <a href="lesson.html" class="text-slate-600 hover:text-indigo-600 hover:bg-slate-100 px-3 py-1.5 rounded-lg transition">Lesson</a>
+                <a href="vocab.html" class="text-slate-600 hover:text-indigo-600 hover:bg-slate-100 px-3 py-1.5 rounded-lg transition">Vocab</a>
+                <a href="conjugations.html" class="text-slate-600 hover:text-indigo-600 hover:bg-slate-100 px-3 py-1.5 rounded-lg transition">Conjugations</a>
+                <a href="reading.html" class="text-slate-600 hover:text-indigo-600 hover:bg-slate-100 px-3 py-1.5 rounded-lg transition">Reading</a>
+                <a href="listening.html" class="text-slate-600 hover:text-indigo-600 hover:bg-slate-100 px-3 py-1.5 rounded-lg transition">Listening</a>
+                <a href="writing.html" class="text-slate-600 hover:text-indigo-600 hover:bg-slate-100 px-3 py-1.5 rounded-lg transition">Writing</a>
+                <a href="speaking.html" class="text-slate-600 hover:text-indigo-600 hover:bg-slate-100 px-3 py-1.5 rounded-lg transition">Speaking</a>
+                <a href="translator.html" class="text-slate-600 hover:text-indigo-600 hover:bg-slate-100 px-3 py-1.5 rounded-lg transition">Translator</a>
+                <a href="admin.html" class="text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 px-3 py-1.5 rounded-lg transition font-bold">Administration</a>
+            </div>
+            <div class="flex items-center space-x-2">
+                <span id="global-progress-badge" class="text-xs font-bold bg-indigo-50 text-indigo-700 px-3 py-1 rounded-full">0% Complété</span>
+                <button id="logoutBtn" class="text-slate-600 hover:text-red-600 hover:bg-slate-100 px-3 py-1.5 rounded-lg transition">Logout</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-4xl mx-auto px-4 py-8 w-full space-y-6">
+
+        <!-- Page Intro & CEFR Tabs -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+                <h2 class="text-2xl font-black text-slate-950">Curriculum & Topic Explorer</h2>
+                <p class="text-sm text-slate-500">Select your target CEFR level tab below to access individual topics.</p>
+            </div>
+            <!-- Level Tabs (A1, A2, B1, B2) -->
+            <div class="flex items-center space-x-1.5 text-xs font-semibold bg-slate-200/80 p-1 rounded-xl">
+                <button onclick="switchTab('a1')" id="tab-a1" class="bg-white text-indigo-600 px-3 py-1.5 rounded-lg shadow-sm transition font-bold">A1 Level</button>
+                <button onclick="switchTab('a2')" id="tab-a2" class="text-slate-600 hover:text-slate-900 px-3 py-1.5 rounded-lg transition">A2 Level</button>
+                <button onclick="switchTab('b1')" id="tab-b1" class="text-slate-600 hover:text-slate-900 px-3 py-1.5 rounded-lg transition">B1 Level</button>
+                <button onclick="switchTab('b2')" id="tab-b2" class="text-slate-600 hover:text-slate-900 px-3 py-1.5 rounded-lg transition">B2 Level</button>
+            </div>
+        </div>
+
+        <!-- ================= TAB CONTENT: A1 ================= -->
+        <div id="content-a1" class="tab-content space-y-6">
+            <!-- Module A1.1 -->
+            <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4">
+                <div class="border-b border-slate-100 pb-3">
+                    <span class="text-xs font-bold uppercase bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded">DELF A1 • Module 1</span>
+                    <h3 class="font-bold text-slate-900 text-base mt-1">Foundational Vocabulary & Basics</h3>
+                </div>
+                <div class="space-y-3">
+                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400">Vocabulary Topics</h4>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+                        <a href="lesson.html?topic=L'alphabet" class="topic-link p-3 bg-slate-50 hover:bg-indigo-50 border border-slate-100 rounded-xl text-xs font-medium text-slate-700 transition block flex justify-between items-center" data-topic="L'alphabet"><span>🔤 L'alphabet</span><span class="status-icon"></span></a>
+                        <a href="lesson.html?topic=Les nombres" class="topic-link p-3 bg-slate-50 hover:bg-indigo-50 border border-slate-100 rounded-xl text-xs font-medium text-slate-700 transition block flex justify-between items-center" data-topic="Les nombres"><span>🔢 Les nombres</span><span class="status-icon"></span></a>
+                        <a href="lesson.html?topic=Noms et prénoms" class="topic-link p-3 bg-slate-50 hover:bg-indigo-50 border border-slate-100 rounded-xl text-xs font-medium text-slate-700 transition block flex justify-between items-center" data-topic="Noms et prénoms"><span>👤 Noms et prénoms</span><span class="status-icon"></span></a>
+                        <a href="lesson.html?topic=L'adresse" class="topic-link p-3 bg-slate-50 hover:bg-indigo-50 border border-slate-100 rounded-xl text-xs font-medium text-slate-700 transition block flex justify-between items-center" data-topic="L'adresse"><span>📍 L'adresse</span><span class="status-icon"></span></a>
+                        <a href="lesson.html?topic=Objets personnels" class="topic-link p-3 bg-slate-50 hover:bg-indigo-50 border border-slate-100 rounded-xl text-xs font-medium text-slate-700 transition block flex justify-between items-center" data-topic="Objets personnels"><span>🎒 Objets personnels</span><span class="status-icon"></span></a>
+                        <a href="lesson.html?topic=Objets de la classe" class="topic-link p-3 bg-slate-50 hover:bg-indigo-50 border border-slate-100 rounded-xl text-xs font-medium text-slate-700 transition block flex justify-between items-center" data-topic="Objets de la classe"><span>📚 Objets de la classe</span><span class="status-icon"></span></a>
+                        <a href="lesson.html?topic=Les nationalités" class="topic-link p-3 bg-slate-50 hover:bg-indigo-50 border border-slate-100 rounded-xl text-xs font-medium text-slate-700 transition block flex justify-between items-center" data-topic="Les nationalités"><span>🌍 Les nationalités</span><span class="status-icon"></span></a>
+                        <a href="lesson.html?topic=Les professions" class="topic-link p-3 bg-slate-50 hover:bg-indigo-50 border border-slate-100 rounded-xl text-xs font-medium text-slate-700 transition block flex justify-between items-center" data-topic="Les professions"><span>💼 Les professions</span><span class="status-icon"></span></a>
+                        <a href="lesson.html?topic=L'état civil" class="topic-link p-3 bg-slate-50 hover:bg-indigo-50 border border-slate-100 rounded-xl text-xs font-medium text-slate-700 transition block flex justify-between items-center" data-topic="L'état civil"><span>💍 L'état civil</span><span class="status-icon"></span></a>
+                        <a href="lesson.html?topic=Pays & villes" class="topic-link p-3 bg-slate-50 hover:bg-indigo-50 border border-slate-100 rounded-xl text-xs font-medium text-slate-700 transition block flex justify-between items-center" data-topic="Pays & villes"><span>🗺️ Pays & villes</span><span class="status-icon"></span></a>
+                        <a href="lesson.html?topic=Les loisirs (Hobbies)" class="topic-link p-3 bg-slate-50 hover:bg-indigo-50 border border-slate-100 rounded-xl text-xs font-medium text-slate-700 transition block flex justify-between items-center" data-topic="Les loisirs (Hobbies)"><span>⚽ Les loisirs</span><span class="status-icon"></span></a>
+                        <a href="lesson.html?topic=La famille proche" class="topic-link p-3 bg-slate-50 hover:bg-indigo-50 border border-slate-100 rounded-xl text-xs font-medium text-slate-700 transition block flex justify-between items-center" data-topic="La famille proche"><span>👨‍👩‍👧 La famille proche</span><span class="status-icon"></span></a>
+                        <a href="lesson.html?topic=L'heure & Les prix" class="topic-link p-3 bg-slate-50 hover:bg-indigo-50 border border-slate-100 rounded-xl text-xs font-medium text-slate-700 transition block flex justify-between items-center" data-topic="L'heure & Les prix"><span>⏰ L'heure & Les prix</span><span class="status-icon"></span></a>
+                        <a href="lesson.html?topic=Météo, date & jours" class="topic-link p-3 bg-slate-50 hover:bg-indigo-50 border border-slate-100 rounded-xl text-xs font-medium text-slate-700 transition block flex justify-between items-center" data-topic="Météo, date & jours"><span>🌤️ Météo, date & jours</span><span class="status-icon"></span></a>
+                        <a href="lesson.html?topic=Descriptions physiques" class="topic-link p-3 bg-slate-50 hover:bg-indigo-50 border border-slate-100 rounded-xl text-xs font-medium text-slate-700 transition block flex justify-between items-center" data-topic="Descriptions physiques"><span>📏 Descriptions physiques</span><span class="status-icon"></span></a>
+                        <a href="lesson.html?topic=Couleurs & Saisons" class="topic-link p-3 bg-slate-50 hover:bg-indigo-50 border border-slate-100 rounded-xl text-xs font-medium text-slate-700 transition block flex justify-between items-center" data-topic="Couleurs & Saisons"><span>🎨 Couleurs & Saisons</span><span class="status-icon"></span></a>
+                        <a href="lesson.html?topic=Les lieux" class="topic-link p-3 bg-slate-50 hover:bg-indigo-50 border border-slate-100 rounded-xl text-xs font-medium text-slate-700 transition block flex justify-between items-center" data-topic="Les lieux"><span>🏛️ Les lieux</span><span class="status-icon"></span></a>
+                    </div>
+                </div>
+
+                <div class="space-y-3 pt-2">
+                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400">Grammar & Functions</h4>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+                        <a href="lesson.html?topic=Pronoms personnels sujets" class="topic-link p-3 bg-slate-50 hover:bg-indigo-50 border border-slate-100 rounded-xl text-xs font-medium text-slate-700 transition block flex justify-between items-center" data-topic="Pronoms personnels sujets"><span>⚡ Pronoms sujets</span><span class="status-icon"></span></a>
+                        <a href="lesson.html?topic=Pronoms toniques" class="topic-link p-3 bg-slate-50 hover:bg-indigo-50 border border-slate-100 rounded-xl text-xs font-medium text-slate-700 transition block flex justify-between items-center" data-topic="Pronoms toniques"><span>⚡ Pronoms toniques</span><span class="status-icon"></span></a>
+                        <a href="lesson.html?topic=Présent - État & description" class="topic-link p-3 bg-slate-50 hover:bg-indigo-50 border border-slate-100 rounded-xl text-xs font-medium text-slate-700 transition block flex justify-between items-center" data-topic="Présent - État & description"><span>⚡ Présent (État)</span><span class="status-icon"></span></a>
+                        <a href="lesson.html?topic=Verbes usuels (être, avoir...)" class="topic-link p-3 bg-slate-50 hover:bg-indigo-50 border border-slate-100 rounded-xl text-xs font-medium text-slate-700 transition block flex justify-between items-center" data-topic="Verbes usuels (être, avoir...)"><span>⚡ Verbes usuels</span><span class="status-icon"></span></a>
+                        <a href="lesson.html?topic=Verbes en -RE, -IR, -ER" class="topic-link p-3 bg-slate-50 hover:bg-indigo-50 border border-slate-100 rounded-xl text-xs font-medium text-slate-700 transition block flex justify-between items-center" data-topic="Verbes en -RE, -IR, -ER"><span>⚡ Verbes en -RE, -IR, -ER</span><span class="status-icon"></span></a>
+                        <a href="lesson.html?topic=Conditionnel de politesse" class="topic-link p-3 bg-slate-50 hover:bg-indigo-50 border border-slate-100 rounded-xl text-xs font-medium text-slate-700 transition block flex justify-between items-center" data-topic="Conditionnel de politesse"><span>⚡ Cond. de politesse</span><span class="status-icon"></span></a>
+                        <a href="lesson.html?topic=Phrases interrogatives" class="topic-link p-3 bg-slate-50 hover:bg-indigo-50 border border-slate-100 rounded-xl text-xs font-medium text-slate-700 transition block flex justify-between items-center" data-topic="Phrases interrogatives"><span>⚡ Phrases interrogatives</span><span class="status-icon"></span></a>
+                        <a href="lesson.html?topic=Pronoms interrogatifs" class="topic-link p-3 bg-slate-50 hover:bg-indigo-50 border border-slate-100 rounded-xl text-xs font-medium text-slate-700 transition block flex justify-between items-center" data-topic="Pronoms interrogatifs"><span>⚡ Pronoms interrogatifs</span><span class="status-icon"></span></a>
+                        <a href="lesson.html?topic=Présentateurs" class="topic-link p-3 bg-slate-50 hover:bg-indigo-50 border border-slate-100 rounded-xl text-xs font-medium text-slate-700 transition block flex justify-between items-center" data-topic="Présentateurs"><span>⚡ Présentateurs</span><span class="status-icon"></span></a>
+                        <a href="lesson.html?topic=Articles définis / indéfinis / partitifs" class="topic-link p-3 bg-slate-50 hover:bg-indigo-50 border border-slate-100 rounded-xl text-xs font-medium text-slate-700 transition block flex justify-between items-center" data-topic="Articles définis / indéfinis / partitifs"><span>⚡ Articles déf./indéf./parti</span><span class="status-icon"></span></a>
+                        <a href="lesson.html?topic=L'article zéro" class="topic-link p-3 bg-slate-50 hover:bg-indigo-50 border border-slate-100 rounded-xl text-xs font-medium text-slate-700 transition block flex justify-between items-center" data-topic="L'article zéro"><span>⚡ L'article zéro</span><span class="status-icon"></span></a>
+                        <a href="lesson.html?topic=Adjectifs démonstratifs" class="topic-link p-3 bg-slate-50 hover:bg-indigo-50 border border-slate-100 rounded-xl text-xs font-medium text-slate-700 transition block flex justify-between items-center" data-topic="Adjectifs démonstratifs"><span>⚡ Adj. démonstratifs</span><span class="status-icon"></span></a>
+                        <a href="lesson.html?topic=Accord masculin/féminin" class="topic-link p-3 bg-slate-50 hover:bg-indigo-50 border border-slate-100 rounded-xl text-xs font-medium text-slate-700 transition block flex justify-between items-center" data-topic="Accord masculin/féminin"><span>⚡ Accord masc./fém.</span><span class="status-icon"></span></a>
+                        <a href="lesson.html?topic=Adjectifs qualificatifs" class="topic-link p-3 bg-slate-50 hover:bg-indigo-50 border border-slate-100 rounded-xl text-xs font-medium text-slate-700 transition block flex justify-between items-center" data-topic="Adjectifs qualificatifs"><span>⚡ Adjectifs qualificatifs</span><span class="status-icon"></span></a>
+                        <a href="lesson.html?topic=Négation (ne...pas)" class="topic-link p-3 bg-slate-50 hover:bg-indigo-50 border border-slate-100 rounded-xl text-xs font-medium text-slate-700 transition block flex justify-between items-center" data-topic="Négation (ne...pas)"><span>⚡ Négation</span><span class="status-icon"></span></a>
+                        <a href="lesson.html?topic=Complément du nom" class="topic-link p-3 bg-slate-50 hover:bg-indigo-50 border border-slate-100 rounded-xl text-xs font-medium text-slate-700 transition block flex justify-between items-center" data-topic="Complément du nom"><span>⚡ Complément du nom</span><span class="status-icon"></span></a>
+                        <a href="lesson.html?topic=Adjectifs possessifs" class="topic-link p-3 bg-slate-50 hover:bg-indigo-50 border border-slate-100 rounded-xl text-xs font-medium text-slate-700 transition block flex justify-between items-center" data-topic="Adjectifs possessifs"><span>⚡ Adjectifs possessifs</span><span class="status-icon"></span></a>
+                        <a href="lesson.html?topic=Articles partitifs" class="topic-link p-3 bg-slate-50 hover:bg-indigo-50 border border-slate-100 rounded-xl text-xs font-medium text-slate-700 transition block flex justify-between items-center" data-topic="Articles partitifs"><span>⚡ Articles partitifs</span><span class="status-icon"></span></a>
+                        <a href="lesson.html?topic=Adverbes de quantité" class="topic-link p-3 bg-slate-50 hover:bg-indigo-50 border border-slate-100 rounded-xl text-xs font-medium text-slate-700 transition block flex justify-between items-center" data-topic="Adverbes de quantité"><span>⚡ Adverbes quantité</span><span class="status-icon"></span></a>
+                        <a href="lesson.html?topic=Forme impersonnelle" class="topic-link p-3 bg-slate-50 hover:bg-indigo-50 border border-slate-100 rounded-xl text-xs font-medium text-slate-700 transition block flex justify-between items-center" data-topic="Forme impersonnelle"><span>⚡ Forme impersonnelle</span><span class="status-icon"></span></a>
+                        <a href="lesson.html?topic=Localisation temps & espace" class="topic-link p-3 bg-slate-50 hover:bg-indigo-50 border border-slate-100 rounded-xl text-xs font-medium text-slate-700 transition block flex justify-between items-center" data-topic="Localisation temps & espace"><span>⚡ Localisation</span><span class="status-icon"></span></a>
+                        <a href="lesson.html?topic=Il y a" class="topic-link p-3 bg-slate-50 hover:bg-indigo-50 border border-slate-100 rounded-xl text-xs font-medium text-slate-700 transition block flex justify-between items-center" data-topic="Il y a"><span>⚡ Il y a</span><span class="status-icon"></span></a>
+                        <a href="lesson.html?topic=Articulateurs du discours" class="topic-link p-3 bg-slate-50 hover:bg-indigo-50 border border-slate-100 rounded-xl text-xs font-medium text-slate-700 transition block flex justify-between items-center" data-topic="Articulateurs du discours"><span>⚡ Articulateurs discours</span><span class="status-icon"></span></a>
+                        <a href="lesson.html?topic=Salutations & Politesse" class="topic-link p-3 bg-slate-50 hover:bg-indigo-50 border border-slate-100 rounded-xl text-xs font-medium text-slate-700 transition block flex justify-between items-center" data-topic="Salutations & Politesse"><span>🤝 Salutations & Politesse</span><span class="status-icon"></span></a>
+                        <a href="lesson.html?topic=Tu ou Vous" class="topic-link p-3 bg-slate-50 hover:bg-indigo-50 border border-slate-100 rounded-xl text-xs font-medium text-slate-700 transition block flex justify-between items-center" data-topic="Tu ou Vous"><span>🤝 Tu ou Vous</span><span class="status-icon"></span></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= TAB CONTENT: A2 ================= -->
+        <div id="content-a2" class="tab-content space-y-6" style="display: none;">
+            <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4">
+                <div class="border-b border-slate-100 pb-3">
+                    <span class="text-xs font-bold uppercase bg-amber-50 text-amber-700 px-2 py-0.5 rounded">DELF A2 • Elementary</span>
+                    <h3 class="font-bold text-slate-900 text-base mt-1">Social Life, Narrating & Transactions</h3>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+                    <a href="lesson.html?topic=Transports & Lieux publics" class="topic-link p-3 bg-slate-50 hover:bg-amber-50 border border-slate-100 rounded-xl text-xs font-medium text-slate-700 transition block flex justify-between items-center" data-topic="Transports & Lieux publics"><span>🚇 Transports & Lieux</span><span class="status-icon"></span></a>
+                    <a href="lesson.html?topic=Personnes, Logement & Aliments" class="topic-link p-3 bg-slate-50 hover:bg-amber-50 border border-slate-100 rounded-xl text-xs font-medium text-slate-700 transition block flex justify-between items-center" data-topic="Personnes, Logement & Aliments"><span>🏠 Logement & Aliments</span><span class="status-icon"></span></a>
+                    <a href="lesson.html?topic=Argent & Paiements" class="topic-link p-3 bg-slate-50 hover:bg-amber-50 border border-slate-100 rounded-xl text-xs font-medium text-slate-700 transition block flex justify-between items-center" data-topic="Argent & Paiements"><span>💳 Argent & Paiements</span><span class="status-icon"></span></a>
+                    <a href="lesson.html?topic=Verbes à 1, 2 et 3 bases" class="topic-link p-3 bg-slate-50 hover:bg-amber-50 border border-slate-100 rounded-xl text-xs font-medium text-slate-700 transition block flex justify-between items-center" data-topic="Verbes à 1, 2 et 3 bases"><span>⚡ Verbes groupes</span><span class="status-icon"></span></a>
+                    <a href="lesson.html?topic=Verbes pronominaux" class="topic-link p-3 bg-slate-50 hover:bg-amber-50 border border-slate-100 rounded-xl text-xs font-medium text-slate-700 transition block flex justify-between items-center" data-topic="Verbes pronominaux"><span>⚡ Verbes pronominaux</span><span class="status-icon"></span></a>
+                    <a href="lesson.html?topic=Verbes + infinitif" class="topic-link p-3 bg-slate-50 hover:bg-amber-50 border border-slate-100 rounded-xl text-xs font-medium text-slate-700 transition block flex justify-between items-center" data-topic="Verbes + infinitif"><span>⚡ Verbes + infinitif</span><span class="status-icon"></span></a>
+                    <a href="lesson.html?topic=Passé Composé vs. Imparfait" class="topic-link p-3 bg-slate-50 hover:bg-amber-50 border border-slate-100 rounded-xl text-xs font-medium text-slate-700 transition block flex justify-between items-center" data-topic="Passé Composé vs. Imparfait"><span>⚡ Passé vs. Imparfait</span><span class="status-icon"></span></a>
+                    <a href="lesson.html?topic=L'impératif" class="topic-link p-3 bg-slate-50 hover:bg-amber-50 border border-slate-100 rounded-xl text-xs font-medium text-slate-700 transition block flex justify-between items-center" data-topic="L'impératif"><span>⚡ L'impératif</span><span class="status-icon"></span></a>
+                    <a href="lesson.html?topic=Futur & Temps récents" class="topic-link p-3 bg-slate-50 hover:bg-amber-50 border border-slate-100 rounded-xl text-xs font-medium text-slate-700 transition block flex justify-between items-center" data-topic="Futur & Temps récents"><span>⚡ Futur & Passé récent</span><span class="status-icon"></span></a>
+                    <a href="lesson.html?topic=Pronoms COD, COI, Y, EN" class="topic-link p-3 bg-slate-50 hover:bg-amber-50 border border-slate-100 rounded-xl text-xs font-medium text-slate-700 transition block flex justify-between items-center" data-topic="Pronoms COD, COI, Y, EN"><span>⚡ Pronoms COD/COI/Y/EN</span><span class="status-icon"></span></a>
+                    <a href="lesson.html?topic=Pronoms relatifs simples" class="topic-link p-3 bg-slate-50 hover:bg-amber-50 border border-slate-100 rounded-xl text-xs font-medium text-slate-700 transition block flex justify-between items-center" data-topic="Pronoms relatifs simples"><span>⚡ Pronoms relatifs (qui/que)</span><span class="status-icon"></span></a>
+                    <a href="lesson.html?topic=Prépositions de temps & lieu" class="topic-link p-3 bg-slate-50 hover:bg-amber-50 border border-slate-100 rounded-xl text-xs font-medium text-slate-700 transition block flex justify-between items-center" data-topic="Prépositions de temps & lieu"><span>⚡ Prépositions</span><span class="status-icon"></span></a>
+                    <a href="lesson.html?topic=Articulateurs logiques" class="topic-link p-3 bg-slate-50 hover:bg-amber-50 border border-slate-100 rounded-xl text-xs font-medium text-slate-700 transition block flex justify-between items-center" data-topic="Articulateurs logiques"><span>⚡ Articulateurs logiques</span><span class="status-icon"></span></a>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= TAB CONTENT: B1 ================= -->
+        <div id="content-b1" class="tab-content space-y-6" style="display: none;">
+            <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4">
+                <div class="border-b border-slate-100 pb-3">
+                    <span class="text-xs font-bold uppercase bg-purple-50 text-purple-700 px-2 py-0.5 rounded">DELF B1 • Intermediate</span>
+                    <h3 class="font-bold text-slate-900 text-base mt-1">Professional & Expressive Expansion</h3>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+                    <a href="lesson.html?topic=Vie professionnelle" class="topic-link p-3 bg-slate-50 hover:bg-purple-50 border border-slate-100 rounded-xl text-xs font-medium text-slate-700 transition block flex justify-between items-center" data-topic="Vie professionnelle"><span>💼 Vie professionnelle</span><span class="status-icon"></span></a>
+                    <a href="lesson.html?topic=Sentiments & Faits divers" class="topic-link p-3 bg-slate-50 hover:bg-purple-50 border border-slate-100 rounded-xl text-xs font-medium text-slate-700 transition block flex justify-between items-center" data-topic="Sentiments & Faits divers"><span>🎭 Sentiments & Faits divers</span><span class="status-icon"></span></a>
+                    <a href="lesson.html?topic=Le Subjonctif" class="topic-link p-3 bg-slate-50 hover:bg-purple-50 border border-slate-100 rounded-xl text-xs font-medium text-slate-700 transition block flex justify-between items-center" data-topic="Le Subjonctif"><span>⚡ Le Subjonctif</span><span class="status-icon"></span></a>
+                    <a href="lesson.html?topic=Le Discours Rapporté" class="topic-link p-3 bg-slate-50 hover:bg-purple-50 border border-slate-100 rounded-xl text-xs font-medium text-slate-700 transition block flex justify-between items-center" data-topic="Le Discours Rapporté"><span>⚡ Discours rapporté</span><span class="status-icon"></span></a>
+                    <a href="lesson.html?topic=Le Conditionnel Passé" class="topic-link p-3 bg-slate-50 hover:bg-purple-50 border border-slate-100 rounded-xl text-xs font-medium text-slate-700 transition block flex justify-between items-center" data-topic="Le Conditionnel Passé"><span>⚡ Conditionnel passé</span><span class="status-icon"></span></a>
+                    <a href="lesson.html?topic=Temps du passé avancés" class="topic-link p-3 bg-slate-50 hover:bg-purple-50 border border-slate-100 rounded-xl text-xs font-medium text-slate-700 transition block flex justify-between items-center" data-topic="Temps du passé avancés"><span>⚡ Plus-que-parfait</span><span class="status-icon"></span></a>
+                    <a href="lesson.html?topic=Le Conditionnel Présent" class="topic-link p-3 bg-slate-50 hover:bg-purple-50 border border-slate-100 rounded-xl text-xs font-medium text-slate-700 transition block flex justify-between items-center" data-topic="Le Conditionnel Présent"><span>⚡ Conditionnel présent</span><span class="status-icon"></span></a>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= TAB CONTENT: B2 ================= -->
+        <div id="content-b2" class="tab-content space-y-6" style="display: none;">
+            <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4">
+                <div class="border-b border-slate-100 pb-3">
+                    <span class="text-xs font-bold uppercase bg-rose-50 text-rose-700 px-2 py-0.5 rounded">DELF B2 • Advanced</span>
+                    <h3 class="font-bold text-slate-900 text-base mt-1">Societal Debates & Mastery</h3>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+                    <a href="lesson.html?topic=Médias, politique & société" class="topic-link p-3 bg-slate-50 hover:bg-rose-50 border border-slate-100 rounded-xl text-xs font-medium text-slate-700 transition block flex justify-between items-center" data-topic="Médias, politique & société"><span>🏛️ Médias & Société</span><span class="status-icon"></span></a>
+                    <a href="lesson.html?topic=Le Passif et le Gérondif" class="topic-link p-3 bg-slate-50 hover:bg-rose-50 border border-slate-100 rounded-xl text-xs font-medium text-slate-700 transition block flex justify-between items-center" data-topic="Le Passif et le Gérondif"><span>⚡ Voix passive & gérondif</span><span class="status-icon"></span></a>
+                    <a href="lesson.html?topic=Hypothèse complexe" class="topic-link p-3 bg-slate-50 hover:bg-rose-50 border border-slate-100 rounded-xl text-xs font-medium text-slate-700 transition block flex justify-between items-center" data-topic="Hypothèse complexe"><span>⚡ Hypothèses (si clauses)</span><span class="status-icon"></span></a>
+                    <a href="lesson.html?topic=Doubles pronoms & relatifs" class="topic-link p-3 bg-slate-50 hover:bg-rose-50 border border-slate-100 rounded-xl text-xs font-medium text-slate-700 transition block flex justify-between items-center" data-topic="Doubles pronoms & relatifs"><span>⚡ Doubles pronoms</span><span class="status-icon"></span></a>
+                    <a href="lesson.html?topic=Pronoms relatifs complexes" class="topic-link p-3 bg-slate-50 hover:bg-rose-50 border border-slate-100 rounded-xl text-xs font-medium text-slate-700 transition block flex justify-between items-center" data-topic="Pronoms relatifs complexes"><span>⚡ Relatifs (dont, auquel)</span><span class="status-icon"></span></a>
+                    <a href="lesson.html?topic=Nominalisation & articulateurs avancés" class="topic-link p-3 bg-slate-50 hover:bg-rose-50 border border-slate-100 rounded-xl text-xs font-medium text-slate-700 transition block flex justify-between items-center" data-topic="Nominalisation & articulateurs avancés"><span>⚡ Nominalisation & logique</span><span class="status-icon"></span></a>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 py-4 text-center text-xs text-slate-400 mt-12">
+        French Study App • Detailed Syllabus Explorer
+    </footer>
+
+    <!-- Tab Switching & Progress Tracking Script -->
+    <script>
+        function switchTab(level) {
+            document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
+            ['a1', 'a2', 'b1', 'b2'].forEach(lvl => {
+                const btn = document.getElementById('tab-' + lvl);
+                if (btn) {
+                    btn.className = lvl === level 
+                        ? "bg-white text-indigo-600 px-3 py-1.5 rounded-lg shadow-sm transition font-bold" 
+                        : "text-slate-600 hover:text-slate-900 px-3 py-1.5 rounded-lg transition";
+                }
+            });
+            document.getElementById('content-' + level).style.display = 'block';
+        }
+
+        function updateProgressUI() {
+            const topicLinks = document.querySelectorAll('.topic-link');
+            let completedCount = 0;
+            const totalCount = topicLinks.length;
+
+            topicLinks.forEach(link => {
+                const topicName = link.getAttribute('data-topic');
+                const progressKey = 'fr_progress_' + topicName;
+                const isCompleted = localStorage.getItem(progressKey) === 'completed';
+                const statusIcon = link.querySelector('.status-icon');
+
+                if (isCompleted) {
+                    completedCount++;
+                    link.classList.add('border-emerald-200', 'bg-emerald-50/30');
+                    if (statusIcon) statusIcon.innerText = '✅';
+                } else {
+                    if (statusIcon) statusIcon.innerText = '';
+                }
+            });
+
+            const globalBadge = document.getElementById('global-progress-badge');
+            if (globalBadge && totalCount > 0) {
+                const pct = Math.round((completedCount / totalCount) * 100);
+                globalBadge.innerText = `${pct}% Complété (${completedCount}/${totalCount})`;
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            updateProgressUI();
+        });
+    </script>
+
+</body>
+</html>

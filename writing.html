@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="fr" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <title>Atelier de Français - Writing & Expression Suite</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="h-full bg-slate-100 flex flex-col overflow-hidden font-sans">
+
+    <!-- Top Sticky Navigation Header -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-50 shrink-0">
+        <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-1 sm:space-x-2 text-xs font-semibold overflow-x-auto py-2">
+                <a href="index.html" class="text-slate-600 hover:text-indigo-600 hover:bg-slate-100 px-3 py-1.5 rounded-lg transition">Dashboard</a>
+                <a href="syllabus.html" class="text-slate-600 hover:text-indigo-600 hover:bg-slate-100 px-3 py-1.5 rounded-lg transition">Syllabus</a>
+                <a href="lesson.html" class="text-slate-600 hover:text-indigo-600 hover:bg-slate-100 px-3 py-1.5 rounded-lg transition">Lesson</a>
+                <a href="vocab.html" class="text-slate-600 hover:text-indigo-600 hover:bg-slate-100 px-3 py-1.5 rounded-lg transition">Vocab</a>
+                <a href="conjugations.html" class="text-slate-600 hover:text-indigo-600 hover:bg-slate-100 px-3 py-1.5 rounded-lg transition">Conjugations</a>
+                <a href="reading.html" class="text-slate-600 hover:text-indigo-600 hover:bg-slate-100 px-3 py-1.5 rounded-lg transition">Reading</a>
+                <a href="listening.html" class="text-slate-600 hover:text-indigo-600 hover:bg-slate-100 px-3 py-1.5 rounded-lg transition">Listening</a>
+                <a href="writing.html" class="bg-indigo-600 text-white px-3 py-1.5 rounded-lg shadow-sm transition">Writing</a>
+                <a href="speaking.html" class="text-slate-600 hover:text-indigo-600 hover:bg-slate-100 px-3 py-1.5 rounded-lg transition">Speaking</a>
+                <a href="translator.html" class="text-slate-600 hover:text-indigo-600 hover:bg-slate-100 px-3 py-1.5 rounded-lg transition">Translator</a>
+                <a href="admin.html" class="text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 px-3 py-1.5 rounded-lg transition font-bold">Administration</a>
+            </div>
+            <div class="flex items-center space-x-2">
+                <span class="text-xs text-slate-400 font-medium">Expression Écrite Active</span>
+                <button id="logoutBtn" class="text-slate-600 hover:text-red-600 hover:bg-slate-100 px-3 py-1.5 rounded-lg transition">Logout</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Workspace Layout -->
+    <div class="flex-1 flex overflow-hidden relative">
+        
+        <!-- LEFT: Writing Setup Sidebar (Custom Topic + Format Selector + Supabase Reading Topics) -->
+        <aside class="w-80 bg-white border-r border-slate-200 flex flex-col shrink-0">
+            <div class="p-4 border-b border-slate-100 space-y-3">
+                <div>
+                    <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Paramètres de Rédaction</h2>
+                    <p class="text-[11px] text-slate-500">Choisissez un format et un sujet.</p>
+                </div>
+                
+                <!-- Format Selector -->
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-700 mb-1">Type d'Écrit :</label>
+                    <select id="writing-format-select" onchange="if(activeSubjectObj) generateWritingPrompt(activeSubjectObj)" class="w-full text-xs px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <option value="Message Amical / Courriel informel">Message Amical / Courriel informel</option>
+                        <option value="Courriel Formel / Réclamation">Courriel Formel / Réclamation</option>
+                        <option value="Article de presse / Blog">Article de presse / Blog</option>
+                        <option value="Essai Argumentatif comparatif">Essai Argumentatif comparatif</option>
+                    </select>
+                </div>
+
+                <!-- Custom Topic Input in Left Pane -->
+                <div class="p-3 bg-indigo-50/60 border border-indigo-100 rounded-xl space-y-2">
+                    <div class="text-[11px] font-bold text-indigo-900 uppercase tracking-wide">🎯 Sujet Personnalisé</div>
+                    <div class="flex space-x-1.5">
+                        <input type="text" id="custom-topic-input" placeholder="Ex: Le télétravail..." class="flex-1 text-xs px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <button onclick="generateCustomWritingPrompt()" class="bg-indigo-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-indigo-700 transition">OK</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Subject Container Loaded From Supabase reading_topics -->
+            <div id="writing-topics-container" class="flex-1 overflow-y-auto p-3 space-y-2">
+                <p class="text-xs text-slate-400 p-2">Chargement des thèmes...</p>
+            </div>
+        </aside>
+
+        <!-- RIGHT: Writing Workspace & AI Evaluation Grid -->
+        <main class="flex-1 flex overflow-hidden">
+            
+            <!-- Editor Content Pane -->
+            <div class="flex-1 overflow-y-auto p-6 space-y-6 relative flex flex-col">
+                <div class="flex items-center justify-between shrink-0">
+                    <div>
+                        <span id="writing-badge" class="text-[10px] font-bold uppercase tracking-wider bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded">Épreuve d'Écriture</span>
+                        <h2 id="writing-prompt-title" class="text-xl font-extrabold text-slate-900 tracking-tight mt-1">Sélectionnez un thème à gauche</h2>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <button onclick="evaluateWriting()" class="text-xs bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl font-bold transition shadow-sm">✨ Évaluer avec l'IA</button>
+                    </div>
+                </div>
+
+                <!-- Prompt Description Card -->
+                <div class="bg-indigo-50/50 border border-indigo-100 p-4 rounded-2xl text-xs text-slate-700 shrink-0 space-y-2">
+                    <div class="flex items-center justify-between">
+                        <strong class="text-indigo-950 font-bold uppercase tracking-wide">Consigne d'Écriture :</strong>
+                        <div class="flex items-center space-x-2">
+                            <button onclick="playPromptAudio()" class="text-[10px] bg-white border border-indigo-200 text-indigo-700 px-2.5 py-1 rounded-lg font-medium hover:bg-indigo-50 transition">🔊 Écouter</button>
+                            <button onclick="togglePromptTranslation()" id="translate-prompt-btn" class="text-[10px] bg-white border border-indigo-200 text-indigo-700 px-2.5 py-1 rounded-lg font-medium hover:bg-indigo-50 transition">🌐 Traduction (EN)</button>
+                        </div>
+                    </div>
+                    <p id="writing-prompt-desc">Choisissez un format et un thème dans le volet de gauche pour générer votre exercice...</p>
+                </div>
+
+                <!-- Hidden Prompt Translation Pane -->
+                <div id="prompt-translation-pane" class="hidden bg-emerald-50/60 border border-emerald-200 rounded-2xl p-4 space-y-1 shadow-sm text-xs leading-relaxed text-emerald-950 shrink-0">
+                    <h4 class="font-bold text-emerald-900 uppercase tracking-wide">English Translation of Prompt:</h4>
+                    <div id="prompt-translation-body">Chargement de la traduction...</div>
+                </div>
+
+                <!-- Utility Options Bar (Copy, Save, Suggestions, Sample Answer) -->
+                <div class="bg-white border border-slate-200 p-2.5 rounded-xl flex items-center justify-between shrink-0 shadow-sm text-xs flex-wrap gap-2">
+                    <div class="flex items-center space-x-2">
+                        <button onclick="copyWritingText()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg font-medium transition">📋 Copier</button>
+                        <button onclick="saveWritingProgress()" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 px-3 py-1.5 rounded-lg font-bold transition">💾 Sauvegarder</button>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <button onclick="getWritingSuggestions()" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 px-3 py-1.5 rounded-lg font-bold transition">💡 Obtenir des suggestions</button>
+                        <button onclick="getSampleAnswer()" class="bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 px-3 py-1.5 rounded-lg font-bold transition">📖 Voir un exemple de réponse</button>
+                    </div>
+                </div>
+
+                <!-- French Virtual Keypad -->
+                <div class="bg-white border border-slate-200 p-2 rounded-xl flex items-center justify-between shrink-0 shadow-sm">
+                    <span class="text-[11px] font-bold text-slate-500 pl-2">Clavier français :</span>
+                    <div class="flex items-center space-x-1">
+                        <button onclick="insertChar('é')" class="px-2 py-1 bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 text-xs font-bold rounded border border-slate-200 transition">é</button>
+                        <button onclick="insertChar('à')" class="px-2 py-1 bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 text-xs font-bold rounded border border-slate-200 transition">à</button>
+                        <button onclick="insertChar('è')" class="px-2 py-1 bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 text-xs font-bold rounded border border-slate-200 transition">è</button>
+                        <button onclick="insertChar('ù')" class="px-2 py-1 bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 text-xs font-bold rounded border border-slate-200 transition">ù</button>
+                        <button onclick="insertChar('ç')" class="px-2 py-1 bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 text-xs font-bold rounded border border-slate-200 transition">ç</button>
+                        <button onclick="insertChar('ê')" class="px-2 py-1 bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 text-xs font-bold rounded border border-slate-200 transition">ê</button>
+                        <button onclick="insertChar('ë')" class="px-2 py-1 bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 text-xs font-bold rounded border border-slate-200 transition">ë</button>
+                        <button onclick="insertChar('î')" class="px-2 py-1 bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 text-xs font-bold rounded border border-slate-200 transition">î</button>
+                        <button onclick="insertChar('ô')" class="px-2 py-1 bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 text-xs font-bold rounded border border-slate-200 transition">ô</button>
+                        <button onclick="insertChar('œ')" class="px-2 py-1 bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 text-xs font-bold rounded border border-slate-200 transition">œ</button>
+                        <button onclick="insertChar('«')" class="px-2 py-1 bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 text-xs font-bold rounded border border-slate-200 transition">«</button>
+                        <button onclick="insertChar('»')" class="px-2 py-1 bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 text-xs font-bold rounded border border-slate-200 transition">»</button>
+                    </div>
+                </div>
+
+                <!-- Writing Textarea & Live Word Counter -->
+                <div class="flex-1 flex flex-col relative space-y-2">
+                    <textarea id="writing-textarea" oninput="updateWordCount()" placeholder="Rédigez votre texte en français ici..." class="flex-1 w-full p-4 bg-white border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm leading-relaxed text-slate-800 resize-none shadow-sm"></textarea>
+                    
+                    <div class="flex items-center justify-between text-xs text-slate-500 px-2 shrink-0">
+                        <div>Mots : <span id="word-count" class="font-bold text-slate-900">0</span> <span id="word-target-hint" class="text-slate-400"></span></div>
+                        <button onclick="clearWritingEditor()" class="text-rose-500 hover:text-rose-700 font-bold transition">Effacer le texte</button>
+                    </div>
+                </div>
+
+                <!-- AI Evaluation Feedback Box -->
+                <div id="evaluation-pane" class="hidden bg-emerald-50/60 border border-emerald-200 rounded-2xl p-6 space-y-3 shadow-sm text-xs leading-relaxed text-slate-800 shrink-0">
+                    <h3 class="font-bold text-emerald-900 uppercase tracking-wide border-b border-emerald-200 pb-2 flex items-center justify-between">
+                        <span>Rapport d'Évaluation IA (Style TCF)</span>
+                        <span id="eval-score" class="text-emerald-700 bg-emerald-100 px-2.5 py-0.5 rounded font-extrabold">Score : --/20</span>
+                    </h3>
+                    <div id="evaluation-body" class="space-y-2 text-emerald-950">L'analyse s'affichera ici...</div>
+                </div>
+            </div>
+
+            <!-- RIGHT: AI Writing Tutor Sidebar -->
+            <section class="w-96 bg-white border-l border-slate-200 flex flex-col shrink-0">
+                <div class="p-4 border-b border-slate-100 flex items-center justify-between">
+                    <span class="text-xs font-bold uppercase tracking-wider text-slate-600">🤖 Correcteur d'Écriture IA</span>
+                    <span class="text-[10px] bg-emerald-50 text-emerald-600 font-semibold px-2 py-0.5 rounded">En ligne</span>
+                </div>
+
+                <div id="ai-chat-box" class="flex-1 p-4 overflow-y-auto space-y-3">
+                    <div class="bg-slate-50 border border-slate-100 p-3 rounded-xl text-xs text-slate-700 space-y-2">
+                        <p>Bonjour ! Posez vos questions en français ou utilisez les suggestions ci-dessous.</p>
+                    </div>
+                </div>
+
+                <!-- Suggestion Chips -->
+                <div class="p-3 bg-slate-50 border-t border-slate-100 flex flex-wrap gap-1.5">
+                    <button onclick="sendPresetPrompt('Donnez-moi des connecteurs logiques utiles pour cette tâche.')" class="text-[10px] bg-white border border-slate-200 text-slate-700 px-2.5 py-1 rounded-lg hover:bg-indigo-50 hover:text-indigo-600 transition font-medium">🔗 Connecteurs logiques</button>
+                    <button onclick="sendPresetPrompt('Proposez une structure d’introduction type.')" class="text-[10px] bg-white border border-slate-200 text-slate-700 px-2.5 py-1 rounded-lg hover:bg-indigo-50 hover:text-indigo-600 transition font-medium">📝 Structure type</button>
+                </div>
+
+                <!-- Chat Input Bar with Microphone -->
+                <div class="p-3 border-t border-slate-100">
+                    <div class="flex items-center space-x-2">
+                        <input type="text" id="ai-input" placeholder="Posez une question en français..." class="flex-1 text-xs px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <button onclick="toggleChatVoiceInput()" id="ai-mic-btn" title="Parler au lieu d'écrire" class="bg-slate-100 text-slate-700 hover:bg-slate-200 p-2 rounded-xl text-xs transition">🎙️</button>
+                        <button onclick="sendAIChat()" class="bg-indigo-600 text-white p-2.5 rounded-xl text-xs font-bold hover:bg-indigo-700 transition">➔</button>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Script Integration -->
+    <script>
+        const SUPABASE_URL = 'https://bkawfexaikntyivqvetk.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrYXdmZXhhaWtudHlpdnF2ZXRrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcyMDU3ODAsImV4cCI6MjEwMjc4MTc4MH0.8YYkD8pzn97DeqA-o83KoGQ4yHb6WT1HB4DcoPPAMwA';
+        
+        if (!window.mySupabase) {
+            window.mySupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+                db: { schema: 'French-schema' }
+            });
+        }
+        const db = window.mySupabase;
+
+        let allReadingTopics = [];
+        let activeSubjectObj = null;
+        let generatedPromptData = null;
+        let isPromptTranslated = false;
+
+        async function saveProgressToDatabase(moduleType, moduleId, score = null) {
+            const { data: { user }, error: userError } = await db.auth.getUser();
+            
+            if (userError || !user) {
+                alert("Veuillez vous connecter pour sauvegarder votre progression.");
+                window.location.href = 'login.html';
+                return;
+            }
+
+            const { error } = await db
+                .from('user_progress')
+                .upsert({
+                    user_id: user.id,
+                    module_type: moduleType, 
+                    module_id: moduleId.toString(),
+                    completed: true,
+                    score: score, 
+                    updated_at: new Date()
+                }, { onConflict: 'user_id, module_type, module_id' });
+
+            if (error) {
+                console.error("Erreur de sauvegarde :", error.message);
+                alert("Erreur lors de la synchronisation de la progression.");
+            } else {
+                alert("💾 Progression enregistrée avec succès !");
+            }
+        }
+
+        async function loadWritingTopicsFromDatabase() {
+            const container = document.getElementById('writing-topics-container');
+            container.innerHTML = `<p class="text-xs text-slate-400 p-2">Chargement des thèmes...</p>`;
+
+            const { data: topics, error } = await db.from('reading_topics').select('*').order('id', { ascending: true });
+
+            if (error || !topics || topics.length === 0) {
+                container.innerHTML = `<p class="text-xs text-rose-500 p-2">Aucun thème trouvé dans la base.</p>`;
+                return;
+            }
+
+            allReadingTopics = topics;
+            renderWritingTopicsList(allReadingTopics);
+            if (topics.length > 0) {
+                generateWritingPrompt(topics[0]);
+            }
+        }
+
+        function renderWritingTopicsList(topics) {
+            const container = document.getElementById('writing-topics-container');
+            container.innerHTML = '';
+
+            topics.forEach((t) => {
+                const item = document.createElement('button');
+                item.className = 'w-full text-left p-3 rounded-xl text-xs font-medium transition bg-slate-50 border border-slate-100 text-slate-700 hover:bg-indigo-50 flex items-center space-x-2.5';
+                item.innerHTML = `
+                    <span class="text-base">✍️</span>
+                    <div class="flex-1">
+                        <div class="font-bold text-slate-900">${t.category}</div>
+                        <div class="text-[10px] text-slate-400 truncate">${t.title} • Niveau ${t.level}</div>
+                    </div>
+                `;
+                item.onclick = () => generateWritingPrompt(t);
+                container.appendChild(item);
+            });
+        }
+
+        async function generateWritingPrompt(subjectObj) {
+            activeSubjectObj = subjectObj;
+            const chosenFormat = document.getElementById('writing-format-select').value;
+
+            document.getElementById('writing-badge').innerText = `${chosenFormat} - Niveau ${subjectObj.level}`;
+            document.getElementById('writing-prompt-title').innerText = subjectObj.title;
+            
+            const descEl = document.getElementById('writing-prompt-desc');
+            descEl.innerText = "🤖 L'IA génère une consigne personnalisée en français...";
+            document.getElementById('word-target-hint').innerText = "(Cible : calcul en cours...)";
+            document.getElementById('writing-textarea').value = "";
+            document.getElementById('word-count').innerText = "0";
+            document.getElementById('evaluation-pane').classList.add('hidden');
+            document.getElementById('prompt-translation-pane').classList.add('hidden');
+            isPromptTranslated = false;
+            document.getElementById('translate-prompt-btn').innerText = "🌐 Traduction (EN)";
+
+            const apiUrl = localStorage.getItem('ai_api_url') || "https://api.groq.com/openai/v1/chat/completions";
+            const apiKey = localStorage.getItem('ai_api_key') || "";
+            const modelName = localStorage.getItem('ai_model_name') || "openai/gpt-oss-120b";
+
+            if (!apiKey) {
+                descEl.innerText = "Erreur : Clé API manquante dans l'administration.";
+                return;
+            }
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${apiKey}`
+                    },
+                    body: JSON.stringify({
+                        model: modelName,
+                        messages: [
+                            {
+                                role: "system",
+                                content: "You are an official TCF/DELF writing test generator. Given a French theme and a requested writing format, generate a detailed exam writing prompt instruction entirely in French and a target word count range. Format strictly as valid JSON with keys: 'instruction' (the detailed prompt in French) and 'word_target' (e.g. '120-150 mots'). Do not include markdown codeblocks like ```json, just output raw valid JSON."
+                            },
+                            {
+                                role: "user",
+                                content: `Generate a writing prompt for level ${subjectObj.level}, theme: "${subjectObj.title}" (Category: ${subjectObj.category}), format type: "${chosenFormat}".`
+                            }
+                        ],
+                        temperature: 0.7
+                    })
+                });
+
+                const data = await response.json();
+                let rawContent = data.choices?.[0]?.message?.content || "";
+                rawContent = rawContent.replace(/```json/g, '').replace(/```/g, '').trim();
+                generatedPromptData = JSON.parse(rawContent);
+
+                descEl.innerText = generatedPromptData.instruction;
+                document.getElementById('word-target-hint').innerText = `(Cible : ${generatedPromptData.word_target})`;
+            } catch (err) {
+                descEl.innerText = subjectObj.description;
+                document.getElementById('word-target-hint').innerText = "(Cible : 120-150 mots)";
+            }
+        }
+
+        async function generateCustomWritingPrompt() {
+            const inputEl = document.getElementById('custom-topic-input');
+            const customTitle = inputEl ? inputEl.value.trim() : "";
+            
+            if (!customTitle) {
+                alert("Veuillez saisir un sujet personnalisé.");
+                return;
+            }
+
+            const chosenFormat = document.getElementById('writing-format-select').value;
+            
+            activeSubjectObj = {
+                id: 'custom_' + Date.now(),
+                title: customTitle,
+                category: 'Sujet Personnalisé',
+                level: 'B2'
+            };
+
+            document.getElementById('writing-badge').innerText = `${chosenFormat} - Sujet Libre`;
+            document.getElementById('writing-prompt-title').innerText = customTitle;
+            
+            const descEl = document.getElementById('writing-prompt-desc');
+            descEl.innerText = "🤖 L'IA convertit votre sujet personnalisé en consigne officielle en français...";
+            document.getElementById('word-target-hint').innerText = "(Cible : calcul en cours...)";
+            document.getElementById('writing-textarea').value = "";
+            document.getElementById('word-count').innerText = "0";
+            document.getElementById('evaluation-pane').classList.add('hidden');
+            document.getElementById('prompt-translation-pane').classList.add('hidden');
+            isPromptTranslated = false;
+            document.getElementById('translate-prompt-btn').innerText = "🌐 Traduction (EN)";
+
+            const apiUrl = localStorage.getItem('ai_api_url') || "[https://api.groq.com/openai/v1/chat/completions](https://api.groq.com/openai/v1/chat/completions)";
+            const apiKey = localStorage.getItem('ai_api_key') || "";
+            const modelName = localStorage.getItem('ai_model_name') || "openai/gpt-oss-120b";
+
+            if (!apiKey) {
+                descEl.innerText = "Erreur : Clé API manquante dans l'administration.";
+                return;
+            }
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${apiKey}`
+                    },
+                    body: JSON.stringify({
+                        model: modelName,
+                        messages: [
+                            {
+                                role: "system",
+                                content: "You are an official TCF/DELF writing test generator. Given a custom user theme and a requested writing format, generate a detailed exam writing prompt instruction entirely in French and a target word count range. Format strictly as valid JSON with keys: 'instruction' (the detailed prompt in French) and 'word_target' (e.g. '120-150 mots'). Do not include markdown codeblocks like ```json, just output raw valid JSON."
+                            },
+                            {
+                                role: "user",
+                                content: `Generate a writing prompt for custom theme: "${customTitle}", format type: "${chosenFormat}".`
+                            }
+                        ],
+                        temperature: 0.7
+                    })
+                });
+
+                const data = await response.json();
+                let rawContent = data.choices?.[0]?.message?.content || "";
+                rawContent = rawContent.replace(/```json/g, '').replace(/```/g, '').trim();
+                generatedPromptData = JSON.parse(rawContent);
+
+                descEl.innerText = generatedPromptData.instruction;
+                document.getElementById('word-target-hint').innerText = `(Cible : ${generatedPromptData.word_target})`;
+                inputEl.value = "";
+            } catch (err) {
+                descEl.innerText = `Rédigez un texte argumentatif ou informatif sur le thème : "${customTitle}".`;
+                document.getElementById('word-target-hint').innerText = "(Cible : 120-150 mots)";
+            }
+        }
+
+        function playPromptAudio() {
+            const descText = document.getElementById('writing-prompt-desc')?.innerText || "";
+            if (!descText || descText.includes("🤖")) {
+                alert("Veuillez attendre que la consigne soit générée.");
+                return;
+            }
+            if (!('speechSynthesis' in window)) return;
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(descText);
+            utterance.lang = 'fr-FR';
+            utterance.rate = 1.0;
+            window.speechSynthesis.speak(utterance);
+        }
+
+        function playTextAudio(buttonElement) {
+            const container = buttonElement.closest('.ai-message-card');
+            const textContent = container ? container.getAttribute('data-reply-text') : "";
+            if (!textContent) return;
+            if (!('speechSynthesis' in window)) return;
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(textContent);
+            utterance.lang = 'fr-FR';
+            utterance.rate = 1.0;
+            window.speechSynthesis.speak(utterance);
+        }
+
+        async function togglePromptTranslation() {
+            const pane = document.getElementById('prompt-translation-pane');
+            const btn = document.getElementById('translate-prompt-btn');
+            const body = document.getElementById('prompt-translation-body');
+
+            if (!generatedPromptData) { alert("Aucune consigne active."); return; }
+
+            if (isPromptTranslated) {
+                pane.classList.add('hidden');
+                btn.innerText = "🌐 Traduction (EN)";
+                isPromptTranslated = false;
+                return;
+            }
+
+            pane.classList.remove('hidden');
+            btn.innerText = "🌐 Masquer Traduction";
+            isPromptTranslated = true;
+            body.innerText = "Traduction en cours...";
+
+            const apiUrl = localStorage.getItem('ai_api_url') || "https://api.groq.com/openai/v1/chat/completions";
+            const apiKey = localStorage.getItem('ai_api_key') || "";
+            const modelName = localStorage.getItem('ai_model_name') || "openai/gpt-oss-120b";
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+                    body: JSON.stringify({
+                        model: modelName,
+                        messages: [
+                            { role: "system", content: "You are a professional translator. Translate the following French writing prompt instruction into clear English." },
+                            { role: "user", content: generatedPromptData.instruction }
+                        ],
+                        temperature: 0.3
+                    })
+                });
+                const data = await response.json();
+                let translation = data.choices?.[0]?.message?.content || "Traduction non disponible.";
+                body.innerHTML = translation.replace(/\n/g, '<br>');
+            } catch (err) {
+                body.innerText = "Erreur de traduction.";
+            }
+        }
+
+        function copyWritingText() {
+            const text = document.getElementById('writing-textarea').value;
+            if (!text) { alert("Aucun texte à copier."); return; }
+            navigator.clipboard.writeText(text);
+            alert("📋 Texte copié dans le presse-papier !");
+        }
+
+        async function saveWritingProgress() {
+            const text = document.getElementById('writing-textarea').value;
+            if (!text) { alert("Veuillez d'abord rédiger un texte."); return; }
+            localStorage.setItem(`writing_draft_${activeSubjectObj?.id || 'save'}`, text);
+            
+            if (activeSubjectObj) {
+                await saveProgressToDatabase('writing', activeSubjectObj.id);
+            } else {
+                alert("💾 Progression de rédaction sauvegardée !");
+            }
+        }
+
+        async function getWritingSuggestions() {
+            if (!generatedPromptData) { alert("Veuillez d'abord sélectionner un sujet."); return; }
+            const chatBox = document.getElementById('ai-chat-box');
+            const promptText = `Donnez-moi des conseils de structure et du vocabulaire clé pour réussir cette consigne : "${generatedPromptData.instruction}"`;
+            
+            const userMsg = document.createElement('div');
+            userMsg.className = 'bg-indigo-50 border border-indigo-100 p-3 rounded-xl text-xs text-indigo-900 ml-4 shadow-sm';
+            userMsg.innerText = "💡 Donnez-moi des suggestions pour cette consigne.";
+            chatBox.appendChild(userMsg);
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            const apiUrl = localStorage.getItem('ai_api_url') || "https://api.groq.com/openai/v1/chat/completions";
+            const apiKey = localStorage.getItem('ai_api_key') || "";
+            const modelName = localStorage.getItem('ai_model_name') || "openai/gpt-oss-120b";
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+                    body: JSON.stringify({
+                        model: modelName,
+                        messages: [
+                            { role: "system", content: "You are a helpful French writing coach responding entirely in French." },
+                            { role: "user", content: promptText }
+                        ],
+                        temperature: 0.7
+                    })
+                });
+                const data = await response.json();
+                let aiReply = data.choices?.[0]?.message?.content || "Conseils non disponibles.";
+                
+                const aiMsg = document.createElement('div');
+                aiMsg.className = 'ai-message-card bg-slate-50 border border-slate-200 p-3.5 rounded-2xl text-xs text-slate-700 mr-4 shadow-sm space-y-2 relative';
+                aiMsg.setAttribute('data-reply-text', aiReply);
+                aiMsg.innerHTML = `
+                    <div class="flex items-center justify-between border-b border-slate-200/60 pb-1.5 mb-1.5">
+                        <span class="font-bold text-indigo-600 flex items-center space-x-1">
+                            <span>🤖</span> <span>Coach IA</span>
+                        </span>
+                        <div class="flex items-center space-x-1.5">
+                            <button onclick="playTextAudio(this)" class="text-[10px] bg-white border border-slate-200 px-2 py-0.5 rounded font-medium text-slate-600 hover:bg-slate-100 transition">🔊 Écouter</button>
+                            <button onclick="translateAIResponse(this)" class="text-[10px] bg-white border border-slate-200 px-2 py-0.5 rounded font-medium text-slate-600 hover:bg-slate-100 transition">🌐 Traduire (EN)</button>
+                        </div>
+                    </div>
+                    <div class="space-y-1.5 leading-relaxed">
+                        ${aiReply.replace(/\n/g, '<br>')}
+                    </div>
+                    <div class="ai-translation-box hidden mt-2 pt-2 border-t border-slate-200/60 text-slate-500 italic bg-slate-100/60 p-2 rounded-lg"></div>
+                `;
+                chatBox.appendChild(aiMsg);
+                chatBox.scrollTop = chatBox.scrollHeight;
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        async function getSampleAnswer() {
+            if (!generatedPromptData) { alert("Veuillez d'abord sélectionner un sujet."); return; }
+            const chatBox = document.getElementById('ai-chat-box');
+            const promptText = `Rédige un exemple de réponse complet et de haute qualité (niveau B2) pour cette consigne : "${generatedPromptData.instruction}"`;
+            
+            const userMsg = document.createElement('div');
+            userMsg.className = 'bg-amber-50 border border-amber-200 p-3 rounded-xl text-xs text-amber-900 ml-4 shadow-sm';
+            userMsg.innerText = "📖 Montrez-moi un exemple de réponse type.";
+            chatBox.appendChild(userMsg);
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            const apiUrl = localStorage.getItem('ai_api_url') || "https://api.groq.com/openai/v1/chat/completions";
+            const apiKey = localStorage.getItem('ai_api_key') || "";
+            const modelName = localStorage.getItem('ai_model_name') || "openai/gpt-oss-120b";
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+                    body: JSON.stringify({
+                        model: modelName,
+                        messages: [
+                            { role: "system", content: "You are an expert French exam model writer. Provide an exemplary student response in French." },
+                            { role: "user", content: promptText }
+                        ],
+                        temperature: 0.7
+                    })
+                });
+                const data = await response.json();
+                let aiReply = data.choices?.[0]?.message?.content || "Exemple non disponible.";
+                
+                const aiMsg = document.createElement('div');
+                aiMsg.className = 'ai-message-card bg-amber-50/60 border border-amber-200 p-3.5 rounded-2xl text-xs text-slate-800 mr-4 shadow-sm space-y-2 relative';
+                aiMsg.setAttribute('data-reply-text', aiReply);
+                aiMsg.innerHTML = `
+                    <div class="flex items-center justify-between border-b border-amber-200 pb-1.5 mb-1.5">
+                        <span class="font-bold text-amber-900 flex items-center space-x-1">
+                            <span>📖</span> <span>Exemple de Réponse Modèle</span>
+                        </span>
+                        <div class="flex items-center space-x-1.5">
+                            <button onclick="playTextAudio(this)" class="text-[10px] bg-white border border-amber-300 px-2 py-0.5 rounded font-medium text-slate-700 hover:bg-slate-100 transition">🔊 Écouter</button>
+                            <button onclick="translateAIResponse(this)" class="text-[10px] bg-white border border-amber-300 px-2 py-0.5 rounded font-medium text-slate-700 hover:bg-slate-100 transition">🌐 Traduire (EN)</button>
+                        </div>
+                    </div>
+                    <div class="space-y-1.5 leading-relaxed font-serif">
+                        ${aiReply.replace(/\n/g, '<br>')}
+                    </div>
+                    <div class="ai-translation-box hidden mt-2 pt-2 border-t border-amber-200 text-slate-600 italic bg-white/80 p-2 rounded-lg"></div>
+                `;
+                chatBox.appendChild(aiMsg);
+                chatBox.scrollTop = chatBox.scrollHeight;
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        async function translateAIResponse(buttonElement) {
+            const container = buttonElement.closest('.ai-message-card');
+            const textContent = container.getAttribute('data-reply-text');
+            const translationContainer = container.querySelector('.ai-translation-box');
+
+            if (!translationContainer) return;
+
+            if (!translationContainer.classList.contains('hidden')) {
+                translationContainer.classList.add('hidden');
+                buttonElement.innerText = '🌐 Traduire (EN)';
+                return;
+            }
+
+            buttonElement.innerText = '⏳ Traduction...';
+
+            const apiUrl = localStorage.getItem('ai_api_url') || "https://api.groq.com/openai/v1/chat/completions";
+            const apiKey = localStorage.getItem('ai_api_key') || "";
+            const modelName = localStorage.getItem('ai_model_name') || "openai/gpt-oss-120b";
+
+            try {
+                const apiResponse = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${apiKey}`
+                    },
+                    body: JSON.stringify({
+                        model: modelName,
+                        messages: [
+                            {
+                                role: "system",
+                                content: "You are a professional translator. Translate the following French text into clear, natural English. Provide only the translation without extra conversational filler."
+                            },
+                            { role: "user", content: textContent }
+                        ],
+                        temperature: 0.3
+                    })
+                });
+
+                const data = await apiResponse.json();
+                if (data.error) throw new Error(data.error.message || 'Erreur API');
+
+                let translationText = data.choices?.[0]?.message?.content || "Translation not available.";
+                
+                translationContainer.innerHTML = `<strong class="text-slate-600 block mb-1">English Translation:</strong> ${translationText}`;
+                translationContainer.classList.remove('hidden');
+                buttonElement.innerText = '🌐 Masquer';
+
+            } catch (err) {
+                console.error("Translation error:", err);
+                translationContainer.innerHTML = `<span class="text-rose-600">Erreur de traduction : ${err.message}</span>`;
+                translationContainer.classList.remove('hidden');
+                buttonElement.innerText = '🌐 Traduire (EN)';
+            }
+        }
+
+        function updateWordCount() {
+            const text = document.getElementById('writing-textarea').value.trim();
+            const words = text === "" ? 0 : text.split(/\s+/).length;
+            document.getElementById('word-count').innerText = words;
+        }
+
+        function insertChar(char) {
+            const textarea = document.getElementById('writing-textarea');
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            const text = textarea.value;
+            textarea.value = text.substring(0, start) + char + text.substring(end);
+            textarea.selectionStart = textarea.selectionEnd = start + char.length;
+            textarea.focus();
+            updateWordCount();
+        }
+
+        function clearWritingEditor() {
+            document.getElementById('writing-textarea').value = "";
+            updateWordCount();
+        }
+
+        async function evaluateWriting() {
+            const text = document.getElementById('writing-textarea').value.trim();
+            const pane = document.getElementById('evaluation-pane');
+            const body = document.getElementById('evaluation-body');
+            const scoreBadge = document.getElementById('eval-score');
+            const chosenFormat = document.getElementById('writing-format-select').value;
+
+            if (!text) { alert("Veuillez d'abord rédiger un texte avant de lancer l'évaluation."); return; }
+
+            pane.classList.remove('hidden');
+            body.innerText = "Analyse de votre production écrite par l'IA...";
+            scoreBadge.innerText = "Score : --/20";
+
+            const apiUrl = localStorage.getItem('ai_api_url') || "https://api.groq.com/openai/v1/chat/completions";
+            const apiKey = localStorage.getItem('ai_api_key') || "";
+            const modelName = localStorage.getItem('ai_model_name') || "openai/gpt-oss-120b";
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${apiKey}`
+                    },
+                    body: JSON.stringify({
+                        model: modelName,
+                        messages: [
+                            {
+                                role: "system",
+                                content: "You are a strict official TCF writing examiner. Evaluate the student's French text entirely in French. Format response strictly as JSON with keys: 'score' (number out of 20), 'feedback' (detailed constructive feedback in French), and 'corrected_text' (improved version in French). Do not include markdown codeblocks like ```json, just output raw valid JSON."
+                            },
+                            {
+                                role: "user",
+                                content: `Evaluate this text (Format: ${chosenFormat}, Theme: "${activeSubjectObj?.title}", Prompt: ${generatedPromptData?.instruction}): "${text}"`
+                            }
+                        ],
+                        temperature: 0.3
+                    })
+                });
+
+                const data = await response.json();
+                let rawContent = data.choices?.[0]?.message?.content || "";
+                rawContent = rawContent.replace(/```json/g, '').replace(/```/g, '').trim();
+                const evalJson = JSON.parse(rawContent);
+
+                scoreBadge.innerText = `Score : ${evalJson.score || '12'}/20`;
+                body.innerHTML = `
+                    <div class="space-y-2">
+                        <div><strong>Commentaires de l'examinateur :</strong><br>${evalJson.feedback || 'Bonne structure.'}</div>
+                        <div class="border-t border-emerald-200 pt-2"><strong>Version corrigée recommandée :</strong><br><span class="text-emerald-950 italic">${evalJson.corrected_text || text}</span></div>
+                    </div>
+                `;
+            } catch (err) {
+                body.innerText = "Erreur lors de l'évaluation de la rédaction.";
+            }
+        }
+
+        let chatSpeechRecognition = null;
+        let isChatListening = false;
+
+        window.toggleChatVoiceInput = function() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) { alert("La reconnaissance vocale nécessite Google Chrome."); return; }
+
+            const micBtn = document.getElementById('ai-mic-btn');
+            const inputField = document.getElementById('ai-input');
+
+            if (!isChatListening) {
+                chatSpeechRecognition = new SpeechRecognition();
+                chatSpeechRecognition.lang = 'fr-FR';
+                chatSpeechRecognition.interimResults = false;
+
+                chatSpeechRecognition.onstart = () => {
+                    isChatListening = true;
+                    if (micBtn) { micBtn.innerHTML = "⏹️"; micBtn.className = "bg-rose-600 text-white p-2 rounded-xl text-xs transition shadow-sm animate-pulse"; }
+                    if (inputField) inputField.placeholder = "Écoute en cours...";
+                };
+                chatSpeechRecognition.onresult = (event) => {
+                    if (inputField) inputField.value = event.results[0][0].transcript;
+                };
+                chatSpeechRecognition.onerror = () => stopChatMicUI();
+                chatSpeechRecognition.onend = () => stopChatMicUI();
+                chatSpeechRecognition.start();
+            } else {
+                if (chatSpeechRecognition) chatSpeechRecognition.stop();
+                stopChatMicUI();
+            }
+        };
+
+        function stopChatMicUI() {
+            isChatListening = false;
+            const micBtn = document.getElementById('ai-mic-btn');
+            const inputField = document.getElementById('ai-input');
+            if (micBtn) { micBtn.innerHTML = "🎙️"; micBtn.className = "bg-slate-100 text-slate-700 hover:bg-slate-200 p-2 rounded-xl text-xs transition"; }
+            if (inputField) inputField.placeholder = "Posez une question en français...";
+        }
+
+        function sendPresetPrompt(promptText) {
+            const input = document.getElementById('ai-input');
+            if (input) { input.value = promptText; sendAIChat(); }
+        }
+
+        async function sendAIChat() {
+            const input = document.getElementById('ai-input');
+            const chatBox = document.getElementById('ai-chat-box');
+            if (!input || !input.value.trim() || !chatBox) return;
+
+            const userText = input.value.trim();
+            const userMsg = document.createElement('div');
+            userMsg.className = 'bg-indigo-50 border border-indigo-100 p-3 rounded-xl text-xs text-indigo-900 ml-4 shadow-sm';
+            userMsg.innerText = userText;
+            chatBox.appendChild(userMsg);
+            input.value = '';
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            const typingMsg = document.createElement('div');
+            typingMsg.id = 'ai-typing';
+            typingMsg.className = 'bg-slate-50 border border-slate-100 p-3 rounded-xl text-xs text-slate-500 mr-4 italic';
+            typingMsg.innerText = '🤖 Le correcteur prépare sa réponse...';
+            chatBox.appendChild(typingMsg);
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            const apiUrl = localStorage.getItem('ai_api_url') || "[https://api.groq.com/openai/v1/chat/completions](https://api.groq.com/openai/v1/chat/completions)";
+            const apiKey = localStorage.getItem('ai_api_key') || "";
+            const modelName = localStorage.getItem('ai_model_name') || "openai/gpt-oss-120b";
+
+            try {
+                const apiResponse = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+                    body: JSON.stringify({
+                        model: modelName,
+                        messages: [
+                            { role: "system", content: `You are an expert TCF writing coach. Respond entirely in French. The student is writing about the theme: "${activeSubjectObj?.title}".` },
+                            { role: "user", content: userText }
+                        ],
+                        temperature: 0.7
+                    })
+                });
+
+                const data = await apiResponse.json();
+                document.getElementById('ai-typing')?.remove();
+
+                let aiReply = data.choices?.[0]?.message?.content || "Réponse non disponible.";
+                const aiMsg = document.createElement('div');
+                aiMsg.className = 'ai-message-card bg-slate-50 border border-slate-200 p-3.5 rounded-2xl text-xs text-slate-700 mr-4 shadow-sm space-y-2 relative';
+                aiMsg.setAttribute('data-reply-text', aiReply);
+                aiMsg.innerHTML = `
+                    <div class="flex items-center justify-between border-b border-slate-200/60 pb-1.5 mb-1.5">
+                        <span class="font-bold text-indigo-600 flex items-center space-x-1">
+                            <span>🤖</span> <span>Coach IA</span>
+                        </span>
+                        <div class="flex items-center space-x-1.5">
+                            <button onclick="playTextAudio(this)" class="text-[10px] bg-white border border-slate-200 px-2 py-0.5 rounded font-medium text-slate-600 hover:bg-slate-100 transition">🔊 Écouter</button>
+                            <button onclick="translateAIResponse(this)" class="text-[10px] bg-white border border-slate-200 px-2 py-0.5 rounded font-medium text-slate-600 hover:bg-slate-100 transition">🌐 Traduire (EN)</button>
+                        </div>
+                    </div>
+                    <div class="space-y-1.5 leading-relaxed">
+                        ${aiReply.replace(/\n/g, '<br>')}
+                    </div>
+                    <div class="ai-translation-box hidden mt-2 pt-2 border-t border-slate-200/60 text-slate-500 italic bg-slate-100/60 p-2 rounded-lg"></div>
+                `;
+                chatBox.appendChild(aiMsg);
+                chatBox.scrollTop = chatBox.scrollHeight;
+            } catch (err) {
+                document.getElementById('ai-typing')?.remove();
+                console.error('Error fetching AI response:', err);
+            }
+        }
+
+        loadWritingTopicsFromDatabase();
+    </script>
+</body>
+</html>
