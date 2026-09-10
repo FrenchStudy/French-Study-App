@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="fr" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <title>Atelier de Français - Speaking & Oral Expression Suite</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="h-full bg-slate-100 flex flex-col overflow-hidden font-sans">
+
+    <!-- Top Sticky Navigation Header -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-50 shrink-0">
+        <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-1 sm:space-x-2 text-xs font-semibold overflow-x-auto py-2">
+                <a href="index.html" class="text-slate-600 hover:text-indigo-600 hover:bg-slate-100 px-3 py-1.5 rounded-lg transition">Dashboard</a>
+                <a href="syllabus.html" class="text-slate-600 hover:text-indigo-600 hover:bg-slate-100 px-3 py-1.5 rounded-lg transition">Syllabus</a>
+                <a href="lesson.html" class="text-slate-600 hover:text-indigo-600 hover:bg-slate-100 px-3 py-1.5 rounded-lg transition">Lesson</a>
+                <a href="vocab.html" class="text-slate-600 hover:text-indigo-600 hover:bg-slate-100 px-3 py-1.5 rounded-lg transition">Vocab</a>
+                <a href="conjugations.html" class="text-slate-600 hover:text-indigo-600 hover:bg-slate-100 px-3 py-1.5 rounded-lg transition">Conjugations</a>
+                <a href="reading.html" class="text-slate-600 hover:text-indigo-600 hover:bg-slate-100 px-3 py-1.5 rounded-lg transition">Reading</a>
+                <a href="listening.html" class="text-slate-600 hover:text-indigo-600 hover:bg-slate-100 px-3 py-1.5 rounded-lg transition">Listening</a>
+                <a href="writing.html" class="text-slate-600 hover:text-indigo-600 hover:bg-slate-100 px-3 py-1.5 rounded-lg transition">Writing</a>
+                <a href="speaking.html" class="bg-indigo-600 text-white px-3 py-1.5 rounded-lg shadow-sm transition">Speaking</a>
+                <a href="translator.html" class="text-slate-600 hover:text-indigo-600 hover:bg-slate-100 px-3 py-1.5 rounded-lg transition">Translator</a>
+                <a href="admin.html" class="text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 px-3 py-1.5 rounded-lg transition font-bold">Administration</a>
+            </div>
+            <div class="flex items-center space-x-2">
+                <span class="text-xs text-slate-400 font-medium">Expression Orale Active</span>
+                <button id="logoutBtn" class="text-slate-600 hover:text-red-600 hover:bg-slate-100 px-3 py-1.5 rounded-lg transition">Logout</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Workspace Layout -->
+    <div class="flex-1 flex overflow-hidden relative">
+        
+        <!-- LEFT: Speaking Topics Sidebar (Custom Topic + Format Selector + Supabase Reading Topics) -->
+        <aside class="w-80 bg-white border-r border-slate-200 flex flex-col shrink-0">
+            <div class="p-4 border-b border-slate-100 space-y-3">
+                <div>
+                    <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Modules d'Expression Orale</h2>
+                    <p class="text-[11px] text-slate-500">Choisissez un format et un sujet.</p>
+                </div>
+                
+                <!-- Oral Exam Format Selector -->
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-700 mb-1">Partie de l'Examen :</label>
+                    <select id="speaking-format-select" onchange="if(activeSubjectObj) generateSpeakingPrompt(activeSubjectObj)" class="w-full text-xs px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <option value="Partie 1 : Entretien dirigé (Présentation & Échange)">Partie 1 : Entretien dirigé (Q&A)</option>
+                        <option value="Partie 2 : Exercice en interaction (Jeu de rôle)">Partie 2 : Jeu de rôle (Simulation)</option>
+                        <option value="Partie 3 : Expression d'un point de vue (Monologue)">Partie 3 : Monologue argumenté</option>
+                    </select>
+                </div>
+
+                <!-- Custom Topic Input in Left Pane -->
+                <div class="p-3 bg-indigo-50/60 border border-indigo-100 rounded-xl space-y-2">
+                    <div class="text-[11px] font-bold text-indigo-900 uppercase tracking-wide">🎯 Sujet Personnalisé</div>
+                    <div class="flex space-x-1.5">
+                        <input type="text" id="custom-topic-input" placeholder="Ex: Voyager seul..." class="flex-1 text-xs px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <button onclick="generateCustomSpeakingPrompt()" class="bg-indigo-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-indigo-700 transition">OK</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Topics Container Loaded From Supabase -->
+            <div id="speaking-topics-container" class="flex-1 overflow-y-auto p-3 space-y-2">
+                <p class="text-xs text-slate-400 p-2">Chargement des sujets d'oral...</p>
+            </div>
+        </aside>
+
+        <!-- RIGHT: Oral Exam Simulator & Voice Recording Grid -->
+        <main class="flex-1 flex overflow-hidden">
+            
+            <!-- Content Pane -->
+            <div class="flex-1 overflow-y-auto p-6 space-y-6 relative flex flex-col">
+                <div class="flex items-center justify-between shrink-0">
+                    <div>
+                        <span id="speaking-badge" class="text-[10px] font-bold uppercase tracking-wider bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded">Épreuve d'Oral</span>
+                        <h2 id="speaking-prompt-title" class="text-xl font-extrabold text-slate-900 tracking-tight mt-1">Sélectionnez un sujet à gauche</h2>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <button onclick="evaluateSpokenResponse()" class="text-xs bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl font-bold transition shadow-sm">✨ Évaluer l'Oral</button>
+                    </div>
+                </div>
+
+                <!-- Exam Prompt Card -->
+                <div class="bg-indigo-50/50 border border-indigo-100 p-4 rounded-2xl text-xs text-slate-700 shrink-0 space-y-2">
+                    <div class="flex items-center justify-between">
+                        <strong class="text-indigo-950 font-bold uppercase tracking-wide">Consigne Orale :</strong>
+                        <div class="flex items-center space-x-2">
+                            <button onclick="speakExamPrompt()" class="text-[10px] bg-white border border-indigo-200 text-indigo-700 px-2.5 py-1 rounded-lg font-medium hover:bg-indigo-50 transition">🔊 Écouter</button>
+                            <button onclick="togglePromptTranslation()" id="translate-prompt-btn" class="text-[10px] bg-white border border-indigo-200 text-indigo-700 px-2.5 py-1 rounded-lg font-medium hover:bg-indigo-50 transition">🌐 Traduction (EN)</button>
+                        </div>
+                    </div>
+                    <p id="speaking-prompt-desc">Choisissez un thème dans la barre latérale pour lancer l'épreuve d'expression orale...</p>
+                </div>
+
+                <!-- Hidden Prompt Translation Pane -->
+                <div id="prompt-translation-pane" class="hidden bg-emerald-50/60 border border-emerald-200 rounded-2xl p-4 space-y-1 shadow-sm text-xs leading-relaxed text-emerald-950 shrink-0">
+                    <h4 class="font-bold text-emerald-900 uppercase tracking-wide">English Translation of Prompt:</h4>
+                    <div id="prompt-translation-body">Chargement de la traduction...</div>
+                </div>
+
+                <!-- Utility Options Bar (Copy, Save, Suggestions, Sample Answer) -->
+                <div class="bg-white border border-slate-200 p-2.5 rounded-xl flex items-center justify-between shrink-0 shadow-sm text-xs flex-wrap gap-2">
+                    <div class="flex items-center space-x-2">
+                        <button onclick="copySpokenText()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg font-medium transition">📋 Copier</button>
+                        <button onclick="saveSpeakingProgress()" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 px-3 py-1.5 rounded-lg font-bold transition">💾 Sauvegarder</button>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <button onclick="getSpeakingSuggestions()" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 px-3 py-1.5 rounded-lg font-bold transition">💡 Suggestions</button>
+                        <button onclick="getSpeakingSampleAnswer()" class="bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 px-3 py-1.5 rounded-lg font-bold transition">📖 Exemple type</button>
+                    </div>
+                </div>
+
+                <!-- Voice Recording & Transcript Workspace -->
+                <div class="flex-1 flex flex-col relative space-y-3">
+                    <div class="bg-white border border-slate-200 p-4 rounded-2xl flex items-center justify-between shadow-sm shrink-0">
+                        <div class="flex items-center space-x-3">
+                            <button onclick="toggleSpeechRecognition()" id="mic-record-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs px-4 py-2.5 rounded-xl font-bold transition flex items-center space-x-2 shadow-sm">
+                                <span>🎙️</span>
+                                <span id="mic-btn-text">Démarrer / Pause</span>
+                            </button>
+                            <span id="mic-status" class="text-xs text-slate-400 font-medium">Microphone en attente...</span>
+                        </div>
+                        <button onclick="clearSpokenTranscript()" class="text-rose-500 hover:text-rose-700 text-xs font-bold transition">Effacer la transcription</button>
+                    </div>
+
+                    <!-- Transcript Box -->
+                    <textarea id="spoken-transcript" placeholder="Votre transcription vocale apparaîtra ici au fur et à mesure que vous parlez en français (ou vous pouvez taper directement)..." class="flex-1 w-full p-4 bg-white border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm leading-relaxed text-slate-800 resize-none shadow-sm"></textarea>
+                </div>
+
+                <!-- AI Speaking Evaluation Report Box -->
+                <div id="speaking-eval-pane" class="hidden bg-emerald-50/60 border border-emerald-200 rounded-2xl p-6 space-y-3 shadow-sm text-xs leading-relaxed text-slate-800 shrink-0">
+                    <h3 class="font-bold text-emerald-900 uppercase tracking-wide border-b border-emerald-200 pb-2 flex items-center justify-between">
+                        <span>Rapport d'Évaluation Orale (Prononciation & Fluence)</span>
+                        <span id="speaking-eval-score" class="text-emerald-700 bg-emerald-100 px-2.5 py-0.5 rounded font-extrabold">Score : --/20</span>
+                    </h3>
+                    <div id="speaking-eval-body" class="space-y-2 text-emerald-950">L'analyse s'affichera ici...</div>
+                </div>
+            </div>
+
+            <!-- AI Oral Examiner Sidebar -->
+            <section class="w-96 bg-white border-l border-slate-200 flex flex-col shrink-0">
+                <div class="p-4 border-b border-slate-100 flex items-center justify-between">
+                    <span class="text-xs font-bold uppercase tracking-wider text-slate-600">🤖 Examinateur Oral IA</span>
+                    <span class="text-[10px] bg-emerald-50 text-emerald-600 font-semibold px-2 py-0.5 rounded">En ligne</span>
+                </div>
+                
+                <div id="ai-chat-box" class="flex-1 p-4 overflow-y-auto space-y-3">
+                    <div class="bg-slate-50 border border-slate-100 p-3 rounded-xl text-xs text-slate-700 space-y-2">
+                        <p>Bonjour ! Je suis votre examinateur. Discutez avec moi de votre sujet ou posez-moi des questions pour préparer votre intervention orale.</p>
+                    </div>
+                </div>
+
+                <!-- Suggestion Chips -->
+                <div class="p-3 bg-slate-50 border-t border-slate-100 flex flex-wrap gap-1.5">
+                    <button onclick="sendPresetPrompt('Posez-moi une question de relance sur ce sujet.')" class="text-[10px] bg-white border border-slate-200 text-slate-700 px-2.5 py-1 rounded-lg hover:bg-indigo-50 hover:text-indigo-600 transition font-medium">❓ Question de relance</button>
+                    <button onclick="sendPresetPrompt('Donnez-moi des expressions pour structurer mon argumentation.')" class="text-[10px] bg-white border border-slate-200 text-slate-700 px-2.5 py-1 rounded-lg hover:bg-indigo-50 hover:text-indigo-600 transition font-medium">💬 Mots de liaison</button>
+                </div>
+
+                <!-- Chat Input Bar with Microphone -->
+                <div class="p-3 border-t border-slate-100">
+                    <div class="flex items-center space-x-2">
+                        <input type="text" id="ai-input" placeholder="Posez une question..." class="flex-1 text-xs px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <button onclick="toggleChatVoiceInput()" id="ai-mic-btn" title="Parler au lieu d'écrire" class="bg-slate-100 text-slate-700 hover:bg-slate-200 p-2 rounded-xl text-xs transition">🎙️</button>
+                        <button onclick="sendAIChat()" class="bg-indigo-600 text-white p-2.5 rounded-xl text-xs font-bold hover:bg-indigo-700 transition">➔</button>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Script Integration -->
+    <script>
+        const SUPABASE_URL = 'https://bkawfexaikntyivqvetk.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrYXdmZXhhaWtudHlpdnF2ZXRrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcyMDU3ODAsImV4cCI6MjEwMjc4MTc4MH0.8YYkD8pzn97DeqA-o83KoGQ4yHb6WT1HB4DcoPPAMwA';
+        
+        if (!window.mySupabase) {
+            window.mySupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+                db: { schema: 'French-schema' }
+            });
+        }
+        const db = window.mySupabase;
+
+        let allReadingTopics = [];
+        let activeSubjectObj = null;
+        let generatedPromptData = null;
+        let isPromptTranslated = false;
+
+        async function saveProgressToDatabase(moduleType, moduleId, score = null) {
+            const { data: { user }, error: userError } = await db.auth.getUser();
+            
+            if (userError || !user) {
+                alert("Veuillez vous connecter pour sauvegarder votre progression.");
+                window.location.href = 'login.html';
+                return;
+            }
+
+            const { error } = await db
+                .from('user_progress')
+                .upsert({
+                    user_id: user.id,
+                    module_type: moduleType, 
+                    module_id: moduleId.toString(),
+                    completed: true,
+                    score: score, 
+                    updated_at: new Date()
+                }, { onConflict: 'user_id, module_type, module_id' });
+
+            if (error) {
+                console.error("Erreur de sauvegarde :", error.message);
+                alert("Erreur lors de la synchronisation de la progression.");
+            } else {
+                alert("💾 Progression et habitudes enregistrées avec succès !");
+            }
+        }
+
+        async function loadSpeakingTopicsFromDatabase() {
+            const container = document.getElementById('speaking-topics-container');
+            container.innerHTML = `<p class="text-xs text-slate-400 p-2">Chargement des sujets depuis Supabase...</p>`;
+
+            const { data: topics, error } = await db.from('reading_topics').select('*').order('id', { ascending: true });
+
+            if (error || !topics || topics.length === 0) {
+                container.innerHTML = `<p class="text-xs text-rose-500 p-2">Aucun sujet trouvé dans la base.</p>`;
+                return;
+            }
+
+            allReadingTopics = topics;
+            renderSpeakingTopicsList(allReadingTopics);
+            if (topics.length > 0) {
+                generateSpeakingPrompt(topics[0]);
+            }
+        }
+
+        function renderSpeakingTopicsList(topics) {
+            const container = document.getElementById('speaking-topics-container');
+            container.innerHTML = '';
+
+            topics.forEach((t) => {
+                const item = document.createElement('button');
+                item.className = 'w-full text-left p-3 rounded-xl text-xs font-medium transition bg-slate-50 border border-slate-100 text-slate-700 hover:bg-indigo-50 flex items-center space-x-2.5';
+                item.innerHTML = `
+                    <span class="text-base">🗣️</span>
+                    <div class="flex-1">
+                        <div class="font-bold text-slate-900">${t.category}</div>
+                        <div class="text-[10px] text-slate-400 truncate">${t.title} • Niveau ${t.level}</div>
+                    </div>
+                `;
+                item.onclick = () => generateSpeakingPrompt(t);
+                container.appendChild(item);
+            });
+        }
+
+        async function generateSpeakingPrompt(subjectObj) {
+            activeSubjectObj = subjectObj;
+            const chosenFormat = document.getElementById('speaking-format-select').value;
+
+            document.getElementById('speaking-badge').innerText = `${chosenFormat} - Niveau ${subjectObj.level}`;
+            document.getElementById('speaking-prompt-title').innerText = subjectObj.title;
+            
+            const descEl = document.getElementById('speaking-prompt-desc');
+            descEl.innerText = "🤖 L'IA génère un scénario oral concis et structuré...";
+            document.getElementById('spoken-transcript').value = "";
+            document.getElementById('speaking-eval-pane').classList.add('hidden');
+            document.getElementById('prompt-translation-pane').classList.add('hidden');
+            isPromptTranslated = false;
+            document.getElementById('translate-prompt-btn').innerText = "🌐 Traduction (EN)";
+
+            const apiUrl = localStorage.getItem('ai_api_url') || "https://api.groq.com/openai/v1/chat/completions";
+            const apiKey = localStorage.getItem('ai_api_key') || "";
+            const modelName = localStorage.getItem('ai_model_name') || "openai/gpt-oss-120b";
+
+            if (!apiKey) {
+                descEl.innerText = "Erreur : Clé API manquante dans l'administration.";
+                return;
+            }
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${apiKey}`
+                    },
+                    body: JSON.stringify({
+                        model: modelName,
+                        messages: [
+                            {
+                                role: "system",
+                                content: "You are an official TCF/DELF speaking exam simulator. Generate a concise, clean oral exam prompt in French consisting of a short 2-sentence scenario description and a clear objective. Avoid long blocks of text. Format strictly as valid JSON with key: 'instruction'."
+                            },
+                            {
+                                role: "user",
+                                content: `Generate a short speaking exam brief for level ${subjectObj.level}, theme: "${subjectObj.title}", format: "${chosenFormat}".`
+                            }
+                        ],
+                        temperature: 0.7
+                    })
+                });
+
+                const data = await response.json();
+                let rawContent = data.choices?.[0]?.message?.content || "";
+                rawContent = rawContent.replace(/```json/g, '').replace(/```/g, '').trim();
+                generatedPromptData = JSON.parse(rawContent);
+
+                descEl.innerText = generatedPromptData.instruction;
+            } catch (err) {
+                descEl.innerText = subjectObj.description;
+            }
+        }
+
+        async function generateCustomSpeakingPrompt() {
+            const inputEl = document.getElementById('custom-topic-input');
+            const customTitle = inputEl ? inputEl.value.trim() : "";
+            
+            if (!customTitle) {
+                alert("Veuillez saisir un sujet personnalisé.");
+                return;
+            }
+
+            const chosenFormat = document.getElementById('speaking-format-select').value;
+            
+            activeSubjectObj = {
+                id: 'custom_' + Date.now(),
+                title: customTitle,
+                category: 'Sujet Personnalisé',
+                level: 'B2'
+            };
+
+            document.getElementById('speaking-badge').innerText = `${chosenFormat} - Sujet Libre`;
+            document.getElementById('speaking-prompt-title').innerText = customTitle;
+            
+            const descEl = document.getElementById('speaking-prompt-desc');
+            descEl.innerText = "🤖 L'IA convertit votre sujet personnalisé en consigne orale officielle...";
+            document.getElementById('spoken-transcript').value = "";
+            document.getElementById('speaking-eval-pane').classList.add('hidden');
+            document.getElementById('prompt-translation-pane').classList.add('hidden');
+            isPromptTranslated = false;
+            document.getElementById('translate-prompt-btn').innerText = "🌐 Traduction (EN)";
+
+            const apiUrl = localStorage.getItem('ai_api_url') || "https://api.groq.com/openai/v1/chat/completions";
+            const apiKey = localStorage.getItem('ai_api_key') || "";
+            const modelName = localStorage.getItem('ai_model_name') || "openai/gpt-oss-120b";
+
+            if (!apiKey) {
+                descEl.innerText = "Erreur : Clé API manquante dans l'administration.";
+                return;
+            }
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${apiKey}`
+                    },
+                    body: JSON.stringify({
+                        model: modelName,
+                        messages: [
+                            {
+                                role: "system",
+                                content: "You are an official TCF/DELF speaking exam simulator. Given a custom user theme and format, generate a concise oral exam prompt instruction entirely in French. Format strictly as valid JSON with key: 'instruction'."
+                            },
+                            {
+                                role: "user",
+                                content: `Generate a speaking prompt for custom theme: "${customTitle}", format: "${chosenFormat}".`
+                            }
+                        ],
+                        temperature: 0.7
+                    })
+                });
+
+                const data = await response.json();
+                let rawContent = data.choices?.[0]?.message?.content || "";
+                rawContent = rawContent.replace(/```json/g, '').replace(/```/g, '').trim();
+                generatedPromptData = JSON.parse(rawContent);
+
+                descEl.innerText = generatedPromptData.instruction;
+                inputEl.value = "";
+            } catch (err) {
+                descEl.innerText = `Exprimez-vous ou discutez sur le thème personnalisé : "${customTitle}".`;
+            }
+        }
+
+        function speakExamPrompt() {
+            const promptText = document.getElementById('speaking-prompt-desc')?.innerText || '';
+            if (!promptText || promptText.includes("🤖") || !('speechSynthesis' in window)) return;
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(promptText);
+            utterance.lang = 'fr-FR';
+            window.speechSynthesis.speak(utterance);
+        }
+
+        function copySpokenText() {
+            const text = document.getElementById('spoken-transcript').value;
+            if (!text) { alert("Aucun texte à copier."); return; }
+            navigator.clipboard.writeText(text);
+            alert("📋 Transcription copiée dans le presse-papier !");
+        }
+
+        async function saveSpeakingProgress() {
+            const text = document.getElementById('spoken-transcript').value;
+            if (!text) { alert("Veuillez d'abord enregistrer ou rédiger votre intervention orale."); return; }
+            localStorage.setItem(`speaking_draft_${activeSubjectObj?.id || 'save'}`, text);
+            
+            if (activeSubjectObj) {
+                await saveProgressToDatabase('speaking', activeSubjectObj.id);
+            } else {
+                alert("💾 Progression orale sauvegardée !");
+            }
+        }
+
+        async function getSpeakingSuggestions() {
+            if (!generatedPromptData) { alert("Veuillez d'abord sélectionner un sujet."); return; }
+            const chatBox = document.getElementById('ai-chat-box');
+            const promptText = `Donnez-moi des astuces de prononciation, de vocabulaire et une structure d'argumentation pour réussir cette épreuve orale : "${generatedPromptData.instruction}"`;
+            
+            const userMsg = document.createElement('div');
+            userMsg.className = 'bg-indigo-50 border border-indigo-100 p-3 rounded-xl text-xs text-indigo-900 ml-4 shadow-sm';
+            userMsg.innerText = "💡 Donnez-moi des suggestions pour réussir cet oral.";
+            chatBox.appendChild(userMsg);
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            const apiUrl = localStorage.getItem('ai_api_url') || "https://api.groq.com/openai/v1/chat/completions";
+            const apiKey = localStorage.getItem('ai_api_key') || "";
+            const modelName = localStorage.getItem('ai_model_name') || "openai/gpt-oss-120b";
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+                    body: JSON.stringify({
+                        model: modelName,
+                        messages: [
+                            { role: "system", content: "You are an expert French oral coach." },
+                            { role: "user", content: promptText }
+                        ],
+                        temperature: 0.7
+                    })
+                });
+                const data = await response.json();
+                let aiReply = data.choices?.[0]?.message?.content || "Conseils non disponibles.";
+                
+                const aiMsg = document.createElement('div');
+                aiMsg.className = 'ai-message-card bg-slate-50 border border-slate-200 p-3.5 rounded-2xl text-xs text-slate-700 mr-4 shadow-sm space-y-2 relative';
+                aiMsg.setAttribute('data-reply-text', aiReply);
+                aiMsg.innerHTML = `
+                    <div class="flex items-center justify-between border-b border-slate-200/60 pb-1.5 mb-1.5">
+                        <span class="font-bold text-indigo-600 flex items-center space-x-1">
+                            <span>🤖</span> <span>Coach IA</span>
+                        </span>
+                        <div class="flex items-center space-x-1.5">
+                            <button onclick="playTextAudio(this)" class="text-[10px] bg-white border border-slate-200 px-2 py-0.5 rounded font-medium text-slate-600 hover:bg-slate-100 transition">🔊 Écouter</button>
+                            <button onclick="translateAIResponse(this)" class="text-[10px] bg-white border border-slate-200 px-2 py-0.5 rounded font-medium text-slate-600 hover:bg-slate-100 transition">🌐 Traduire (EN)</button>
+                        </div>
+                    </div>
+                    <div class="space-y-1.5 leading-relaxed">
+                        ${aiReply.replace(/\n/g, '<br>')}
+                    </div>
+                    <div class="ai-translation-box hidden mt-2 pt-2 border-t border-slate-200/60 text-slate-500 italic bg-slate-100/60 p-2 rounded-lg"></div>
+                `;
+                chatBox.appendChild(aiMsg);
+                chatBox.scrollTop = chatBox.scrollHeight;
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        async function getSpeakingSampleAnswer() {
+            if (!generatedPromptData) { alert("Veuillez d'abord sélectionner un sujet."); return; }
+            const chatBox = document.getElementById('ai-chat-box');
+            const promptText = `Rédige un exemple de monologue ou de dialogue type (niveau B2) pour réussir cette épreuve orale : "${generatedPromptData.instruction}"`;
+            
+            const userMsg = document.createElement('div');
+            userMsg.className = 'bg-amber-50 border border-amber-200 p-3 rounded-xl text-xs text-amber-900 ml-4 shadow-sm';
+            userMsg.innerText = "📖 Montrez-moi un exemple de réponse orale type.";
+            chatBox.appendChild(userMsg);
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            const apiUrl = localStorage.getItem('ai_api_url') || "https://api.groq.com/openai/v1/chat/completions";
+            const apiKey = localStorage.getItem('ai_api_key') || "";
+            const modelName = localStorage.getItem('ai_model_name') || "openai/gpt-oss-120b";
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+                    body: JSON.stringify({
+                        model: modelName,
+                        messages: [
+                            { role: "system", content: "You are an expert French oral exam model speaker. Provide an exemplary student spoken script in French." },
+                            { role: "user", content: promptText }
+                        ],
+                        temperature: 0.7
+                    })
+                });
+                const data = await response.json();
+                let aiReply = data.choices?.[0]?.message?.content || "Exemple non disponible.";
+                
+                const aiMsg = document.createElement('div');
+                aiMsg.className = 'ai-message-card bg-amber-50/60 border border-amber-200 p-3.5 rounded-2xl text-xs text-slate-800 mr-4 shadow-sm space-y-2 relative';
+                aiMsg.setAttribute('data-reply-text', aiReply);
+                aiMsg.innerHTML = `
+                    <div class="flex items-center justify-between border-b border-amber-200 pb-1.5 mb-1.5">
+                        <span class="font-bold text-amber-900 flex items-center space-x-1">
+                            <span>📖</span> <span>Exemple de Réponse Orale Type</span>
+                        </span>
+                        <div class="flex items-center space-x-1.5">
+                            <button onclick="playTextAudio(this)" class="text-[10px] bg-white border border-amber-300 px-2 py-0.5 rounded font-medium text-slate-700 hover:bg-slate-100 transition">🔊 Écouter</button>
+                            <button onclick="translateAIResponse(this)" class="text-[10px] bg-white border border-amber-300 px-2 py-0.5 rounded font-medium text-slate-700 hover:bg-slate-100 transition">🌐 Traduire (EN)</button>
+                        </div>
+                    </div>
+                    <div class="space-y-1.5 leading-relaxed font-serif">
+                        ${aiReply.replace(/\n/g, '<br>')}
+                    </div>
+                    <div class="ai-translation-box hidden mt-2 pt-2 border-t border-amber-200 text-slate-600 italic bg-white/80 p-2 rounded-lg"></div>
+                `;
+                chatBox.appendChild(aiMsg);
+                chatBox.scrollTop = chatBox.scrollHeight;
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        async function togglePromptTranslation() {
+            const pane = document.getElementById('prompt-translation-pane');
+            const btn = document.getElementById('translate-prompt-btn');
+            const body = document.getElementById('prompt-translation-body');
+
+            if (!generatedPromptData) { alert("Aucune consigne active."); return; }
+
+            if (isPromptTranslated) {
+                pane.classList.add('hidden');
+                btn.innerText = "🌐 Traduction (EN)";
+                isPromptTranslated = false;
+                return;
+            }
+
+            pane.classList.remove('hidden');
+            btn.innerText = "🌐 Masquer Traduction";
+            isPromptTranslated = true;
+            body.innerText = "Traduction en cours...";
+
+            const apiUrl = localStorage.getItem('ai_api_url') || "https://api.groq.com/openai/v1/chat/completions";
+            const apiKey = localStorage.getItem('ai_api_key') || "";
+            const modelName = localStorage.getItem('ai_model_name') || "openai/gpt-oss-120b";
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+                    body: JSON.stringify({
+                        model: modelName,
+                        messages: [
+                            { role: "system", content: "Translate the following French speaking exam instruction into clear English." },
+                            { role: "user", content: generatedPromptData.instruction }
+                        ],
+                        temperature: 0.3
+                    })
+                });
+                const data = await response.json();
+                let translation = data.choices?.[0]?.message?.content || "Traduction non disponible.";
+                body.innerHTML = translation.replace(/\n/g, '<br>');
+            } catch (err) {
+                body.innerText = "Erreur de traduction.";
+            }
+        }
+
+        async function translateAIResponse(buttonElement) {
+            const container = buttonElement.closest('.ai-message-card');
+            const textContent = container.getAttribute('data-reply-text');
+            const translationContainer = container.querySelector('.ai-translation-box');
+
+            if (!translationContainer) return;
+
+            if (!translationContainer.classList.contains('hidden')) {
+                translationContainer.classList.add('hidden');
+                buttonElement.innerText = '🌐 Traduire (EN)';
+                return;
+            }
+
+            buttonElement.innerText = '⏳ Traduction...';
+
+            const apiUrl = localStorage.getItem('ai_api_url') || "https://api.groq.com/openai/v1/chat/completions";
+            const apiKey = localStorage.getItem('ai_api_key') || "";
+            const modelName = localStorage.getItem('ai_model_name') || "openai/gpt-oss-120b";
+
+            try {
+                const apiResponse = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${apiKey}`
+                    },
+                    body: JSON.stringify({
+                        model: modelName,
+                        messages: [
+                            {
+                                role: "system",
+                                content: "You are a professional translator. Translate the following French text into clear, natural English. Provide only the translation without extra conversational filler."
+                            },
+                            { role: "user", content: textContent }
+                        ],
+                        temperature: 0.3
+                    })
+                });
+
+                const data = await apiResponse.json();
+                if (data.error) throw new Error(data.error.message || 'Erreur API');
+
+                let translationText = data.choices?.[0]?.message?.content || "Translation not available.";
+                
+                translationContainer.innerHTML = `<strong class="text-slate-600 block mb-1">English Translation:</strong> ${translationText}`;
+                translationContainer.classList.remove('hidden');
+                buttonElement.innerText = '🌐 Masquer';
+
+            } catch (err) {
+                console.error("Translation error:", err);
+                translationContainer.innerHTML = `<span class="text-rose-600">Erreur de traduction : ${err.message}</span>`;
+                translationContainer.classList.remove('hidden');
+                buttonElement.innerText = '🌐 Traduire (EN)';
+            }
+        }
+
+        function playTextAudio(buttonElement) {
+            const container = buttonElement.closest('.ai-message-card');
+            const textContent = container ? container.getAttribute('data-reply-text') : "";
+            if (!textContent || !('speechSynthesis' in window)) return;
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(textContent);
+            utterance.lang = 'fr-FR';
+            window.speechSynthesis.speak(utterance);
+        }
+
+        // --- SPEECH RECOGNITION (Microphone Start, Pause, Resume) ---
+        let speechRecognition = null;
+        let isRecording = false;
+        let isPaused = false;
+
+        function toggleSpeechRecognition() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) {
+                alert("La reconnaissance vocale nécessite Google Chrome.");
+                return;
+            }
+
+            const micBtn = document.getElementById('mic-record-btn');
+            const micBtnText = document.getElementById('mic-btn-text');
+            const micStatus = document.getElementById('mic-status');
+            const transcriptField = document.getElementById('spoken-transcript');
+
+            if (!isRecording) {
+                // Start fresh recording session
+                speechRecognition = new SpeechRecognition();
+                speechRecognition.lang = 'fr-FR';
+                speechRecognition.interimResults = true;
+                speechRecognition.continuous = true;
+
+                speechRecognition.onstart = () => {
+                    isRecording = true;
+                    isPaused = false;
+                    micBtn.className = "bg-rose-600 hover:bg-rose-700 text-white text-xs px-4 py-2.5 rounded-xl font-bold transition flex items-center space-x-2 shadow-sm animate-pulse";
+                    micBtnText.innerText = "Pause / Arrêter";
+                    micStatus.innerText = "🔴 Enregistrement en cours (parlez en français)...";
+                };
+
+                speechRecognition.onresult = (event) => {
+                    if (isPaused) return;
+                    let finalTranscript = '';
+                    for (let i = event.resultIndex; i < event.results.length; ++i) {
+                        if (event.results[i].isFinal) {
+                            finalTranscript += event.results[i][0].transcript + ' ';
+                        }
+                    }
+                    if (finalTranscript) {
+                        transcriptField.value += finalTranscript;
+                    }
+                };
+
+                speechRecognition.onerror = () => stopMicUI();
+                speechRecognition.onend = () => {
+                    if (isRecording && !isPaused) {
+                        // Auto-restart if it cuts out unexpectedly while active
+                        try { speechRecognition.start(); } catch(e){}
+                    } else {
+                        stopMicUI();
+                    }
+                };
+
+                speechRecognition.start();
+            } else if (!isPaused) {
+                // Pause recording
+                isPaused = true;
+                if (speechRecognition) speechRecognition.stop();
+                micBtn.className = "bg-amber-600 hover:bg-amber-700 text-white text-xs px-4 py-2.5 rounded-xl font-bold transition flex items-center space-x-2 shadow-sm";
+                micBtnText.innerText = "Reprendre";
+                micStatus.innerText = "⏸️ Enregistrement en pause. Cliquez pour reprendre ou relancer.";
+            } else {
+                // Resume recording
+                isPaused = false;
+                try {
+                    speechRecognition.start();
+                    micBtn.className = "bg-rose-600 hover:bg-rose-700 text-white text-xs px-4 py-2.5 rounded-xl font-bold transition flex items-center space-x-2 shadow-sm animate-pulse";
+                    micBtnText.innerText = "Pause / Arrêter";
+                    micStatus.innerText = "🔴 Enregistrement en cours...";
+                } catch(e) {
+                    stopMicUI();
+                }
+            }
+        }
+
+        function stopMicUI() {
+            isRecording = false;
+            isPaused = false;
+            const micBtn = document.getElementById('mic-record-btn');
+            const micBtnText = document.getElementById('mic-btn-text');
+            const micStatus = document.getElementById('mic-status');
+            if (micBtn) {
+                micBtn.className = "bg-indigo-600 hover:bg-indigo-700 text-white text-xs px-4 py-2.5 rounded-xl font-bold transition flex items-center space-x-2 shadow-sm";
+                micBtnText.innerText = "Démarrer / Pause";
+            }
+            if (micStatus) micStatus.innerText = "Enregistrement arrêté.";
+        }
+
+        function clearSpokenTranscript() {
+            document.getElementById('spoken-transcript').value = "";
+        }
+
+        async function evaluateSpokenResponse() {
+            const text = document.getElementById('spoken-transcript').value.trim();
+            const pane = document.getElementById('speaking-eval-pane');
+            const body = document.getElementById('speaking-eval-body');
+            const scoreBadge = document.getElementById('speaking-eval-score');
+            const chosenFormat = document.getElementById('speaking-format-select').value;
+
+            if (!text) {
+                alert("Veuillez d'abord enregistrer ou saisir votre intervention orale.");
+                return;
+            }
+
+            pane.classList.remove('hidden');
+            body.innerText = "Analyse de votre expression orale par l'examinateur IA...";
+            scoreBadge.innerText = "Score : --/20";
+
+            const apiUrl = localStorage.getItem('ai_api_url') || "https://api.groq.com/openai/v1/chat/completions";
+            const apiKey = localStorage.getItem('ai_api_key') || "";
+            const modelName = localStorage.getItem('ai_model_name') || "openai/gpt-oss-120b";
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${apiKey}`
+                    },
+                    body: JSON.stringify({
+                        model: modelName,
+                        messages: [
+                            {
+                                role: "system",
+                                content: "You are a strict official TCF/DELF speaking examiner. Evaluate the student's transcribed spoken French based on fluency, pronunciation expectations, grammar, and vocabulary structure. Format response strictly as JSON with keys: 'score' (number out of 20), 'feedback' (detailed constructive feedback in French), and 'improved_transcript' (refined spoken version). Do not include markdown codeblocks like ```json, just output raw valid JSON."
+                            },
+                            {
+                                role: "user",
+                                content: `Evaluate this spoken transcript (Format: ${chosenFormat}, Theme: "${activeSubjectObj?.title}"): "${text}"`
+                            }
+                        ],
+                        temperature: 0.3
+                    })
+                });
+
+                const data = await response.json();
+                let rawContent = data.choices?.[0]?.message?.content || "";
+                rawContent = rawContent.replace(/```json/g, '').replace(/```/g, '').trim();
+                const evalJson = JSON.parse(rawContent);
+
+                scoreBadge.innerText = `Score : ${evalJson.score || '14'}/20`;
+                body.innerHTML = `
+                    <div class="space-y-2">
+                        <div><strong>Évaluation de l'examinateur :</strong><br>${evalJson.feedback || 'Bonne fluidité générale.'}</div>
+                        <div class="border-t border-emerald-200 pt-2"><strong>Version orale améliorée :</strong><br><span class="text-emerald-950 italic">${evalJson.improved_transcript || text}</span></div>
+                    </div>
+                `;
+            } catch (err) {
+                body.innerText = "Erreur lors de l'évaluation de l'oral.";
+            }
+        }
+
+        // --- INTERACTIVE CHAT MICROPHONE ---
+        let chatSpeechRecognition = null;
+        let isChatListening = false;
+
+        window.toggleChatVoiceInput = function() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) { alert("La reconnaissance vocale nécessite Google Chrome."); return; }
+
+            const micBtn = document.getElementById('ai-mic-btn');
+            const inputField = document.getElementById('ai-input');
+
+            if (!isChatListening) {
+                chatSpeechRecognition = new SpeechRecognition();
+                chatSpeechRecognition.lang = 'fr-FR';
+                chatSpeechRecognition.interimResults = false;
+
+                chatSpeechRecognition.onstart = () => {
+                    isChatListening = true;
+                    if (micBtn) { micBtn.innerHTML = "⏹️"; micBtn.className = "bg-rose-600 text-white p-2 rounded-xl text-xs transition shadow-sm animate-pulse"; }
+                    if (inputField) inputField.placeholder = "Écoute en cours...";
+                };
+                chatSpeechRecognition.onresult = (event) => {
+                    if (inputField) inputField.value = event.results[0][0].transcript;
+                };
+                chatSpeechRecognition.onerror = () => stopChatMicUI();
+                chatSpeechRecognition.onend = () => stopChatMicUI();
+                chatSpeechRecognition.start();
+            } else {
+                if (chatSpeechRecognition) chatSpeechRecognition.stop();
+                stopChatMicUI();
+            }
+        };
+
+        function stopChatMicUI() {
+            isChatListening = false;
+            const micBtn = document.getElementById('ai-mic-btn');
+            const inputField = document.getElementById('ai-input');
+            if (micBtn) { micBtn.innerHTML = "🎙️"; micBtn.className = "bg-slate-100 text-slate-700 hover:bg-slate-200 p-2 rounded-xl text-xs transition"; }
+            if (inputField) inputField.placeholder = "Posez une question...";
+        }
+
+        function sendPresetPrompt(promptText) {
+            const input = document.getElementById('ai-input');
+            if (input) { input.value = promptText; sendAIChat(); }
+        }
+
+        async function sendAIChat() {
+            const input = document.getElementById('ai-input');
+            const chatBox = document.getElementById('ai-chat-box');
+            if (!input || !input.value.trim() || !chatBox) return;
+
+            const userText = input.value.trim();
+            const userMsg = document.createElement('div');
+            userMsg.className = 'bg-indigo-50 border border-indigo-100 p-3 rounded-xl text-xs text-indigo-900 ml-4 shadow-sm';
+            userMsg.innerText = userText;
+            chatBox.appendChild(userMsg);
+            input.value = '';
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            const typingMsg = document.createElement('div');
+            typingMsg.id = 'ai-typing';
+            typingMsg.className = 'bg-slate-50 border border-slate-100 p-3 rounded-xl text-xs text-slate-500 mr-4 italic';
+            typingMsg.innerText = '🤖 L\'examinateur prépare sa réponse...';
+            chatBox.appendChild(typingMsg);
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            const apiUrl = localStorage.getItem('ai_api_url') || "[https://api.groq.com/openai/v1/chat/completions](https://api.groq.com/openai/v1/chat/completions)";
+            const apiKey = localStorage.getItem('ai_api_key') || "";
+            const modelName = localStorage.getItem('ai_model_name') || "openai/gpt-oss-120b";
+
+            try {
+                const apiResponse = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+                    body: JSON.stringify({
+                        model: modelName,
+                        messages: [
+                            { role: "system", content: `You are an expert TCF oral examiner. The student is practicing speaking about: "${activeSubjectObj?.title}".` },
+                            { role: "user", content: userText }
+                        ],
+                        temperature: 0.7
+                    })
+                });
+
+                const data = await apiResponse.json();
+                document.getElementById('ai-typing')?.remove();
+
+                let aiReply = data.choices?.[0]?.message?.content || "Réponse non disponible.";
+                const aiMsg = document.createElement('div');
+                aiMsg.className = 'ai-message-card bg-slate-50 border border-slate-200 p-3.5 rounded-2xl text-xs text-slate-700 mr-4 shadow-sm space-y-2 relative';
+                aiMsg.setAttribute('data-reply-text', aiReply);
+                aiMsg.innerHTML = `
+                    <div class="flex items-center justify-between border-b border-slate-200/60 pb-1.5 mb-1.5">
+                        <span class="font-bold text-indigo-600 flex items-center space-x-1">
+                            <span>🤖</span> <span>Examinateur</span>
+                        </span>
+                        <div class="flex items-center space-x-1.5">
+                            <button onclick="playTextAudio(this)" class="text-[10px] bg-white border border-slate-200 px-2 py-0.5 rounded font-medium text-slate-600 hover:bg-slate-100 transition">🔊 Écouter</button>
+                            <button onclick="translateAIResponse(this)" class="text-[10px] bg-white border border-slate-200 px-2 py-0.5 rounded font-medium text-slate-600 hover:bg-slate-100 transition">🌐 Traduire (EN)</button>
+                        </div>
+                    </div>
+                    <div class="space-y-1.5 leading-relaxed">
+                        ${aiReply.replace(/\n/g, '<br>')}
+                    </div>
+                    <div class="ai-translation-box hidden mt-2 pt-2 border-t border-slate-200/60 text-slate-500 italic bg-slate-100/60 p-2 rounded-lg"></div>
+                `;
+                chatBox.appendChild(aiMsg);
+                chatBox.scrollTop = chatBox.scrollHeight;
+            } catch (err) {
+                document.getElementById('ai-typing')?.remove();
+            }
+        }
+
+        loadSpeakingTopicsFromDatabase();
+    </script>
+</body>
+</html>

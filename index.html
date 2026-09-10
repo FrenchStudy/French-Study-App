@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>French Study App - Hub</title>
+    <!-- Tailwind CSS CDN for instant styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen flex flex-col justify-between">
+
+    <!-- Header with Progress, Community & Settings Links -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-50">
+        <div class="max-w-4xl mx-auto px-4 h-16 flex items-center justify-between">
+            <h1 class="font-bold text-slate-950 flex items-center space-x-2">
+                <span class="w-3 h-3 rounded-full bg-indigo-600"></span>
+                <span>Apprendre le Français</span>
+            </h1>
+            <div class="flex items-center space-x-1 sm:space-x-2 text-xs font-medium overflow-x-auto py-2">
+                <a href="progress.html" class="text-slate-600 hover:text-indigo-600 px-2.5 py-1.5 rounded-lg hover:bg-slate-100 transition">📊 Progress</a>
+                <a href="community.html" class="text-slate-600 hover:text-indigo-600 px-2.5 py-1.5 rounded-lg hover:bg-slate-100 transition">👥 Community</a>
+                <a href="settings.html" class="text-slate-600 hover:text-indigo-600 px-2.5 py-1.5 rounded-lg hover:bg-slate-100 transition">⚙️ Settings</a>
+                <a href="translator.html" class="text-slate-600 hover:text-indigo-600 px-2.5 py-1.5 rounded-lg hover:bg-slate-100 transition font-bold text-indigo-600">💬 Translator</a>
+                <a href="admin.html" class="text-slate-600 hover:text-indigo-600 px-2.5 py-1.5 rounded-lg hover:bg-slate-100 transition">Admin</a>
+                <span class="bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded-full hidden md:inline-block">A1–B2 Curriculum</span>
+            </div>
+            <div class="flex items-center space-x-2">
+                <button id="logoutBtn" class="text-slate-600 hover:text-red-600 hover:bg-slate-100 px-3 py-1.5 rounded-lg transition">Logout</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Navigation Grid for Core Pages & Translator -->
+    <main class="max-w-4xl mx-auto px-4 py-10 w-full space-y-6">
+        <div class="text-center space-y-2">
+            <h2 class="text-2xl font-black text-slate-900">Your Study Hub</h2>
+            <p class="text-sm text-slate-500">Select any section below to start practicing.</p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            <a href="syllabus.html" class="bg-white border border-slate-200 hover:border-indigo-400 p-5 rounded-2xl shadow-sm transition space-y-2 block group">
+                <span class="text-2xl group-hover:scale-110 transition inline-block">📚</span>
+                <h3 class="font-bold text-slate-900 group-hover:text-indigo-600 transition">1. Syllabus</h3>
+                <p class="text-xs text-slate-500">Grammar rules, modules, and micro-drills.</p>
+            </a>
+            <a href="lesson.html" class="bg-white border border-slate-200 hover:border-indigo-400 p-5 rounded-2xl shadow-sm transition space-y-2 block group">
+                <span class="text-2xl group-hover:scale-110 transition inline-block">🎨</span>
+                <h3 class="font-bold text-slate-900 group-hover:text-indigo-600 transition">Lesson</h3>
+                <p class="text-xs text-slate-500">Interactive workspace and AI tutor master-detail hub.</p>
+            </a>
+            <a href="vocab.html" class="bg-white border border-slate-200 hover:border-indigo-400 p-5 rounded-2xl shadow-sm transition space-y-2 block group">
+                <span class="text-2xl group-hover:scale-110 transition inline-block">🗂️</span>
+                <h3 class="font-bold text-slate-900 group-hover:text-indigo-600 transition">Vocab</h3>
+                <p class="text-xs text-slate-500">Spaced repetition flashcards and audio.</p>
+            </a>
+            <a href="conjugations.html" class="bg-white border border-slate-200 hover:border-indigo-400 p-5 rounded-2xl shadow-sm transition space-y-2 block group">
+                <span class="text-2xl group-hover:scale-110 transition inline-block">⚡</span>
+                <h3 class="font-bold text-slate-900 group-hover:text-indigo-600 transition">Conjugates</h3>
+                <p class="text-xs text-slate-500">Verb matrices, tenses, and interactive tools.</p>
+            </a>
+            <a href="reading.html" class="bg-white border border-slate-200 hover:border-indigo-400 p-5 rounded-2xl shadow-sm transition space-y-2 block group">
+                <span class="text-2xl group-hover:scale-110 transition inline-block">📖</span>
+                <h3 class="font-bold text-slate-900 group-hover:text-indigo-600 transition">Reading</h3>
+                <p class="text-xs text-slate-500">CEFR texts with tap-to-translate tools.</p>
+            </a>
+            <a href="listening.html" class="bg-white border border-slate-200 hover:border-indigo-400 p-5 rounded-2xl shadow-sm transition space-y-2 block group">
+                <span class="text-2xl group-hover:scale-110 transition inline-block">🎧</span>
+                <h3 class="font-bold text-slate-900 group-hover:text-indigo-600 transition">Listening</h3>
+                <p class="text-xs text-slate-500">Audio tracks and synced transcripts.</p>
+            </a>
+            <a href="writing.html" class="bg-white border border-slate-200 hover:border-indigo-400 p-5 rounded-2xl shadow-sm transition space-y-2 block group">
+                <span class="text-2xl group-hover:scale-110 transition inline-block">✍️</span>
+                <h3 class="font-bold text-slate-900 group-hover:text-indigo-600 transition">Writing</h3>
+                <p class="text-xs text-slate-500">Prompts with AI feedback and correction.</p>
+            </a>
+            <a href="speaking.html" class="bg-white border border-slate-200 hover:border-indigo-400 p-5 rounded-2xl shadow-sm transition space-y-2 block group">
+                <span class="text-2xl group-hover:scale-110 transition inline-block">🗣️</span>
+                <h3 class="font-bold text-slate-900 group-hover:text-indigo-600 transition">Speaking</h3>
+                <p class="text-xs text-slate-500">Shadowing, roleplay, and voice scoring.</p>
+            </a>
+            <!-- New Universal Translator & Grammar Card -->
+            <a href="translator.html" class="bg-indigo-50/60 border border-indigo-200 hover:border-indigo-400 p-5 rounded-2xl shadow-sm transition space-y-2 block group">
+                <span class="text-2xl group-hover:scale-110 transition inline-block">💬</span>
+                <h3 class="font-bold text-indigo-950 group-hover:text-indigo-600 transition">Translator & Analyzer</h3>
+                <p class="text-xs text-indigo-900/70">Bidirectional translation with preposition & article breakdowns.</p>
+            </a>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 py-4 text-center text-xs text-slate-400">
+        French Study App Workspace • Powered by Supabase & Tailwind
+    </footer>
+
+</body>
+</html>

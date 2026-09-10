@@ -1,0 +1,1080 @@
+<!DOCTYPE html>
+<html lang="fr" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <title>Atelier de Français - Master Workspace</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="h-full bg-slate-100 flex flex-col overflow-hidden font-sans">
+
+    <!-- Top Sticky Navigation Header -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-50 shrink-0">
+        <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-1 sm:space-x-2 text-xs font-semibold overflow-x-auto py-2">
+                <a href="index.html" class="text-slate-600 hover:text-indigo-600 hover:bg-slate-100 px-3 py-1.5 rounded-lg transition">Dashboard</a>
+                <a href="syllabus.html" class="text-slate-600 hover:text-indigo-600 hover:bg-slate-100 px-3 py-1.5 rounded-lg transition">Syllabus</a>
+                <a href="lesson.html" class="bg-indigo-600 text-white px-3 py-1.5 rounded-lg shadow-sm transition">Lesson</a>
+                <a href="vocab.html" class="text-slate-600 hover:text-indigo-600 hover:bg-slate-100 px-3 py-1.5 rounded-lg transition">Vocab</a>
+                <a href="conjugations.html" class="text-slate-600 hover:text-indigo-600 hover:bg-slate-100 px-3 py-1.5 rounded-lg transition">Conjugations</a>
+                <a href="reading.html" class="text-slate-600 hover:text-indigo-600 hover:bg-slate-100 px-3 py-1.5 rounded-lg transition">Reading</a>
+                <a href="listening.html" class="text-slate-600 hover:text-indigo-600 hover:bg-slate-100 px-3 py-1.5 rounded-lg transition">Listening</a>
+                <a href="writing.html" class="text-slate-600 hover:text-indigo-600 hover:bg-slate-100 px-3 py-1.5 rounded-lg transition">Writing</a>
+                <a href="speaking.html" class="text-slate-600 hover:text-indigo-600 hover:bg-slate-100 px-3 py-1.5 rounded-lg transition">Speaking</a>
+                <a href="translator.html" class="text-slate-600 hover:text-indigo-600 hover:bg-slate-100 px-3 py-1.5 rounded-lg transition">Translator</a>
+                <a href="admin.html" class="text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 px-3 py-1.5 rounded-lg transition font-bold">Administration</a>
+            </div>
+            <div class="flex items-center space-x-2">
+                <span class="text-xs text-slate-400 font-medium">Atelier Actif</span>
+                <button id="logoutBtn" class="text-slate-600 hover:text-red-600 hover:bg-slate-100 px-3 py-1.5 rounded-lg transition">Logout</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Workspace Layout (Master-Detail Split) -->
+    <div class="flex-1 flex overflow-hidden">
+        
+        <!-- LEFT: Master Syllabus Sidebar with Expanded Two-Way Toggle & Bilingual Search -->
+        <aside id="left-sidebar" class="w-80 bg-white border-r border-slate-200 flex flex-col shrink-0 transition-all duration-300">
+            <div class="p-4 border-b border-slate-100 flex items-center justify-between">
+                <h2 id="left-sidebar-title" class="text-xs font-bold uppercase tracking-wider text-slate-400">Syllabus par Niveau</h2>
+                <button onclick="toggleLeftPane()" title="Minimiser / Restaurer" class="text-slate-500 hover:text-indigo-600 p-2 rounded-lg hover:bg-slate-100 transition text-sm font-bold flex items-center justify-center min-w-[32px] min-h-[32px]">
+                    <span id="left-toggle-icon">«</span>
+                </button>
+            </div>
+            <div id="left-sidebar-body" class="flex-1 flex flex-col overflow-hidden">
+                <div class="p-3 border-b border-slate-100">
+                    <input type="text" id="syllabus-search" placeholder="Filtrer en français ou anglais..." class="w-full text-xs px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                </div>
+                <div id="syllabus-container" class="flex-1 overflow-y-auto p-3 space-y-3">
+                    <p class="text-xs text-slate-400 p-2">Chargement du programme...</p>
+                </div>
+            </div>
+        </aside>
+
+        <!-- RIGHT: Detail Workspace & AI Assistant Grid -->
+        <main class="flex-1 flex overflow-hidden">
+            
+            <!-- Lesson Content Pane -->
+            <div class="flex-1 overflow-y-auto p-6 space-y-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 id="atelier-title" class="text-2xl font-extrabold text-slate-900 tracking-tight">Sélectionnez un module</h2>
+                        <p id="atelier-category" class="text-xs text-slate-500 mt-0.5">Catégorie: --</p>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <button onclick="toggleTranslation()" class="text-xs bg-white border border-slate-200 px-3 py-1.5 rounded-xl font-medium text-slate-700 hover:bg-slate-50 transition">🌐 Traduction (EN)</button>
+                        <button onclick="exportLesson()" class="text-xs bg-white border border-slate-200 px-3 py-1.5 rounded-xl font-medium text-slate-700 hover:bg-slate-50 transition">📤 Exporter</button>
+                    </div>
+                </div>
+
+                <!-- Interactive Tools Bar with integrated zero-scroll Speech Recognition Feedback -->
+                <div class="bg-white border border-slate-200 p-4 rounded-2xl shadow-sm space-y-3">
+                    <div class="flex items-center justify-between flex-wrap gap-2">
+                        <div class="flex items-center space-x-2">
+                            <button onclick="playNativeAudio()" class="bg-indigo-600 text-white text-xs px-3 py-2 rounded-xl font-bold hover:bg-indigo-700 transition">🔊 Écouter</button>
+                            <button onclick="adjustSpeed()" id="speed-btn" class="bg-slate-100 text-slate-700 text-xs px-3 py-2 rounded-xl font-medium hover:bg-slate-200 transition">⚡ 1.0x</button>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <button onclick="toggleSpeechRecognition()" id="rec-btn" class="bg-rose-50 text-rose-600 border border-rose-200 text-xs px-3 py-2 rounded-xl font-bold hover:bg-rose-100 transition">🎙️ Enregistrer & Vérifier</button>
+                            <button onclick="saveProgress()" class="bg-emerald-50 text-emerald-600 border border-emerald-200 text-xs px-3 py-2 rounded-xl font-bold hover:bg-emerald-100 transition">💾 Sauvegarder</button>
+                        </div>
+                    </div>
+
+                    <!-- Live Voice Recognition Feedback Panel -->
+                    <div id="feedbackBox" class="hidden bg-amber-50 p-3.5 rounded-xl border border-amber-200 text-xs space-y-1.5">
+                        <div class="flex items-center space-x-2 text-amber-900 font-bold">
+                            <span class="animate-pulse">🎙️</span>
+                            <span>Analyse de votre prononciation en cours...</span>
+                        </div>
+                        <div><strong>Reconnu :</strong> <span id="transcriptionResult" class="italic text-slate-700">...</span></div>
+                        <div><strong>Analyse du Coach :</strong> <span id="correctionResult" class="font-medium text-amber-900">...</span></div>
+                    </div>
+                </div>
+
+                <!-- Content Body Card -->
+                <div id="lesson-content-body" class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4 cursor-pointer">
+                    <p class="text-xs text-slate-500">Chargement du contenu de la leçon...</p>
+                </div>
+
+                <!-- Rule Box Card -->
+                <div class="bg-amber-50 border border-amber-200/60 rounded-2xl p-4 space-y-3">
+                    <div class="flex items-center space-x-2 mb-1">
+                        <span class="text-amber-600">💡</span>
+                        <h3 class="text-xs font-bold text-amber-900 uppercase tracking-wide">Règle de la leçon & Coach Prononciation</h3>
+                    </div>
+                    <div id="rule-text" class="text-xs text-amber-800 leading-relaxed">Aucune règle chargée.</div>
+                    
+                    <div class="border-t border-amber-200/60 pt-2 flex items-center justify-between">
+                        <span id="ai-suggestion" class="text-[11px] text-amber-700 italic">Suggestion : Cliquez sur n'importe quel mot pour l'écouter.</span>
+                        <button onclick="loadAISuggestion()" class="text-[11px] bg-amber-600 text-white px-2.5 py-1 rounded-lg font-bold hover:bg-amber-700 transition">Générer une astuce</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- UPGRADED: AI Assistant Sidebar Pane with Expanded Two-Way Toggle & Translation Option -->
+            <section id="right-sidebar" class="w-96 bg-white border-l border-slate-200 flex flex-col shrink-0 transition-all duration-300">
+                <div class="p-4 border-b border-slate-100 flex items-center justify-between">
+                    <div class="flex items-center space-x-1">
+                        <span id="right-sidebar-title" class="text-xs font-bold uppercase tracking-wider text-slate-600 flex items-center space-x-1">
+                            <span>🤖</span> <span>Assistant IA</span>
+                        </span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <span id="ai-status-badge" class="text-[10px] bg-emerald-50 text-emerald-600 font-semibold px-2 py-0.5 rounded">En ligne</span>
+                        <button onclick="toggleRightPane()" title="Minimiser / Restaurer" class="text-slate-500 hover:text-indigo-600 p-2 rounded-lg hover:bg-slate-100 transition text-sm font-bold flex items-center justify-center min-w-[32px] min-h-[32px]">
+                            <span id="right-toggle-icon">»</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="right-sidebar-body" class="flex-1 flex flex-col overflow-hidden">
+                    <div id="ai-chat-box" class="flex-1 p-4 overflow-y-auto space-y-3">
+                        <div class="bg-slate-50 border border-slate-100 p-3.5 rounded-xl text-xs text-slate-700 space-y-1">
+                            <p class="font-bold text-indigo-600">Bienvenue dans votre atelier IA !</p>
+                            <p>Posez vos questions ou utilisez les raccourcis ci-dessous pour explorer la leçon active.</p>
+                        </div>
+                    </div>
+
+                    <!-- Quick Action Chips (Prompt Pills) -->
+                    <div class="px-3 py-2 bg-slate-50 border-t border-slate-100 flex items-center space-x-1 overflow-x-auto text-[11px]">
+                        <button onclick="sendQuickPrompt('Donne-moi un exemple concret avec ce sujet.')" class="bg-white border border-slate-200 text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 px-2.5 py-1 rounded-lg shrink-0 transition font-medium">💡 Exemple</button>
+                        <button onclick="sendQuickPrompt('Explique cette règle plus simplement.')" class="bg-white border border-slate-200 text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 px-2.5 py-1 rounded-lg shrink-0 transition font-medium">✨ Simplifier</button>
+                        <button onclick="sendQuickPrompt('Pose-moi un quiz rapide sur ce module.')" class="bg-white border border-slate-200 text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 px-2.5 py-1 rounded-lg shrink-0 transition font-medium">❓ Quiz</button>
+                    </div>
+
+                    <div class="p-3 border-t border-slate-100">
+                        <div class="flex items-center space-x-2">
+                            <input type="text" id="ai-input" placeholder="Posez une question..." class="flex-1 text-xs px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            <button onclick="toggleChatVoiceInput()" id="ai-mic-btn" title="Parler au lieu d'écrire" class="bg-slate-100 text-slate-700 hover:bg-slate-200 p-2 rounded-xl text-xs transition">🎙️</button>
+                            <button onclick="sendAIChat()" class="bg-indigo-600 text-white p-2.5 rounded-xl text-xs font-bold hover:bg-indigo-700 transition">➔</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Script Integration -->
+    <script>
+        const SUPABASE_URL = 'https://bkawfexaikntyivqvetk.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrYXdmZXhhaWtudHlpdnF2ZXRrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcyMDU3ODAsImV4cCI6MjEwMjc4MTc4MH0.8YYkD8pzn97DeqA-o83KoGQ4yHb6WT1HB4DcoPPAMwA';
+        
+        if (!window.mySupabase) {
+            window.mySupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+                db: { schema: 'French-schema' }
+            });
+        }
+        const db = window.mySupabase;
+        const urlParams = new URLSearchParams(window.location.search);
+
+        let currentPlaybackSpeed = 1.0;
+        let recognition = null;
+        let isRecording = false;
+        let currentPracticeTarget = "";
+
+        const curriculumSequence = [
+            "L'alphabet", "Les nombres", "Noms et prénoms", "L'adresse", 
+            "Objets personnels", "Objets de la classe", "Pronoms personnels sujets", 
+            "Pronoms toniques", "Présent - État & description", "Verbes usuels (être, avoir...)", 
+            "Présentateurs (c', voilà)", "Articles définis / indéfinis", "L'article zéro (Professions)", 
+            "Salutations & Politesse", "Tu ou Vous (Formal/Informal)", "L'heure & Les prix", "L'état civil"
+        ];
+
+        function cleanText(text) {
+            if (!text) return '';
+            if (text.includes('[Notebook sources]')) {
+                text = text.split('[Notebook sources]')[0];
+            }
+            text = text
+                .replaceAll('[]', '')
+                .replaceAll('(cite: 1)', '')
+                .replaceAll('cite: 1', '')
+                .replace(/''/g, "'")
+                .trim();
+
+            const halfLength = Math.floor(text.length / 2);
+            if (halfLength > 10) {
+                const firstHalf = text.substring(0, halfLength).trim();
+                const secondHalf = text.substring(halfLength).trim();
+                if (firstHalf === secondHalf) {
+                    text = firstHalf;
+                }
+            }
+            return text;
+        }
+
+        // --- TWO-WAY PANEL COLLAPSE / EXPAND FUNCTIONS ---
+        function toggleLeftPane() {
+            const sidebar = document.getElementById('left-sidebar');
+            const sidebarBody = document.getElementById('left-sidebar-body');
+            const sidebarTitle = document.getElementById('left-sidebar-title');
+            const toggleBtnText = document.getElementById('left-toggle-icon');
+
+            if (sidebar.classList.contains('w-80')) {
+                sidebar.classList.remove('w-80');
+                sidebar.classList.add('w-14');
+                sidebarBody.style.display = 'none';
+                sidebarTitle.style.display = 'none';
+                toggleBtnText.innerText = '»';
+            } else {
+                sidebar.classList.remove('w-14');
+                sidebar.classList.add('w-80');
+                sidebarBody.style.display = 'flex';
+                sidebarTitle.style.display = 'block';
+                toggleBtnText.innerText = '«';
+            }
+        }
+
+        function toggleRightPane() {
+            const aiPane = document.getElementById('right-sidebar');
+            const aiPaneBody = document.getElementById('right-sidebar-body');
+            const aiPaneTitle = document.getElementById('right-sidebar-title');
+            const statusBadge = document.getElementById('ai-status-badge');
+            const toggleBtnText = document.getElementById('right-toggle-icon');
+
+            if (aiPane.classList.contains('w-96')) {
+                aiPane.classList.remove('w-96');
+                aiPane.classList.add('w-14');
+                aiPaneBody.style.display = 'none';
+                aiPaneTitle.style.display = 'none';
+                statusBadge.style.display = 'none';
+                toggleBtnText.innerText = '«';
+            } else {
+                aiPane.classList.remove('w-14');
+                aiPane.classList.add('w-96');
+                aiPaneBody.style.display = 'flex';
+                aiPaneTitle.style.display = 'flex';
+                statusBadge.style.display = 'inline-block';
+                toggleBtnText.innerText = '»';
+            }
+        }
+
+        function getTopicIcon(category, title) {
+            const cat = (category || '').toLowerCase();
+            const t = (title || '').toLowerCase();
+
+            if (cat.includes('vocab')) return '📚';
+            if (cat.includes('gram')) return '⚡';
+            if (cat.includes('fonction') || cat.includes('communication')) return '💬';
+
+            if (t.includes('verbe') || t.includes('présent') || t.includes('futur') || t.includes('conditionnel')) return '⚙️';
+            if (t.includes('pronom') || t.includes('adjectif') || t.includes('article') || t.includes('préposition')) return '🔗';
+            if (t.includes('lieu') || t.includes('espace') || t.includes('logement')) return '📍';
+            if (t.includes('chiffre') || t.includes('nombre') || t.includes('heure') || t.includes('argent') || t.includes('prix')) return '🔢';
+            
+            return '📖';
+        }
+
+        async function loadSyllabusSidebar(activeTopicTitle) {
+            const containerEl = document.getElementById('syllabus-container');
+            if (!containerEl) return;
+            
+            containerEl.innerHTML = `<p class="text-xs text-indigo-600 font-bold animate-pulse p-2">⏳ Chargement de tous les sujets...</p>`;
+
+            try {
+                let allTopics = [];
+                let step = 1000;
+                for (let i = 0; i < 5000; i += step) {
+                    const { data, error } = await db.from('topics').select('title, english_translation, category, content_path').range(i, i + step - 1);
+                    if (error) throw error;
+                    if (data) allTopics = allTopics.concat(data);
+                    if (data.length < step) break;
+                }
+
+                containerEl.innerHTML = '';
+                const levels = ['A1', 'A2', 'B1', 'B2', 'Général'];
+                
+                levels.forEach(lvl => {
+                    let levelTopics = allTopics.filter(t => (t.category || '').toUpperCase().includes(lvl));
+                    if (levelTopics.length === 0) return;
+
+                    const subGroups = {
+                        'Vocabulaire': levelTopics.filter(t => (t.category || '').toLowerCase().includes('vocab')),
+                        'Grammaire': levelTopics.filter(t => (t.category || '').toLowerCase().includes('gram')),
+                        'Fonctions & Autres': levelTopics.filter(t => {
+                            const c = (t.category || '').toLowerCase();
+                            return !c.includes('vocab') && !c.includes('gram');
+                        })
+                    };
+
+                    const levelDetails = document.createElement('details');
+                    levelDetails.className = 'group bg-slate-50 border border-slate-200 rounded-xl overflow-hidden';
+                    levelDetails.open = true;
+
+                    const summary = document.createElement('summary');
+                    summary.className = 'flex items-center justify-between p-3 font-bold text-xs text-slate-800 cursor-pointer hover:bg-slate-100 select-none';
+                    summary.innerHTML = `
+                        <div class="flex items-center space-x-2">
+                            <span class="text-indigo-600 transition-transform group-open:rotate-90">▶</span>
+                            <span class="uppercase tracking-wider font-extrabold">Niveau ${lvl}</span>
+                        </div>
+                        <span class="bg-indigo-100 text-indigo-700 text-[10px] px-2 py-0.5 rounded-full font-mono">${levelTopics.length}</span>
+                    `;
+                    levelDetails.appendChild(summary);
+
+                    const contentWrapper = document.createElement('div');
+                    contentWrapper.className = 'p-2 space-y-2 bg-white border-t border-slate-100';
+
+                    Object.keys(subGroups).forEach(subName => {
+                        const items = subGroups[subName];
+                        if (items.length === 0) return;
+
+                        items.sort((a, b) => {
+                            const cleanA = cleanText(a.title.split('[')[0]);
+                            const cleanB = cleanText(b.title.split('[')[0]);
+                            const indexA = curriculumSequence.indexOf(cleanA);
+                            const indexB = curriculumSequence.indexOf(cleanB);
+                            if (indexA === -1 && indexB === -1) return cleanA.localeCompare(cleanB);
+                            if (indexA === -1) return 1;
+                            if (indexB === -1) return -1;
+                            return indexA - indexB;
+                        });
+
+                        const subSubContainer = document.createElement('div');
+                        subSubContainer.className = 'space-y-1 mb-2 last:mb-0';
+
+                        const subHeader = document.createElement('div');
+                        subHeader.className = 'text-[10px] font-bold text-slate-400 uppercase tracking-wider px-2 py-1 flex items-center space-x-1';
+                        subHeader.innerHTML = `<span>${subName === 'Vocabulaire' ? '📚' : subName === 'Grammaire' ? '⚡' : '💬'}</span><span>${subName}</span>`;
+                        subSubContainer.appendChild(subHeader);
+
+                        items.forEach(t => {
+                            const cleanTitle = cleanText(t.title.split('[')[0]);
+                            const englishMeaning = t.english_translation || cleanTitle;
+                            const isActive = cleanTitle.toLowerCase() === activeTopicTitle.toLowerCase();
+                            const icon = getTopicIcon(t.category, cleanTitle);
+
+                            const item = document.createElement('a');
+                            item.href = `lesson.html?topic=${encodeURIComponent(cleanTitle)}`;
+                            item.className = `topic-item p-2 rounded-lg text-xs font-medium transition flex items-center space-x-2 ${isActive ? 'bg-indigo-600 text-white shadow-sm' : 'bg-slate-50 text-slate-700 hover:bg-indigo-50 border border-slate-100'}`;
+                            item.setAttribute('data-fr', cleanTitle.toLowerCase());
+                            item.setAttribute('data-en', englishMeaning.toLowerCase());
+
+                            item.innerHTML = `
+                                <span class="shrink-0">${icon}</span>
+                                <div class="truncate flex-1">
+                                    <div class="font-bold truncate">${cleanTitle}</div>
+                                    <div class="text-[10px] ${isActive ? 'text-indigo-200' : 'text-slate-400'} truncate">${englishMeaning}</div>
+                                </div>
+                            `;
+                            subSubContainer.appendChild(item);
+                        });
+
+                        contentWrapper.appendChild(subSubContainer);
+                    });
+
+                    levelDetails.appendChild(contentWrapper);
+                    containerEl.appendChild(levelDetails);
+                });
+            } catch (err) {
+                console.error("Error loading syllabus:", err);
+                containerEl.innerHTML = `<p class="text-xs text-rose-500 p-2">Erreur de chargement du syllabus.</p>`;
+            }
+        }
+
+        async function loadLessonFromDatabase() {
+            const rawParam = urlParams.get('topic') || "L'heure & Les prix";
+            let cleanParam = cleanText(decodeURIComponent(rawParam).split('[')[0]);
+            const currentTopicTitle = cleanParam;
+            const cleanTopicQuery = currentTopicTitle.replace(/[-–]/g, ' ').trim().toLowerCase();
+
+            currentPracticeTarget = ""; 
+
+            await loadSyllabusSidebar(currentTopicTitle);
+
+            let allTopics = [];
+            let step = 1000;
+            for (let i = 0; i < 5000; i += step) {
+                const { data, error } = await db.from('topics').select('*').range(i, i + step - 1);
+                if (error) break;
+                if (data) allTopics = allTopics.concat(data);
+                if (data.length < step) break;
+            }
+
+            let data = null;
+            if (allTopics.length > 0) {
+                data = allTopics.find(t => {
+                    const cleanDbTitle = cleanText(t.title.split('[')[0]).replace(/[-–\s'‘’]/g, '').toLowerCase();
+                    const queryTitle = cleanTopicQuery.replace(/[-–\s'‘’]/g, '');
+                    return cleanDbTitle === queryTitle;
+                });
+            }
+
+            const titleEl = document.getElementById('atelier-title');
+            const categoryEl = document.getElementById('atelier-category');
+            const contentBodyEl = document.getElementById('lesson-content-body');
+            const ruleTextEl = document.getElementById('rule-text');
+
+            if (data) {
+                const displayedTitle = cleanText(data.title.split('[')[0]);
+                if (titleEl) titleEl.innerText = displayedTitle;
+                if (categoryEl) categoryEl.innerText = `Catégorie: ${data.category || 'Général'}`;
+
+                if (data.content_path && contentBodyEl) {
+                    let cleanPath = cleanText(data.content_path.split('[')[0]);
+                    const fetchPath = cleanPath.startsWith('/') ? cleanPath : '/' + cleanPath;
+                    try {
+                        const response = await fetch(fetchPath);
+                        if (response.ok) {
+                            let htmlContent = await response.text();
+                            contentBodyEl.innerHTML = cleanText(htmlContent);
+
+                            if (currentTopicTitle.toLowerCase().includes('heure')) {
+                                bindClockModuleEvents(contentBodyEl);
+                            }
+
+                            if (currentTopicTitle.toLowerCase().includes('météo') || currentTopicTitle.toLowerCase().includes('meteo')) {
+                                bindMeteoModuleEvents(contentBodyEl);
+                            }
+                        } else {
+                            contentBodyEl.innerHTML = `<p class="text-xs text-amber-600">Fichier de leçon introuvable.</p>`;
+                        }
+                    } catch (err) {
+                        console.error('Fetch error:', err);
+                    }
+                }
+                if (data.rule_html && ruleTextEl) {
+                    ruleTextEl.innerHTML = cleanText(data.rule_html);
+                }
+            } else {
+                if (titleEl) titleEl.innerText = currentTopicTitle;
+            }
+        }
+
+        function bindClockModuleEvents(container) {
+            const hourInput = container.querySelector("#fc-hour");
+            const minInput = container.querySelector("#fc-min");
+            const outputCurrent = container.querySelector("#fc-out-current");
+
+            if (!hourInput || !minInput || !outputCurrent) return;
+
+            const hours = ["", "une heure", "deux heures", "trois heures", "quatre heures", "cinq heures", "six heures", "sept heures", "huit heures", "neuf heures", "dix heures", "onze heures", "douze heures"];
+            const numbers = ["zéro", "une", "deux", "trois", "quatre", "cinq", "six", "sept", "huit", "neuf", "dix", "onze", "douze", "treize", "quatorze", "quinze", "seize", "dix-sept", "dix-huit", "dix-neuf", "vingt", "vingt et un", "vingt-deux", "vingt-trois", "vingt-quatre", "vingt-cinq", "vingt-six", "vingt-sept", "vingt-huit", "vingt-neuf", "trente", "trente et un", "trente-deux", "trente-trois", "trente-quatre", "trente-cinq", "trente-six", "trente-sept", "trente-huit", "trente-neuf", "quarante", "quarante et un", "quarante-deux", "quarante-trois", "quarante-quatre", "quarante-cinq", "quarante-six", "quarante-sept", "quarante-huit", "quarante-neuf", "cinquante", "cinquante et un", "cinquante-deux", "cinquante-trois", "cinquante-quatre", "cinquante-cinq", "cinquante-six", "cinquante-sept", "cinquante-huit", "cinquante-neuf"];
+
+            function getPeriod(hour) {
+                if (hour >= 5 && hour < 12) return "du matin";
+                if (hour >= 12 && hour < 18) return "de l'après-midi";
+                return "du soir";
+            }
+
+            function updateClock() {
+                let h = parseInt(hourInput.value, 10);
+                let m = parseInt(minInput.value, 10);
+
+                if (isNaN(h)) h = 0;
+                if (isNaN(m)) m = 0;
+
+                h = Math.max(0, Math.min(23, h));
+                m = Math.max(0, Math.min(59, m));
+
+                if (h === 0 && m === 0) {
+                    outputCurrent.textContent = "Il est minuit pile.";
+                    currentPracticeTarget = outputCurrent.textContent;
+                    return;
+                }
+                if (h === 12 && m === 0) {
+                    outputCurrent.textContent = "Il est midi pile.";
+                    currentPracticeTarget = outputCurrent.textContent;
+                    return;
+                }
+
+                let h12 = h % 12;
+                if (h12 === 0) h12 = 12;
+
+                let timeStr = "";
+                if (m === 0) {
+                    timeStr = `${hours[h12]} pile ${getPeriod(h)}`;
+                } else if (m === 15) {
+                    timeStr = `${hours[h12]} et quart ${getPeriod(h)}`;
+                } else if (m === 30) {
+                    timeStr = `${hours[h12]} et demie ${getPeriod(h)}`;
+                } else if (m === 45) {
+                    let nextHour = (h12 % 12) + 1;
+                    let nextPeriod = (nextHour === 1 && h >= 11 && h < 12) ? "de l'après-midi" : getPeriod(h);
+                    timeStr = `${hours[nextHour]} moins le quart ${nextPeriod}`;
+                } else if (m > 45) {
+                    let nextHour = (h12 % 12) + 1;
+                    let diff = 60 - m;
+                    timeStr = `${hours[nextHour]} moins ${numbers[diff]} ${getPeriod(h)}`;
+                } else {
+                    timeStr = `${hours[h12]} ${numbers[m]} ${getPeriod(h)}`;
+                }
+
+                outputCurrent.textContent = `Il est ${timeStr}.`;
+                currentPracticeTarget = outputCurrent.textContent;
+            }
+
+            ['input', 'change', 'keyup'].forEach(evt => {
+                hourInput.addEventListener(evt, updateClock);
+                minInput.addEventListener(evt, updateClock);
+            });
+
+            updateClock();
+        }
+
+        const contentBodyNode = document.getElementById('lesson-content-body');
+        if (contentBodyNode) {
+            contentBodyNode.addEventListener('click', (e) => {
+                const card = e.target.closest('.cursor-pointer') || e.target.closest('#fc-out-current') || e.target.closest('#fc-out-event') || e.target.closest('p');
+                if (!card) return;
+
+                let targetPhrase = card.innerText;
+                targetPhrase = cleanText(targetPhrase);
+
+                if (targetPhrase && targetPhrase.length < 150) {
+                    currentPracticeTarget = targetPhrase;
+                    const titleEl = document.getElementById('atelier-title');
+                    if (titleEl) {
+                        titleEl.innerText = targetPhrase;
+                    }
+                }
+            });
+        }
+
+        window.speakText = function(text) {
+            if (!('speechSynthesis' in window)) return;
+            window.speechSynthesis.cancel();
+            
+            const plainText = text
+                .replace(/<[^>]*>/g, '')
+                .replace(/\*\*/g, '')
+                .replace(/\*/g, '')
+                .replace(/[_#`-]/g, ' ')
+                .replace(/\s+/g, ' ')
+                .trim();
+
+            if (plainText && plainText.length < 150) {
+                currentPracticeTarget = plainText;
+                const titleEl = document.getElementById('atelier-title');
+                if (titleEl) {
+                    titleEl.innerText = plainText;
+                }
+            }
+
+            const utterance = new SpeechSynthesisUtterance(plainText);
+            utterance.lang = 'fr-FR';
+            utterance.rate = currentPlaybackSpeed;
+            window.speechSynthesis.speak(utterance);
+        };
+
+        function playNativeAudio() {
+            const title = document.getElementById('atelier-title')?.innerText || '';
+            speakText(currentPracticeTarget || title);
+        }
+
+        function adjustSpeed() {
+            const speeds = [1.0, 0.75, 0.5];
+            const currentIndex = speeds.indexOf(currentPlaybackSpeed);
+            currentPlaybackSpeed = speeds[(currentIndex + 1) % speeds.length];
+            const speedBtn = document.getElementById('speed-btn');
+            if (speedBtn) speedBtn.innerText = `⚡ ${currentPlaybackSpeed}x`;
+        }
+
+        function toggleSpeechRecognition() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) {
+                alert("La reconnaissance vocale nécessite Google Chrome ou un navigateur compatible.");
+                return;
+            }
+
+            const recordBtn = document.getElementById('rec-btn');
+            const feedbackBox = document.getElementById('feedbackBox');
+            const transcriptionResult = document.getElementById('transcriptionResult');
+            const correctionResult = document.getElementById('correctionResult');
+            
+            const activeTarget = currentPracticeTarget || document.getElementById('atelier-title')?.innerText || '';
+
+            if (!isRecording) {
+                try {
+                    recognition = new SpeechRecognition();
+                    recognition.lang = 'fr-FR';
+                    recognition.interimResults = false;
+
+                    recognition.onstart = () => {
+                        isRecording = true;
+                        if (recordBtn) {
+                            recordBtn.textContent = "⏹️ Arrêter l'écoute";
+                            recordBtn.className = "bg-amber-600 text-white border border-amber-700 text-xs px-3 py-2 rounded-xl font-bold transition shadow-sm";
+                        }
+                        if (feedbackBox) feedbackBox.classList.remove('hidden');
+                        if (transcriptionResult) transcriptionResult.textContent = "Écoute en cours...";
+                        if (correctionResult) correctionResult.textContent = "Analysez la prononciation...";
+                    };
+
+                    recognition.onresult = async (event) => {
+                        const speechToText = event.results[0][0].transcript;
+                        if (transcriptionResult) transcriptionResult.textContent = speechToText;
+                        if (correctionResult) correctionResult.innerHTML = "🤖 Le coach analyse les nuances de votre prononciation...";
+
+                        const apiUrl = localStorage.getItem('ai_api_url') || "https://api.groq.com/openai/v1/chat/completions";
+                        const apiKey = localStorage.getItem('ai_api_key') || "";
+                        const modelName = localStorage.getItem('ai_model_name') || "openai/gpt-oss-120b";
+
+                        if (!apiKey) {
+                            if (correctionResult) correctionResult.innerHTML = `Reconnu : "${speechToText}" (Configurez votre clé API pour un feedback détaillé).`;
+                            return;
+                        }
+
+                        try {
+                            const apiResponse = await fetch(apiUrl, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Authorization': `Bearer ${apiKey}`
+                                },
+                                body: JSON.stringify({
+                                    model: modelName,
+                                    messages: [
+                                        {
+                                            role: "system",
+                                            content: "You are an expert French pronunciation coach. Compare the target phrase the student was supposed to say with what the speech recognition system actually picked up. Give a short, encouraging evaluation in French (1-2 sentences) noting if it was correct or where they can improve."
+                                        },
+                                        {
+                                            role: "user",
+                                            content: `Target phrase: "${activeTarget}"\nWhat the student said: "${speechToText}"`
+                                        }
+                                    ],
+                                    temperature: 0.3
+                                })
+                            });
+
+                            const data = await apiResponse.json();
+                            let coachFeedback = data.choices?.[0]?.message?.content || "Bon effort !";
+                            coachFeedback = cleanText(coachFeedback);
+
+                            if (correctionResult) {
+                                correctionResult.innerHTML = coachFeedback;
+                            }
+                        } catch (err) {
+                            console.error("AI Pronunciation analysis error:", err);
+                            if (correctionResult) {
+                                correctionResult.innerHTML = `Reconnu : "${speechToText}". (Erreur d'analyse IA)`;
+                            }
+                        }
+                    };
+
+                    recognition.onerror = (event) => {
+                        console.error("Speech recognition error:", event.error);
+                        if (transcriptionResult) transcriptionResult.textContent = "Erreur : " + event.error;
+                        stopRecognitionUI();
+                    };
+
+                    recognition.onend = () => {
+                        stopRecognitionUI();
+                    };
+
+                    recognition.start();
+                } catch (err) {
+                    console.error("Failed to start speech recognition:", err);
+                    alert("Impossible de démarrer le microphone. Vérifiez vos autorisations.");
+                    stopRecognitionUI();
+                }
+            } else {
+                if (recognition) recognition.stop();
+                stopRecognitionUI();
+            }
+        }
+
+        function stopRecognitionUI() {
+            isRecording = false;
+            const recordBtn = document.getElementById('rec-btn');
+            if (recordBtn) {
+                recordBtn.textContent = "🎙️ Enregistrer & Vérifier";
+                recordBtn.className = "bg-rose-50 text-rose-600 border border-rose-200 text-xs px-3 py-2 rounded-xl font-bold hover:bg-rose-100 transition";
+            }
+        }
+
+        let chatSpeechRecognition = null;
+        let isChatListening = false;
+
+        window.toggleChatVoiceInput = function() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) {
+                alert("La reconnaissance vocale nécessite Google Chrome.");
+                return;
+            }
+
+            const micBtn = document.getElementById('ai-mic-btn');
+            const inputField = document.getElementById('ai-input');
+
+            if (!isChatListening) {
+                chatSpeechRecognition = new SpeechRecognition();
+                chatSpeechRecognition.lang = 'fr-FR';
+                chatSpeechRecognition.interimResults = false;
+
+                chatSpeechRecognition.onstart = () => {
+                    isChatListening = true;
+                    if (micBtn) {
+                        micBtn.innerHTML = "⏹️";
+                        micBtn.className = "bg-rose-600 text-white p-2 rounded-xl text-xs transition shadow-sm animate-pulse";
+                    }
+                    if (inputField) inputField.placeholder = "Écoute en cours (parlez en français)...";
+                };
+
+                chatSpeechRecognition.onresult = (event) => {
+                    const spokenText = event.results[0][0].transcript;
+                    if (inputField) inputField.value = spokenText;
+                };
+
+                chatSpeechRecognition.onerror = () => {
+                    stopChatMicUI();
+                };
+
+                chatSpeechRecognition.onend = () => {
+                    stopChatMicUI();
+                };
+
+                chatSpeechRecognition.start();
+            } else {
+                if (chatSpeechRecognition) chatSpeechRecognition.stop();
+                stopChatMicUI();
+            }
+        };
+
+        function stopChatMicUI() {
+            isChatListening = false;
+            const micBtn = document.getElementById('ai-mic-btn');
+            const inputField = document.getElementById('ai-input');
+            if (micBtn) {
+                micBtn.innerHTML = "🎙️";
+                micBtn.className = "bg-slate-100 text-slate-700 hover:bg-slate-200 p-2 rounded-xl text-xs transition";
+            }
+            if (inputField) inputField.placeholder = "Posez une question...";
+        }
+
+        function sendQuickPrompt(promptText) {
+            const input = document.getElementById('ai-input');
+            if (input) {
+                input.value = promptText;
+                sendAIChat();
+            }
+        }
+
+        function saveProgress() {
+            const currentTopic = document.getElementById('atelier-title')?.innerText || 'module';
+            localStorage.setItem('fr_progress_' + currentTopic, 'completed');
+            alert(`💾 Progression pour "${currentTopic}" sauvegardée !`);
+        }
+
+        let isTranslatedToEnglish = false;
+
+        async function toggleTranslation() {
+            const contentBody = document.getElementById('lesson-content-body');
+            const titleEl = document.getElementById('atelier-title');
+            if (!contentBody) return;
+
+            if (isTranslatedToEnglish) {
+                loadLessonFromDatabase();
+                isTranslatedToEnglish = false;
+                return;
+            }
+
+            const originalText = contentBody.innerText;
+            const originalTitle = titleEl ? titleEl.innerText : "";
+            contentBody.innerHTML = `<p class="text-xs text-indigo-600 font-bold animate-pulse p-4">⏳ Translating lesson into English...</p>`;
+
+            const apiUrl = localStorage.getItem('ai_api_url') || "https://api.groq.com/openai/v1/chat/completions";
+            const apiKey = localStorage.getItem('ai_api_key') || "";
+            const modelName = localStorage.getItem('ai_model_name') || "openai/gpt-oss-120b";
+
+            if (!apiKey) {
+                alert("Please configure your AI API key in the admin panel to use live translation.");
+                loadLessonFromDatabase();
+                return;
+            }
+
+            try {
+                const apiResponse = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${apiKey}`
+                    },
+                    body: JSON.stringify({
+                        model: modelName,
+                        messages: [
+                            {
+                                role: "system",
+                                content: "You are a professional translator. Translate the following French lesson content accurately into clear English, preserving formatting, lists, and interactive cues where possible."
+                            },
+                            { role: "user", content: `Title: ${originalTitle}\n\nContent:\n${originalText}` }
+                        ],
+                        temperature: 0.3
+                    })
+                });
+
+                const data = await apiResponse.json();
+                let translatedContent = data.choices?.[0]?.message?.content || "Translation failed.";
+                translatedContent = cleanText(translatedContent);
+
+                contentBody.innerHTML = `
+                    <div class="bg-indigo-50 border border-indigo-100 p-4 rounded-xl text-xs text-slate-800 space-y-2">
+                        <div class="font-bold text-indigo-700 uppercase tracking-wide mb-2">🌐 English Translation View</div>
+                        <div class="leading-relaxed space-y-2">${translatedContent.replace(/\n/g, '<br>')}</div>
+                    </div>
+                `;
+                isTranslatedToEnglish = true;
+            } catch (err) {
+                console.error("Translation error:", err);
+                alert("Translation error: " + err.message);
+                loadLessonFromDatabase();
+            }
+        }
+
+        function bindMeteoModuleEvents(container) {
+            const daySelect = container.querySelector("#meteo-day");
+            const monthSelect = container.querySelector("#meteo-month");
+            const condSelect = container.querySelector("#meteo-condition");
+            const output = container.querySelector("#meteo-output");
+
+            if (!daySelect || !monthSelect || !condSelect || !output) return;
+
+            function updateMeteo() {
+                const dayText = daySelect.value;
+                const monthText = monthSelect.value;
+                const condText = condSelect.value;
+                
+                const vowelMonths = ['avril', 'août', 'octobre'];
+                const prefix = vowelMonths.includes(monthText.toLowerCase()) ? "d'" : "de ";
+                
+                const result = `Aujourd'hui, nous sommes ${dayText} ${prefix}${monthText} et ${condText.toLowerCase()}.`;
+                output.textContent = result;
+                currentPracticeTarget = result;
+            }
+
+            daySelect.addEventListener("change", updateMeteo);
+            monthSelect.addEventListener("change", updateMeteo);
+            condSelect.addEventListener("change", updateMeteo);
+            updateMeteo();
+        }
+
+        function exportLesson() {
+            const title = document.getElementById('atelier-title')?.innerText || 'lecon';
+            const content = document.getElementById('lesson-content-body')?.innerText || '';
+            const blob = new Blob([`# ${title}\n\n${content}`], { type: 'text/markdown' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${title}-atelier.md`;
+            a.click();
+        }
+
+        function loadAISuggestion() {
+            const suggestions = [
+                "Astuce : Remarquez la différence entre 'Il est...' (What time is it?) et 'Il commence à...' (At what time something happens).",
+                "Défi : Utilisez l'enregistreur vocal pour répéter les deux formes à voix haute.",
+                "Règle : Utilisez la préposition 'à' pour indiquer l'heure d'un événement."
+            ];
+            const aiSuggestionEl = document.getElementById('ai-suggestion');
+            if (aiSuggestionEl) aiSuggestionEl.innerText = suggestions[Math.floor(Math.random() * suggestions.length)];
+        }
+
+        async function translateAIResponse(buttonElement) {
+            const container = buttonElement.closest('.ai-message-card');
+            const textContent = container.getAttribute('data-reply-text');
+            const translationContainer = container.querySelector('.ai-translation-box');
+
+            if (!translationContainer) return;
+
+            if (!translationContainer.classList.contains('hidden')) {
+                translationContainer.classList.add('hidden');
+                buttonElement.innerText = '🌐 Traduire';
+                return;
+            }
+
+            buttonElement.innerText = '⏳ Traduction...';
+
+            const apiUrl = localStorage.getItem('ai_api_url') || "https://api.groq.com/openai/v1/chat/completions";
+            const apiKey = localStorage.getItem('ai_api_key') || "";
+            const modelName = localStorage.getItem('ai_model_name') || "openai/gpt-oss-120b";
+
+            try {
+                const apiResponse = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${apiKey}`
+                    },
+                    body: JSON.stringify({
+                        model: modelName,
+                        messages: [
+                            {
+                                role: "system",
+                                content: "You are a professional translator. Translate the following French text into clear, natural English. Provide only the translation without extra conversational filler."
+                            },
+                            { role: "user", content: textContent }
+                        ],
+                        temperature: 0.3
+                    })
+                });
+
+                const data = await apiResponse.json();
+                if (data.error) throw new Error(data.error.message || 'Erreur API');
+
+                let translationText = data.choices?.[0]?.message?.content || "Translation not available.";
+                translationText = cleanText(translationText);
+
+                translationContainer.innerHTML = `<strong class="text-slate-600 block mb-1">English Translation:</strong> ${translationText}`;
+                translationContainer.classList.remove('hidden');
+                buttonElement.innerText = '🌐 Masquer';
+
+            } catch (err) {
+                console.error("Translation error:", err);
+                translationContainer.innerHTML = `<span class="text-rose-600">Erreur de traduction : ${err.message}</span>`;
+                translationContainer.classList.remove('hidden');
+                buttonElement.innerText = '🌐 Traduire';
+            }
+        }
+
+        async function sendAIChat() {
+            const input = document.getElementById('ai-input');
+            const chatBox = document.getElementById('ai-chat-box');
+            if (!input || !input.value.trim() || !chatBox) return;
+
+            const userText = cleanText(input.value.trim());
+            const currentTopic = document.getElementById('atelier-title')?.innerText || 'Leçon générale';
+
+            const userMsg = document.createElement('div');
+            userMsg.className = 'bg-indigo-50 border border-indigo-100 p-3 rounded-xl text-xs text-indigo-900 ml-4 shadow-sm';
+            userMsg.innerText = userText;
+            chatBox.appendChild(userMsg);
+
+            input.value = '';
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            const typingMsg = document.createElement('div');
+            typingMsg.id = 'ai-typing';
+            typingMsg.className = 'bg-slate-50 border border-slate-100 p-3 rounded-xl text-xs text-slate-500 mr-4 italic';
+            typingMsg.innerText = '🤖 L\'assistant réfléchit...';
+            chatBox.appendChild(typingMsg);
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            const apiUrl = localStorage.getItem('ai_api_url') || "https://api.groq.com/openai/v1/chat/completions";
+            const apiKey = localStorage.getItem('ai_api_key') || "";
+            const modelName = localStorage.getItem('ai_model_name') || "openai/gpt-oss-120b";
+
+            if (!apiKey) {
+                document.getElementById('ai-typing')?.remove();
+                const errorMsg = document.createElement('div');
+                errorMsg.className = 'bg-rose-50 border border-rose-100 p-3 rounded-xl text-xs text-rose-700 mr-4 shadow-sm';
+                errorMsg.innerText = "Erreur : Aucune clé API globale n'a été configurée par l'administrateur dans le panneau d'administration.";
+                chatBox.appendChild(errorMsg);
+                return;
+            }
+
+            try {
+                const apiResponse = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${apiKey}`
+                    },
+                    body: JSON.stringify({
+                        model: modelName,
+                        messages: [
+                            {
+                                role: "system",
+                                content: `You are an expert French language tutor. The student is studying: "${currentTopic}". Structure your response cleanly using short paragraphs or bullet points. Avoid massive walls of plain text. Highlight key terms in bold.`
+                            },
+                            { role: "user", content: userText }
+                        ],
+                        temperature: 0.7
+                    })
+                });
+
+                const data = await apiResponse.json();
+                if (data.error) throw new Error(data.error.message || 'Erreur API');
+
+                let aiReply = data.choices?.[0]?.message?.content || "Réponse non disponible.";
+                document.getElementById('ai-typing')?.remove();
+                aiReply = cleanText(aiReply);
+
+                const formattedHtml = aiReply
+                    .replace(/\*\*(.*?)\*\*/g, '<strong class="text-slate-900">$1</strong>')
+                    .replace(/\n/g, '<br>');
+
+                const aiMsg = document.createElement('div');
+                aiMsg.className = 'ai-message-card bg-slate-50 border border-slate-200 p-3.5 rounded-2xl text-xs text-slate-700 mr-4 shadow-sm space-y-2 relative';
+                aiMsg.setAttribute('data-reply-text', aiReply);
+                aiMsg.innerHTML = `
+                    <div class="flex items-center justify-between border-b border-slate-200/60 pb-1.5 mb-1.5">
+                        <span class="font-bold text-indigo-600 flex items-center space-x-1">
+                            <span>🤖</span> <span>Correcteur IA</span>
+                        </span>
+                        <div class="flex items-center space-x-1.5">
+                            <button onclick="translateAIResponse(this)" class="text-[10px] bg-white border border-slate-200 px-2 py-0.5 rounded font-medium text-slate-600 hover:bg-slate-100 transition">🌐 Traduire</button>
+                            <button onclick="speakText(this.getAttribute('data-speech'))" data-speech="${aiReply.replace(/"/g, '&quot;')}" title="Écouter la réponse" class="p-1 hover:bg-slate-200 rounded text-slate-600 transition">🔊</button>
+                            <button onclick="navigator.clipboard.writeText(this.getAttribute('data-copy'))" data-copy="${aiReply.replace(/"/g, '&quot;')}" title="Copier le texte" class="p-1 hover:bg-slate-200 rounded text-slate-600 transition">📋</button>
+                        </div>
+                    </div>
+                    <div class="space-y-1.5 leading-relaxed">
+                        ${formattedHtml}
+                    </div>
+                    <div class="ai-translation-box hidden mt-2 pt-2 border-t border-slate-200/60 text-slate-500 italic bg-slate-100/60 p-2 rounded-lg"></div>
+                `;
+                chatBox.appendChild(aiMsg);
+                chatBox.scrollTop = chatBox.scrollHeight;
+
+            } catch (err) {
+                document.getElementById('ai-typing')?.remove();
+                const errorMsg = document.createElement('div');
+                errorMsg.className = 'bg-rose-50 border border-rose-100 p-3 rounded-xl text-xs text-rose-700 mr-4 shadow-sm';
+                errorMsg.innerText = "Erreur de connexion : " + err.message;
+                chatBox.appendChild(errorMsg);
+            }
+        }
+
+        const aiInputNode = document.getElementById('ai-input');
+        if (aiInputNode) {
+            aiInputNode.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    sendAIChat();
+                }
+            });
+        }
+
+        // --- BILINGUAL SYLLABUS SEARCH FILTER ---
+        const syllabusSearchInput = document.getElementById('syllabus-search');
+        if (syllabusSearchInput) {
+            syllabusSearchInput.addEventListener('input', (e) => {
+                const query = e.target.value.toLowerCase().trim();
+                const syllabusContainer = document.getElementById('syllabus-container');
+                if (!syllabusContainer) return;
+
+                const detailsElements = syllabusContainer.querySelectorAll('details');
+                
+                detailsElements.forEach(details => {
+                    const topicLinks = details.querySelectorAll('.topic-item');
+                    let hasVisibleMatch = false;
+
+                    topicLinks.forEach(link => {
+                        const frenchName = link.getAttribute('data-fr') || '';
+                        const englishName = link.getAttribute('data-en') || '';
+
+                        if (frenchName.includes(query) || englishName.includes(query)) {
+                            link.style.display = 'flex';
+                            hasVisibleMatch = true;
+                        } else {
+                            link.style.display = 'none';
+                        }
+                    });
+
+                    if (hasVisibleMatch || query === '') {
+                        details.style.display = 'block';
+                        if (query !== '') {
+                            details.open = true;
+                        }
+                    } else {
+                        details.style.display = 'none';
+                    }
+                });
+            });
+        }
+
+        loadLessonFromDatabase();
+    </script>
+</body>
+</html>
