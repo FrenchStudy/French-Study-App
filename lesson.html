@@ -68,7 +68,7 @@
                     </div>
                 </div>
 
-                <!-- Interactive Tools Bar with integrated zero-scroll Speech Recognition Feedback -->
+                <!-- Interactive Tools Bar -->
                 <div class="bg-white border border-slate-200 p-4 rounded-2xl shadow-sm space-y-3">
                     <div class="flex items-center justify-between flex-wrap gap-2">
                         <div class="flex items-center space-x-2">
@@ -112,7 +112,7 @@
                 </div>
             </div>
 
-            <!-- UPGRADED: AI Assistant Sidebar Pane with Expanded Two-Way Toggle & Translation Option -->
+            <!-- AI Assistant Sidebar Pane -->
             <section id="right-sidebar" class="w-96 bg-white border-l border-slate-200 flex flex-col shrink-0 transition-all duration-300">
                 <div class="p-4 border-b border-slate-100 flex items-center justify-between">
                     <div class="flex items-center space-x-1">
@@ -136,7 +136,7 @@
                         </div>
                     </div>
 
-                    <!-- Quick Action Chips (Prompt Pills) -->
+                    <!-- Quick Action Chips -->
                     <div class="px-3 py-2 bg-slate-50 border-t border-slate-100 flex items-center space-x-1 overflow-x-auto text-[11px]">
                         <button onclick="sendQuickPrompt('Donne-moi un exemple concret avec ce sujet.')" class="bg-white border border-slate-200 text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 px-2.5 py-1 rounded-lg shrink-0 transition font-medium">💡 Exemple</button>
                         <button onclick="sendQuickPrompt('Explique cette règle plus simplement.')" class="bg-white border border-slate-200 text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 px-2.5 py-1 rounded-lg shrink-0 transition font-medium">✨ Simplifier</button>
@@ -152,7 +152,6 @@
                     </div>
                 </div>
             </section>
-
         </main>
     </div>
 
@@ -414,7 +413,12 @@
 
                 if (data.content_path && contentBodyEl) {
                     let cleanPath = cleanText(data.content_path.split('[')[0]);
-                    const fetchPath = cleanPath.startsWith('/') ? cleanPath : '/' + cleanPath;
+                    
+                    // --- GitHub Pages Compatibility Path Fix ---
+                    const isGitHubPages = window.location.hostname.includes('github.io');
+                    const repoPrefix = isGitHubPages ? '/French-Study-App' : '';
+                    const fetchPath = cleanPath.startsWith('/') ? repoPrefix + cleanPath : repoPrefix + '/' + cleanPath;
+
                     try {
                         const response = await fetch(fetchPath);
                         if (response.ok) {
@@ -429,7 +433,7 @@
                                 bindMeteoModuleEvents(contentBodyEl);
                             }
                         } else {
-                            contentBodyEl.innerHTML = `<p class="text-xs text-amber-600">Fichier de leçon introuvable.</p>`;
+                            contentBodyEl.innerHTML = `<p class="text-xs text-amber-600">Fichier de leçon introuvable (${fetchPath}).</p>`;
                         }
                     } catch (err) {
                         console.error('Fetch error:', err);
@@ -871,63 +875,6 @@
             if (aiSuggestionEl) aiSuggestionEl.innerText = suggestions[Math.floor(Math.random() * suggestions.length)];
         }
 
-        async function translateAIResponse(buttonElement) {
-            const container = buttonElement.closest('.ai-message-card');
-            const textContent = container.getAttribute('data-reply-text');
-            const translationContainer = container.querySelector('.ai-translation-box');
-
-            if (!translationContainer) return;
-
-            if (!translationContainer.classList.contains('hidden')) {
-                translationContainer.classList.add('hidden');
-                buttonElement.innerText = '🌐 Traduire';
-                return;
-            }
-
-            buttonElement.innerText = '⏳ Traduction...';
-
-            const apiUrl = localStorage.getItem('ai_api_url') || "https://api.groq.com/openai/v1/chat/completions";
-            const apiKey = localStorage.getItem('ai_api_key') || "";
-            const modelName = localStorage.getItem('ai_model_name') || "openai/gpt-oss-120b";
-
-            try {
-                const apiResponse = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${apiKey}`
-                    },
-                    body: JSON.stringify({
-                        model: modelName,
-                        messages: [
-                            {
-                                role: "system",
-                                content: "You are a professional translator. Translate the following French text into clear, natural English. Provide only the translation without extra conversational filler."
-                            },
-                            { role: "user", content: textContent }
-                        ],
-                        temperature: 0.3
-                    })
-                });
-
-                const data = await apiResponse.json();
-                if (data.error) throw new Error(data.error.message || 'Erreur API');
-
-                let translationText = data.choices?.[0]?.message?.content || "Translation not available.";
-                translationText = cleanText(translationText);
-
-                translationContainer.innerHTML = `<strong class="text-slate-600 block mb-1">English Translation:</strong> ${translationText}`;
-                translationContainer.classList.remove('hidden');
-                buttonElement.innerText = '🌐 Masquer';
-
-            } catch (err) {
-                console.error("Translation error:", err);
-                translationContainer.innerHTML = `<span class="text-rose-600">Erreur de traduction : ${err.message}</span>`;
-                translationContainer.classList.remove('hidden');
-                buttonElement.innerText = '🌐 Traduire';
-            }
-        }
-
         async function sendAIChat() {
             const input = document.getElementById('ai-input');
             const chatBox = document.getElementById('ai-chat-box');
@@ -959,7 +906,7 @@
                 document.getElementById('ai-typing')?.remove();
                 const errorMsg = document.createElement('div');
                 errorMsg.className = 'bg-rose-50 border border-rose-100 p-3 rounded-xl text-xs text-rose-700 mr-4 shadow-sm';
-                errorMsg.innerText = "Erreur : Aucune clé API globale n'a été configurée par l'administrateur dans le panneau d'administration.";
+                errorMsg.innerText = "Erreur : Aucune clé API globale n'a été configurée.";
                 chatBox.appendChild(errorMsg);
                 return;
             }
@@ -976,7 +923,7 @@
                         messages: [
                             {
                                 role: "system",
-                                content: `You are an expert French language tutor. The student is studying: "${currentTopic}". Structure your response cleanly using short paragraphs or bullet points. Avoid massive walls of plain text. Highlight key terms in bold.`
+                                content: `You are an expert French language tutor. The student is studying: "${currentTopic}". Structure your response cleanly using short paragraphs or bullet points.`
                             },
                             { role: "user", content: userText }
                         ],
@@ -997,26 +944,21 @@
 
                 const aiMsg = document.createElement('div');
                 aiMsg.className = 'ai-message-card bg-slate-50 border border-slate-200 p-3.5 rounded-2xl text-xs text-slate-700 mr-4 shadow-sm space-y-2 relative';
-                aiMsg.setAttribute('data-reply-text', aiReply);
                 aiMsg.innerHTML = `
                     <div class="flex items-center justify-between border-b border-slate-200/60 pb-1.5 mb-1.5">
                         <span class="font-bold text-indigo-600 flex items-center space-x-1">
                             <span>🤖</span> <span>Correcteur IA</span>
                         </span>
                         <div class="flex items-center space-x-1.5">
-                            <button onclick="translateAIResponse(this)" class="text-[10px] bg-white border border-slate-200 px-2 py-0.5 rounded font-medium text-slate-600 hover:bg-slate-100 transition">🌐 Traduire</button>
                             <button onclick="speakText(this.getAttribute('data-speech'))" data-speech="${aiReply.replace(/"/g, '&quot;')}" title="Écouter la réponse" class="p-1 hover:bg-slate-200 rounded text-slate-600 transition">🔊</button>
-                            <button onclick="navigator.clipboard.writeText(this.getAttribute('data-copy'))" data-copy="${aiReply.replace(/"/g, '&quot;')}" title="Copier le texte" class="p-1 hover:bg-slate-200 rounded text-slate-600 transition">📋</button>
                         </div>
                     </div>
                     <div class="space-y-1.5 leading-relaxed">
                         ${formattedHtml}
                     </div>
-                    <div class="ai-translation-box hidden mt-2 pt-2 border-t border-slate-200/60 text-slate-500 italic bg-slate-100/60 p-2 rounded-lg"></div>
                 `;
                 chatBox.appendChild(aiMsg);
                 chatBox.scrollTop = chatBox.scrollHeight;
-
             } catch (err) {
                 document.getElementById('ai-typing')?.remove();
                 const errorMsg = document.createElement('div');
