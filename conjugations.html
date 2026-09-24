@@ -425,7 +425,8 @@
                     const pos = (row.Part_of_Speech || row.part_of_speech || '').toLowerCase();
                     const word = (row.French || row.french || row.word || row.term || '').toLowerCase().trim();
                     
-                    const isVerbPOS = pos.includes('v');
+                    const isVerbPOS = pos.includes('v') ;
+        //&& !pos.includes('adj') && !pos.includes('n');
                     const isValidSuffix = word.endsWith('er') || word.endsWith('ir') || word.endsWith('re') || word === 'être' || word === 'avoir';
                     
                     return isVerbPOS && isValidSuffix;
@@ -529,29 +530,98 @@
             }
         }
 
-        function renderVerb(verbKey) {
-            const data = verbRegistry[verbKey];
-            if (!data) return;
+        async function renderVerb(verbKey) {
+    const data = verbRegistry[verbKey];
+    if (!data) return;
 
-            document.getElementById('atelier-title').dataset.activeVerb = verbKey;
-            document.getElementById('atelier-title').innerText = `Verbe : ${verbKey.charAt(0).toUpperCase() + verbKey.slice(1)} (${data.translation})`;
-            document.getElementById('atelier-category').innerText = `Catégorie : ${data.category.toUpperCase()} | Traduction : ${data.translation}`;
-            
-            const ruleEl = document.getElementById('rule-text');
-            if (ruleEl) ruleEl.innerText = data.rule;
+    // Update headers and titles
+    document.getElementById('atelier-title').dataset.activeVerb = verbKey;
+    document.getElementById('atelier-title').innerText = `Verbe : ${verbKey.charAt(0).toUpperCase() + verbKey.slice(1)} (${data.translation})`;
+    document.getElementById('atelier-category').innerText = `Catégorie : ${data.category.toUpperCase()} | Traduction : ${data.translation}`;
+    
+    const ruleEl = document.getElementById('rule-text');
+    if (ruleEl) ruleEl.innerText = data.rule;
 
-            const tenses = ['pres', 'ps', 'pc', 'pp', 'fut', 'fp', 'cond', 'subj', 'psubj'];
-            const pronouns = ['je', 'tu', 'il', 'nous', 'vous', 'ils'];
+    const tenses = ['pres', 'ps', 'pc', 'pp', 'fut', 'fp', 'cond', 'subj', 'psubj'];
+    const pronouns = ['je', 'tu', 'il', 'nous', 'vous', 'ils'];
 
-            tenses.forEach(tense => {
-                pronouns.forEach(pronoun => {
-                    const el = document.getElementById(`t-${tense}-${pronoun}`);
-                    if (el && data[tense]) {
-                        el.innerText = data[tense][pronoun] || "-";
-                    }
-                });
+    // Display temporary loading placeholders across all tables
+    tenses.forEach(tense => {
+        pronouns.forEach(pronoun => {
+            const el = document.getElementById(`t-${tense}-${pronoun}`);
+            if (el) el.innerText = "⏳";
+        });
+    });
+
+    const apiUrl = localStorage.getItem('ai_api_url') || "https://api.groq.com/openai/v1/chat/completions";
+    const apiKey = localStorage.getItem('ai_api_key') || "";
+    const modelName = localStorage.getItem('ai_model_name') || "openai/gpt-oss-120b";
+
+    if (!apiKey) {
+        tenses.forEach(tense => {
+            pronouns.forEach(pronoun => {
+                const el = document.getElementById(`t-${tense}-${pronoun}`);
+                if (el) el.innerText = "-";
             });
+        });
+        if (ruleEl) ruleEl.innerText += " (⚠️ Clé API Groq manquante. Veuillez la configurer dans l'Administration).";
+        return;
+    }
+
+    try {
+        const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json', 
+                'Authorization': `Bearer ${apiKey}` 
+            },
+            body: JSON.stringify({
+                model: modelName,
+                messages: [
+                    { 
+                        role: "system", 
+                        content: "You are an expert French conjugation assistant. Output ONLY a raw valid JSON object without any markdown code blocks or explanatory text. The JSON object must contain these exact 9 keys: 'pres', 'ps', 'pc', 'pp', 'fut', 'fp', 'cond', 'subj', 'psubj'. Each key must be an object mapping pronouns ('je', 'tu', 'il', 'nous', 'vous', 'ils') to their exact conjugated strings in French." 
+                    },
+                    { role: "user", content: `Conjugate the French verb: "${verbKey}"` }
+                ],
+                temperature: 0.1
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error(`Erreur HTTP: ${response.status}`);
         }
+
+        const resData = await response.json();
+        let rawContent = resData.choices?.[0]?.message?.content || "";
+        
+        // Strip markdown backticks if the model includes them anyway
+        rawContent = rawContent.replace(/```json/g, '').replace(/```/g, '').trim();
+        const parsedConjugations = JSON.parse(rawContent);
+
+        // Populate tables dynamically with the AI response
+        tenses.forEach(tense => {
+            pronouns.forEach(pronoun => {
+                const el = document.getElementById(`t-${tense}-${pronoun}`);
+                if (el && parsedConjugations[tense] && parsedConjugations[tense][pronoun]) {
+                    el.innerText = parsedConjugations[tense][pronoun];
+                } else if (el) {
+                    el.innerText = "-";
+                }
+            });
+        });
+
+    } catch (err) {
+        console.error("Erreur IA / Parsing JSON :", err);
+        tenses.forEach(tense => {
+            pronouns.forEach(pronoun => {
+                const el = document.getElementById(`t-${tense}-${pronoun}`);
+                if (el) el.innerText = "Erreur";
+            });
+        });
+        if (ruleEl) ruleEl.innerText += " (Échec de la génération IA. Vérifiez votre clé API ou le nom du modèle dans les paramètres).";
+    }
+}
 
         window.speakText = function(text) {
             if (!('speechSynthesis' in window)) return;
