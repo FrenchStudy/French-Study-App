@@ -425,7 +425,7 @@
                     const pos = (row.Part_of_Speech || row.part_of_speech || '').toLowerCase();
                     const word = (row.French || row.french || row.word || row.term || '').toLowerCase().trim();
                     
-                    const isVerbPOS = pos.includes('v') && !pos.includes('adj') && !pos.includes('n');
+                    const isVerbPOS = pos.includes('v');
                     const isValidSuffix = word.endsWith('er') || word.endsWith('ir') || word.endsWith('re') || word === 'être' || word === 'avoir';
                     
                     return isVerbPOS && isValidSuffix;
