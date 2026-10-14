@@ -3,14 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lessons - French Study App</title>
+    <title>Grammar - French Study App</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="config.js"></script>
     <script src="js/ai.js"></script>
     <script src="js/conjugate.js"></script>
     <script src="js/lessons-data.js"></script>
-    <style>.en-end { color: #4f46e5; } #lesson-body b { color: #0f172a; }</style>
+    <script src="js/lesson-kit.js"></script>
+    <style>.en-end { color: #4f46e5; } .lk-body b { color: #0f172a; }</style>
 </head>
 <body class="h-full bg-slate-100 flex flex-col overflow-hidden font-sans text-slate-800">
 
@@ -18,7 +19,7 @@
         <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
             <div class="flex items-center space-x-1 sm:space-x-2 text-xs font-semibold overflow-x-auto py-2">
                 <a href="index.html" class="text-slate-600 hover:text-indigo-600 hover:bg-slate-100 px-3 py-1.5 rounded-lg transition">Dashboard</a>
-                <a href="lesson.html" class="bg-indigo-600 text-white px-3 py-1.5 rounded-lg shadow-sm transition">Lessons</a>
+                <a href="lesson.html" class="bg-indigo-600 text-white px-3 py-1.5 rounded-lg shadow-sm transition">Grammar</a>
                  <a href="vocab.html" class="text-slate-600 hover:text-indigo-600 hover:bg-slate-100 px-3 py-1.5 rounded-lg transition">Vocab</a>
                 <a href="conjugations.html" class="text-slate-600 hover:text-indigo-600 hover:bg-slate-100 px-3 py-1.5 rounded-lg transition">Conjugates</a>
                  <a href="reading.html" class="text-slate-600 hover:text-indigo-600 hover:bg-slate-100 px-3 py-1.5 rounded-lg transition">Reading</a>
@@ -35,87 +36,24 @@
         </div>
     </header>
 
-    <main id="scroller" class="flex-1 overflow-y-auto">
-        <div class="max-w-3xl mx-auto px-4 py-5 space-y-4">
-
-            <!-- ===== LIST VIEW ===== -->
-            <section id="list-view" class="space-y-4">
-                <div>
-                    <h1 class="text-2xl font-black text-slate-900">Lessons</h1>
-                    <p class="text-sm text-slate-500 mt-1">Grammar, conjugation and interactive lessons from A1 to C2. Tap a lesson to open it; tick it off when you're done.</p>
-                </div>
-
-                <nav class="grid grid-cols-3 gap-1 bg-slate-200/70 p-1 rounded-xl text-sm font-semibold" role="tablist">
-                    <button data-tab="grammar" class="tab-btn min-h-[44px] rounded-lg">Grammar</button>
-                    <button data-tab="conjugation" class="tab-btn min-h-[44px] rounded-lg">Conjugation</button>
-                    <button data-tab="interactive" class="tab-btn min-h-[44px] rounded-lg">Interactive</button>
-                </nav>
-
-                <input id="search" type="search" placeholder="Search, e.g. subjonctif"
-                       class="w-full text-base px-3 py-3 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
-
-                <a href="vocab.html" class="flex items-center gap-3 bg-indigo-50 border border-indigo-100 hover:border-indigo-300 rounded-2xl p-4">
-                    <span class="text-2xl">🗂️</span>
-                    <span class="min-w-0">
-                        <span class="block font-bold text-indigo-900">Vocabulary</span>
-                        <span class="block text-sm text-indigo-800/80">44 themes and 5,000 frequent words as flashcards, with memory hooks.</span>
-                    </span>
-                    <span class="ml-auto text-indigo-600 font-bold">→</span>
-                </a>
-
-                <div id="lesson-groups" class="space-y-5"></div>
-            </section>
-
-            <!-- ===== LESSON VIEW ===== -->
-            <article id="lesson-view" class="hidden space-y-4">
-                <div class="flex items-center justify-between gap-2">
-                    <button id="btn-back" class="min-h-[44px] px-1 text-sm font-semibold text-slate-600 hover:text-indigo-600">← All lessons</button>
-                    <span id="lesson-crumb" class="text-xs font-bold bg-indigo-50 text-indigo-700 px-2 py-1 rounded-full"></span>
-                </div>
-
-                <header class="space-y-1">
-                    <h1 id="lesson-title" class="text-2xl font-black text-slate-900 leading-tight"></h1>
-                    <p id="lesson-blurb" class="text-base text-slate-600"></p>
-                </header>
-
-                <div id="lesson-body" class="space-y-4"></div>
-
-                <div class="flex flex-col sm:flex-row gap-2 pt-2">
-                    <button id="btn-done" class="min-h-[48px] px-5 rounded-xl font-bold"></button>
-                </div>
-                <div class="grid grid-cols-2 gap-2">
-                    <button id="btn-prev" class="min-h-[56px] text-left px-3 py-2 bg-white border border-slate-200 hover:border-indigo-300 rounded-xl text-sm disabled:opacity-40"></button>
-                    <button id="btn-next" class="min-h-[56px] text-right px-3 py-2 bg-white border border-slate-200 hover:border-indigo-300 rounded-xl text-sm disabled:opacity-40"></button>
-                </div>
-            </article>
-        </div>
+    <main class="flex-1 overflow-y-auto">
+        <div id="grammar" class="max-w-3xl mx-auto px-4 py-5"></div>
     </main>
 
     <script>
-        const db = window.mySupabase;
-        const L = window.LESSONS;
-        const C = window.Conjugator;
-        const $ = (id) => document.getElementById(id);
-        let currentPracticeTarget = '';   // used by the clock and weather widgets
+        const grammar = LessonKit.mount(document.getElementById('grammar'), {
+            section: 'grammar',
+            pagePath: 'lesson.html',
+            param: 'g',
+            intro: `<div>
+                <h1 class="text-2xl font-black text-slate-900">Grammar</h1>
+                <p class="text-sm text-slate-500 mt-1">78 lessons from A1 to C2. Tap a lesson to open it; tick it off when you're done.
+                Verb tables and conjugation lessons are in <a href="conjugations.html" class="text-indigo-700 font-semibold underline">Conjugations</a>;
+                vocabulary and interactive lessons are in <a href="vocab.html" class="text-indigo-700 font-semibold underline">Vocab</a>.</p>
+            </div>`
+        });
 
-        // Interactive lessons (hand-built pages in content/), linked to vocab themes and grammar topics
-        const INTERACTIVE = [
-            { id: 'lalphabet', title: "L'alphabet", blurb: 'The alphabet and spelling out loud.', level: 'A1', path: 'content/vocab/lalphabet.html' },
-            { id: 'nombres', title: 'Les nombres', blurb: 'Numbers from 0 upwards, with audio.', level: 'A1', path: 'content/vocab/nombres.html', theme: 4 },
-            { id: 'noms-prenoms', title: 'Noms et prénoms', blurb: 'First names, surnames and introducing yourself.', level: 'A1', path: 'content/vocab/noms-prenoms.html' },
-            { id: 'ladresse', title: "L'adresse", blurb: 'Saying and understanding an address.', level: 'A1', path: 'content/vocab/ladresse.html' },
-            { id: 'objets-personnels', title: 'Objets personnels', blurb: 'Everyday personal objects.', level: 'A1', path: 'content/vocab/objets-personnels.html', theme: 17 },
-            { id: 'objets-classe', title: 'Objets de la classe', blurb: 'Classroom objects.', level: 'A1', path: 'content/vocab/objets-classe.html' },
-            { id: 'nationalites', title: 'Les nationalités', blurb: 'Countries and nationalities.', level: 'A1', path: 'content/vocab/nationalites.html', theme: 10, grammar: [27] },
-            { id: 'professions', title: 'Les professions', blurb: 'Jobs, with and without an article.', level: 'A1', path: 'content/vocab/professions.html', theme: 11, grammar: [11] },
-            { id: 'famille-proche', title: 'La famille', blurb: 'An interactive family tree.', level: 'A1', path: 'content/vocab/famille-proche.html', theme: 9 },
-            { id: 'lheure-prix', title: "L'heure et les prix", blurb: 'Telling the time and prices, with a practice clock.', level: 'A1', path: 'content/vocab/lheure-prix.html', theme: 6, widget: 'clock' },
-            { id: 'meteo-date-jours', title: 'Météo, date et jours', blurb: 'Weather, days and dates, with a sentence builder.', level: 'A1', path: 'content/vocab/meteo-date-jours.html', theme: 8, widget: 'meteo' },
-            { id: 'loisirs-hobbies', title: 'Les loisirs', blurb: 'Hobbies and free time.', level: 'A1', path: 'content/vocab/loisirs-hobbies.html', theme: 26 },
-            { id: 'articles-definis-indefinis-partitifs', title: 'Les articles', blurb: 'le, un, du: definite, indefinite and partitive.', level: 'A1', path: 'content/grammar/articles-definis-indefinis-partitifs.html', grammar: [2, 3] },
-            { id: 'prepositions-temps-lieu', title: 'Prépositions de temps et de lieu', blurb: 'à, en, dans, depuis, pendant...', level: 'A2', path: 'content/grammar/prepositions-temps-lieu.html', grammar: [10, 28] }
-        ];
-        // Old syllabus links used titles (lesson.html?topic=...)
+        // Older links: conjugation and vocabulary lessons moved to their own pages
         const OLD_TITLES = {
             "l'alphabet": 'lalphabet', 'les nombres': 'nombres', 'noms et prénoms': 'noms-prenoms', "l'adresse": 'ladresse',
             'objets personnels': 'objets-personnels', 'objets de la classe': 'objets-classe', 'les nationalités': 'nationalites',
@@ -124,459 +62,27 @@
             'articles définis / indéfinis / partitifs': 'articles-definis-indefinis-partitifs',
             'prépositions de temps & lieu': 'prepositions-temps-lieu'
         };
-
-        // ---------- Sections ----------
-        const SECTIONS = {
-            grammar: {
-                name: 'Grammar', prefix: 'g',
-                levels: L.grammarLevels,
-                get: (id) => L.grammar[id]
-            },
-            conjugation: {
-                name: 'Conjugation', prefix: 'c',
-                levels: L.conjugationLevels,
-                get: (id) => L.conjugation[id]
-            },
-            interactive: {
-                name: 'Interactive', prefix: 'i',
-                levels: ['A1', 'A2'].map(lv => [lv === 'A1' ? 'A1: Foundations' : 'A2: Elementary',
-                    INTERACTIVE.filter(x => x.level === lv).map(x => x.id)]),
-                get: (id) => INTERACTIVE.find(x => x.id === id)
-            }
-        };
-        let tab = 'grammar';
-        let current = null;   // { section, id }
-
-        // ---------- Progress (this device, plus your account when logged in) ----------
-        const store = {
-            get(k, d) { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch (e) { return d; } },
-            set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
-        };
-        let done = store.get('lessons_done', {});
-        const doneKey = (section, id) => `${SECTIONS[section].prefix}:${id}`;
-        async function setDone(section, id, value) {
-            if (value) done[doneKey(section, id)] = true; else delete done[doneKey(section, id)];
-            store.set('lessons_done', done);
-            try {
-                const { data: { user } } = await db.auth.getUser();
-                if (!user) return;
-                await db.from('user_progress').upsert({
-                    user_id: user.id, module_type: 'lesson-' + section, module_id: String(id),
-                    completed: value, updated_at: new Date()
-                }, { onConflict: 'user_id, module_type, module_id' });
-            } catch (err) {
-                console.warn('Progress saved on this device only.', err);
-            }
+        function openInteractive(id) {
+            const item = LessonKit.INTERACTIVE.find(x => x.id === id);
+            if (!item) return false;
+            location.replace(item.embedIn ? LessonKit.URLS.grammar(item.embedIn[0]) : LessonKit.URLS.interactive(id));
+            return true;
         }
-
-        // ---------- Helpers ----------
-        const levelCode = (name) => String(name).split(':')[0];
-        const plain = (s) => String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
-        const toText = (html) => { const d = document.createElement('div'); d.innerHTML = html; return d.textContent.trim(); };
-        function levelOf(section, id) {
-            const lv = SECTIONS[section].levels.find(([, ids]) => ids.includes(section === 'interactive' ? id : Number(id)));
-            return lv ? levelCode(lv[0]) : '';
-        }
-        function orderedIds(section) {
-            return SECTIONS[section].levels.flatMap(([, ids]) => ids);
-        }
-        window.speakText = (text) => speakFrench(String(text || '').replace(/\(e\)|\(s\)/g, ''));
-
-        // ---------- Search: every word must match; French and English grammar names are treated alike ----------
-        const SYNONYMS = [['subjonc', 'subjunc'], ['imparf', 'imperf'], ['pronom', 'pronoun'], ['passif', 'passive'],
-            ['gerondif', 'gerund'], ['plus-que-parfait', 'pluperfect'], ['passe compose', 'perfect'], ['nombre', 'number'],
-            ['heure', 'time'], ['famille', 'family'], ['article', 'article'], ['preposition', 'preposition']];
-        function queryWords(raw) {
-            return plain(raw).replace(/^(le|la|les|l')\s*/, '').split(/\s+/).filter(Boolean);
-        }
-        function matches(text, words) {
-            const hay = plain(text);
-            return words.every(w => hay.includes(w) ||
-                SYNONYMS.some(([a, b]) => (w.startsWith(a) && hay.includes(b)) || (w.startsWith(b) && hay.includes(a))));
-        }
-
-        // ---------- List view ----------
-        function sectionHtml(section, words, withHeading) {
-            const sec = SECTIONS[section];
-            const groups = sec.levels.map(([levelName, ids]) => {
-                const items = ids.map(id => ({ id, t: sec.get(id) }))
-                    .filter(({ t }) => t && (!words.length || matches(t.title + ' ' + (t.blurb || ''), words)));
-                if (!items.length) return '';
-                const doneCount = ids.filter(id => done[doneKey(section, id)]).length;
-                return `
-                <section class="space-y-2">
-                    <div class="flex items-baseline justify-between">
-                        <h2 class="text-base font-black text-slate-900">${escapeHtml(levelName)}</h2>
-                        <span class="text-xs text-slate-500">${doneCount} / ${ids.length} done</span>
-                    </div>
-                    <div class="bg-white border border-slate-200 rounded-2xl divide-y divide-slate-100 overflow-hidden">
-                        ${items.map(({ id, t }) => {
-                            const isDone = !!done[doneKey(section, id)];
-                            return `
-                            <a href="${lessonUrl(section, id)}" data-sec="${section}" data-open="${escapeHtml(String(id))}" class="flex items-start gap-3 p-3 hover:bg-indigo-50/60 min-h-[56px]">
-                                <span class="shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${isDone ? 'bg-emerald-500 text-white' : 'bg-slate-100 text-slate-600'}">${isDone ? '✓' : (section === 'interactive' ? '▶' : id)}</span>
-                                <span class="min-w-0">
-                                    <span class="block font-bold text-slate-900">${escapeHtml(t.title)}</span>
-                                    <span class="block text-sm text-slate-500">${escapeHtml(t.blurb || '')}</span>
-                                </span>
-                            </a>`;
-                        }).join('')}
-                    </div>
-                </section>`;
-            }).join('');
-            if (!groups) return '';
-            return withHeading ? `<div class="space-y-3"><h2 class="text-lg font-black text-indigo-800">${sec.name}</h2>${groups}</div>` : groups;
-        }
-
-        function renderList() {
-            const words = queryWords($('search').value.trim());
-            document.querySelectorAll('.tab-btn').forEach(b => {
-                const on = b.dataset.tab === tab && !words.length;
-                b.classList.toggle('bg-white', on); b.classList.toggle('shadow-sm', on);
-                b.classList.toggle('text-indigo-700', on); b.classList.toggle('text-slate-600', !on);
-                b.setAttribute('aria-selected', on);
-            });
-            // While searching, show matches from all three sections
-            const html = words.length
-                ? Object.keys(SECTIONS).map(s => sectionHtml(s, words, true)).join('')
-                : sectionHtml(tab, [], false);
-            $('lesson-groups').innerHTML = html || '<p class="text-sm text-slate-500">No lessons match your search.</p>';
-            $('lesson-groups').querySelectorAll('[data-open]').forEach(a => a.addEventListener('click', (e) => {
-                e.preventDefault();
-                const section = a.dataset.sec;
-                const id = section === 'interactive' ? a.dataset.open : Number(a.dataset.open);
-                openLesson(section, id, true);
-            }));
-        }
-
-        function lessonUrl(section, id) {
-            return `lesson.html?${SECTIONS[section].prefix}=${encodeURIComponent(id)}`;
-        }
-
-        // ---------- Lesson view: building blocks ----------
-        function card(title, inner, extra = '') {
-            return `<section class="bg-white border border-slate-200 rounded-2xl p-4 space-y-3 ${extra}">
-                ${title ? `<h2 class="text-sm font-bold uppercase tracking-wide text-slate-500">${title}</h2>` : ''}${inner}</section>`;
-        }
-
-        function dataTable(t) {
-            const fr = new Set(t.fr || []);
-            const head = t.head && t.head.some(h => h) ? `<thead><tr>${t.head.map(h => `<th class="text-left px-3 py-2 font-semibold text-slate-600 bg-slate-50">${h}</th>`).join('')}</tr></thead>` : '';
-            const body = t.rows.map(r => `<tr class="border-t border-slate-100">${r.map((cell, i) => {
-                const isFr = fr.has(i) && String(cell).trim();
-                const nowrap = i === 0 && toText(cell).length <= 16 ? ' whitespace-nowrap' : '';
-                return isFr
-                    ? `<td class="px-3 py-2 align-top${nowrap}"><button type="button" data-say="${escapeHtml(toText(cell))}" class="text-left font-semibold text-slate-900 hover:text-indigo-700">${cell}</button></td>`
-                    : `<td class="px-3 py-2 align-top text-slate-600${nowrap}">${cell}</td>`;
-            }).join('')}</tr>`).join('');
-            return `<figure class="space-y-1">
-                ${t.cap ? `<figcaption class="text-sm font-bold text-slate-800">${escapeHtml(t.cap)}</figcaption>` : ''}
-                <div class="overflow-x-auto border border-slate-200 rounded-xl"><table class="w-full text-sm">${head}<tbody>${body}</tbody></table></div>
-            </figure>`;
-        }
-
-        function verbTable(t) {
-            const verbs = t.verbs.map(v => C.find(v)).filter(Boolean);
-            const tense = C.tenses.find(x => x.key === t.tense);
-            const cols = verbs.map(v => C.forms(v, t.tense));
-            const rows = cols[0] || [];
-            const body = rows.map((r0, i) => `<tr class="border-t border-slate-100">
-                <td class="px-3 py-2 text-slate-500 whitespace-nowrap">${escapeHtml(r0.cp)}</td>
-                ${cols.map((col, j) => {
-                    const r = col[i];
-                    return r ? `<td class="px-3 py-2 whitespace-nowrap"><button type="button" data-say="${escapeHtml(r.say)}" class="text-left font-semibold text-slate-900 hover:text-indigo-700">${C.highlight(verbs[j], t.tense, i, r.cf)}</button></td>` : '<td></td>';
-                }).join('')}</tr>`).join('');
-            return `<figure class="space-y-1">
-                <figcaption class="text-sm font-bold text-slate-800">${escapeHtml(t.cap || '')}${tense ? ` <span class="font-normal text-slate-500">· ${escapeHtml(tense.name)}</span>` : ''}</figcaption>
-                <div class="overflow-x-auto border border-slate-200 rounded-xl"><table class="w-full text-sm">
-                    <thead><tr><th class="bg-slate-50"></th>${verbs.map(v => `<th class="text-left px-3 py-2 font-semibold text-slate-600 bg-slate-50"><a class="hover:text-indigo-700" href="conjugations.html?verb=${encodeURIComponent(v.disp)}">${escapeHtml(v.disp)}</a></th>`).join('')}</tr></thead>
-                    <tbody>${body}</tbody></table></div>
-            </figure>`;
-        }
-
-        // "Vocab Blocks 9, 11 and 17" / "Grammar topic 4" / "Conjugaison sheet topics 4 and 5" -> links
-        function linkSeeAlso(text) {
-            let html = escapeHtml(text);
-            const linkNums = (str, makeHref) => str.replace(/\d+/g, n => `<a class="text-indigo-700 font-semibold underline" href="${makeHref(n)}">${n}</a>`);
-            html = html.replace(/(Vocab (?:sheet )?Blocks?|Block)((?:\s*(?:\d+|,|and))+)/g, (m, word, nums) => word + linkNums(nums, n => `vocab.html?deck=theme:${n}`));
-            html = html.replace(/(Grammar topics?)((?:\s*(?:\d+|,|and))+)/g, (m, word, nums) => word + linkNums(nums, n => lessonUrl('grammar', n)));
-            html = html.replace(/(Conjugaison (?:sheet )?topics?)((?:\s*(?:\d+|,|and))+)/g, (m, word, nums) => word + linkNums(nums, n => lessonUrl('conjugation', n)));
-            return html;
-        }
-
-        function examplesBlock(ex) {
-            return `<ul class="divide-y divide-slate-100">${ex.map(([fr, en]) => `
-                <li class="py-2 flex items-start gap-3">
-                    <button type="button" data-say="${escapeHtml(fr)}" class="shrink-0 w-10 h-10 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700" aria-label="Listen">🔊</button>
-                    <span><span class="block text-base text-slate-900">${escapeHtml(fr)}</span><span class="block text-sm text-slate-500">${escapeHtml(en)}</span></span>
-                </li>`).join('')}</ul>`;
-        }
-
-        function drillBlock(drill) {
-            return `<ol class="space-y-2">${drill.map(([qn, ans], i) => `
-                <li class="border border-slate-100 rounded-xl p-3">
-                    <div class="text-base text-slate-900"><span class="text-slate-400 font-bold mr-1">${i + 1}.</span>${qn}</div>
-                    <button type="button" data-reveal class="mt-2 min-h-[40px] px-3 text-sm font-semibold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 rounded-lg">Show answer</button>
-                    <div class="hidden mt-2 text-base font-semibold text-emerald-800">${ans}
-                        <button type="button" data-say="${escapeHtml(toText(ans))}" class="ml-1 text-indigo-600 text-sm" aria-label="Listen">🔊</button></div>
-                </li>`).join('')}</ol>
-                <button type="button" data-reveal-all class="min-h-[44px] px-4 text-sm font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl">Show all answers</button>`;
-        }
-
-        function relatedInteractive(section, id) {
-            if (section !== 'grammar') return '';
-            const hits = INTERACTIVE.filter(x => (x.grammar || []).includes(id));
-            return hits.map(x => `
-                <a href="${lessonUrl('interactive', x.id)}" class="flex items-center gap-3 bg-emerald-50 border border-emerald-100 hover:border-emerald-300 rounded-2xl p-4">
-                    <span class="text-2xl">▶️</span>
-                    <span class="min-w-0"><span class="block font-bold text-emerald-900">Interactive practice: ${escapeHtml(x.title)}</span>
-                    <span class="block text-sm text-emerald-800/80">${escapeHtml(x.blurb)}</span></span>
-                </a>`).join('');
-        }
-
-        // ---------- Lesson view ----------
-        async function openLesson(section, id, push) {
-            const t = SECTIONS[section].get(id);
-            if (!t) { showList(); return; }
-            tab = section;
-            current = { section, id };
-            if (push) history.pushState({ section, id }, '', lessonUrl(section, id));
-            $('list-view').classList.add('hidden');
-            $('lesson-view').classList.remove('hidden');
-            $('scroller').scrollTop = 0;
-            const level = levelOf(section, id);
-            $('lesson-crumb').textContent = `${SECTIONS[section].name} · ${level}`;
-            $('lesson-title').textContent = section === 'interactive' ? t.title : `${id}. ${t.title}`;
-            $('lesson-blurb').textContent = t.blurb || '';
-            document.title = `${t.title} - Lessons`;
-
-            if (section === 'interactive') {
-                await renderInteractive(t);
-            } else {
-                const parts = [];
-                if (t.rule && t.rule.length) parts.push(card('The rule', t.rule.map(p => `<p class="text-base text-slate-800 leading-relaxed">${p}</p>`).join('')));
-                if (t.tables && t.tables.length) parts.push(card('Tables', t.tables.map(tb => tb.tense ? verbTable(tb) : dataTable(tb)).join('') +
-                    '<p class="text-xs text-slate-400">Tap any French word to hear it.</p>'));
-                if (t.likes && t.likes.length) parts.push(card('Verbs that follow the same pattern', t.likes.map(g => `
-                    <div><div class="text-sm font-semibold text-slate-700 mb-1">${escapeHtml(g.label)}</div>
-                    <div class="flex flex-wrap gap-1.5">${g.verbs.map(v => `<a href="conjugations.html?verb=${encodeURIComponent(v)}" class="text-sm px-2 py-1 bg-slate-100 hover:bg-indigo-100 rounded-lg text-slate-700">${escapeHtml(v)}</a>`).join('')}</div></div>`).join('')));
-                if (t.ex && t.ex.length) parts.push(card('Examples', examplesBlock(t.ex)));
-                if (t.watch) parts.push(card('⚠️ Watch out', `<div class="text-base text-amber-900 leading-relaxed">${t.watch}</div>`, 'bg-amber-50 border-amber-200'));
-                parts.push(relatedInteractive(section, id));
-                if (t.drill && t.drill.length) parts.push(card('Practice', drillBlock(t.drill)));
-                if (t.see) parts.push(`<p class="text-sm text-slate-600"><span class="font-semibold">See also:</span> ${linkSeeAlso(t.see)}</p>`);
-                $('lesson-body').innerHTML = parts.join('');
-                markWideTables();
-            }
-            renderLessonFooter();
-        }
-
-        // Tell phone users when a table continues off-screen
-        function markWideTables() {
-            document.querySelectorAll('#lesson-body .overflow-x-auto').forEach(box => {
-                if (box.scrollWidth > box.clientWidth + 4 && !box.nextElementSibling?.classList.contains('swipe-hint')) {
-                    box.insertAdjacentHTML('afterend', '<p class="swipe-hint text-xs text-slate-400 text-right">Swipe sideways to see more →</p>');
-                }
-            });
-        }
-
-        async function renderInteractive(t) {
-            const links = [];
-            if (t.theme) links.push(`<a href="vocab.html?deck=theme:${t.theme}" class="text-indigo-700 font-semibold underline">Flashcards for this theme</a>`);
-            (t.grammar || []).forEach(g => links.push(`<a href="${lessonUrl('grammar', g)}" class="text-indigo-700 font-semibold underline">Grammar ${g}: ${escapeHtml(L.grammar[g].title)}</a>`));
-            $('lesson-body').innerHTML = `
-                <div id="interactive-box" class="bg-white border border-slate-200 rounded-2xl p-4 text-base"><p class="text-sm text-indigo-600 animate-pulse">Loading the lesson…</p></div>
-                ${links.length ? `<p class="text-sm text-slate-600"><span class="font-semibold">Related:</span> ${links.join(' · ')}</p>` : ''}`;
-            const box = $('interactive-box');
-            try {
-                const res = await fetch(t.path);
-                if (!res.ok) throw new Error(res.status);
-                box.innerHTML = await res.text();
-                if (t.widget === 'clock') bindClockModuleEvents(box);
-                if (t.widget === 'meteo') bindMeteoModuleEvents(box);
-            } catch (err) {
-                box.innerHTML = '<p class="text-sm text-rose-700">This lesson could not be loaded. Check your connection and try again.</p>';
-            }
-        }
-
-        function renderLessonFooter() {
-            const { section, id } = current;
-            const isDone = !!done[doneKey(section, id)];
-            const btn = $('btn-done');
-            btn.textContent = isDone ? '✓ Done (tap to undo)' : 'Mark as done';
-            btn.className = 'min-h-[48px] px-5 rounded-xl font-bold ' + (isDone ? 'bg-emerald-100 text-emerald-800' : 'bg-emerald-600 hover:bg-emerald-700 text-white');
-            const ids = orderedIds(section);
-            const i = ids.indexOf(id);
-            const prev = ids[i - 1], next = ids[i + 1];
-            const label = (x) => SECTIONS[section].get(x).title;
-            $('btn-prev').disabled = prev === undefined;
-            $('btn-prev').innerHTML = prev === undefined ? '' : `<span class="block text-xs text-slate-400">← Previous</span><span class="block font-semibold text-slate-800">${escapeHtml(label(prev))}</span>`;
-            $('btn-next').disabled = next === undefined;
-            $('btn-next').innerHTML = next === undefined ? '' : `<span class="block text-xs text-slate-400">Next →</span><span class="block font-semibold text-slate-800">${escapeHtml(label(next))}</span>`;
-            $('btn-prev').onclick = () => prev !== undefined && openLesson(section, prev, true);
-            $('btn-next').onclick = () => next !== undefined && openLesson(section, next, true);
-        }
-
-        function showList(push) {
-            current = null;
-            if (push) history.pushState({}, '', `lesson.html${tab === 'grammar' ? '' : '?tab=' + tab}`);
-            $('lesson-view').classList.add('hidden');
-            $('list-view').classList.remove('hidden');
-            document.title = 'Lessons - French Study App';
-            renderList();
-        }
-
-        // ---------- Widgets used by two interactive lessons ----------
-        function bindClockModuleEvents(container) {
-            const hourInput = container.querySelector("#fc-hour");
-            const minInput = container.querySelector("#fc-min");
-            const outputCurrent = container.querySelector("#fc-out-current");
-
-            if (!hourInput || !minInput || !outputCurrent) return;
-
-            const hours = ["", "une heure", "deux heures", "trois heures", "quatre heures", "cinq heures", "six heures", "sept heures", "huit heures", "neuf heures", "dix heures", "onze heures", "douze heures"];
-            const numbers = ["zéro", "une", "deux", "trois", "quatre", "cinq", "six", "sept", "huit", "neuf", "dix", "onze", "douze", "treize", "quatorze", "quinze", "seize", "dix-sept", "dix-huit", "dix-neuf", "vingt", "vingt et un", "vingt-deux", "vingt-trois", "vingt-quatre", "vingt-cinq", "vingt-six", "vingt-sept", "vingt-huit", "vingt-neuf", "trente", "trente et un", "trente-deux", "trente-trois", "trente-quatre", "trente-cinq", "trente-six", "trente-sept", "trente-huit", "trente-neuf", "quarante", "quarante et un", "quarante-deux", "quarante-trois", "quarante-quatre", "quarante-cinq", "quarante-six", "quarante-sept", "quarante-huit", "quarante-neuf", "cinquante", "cinquante et un", "cinquante-deux", "cinquante-trois", "cinquante-quatre", "cinquante-cinq", "cinquante-six", "cinquante-sept", "cinquante-huit", "cinquante-neuf"];
-
-            function getPeriod(hour) {
-                if (hour >= 5 && hour < 12) return "du matin";
-                if (hour >= 12 && hour < 18) return "de l'après-midi";
-                return "du soir";
-            }
-
-            function updateClock() {
-                let h = parseInt(hourInput.value, 10);
-                let m = parseInt(minInput.value, 10);
-
-                if (isNaN(h)) h = 0;
-                if (isNaN(m)) m = 0;
-
-                h = Math.max(0, Math.min(23, h));
-                m = Math.max(0, Math.min(59, m));
-
-                if (h === 0 && m === 0) {
-                    outputCurrent.textContent = "Il est minuit pile.";
-                    currentPracticeTarget = outputCurrent.textContent;
-                    return;
-                }
-                if (h === 12 && m === 0) {
-                    outputCurrent.textContent = "Il est midi pile.";
-                    currentPracticeTarget = outputCurrent.textContent;
-                    return;
-                }
-
-                let h12 = h % 12;
-                if (h12 === 0) h12 = 12;
-
-                let timeStr = "";
-                if (m === 0) {
-                    timeStr = `${hours[h12]} pile ${getPeriod(h)}`;
-                } else if (m === 15) {
-                    timeStr = `${hours[h12]} et quart ${getPeriod(h)}`;
-                } else if (m === 30) {
-                    timeStr = `${hours[h12]} et demie ${getPeriod(h)}`;
-                } else if (m === 45) {
-                    let nextHour = (h12 % 12) + 1;
-                    let nextPeriod = (nextHour === 1 && h >= 11 && h < 12) ? "de l'après-midi" : getPeriod(h);
-                    timeStr = `${hours[nextHour]} moins le quart ${nextPeriod}`;
-                } else if (m > 45) {
-                    let nextHour = (h12 % 12) + 1;
-                    let diff = 60 - m;
-                    timeStr = `${hours[nextHour]} moins ${numbers[diff]} ${getPeriod(h)}`;
-                } else {
-                    timeStr = `${hours[h12]} ${numbers[m]} ${getPeriod(h)}`;
-                }
-
-                outputCurrent.textContent = `Il est ${timeStr}.`;
-                currentPracticeTarget = outputCurrent.textContent;
-            }
-
-            ['input', 'change', 'keyup'].forEach(evt => {
-                hourInput.addEventListener(evt, updateClock);
-                minInput.addEventListener(evt, updateClock);
-            });
-
-            updateClock();
-        }
-
-        function bindMeteoModuleEvents(container) {
-            const daySelect = container.querySelector("#meteo-day");
-            const monthSelect = container.querySelector("#meteo-month");
-            const condSelect = container.querySelector("#meteo-condition");
-            const output = container.querySelector("#meteo-output");
-
-            if (!daySelect || !monthSelect || !condSelect || !output) return;
-
-            function updateMeteo() {
-                const dayText = daySelect.value;
-                const monthText = monthSelect.value;
-                const condText = condSelect.value;
-                
-                const vowelMonths = ['avril', 'août', 'octobre'];
-                const prefix = vowelMonths.includes(monthText.toLowerCase()) ? "d'" : "de ";
-                
-                const result = `Aujourd'hui, nous sommes ${dayText} ${prefix}${monthText} et ${condText.toLowerCase()}.`;
-                output.textContent = result;
-                currentPracticeTarget = result;
-            }
-
-            daySelect.addEventListener("change", updateMeteo);
-            monthSelect.addEventListener("change", updateMeteo);
-            condSelect.addEventListener("change", updateMeteo);
-            updateMeteo();
-        }
-
-        // ---------- Events ----------
-        document.addEventListener('click', (e) => {
-            const say = e.target.closest('[data-say]');
-            if (say) { speakText(say.dataset.say); return; }
-            const rev = e.target.closest('[data-reveal]');
-            if (rev) { rev.nextElementSibling.classList.remove('hidden'); rev.remove(); return; }
-            if (e.target.closest('[data-reveal-all]')) {
-                document.querySelectorAll('#lesson-body [data-reveal]').forEach(b => { b.nextElementSibling.classList.remove('hidden'); b.remove(); });
-                e.target.closest('[data-reveal-all]').remove();
+        function route() {
+            const p = new URLSearchParams(location.search);
+            if (p.get('c')) return location.replace(LessonKit.URLS.conjugation(p.get('c')));
+            if (p.get('i') && openInteractive(p.get('i'))) return;
+            if (p.get('topic')) {
+                const old = p.get('topic').trim();
+                if (OLD_TITLES[old.toLowerCase()] && openInteractive(OLD_TITLES[old.toLowerCase()])) return;
+                grammar.route(new URLSearchParams());
+                grammar.search(old.replace(/\(.*?\)/g, '').trim());
                 return;
             }
-            // Links to other lessons open in place
-            const a = e.target.closest('#lesson-body a[href^="lesson.html?"]');
-            if (a) {
-                e.preventDefault();
-                routeFromParams(new URLSearchParams(a.getAttribute('href').split('?')[1]), true);
-            }
-        });
-        document.querySelectorAll('.tab-btn').forEach(b => b.addEventListener('click', () => {
-            tab = b.dataset.tab;
-            $('search').value = '';
-            store.set('lessons_tab', tab);
-            history.replaceState({}, '', `lesson.html${tab === 'grammar' ? '' : '?tab=' + tab}`);
-            renderList();
-        }));
-        $('search').addEventListener('input', renderList);
-        $('btn-back').addEventListener('click', () => showList(true));
-        $('btn-done').addEventListener('click', async () => {
-            const { section, id } = current;
-            await setDone(section, id, !done[doneKey(section, id)]);
-            renderLessonFooter();
-        });
-        window.addEventListener('popstate', () => routeFromParams(new URLSearchParams(location.search), false));
-
-        // ---------- Routing ----------
-        function routeFromParams(params, push) {
-            if (params.get('g')) return openLesson('grammar', Number(params.get('g')), push);
-            if (params.get('c')) return openLesson('conjugation', Number(params.get('c')), push);
-            if (params.get('i')) return openLesson('interactive', params.get('i'), push);
-            if (params.get('topic')) {
-                const old = params.get('topic').trim();
-                const hit = OLD_TITLES[old.toLowerCase()];
-                if (hit) return openLesson('interactive', hit, false);
-                $('search').value = old.replace(/\(.*?\)/g, '').trim();
-            }
-            if (params.get('tab') && SECTIONS[params.get('tab')]) tab = params.get('tab');
-            showList(false);
+            grammar.route(p);
         }
-
-        tab = store.get('lessons_tab', 'grammar');
-        if (!SECTIONS[tab]) tab = 'grammar';
-        routeFromParams(new URLSearchParams(location.search), false);
+        window.addEventListener('popstate', () => grammar.route(new URLSearchParams(location.search)));
+        route();
     </script>
 </body>
 </html>

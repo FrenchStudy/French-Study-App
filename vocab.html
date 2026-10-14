@@ -9,6 +9,7 @@
     <script src="config.js"></script>
     <script src="js/ai.js"></script>
     <script src="js/cheatsheet-data.js"></script>
+    <script src="js/lesson-kit.js"></script>
 </head>
 <body class="h-full bg-slate-100 flex flex-col overflow-hidden font-sans text-slate-800">
 
@@ -16,7 +17,7 @@
         <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
             <div class="flex items-center space-x-1 sm:space-x-2 text-xs font-semibold overflow-x-auto py-2">
                 <a href="index.html" class="text-slate-600 hover:text-indigo-600 hover:bg-slate-100 px-3 py-1.5 rounded-lg transition">Dashboard</a>
-                <a href="lesson.html" class="text-slate-600 hover:text-indigo-600 hover:bg-slate-100 px-3 py-1.5 rounded-lg transition">Lessons</a>
+                <a href="lesson.html" class="text-slate-600 hover:text-indigo-600 hover:bg-slate-100 px-3 py-1.5 rounded-lg transition">Grammar</a>
                  <a href="vocab.html" class="bg-indigo-600 text-white px-3 py-1.5 rounded-lg shadow-sm transition">Vocab</a>
                 <a href="conjugations.html" class="text-slate-600 hover:text-indigo-600 hover:bg-slate-100 px-3 py-1.5 rounded-lg transition">Conjugates</a>
                  <a href="reading.html" class="text-slate-600 hover:text-indigo-600 hover:bg-slate-100 px-3 py-1.5 rounded-lg transition">Reading</a>
@@ -37,7 +38,7 @@
         <div class="max-w-3xl mx-auto px-4 py-5 space-y-4">
 
             <!-- Deck picker and progress -->
-            <section class="space-y-3">
+            <section id="deck-block" class="space-y-3">
                 <div>
                     <label for="deck-select" class="block text-sm font-semibold text-slate-700 mb-1">Deck</label>
                     <select id="deck-select" class="w-full text-base px-3 py-3 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500"></select>
@@ -61,10 +62,18 @@
             </section>
 
             <!-- Mode tabs -->
-            <nav class="grid grid-cols-3 gap-1 bg-slate-200/70 p-1 rounded-xl text-sm font-semibold" role="tablist">
-                <button data-mode="cards" class="mode-tab min-h-[44px] rounded-lg">🃏 Flashcards</button>
-                <button data-mode="list" class="mode-tab min-h-[44px] rounded-lg">📋 Word list</button>
+            <a id="lesson-shortcut" href="#" class="hidden flex items-center gap-3 bg-emerald-50 border border-emerald-100 hover:border-emerald-300 rounded-2xl p-3">
+                <span class="text-2xl">▶️</span>
+                <span class="min-w-0"><span class="block text-sm font-bold text-emerald-900">Interactive lesson for this theme</span>
+                <span id="lesson-shortcut-title" class="block text-sm text-emerald-800/80"></span></span>
+                <span class="ml-auto text-emerald-700 font-bold">→</span>
+            </a>
+
+            <nav class="grid grid-cols-4 gap-1 bg-slate-200/70 p-1 rounded-xl text-sm font-semibold" role="tablist">
+                <button data-mode="cards" class="mode-tab min-h-[44px] rounded-lg">🃏 <span class="sm:hidden">Cards</span><span class="hidden sm:inline">Flashcards</span></button>
+                <button data-mode="list" class="mode-tab min-h-[44px] rounded-lg">📋 <span class="sm:hidden">List</span><span class="hidden sm:inline">Word list</span></button>
                 <button data-mode="quiz" class="mode-tab min-h-[44px] rounded-lg">🎯 Quiz</button>
+                <button data-mode="lessons" class="mode-tab min-h-[44px] rounded-lg">▶️ Lessons</button>
             </nav>
 
             <div id="loading" class="hidden text-sm text-indigo-600 animate-pulse">Loading words…</div>
@@ -157,6 +166,11 @@
                 <div id="quiz-box" class="bg-white border border-slate-200 rounded-2xl p-5 space-y-4">
                     <p class="text-base text-slate-600">Choose a quiz above. Questions use the words you don't know yet first.</p>
                 </div>
+            </section>
+
+            <!-- INTERACTIVE LESSONS -->
+            <section id="mode-lessons" class="hidden">
+                <div id="vocab-lessons"></div>
             </section>
 
             <p class="text-xs text-slate-400">Your progress is saved on this device for now; it will sync to your account in a later update.</p>
@@ -741,7 +755,10 @@
                 t.classList.toggle('text-slate-600', !on);
                 t.setAttribute('aria-selected', on);
             });
-            ['cards', 'list', 'quiz'].forEach(x => $('mode-' + x).classList.toggle('hidden', x !== m));
+            ['cards', 'list', 'quiz', 'lessons'].forEach(x => $('mode-' + x).classList.toggle('hidden', x !== m));
+            // Decks don't apply to the interactive lessons
+            $('deck-block').classList.toggle('hidden', m === 'lessons');
+            renderLessonShortcut();
             if (m === 'cards') startCards();
             if (m === 'list') renderList();
         }
@@ -760,7 +777,15 @@
 
         // ---------- Wiring ----------
         $('deck-select').addEventListener('change', (e) => loadDeck(e.target.value));
-        document.querySelectorAll('.mode-tab').forEach(t => t.addEventListener('click', () => setMode(t.dataset.mode)));
+        document.querySelectorAll('.mode-tab').forEach(t => t.addEventListener('click', () => {
+            setMode(t.dataset.mode);
+            if (t.dataset.mode === 'lessons') {
+                lessons.showList(false);
+                history.replaceState({}, '', 'vocab.html?mode=lessons');
+            } else if (location.search) {
+                history.replaceState({}, '', 'vocab.html');
+            }
+        }));
         $('card').addEventListener('click', flipCard);
         $('btn-say').addEventListener('click', () => current && speakFrench(current.fr));
         $('btn-say-ex').addEventListener('click', () => current && speakFrench(current.exFr));
@@ -782,8 +807,44 @@
             }
         });
 
+        // ---------- Interactive lessons (numbers, family tree, clock...) ----------
+        const lessons = LessonKit.mount($('vocab-lessons'), {
+            section: 'interactive',
+            pagePath: 'vocab.html',
+            param: 'lesson',
+            keepParams: { mode: 'lessons' },
+            searchPlaceholder: 'Search, e.g. famille',
+            intro: '<p class="text-sm text-slate-500">Hands-on lessons with audio: tap any word to hear it. Each one links to the flashcards for its theme.</p>'
+        });
+
+        // Shortcut card when the open theme deck has an interactive lesson
+        function renderLessonShortcut() {
+            const themeId = deck && deck.id.startsWith('theme:') ? Number(deck.id.split(':')[1]) : null;
+            const item = LessonKit.VOCAB_LESSONS.find(x => x.theme === themeId);
+            const show = !!item && mode !== 'lessons';
+            $('lesson-shortcut').classList.toggle('hidden', !show);
+            if (!show) return;
+            $('lesson-shortcut-title').textContent = `${item.title}: ${item.blurb}`;
+            $('lesson-shortcut').href = LessonKit.URLS.interactive(item.id);
+            $('lesson-shortcut').onclick = (e) => { e.preventDefault(); setMode('lessons'); lessons.open(item.id, true); };
+        }
+
+        function routeLessons() {
+            const p = new URLSearchParams(location.search);
+            if (p.get('lesson') || p.get('mode') === 'lessons') {
+                setMode('lessons');
+                lessons.route(p);
+                return true;
+            }
+            return false;
+        }
+        window.addEventListener('popstate', () => {
+            if (!routeLessons() && mode === 'lessons') setMode('cards');
+        });
+
         // ---------- Start: last deck and mode are remembered ----------
         mode = store.get('vocab_mode', 'cards');
+        if (!routeLessons() && mode === 'lessons') lessons.showList(false);
         (async () => {
             await loadThemeList();
             renderDeckOptions();
