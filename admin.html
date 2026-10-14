@@ -2,6 +2,7 @@
 <html lang="fr" class="h-full">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Atelier de Français - Administration</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -25,10 +26,7 @@
             </div>
             <div class="flex items-center space-x-2">
                 <span id="user-role-badge" class="text-xs bg-emerald-50 text-emerald-700 border border-emerald-200 px-3 py-1 rounded-full font-medium">Mode Dev : Admin</span>
-                <button onclick="logoutAdmin()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1 rounded-lg transition font-medium">Déconnexion</button>
-            <div class="flex items-center space-x-2">
                 <button id="logoutBtn" class="text-slate-600 hover:text-red-600 hover:bg-slate-100 px-3 py-1.5 rounded-lg transition">Logout</button>
-            </div>
             </div>
         </div>
     </header>
@@ -83,10 +81,6 @@
             if (model) localStorage.setItem('ai_model_name', model);
             
             alert("✅ Paramètres globaux de l'IA enregistrés avec succès !");
-        }
-
-        function logoutAdmin() {
-            window.location.href = 'index.html';
         }
 
         // Initialize settings view on load

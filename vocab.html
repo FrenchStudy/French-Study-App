@@ -2,6 +2,7 @@
 <html lang="fr" class="h-full">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Atelier de Français - Vocabulary & Flashcard Suite</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -340,6 +341,16 @@
             if (mainContent) mainContent.scrollTop = 0;
         }
 
+        // Escape text before inserting it into HTML (handles l'homme, "quotes", <tags>)
+        function escapeHtml(value) {
+            return String(value ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
         function renderFlashcardsFromSupabase(rows) {
             const grid = document.getElementById('vocab-cards-grid');
             grid.innerHTML = '';
@@ -347,62 +358,32 @@
             rows.forEach((row) => {
                 const cardEl = document.createElement('div');
                 cardEl.className = 'bg-white border border-slate-200 p-5 rounded-2xl shadow-sm space-y-3 flex flex-col justify-between hover:border-indigo-300 transition';
-                
+
                 const frenchWord = row.French || row.french || '';
                 const englishMeaning = row.English || row.english || '';
                 const sentenceFr = row.SentenceFR || row.sentence_fr || '';
                 const pos = row.Part_of_Speech || row.part_of_speech || '';
                 const rankNum = row.Rank || row.rank || '';
-                const imgUrl = row.image_url || '';
-
-                const imageSection = imgUrl 
-                    ? `<div class="h-32 w-full bg-slate-100 rounded-xl overflow-hidden relative mb-2"><img src="${imgUrl}" alt="${frenchWord}" class="w-full h-full object-cover"></div>`
-                    : `<div id="img-container-${rankNum}">
-                        <button onclick="generateWordImage('${frenchWord}', '${englishMeaning}', ${rankNum})" class="w-full py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 rounded-xl text-xs font-semibold transition flex items-center justify-center space-x-1.5">
-                         <span>✨ Créer une image mnémonique IA</span>
-                        </button>
-                       </div>`;
 
                 cardEl.innerHTML = `
                     <div class="space-y-2">
-                        ${imageSection}
                         <div class="flex items-center justify-between">
-                            <div class="flex items-center space-x-2">
-                                <span class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-mono font-bold">#${rankNum}</span>
-                                <span class="text-base font-bold text-slate-900">${frenchWord}</span>
-                            </div>
-                            <button onclick="speakWord('${frenchWord}')" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-600 p-1.5 rounded-lg text-xs transition">🔊</button>
+                            <span class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-mono font-bold">#${escapeHtml(rankNum)}</span>
+                            <button type="button" data-speak class="bg-indigo-50 hover:bg-indigo-100 text-indigo-600 p-1.5 rounded-lg text-xs transition" aria-label="Listen">🔊</button>
                         </div>
+                        <div class="text-base font-bold text-slate-900 break-words">${escapeHtml(frenchWord)}</div>
                         <div class="flex items-center justify-between">
-                            <span class="text-xs text-emerald-600 font-semibold">${englishMeaning}</span>
-                            <span class="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded">${pos}</span>
+                            <span class="text-xs text-emerald-600 font-semibold">${escapeHtml(englishMeaning)}</span>
+                            <span class="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded">${escapeHtml(pos)}</span>
                         </div>
                     </div>
                     <div class="bg-slate-50 p-2.5 rounded-xl text-[11px] text-slate-600 italic">
-                        "${sentenceFr}"
+                        "${escapeHtml(sentenceFr)}"
                     </div>
                 `;
+                cardEl.querySelector('[data-speak]').addEventListener('click', () => speakWord(frenchWord));
                 grid.appendChild(cardEl);
             });
-        }
-
-        async function generateWordImage(frenchWord, englishMeaning, rankNum) {
-            const containerId = `img-container-${rankNum}`;
-            const container = document.getElementById(containerId);
-            if (!container) return;
-
-            container.innerHTML = `<p class="text-[11px] text-indigo-600 font-medium text-center py-3 animate-pulse">🎨 Création du visuel mnémonique unique...</p>`;
-            
-            setTimeout(async () => {
-                const uniqueImageUrl = `https://picsum.photos/seed/${encodeURIComponent(frenchWord)}/400/300`;
-                try {
-                    await db.from('vocabulary_bank').update({ image_url: uniqueImageUrl }).eq('Rank', rankNum);
-                } catch (e) {
-                    console.error("Cache save error:", e);
-                }
-
-                container.innerHTML = `<div class="h-32 w-full bg-slate-100 rounded-xl overflow-hidden relative mb-2"><img src="${uniqueImageUrl}" alt="${frenchWord}" class="w-full h-full object-cover"><span class="absolute bottom-1 right-1 bg-black/60 text-white text-[9px] px-1.5 py-0.5 rounded">Mnémonique: ${frenchWord}</span></div>`;
-            }, 1000);
         }
 
         function speakWord(word) {

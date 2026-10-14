@@ -6,6 +6,8 @@
     <title>French Study App - Hub</title>
     <!-- Tailwind CSS CDN for instant styling -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen flex flex-col justify-between">
 
@@ -17,7 +19,6 @@
                 <span>Apprendre le Français</span>
             </h1>
             <div class="flex items-center space-x-1 sm:space-x-2 text-xs font-medium overflow-x-auto py-2">
-                <a href="translator.html" class="text-slate-600 hover:text-indigo-600 px-2.5 py-1.5 rounded-lg hover:bg-slate-100 transition font-bold text-indigo-600">💬 Translator</a>
                 <a href="admin.html" class="text-slate-600 hover:text-indigo-600 px-2.5 py-1.5 rounded-lg hover:bg-slate-100 transition">Admin</a>
                 <span class="bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded-full hidden md:inline-block">A1–B2 Curriculum</span>
             </div>
@@ -37,7 +38,7 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
             <a href="syllabus.html" class="bg-white border border-slate-200 hover:border-indigo-400 p-5 rounded-2xl shadow-sm transition space-y-2 block group">
                 <span class="text-2xl group-hover:scale-110 transition inline-block">📚</span>
-                <h3 class="font-bold text-slate-900 group-hover:text-indigo-600 transition">1. Syllabus</h3>
+                <h3 class="font-bold text-slate-900 group-hover:text-indigo-600 transition">Syllabus</h3>
                 <p class="text-xs text-slate-500">Grammar rules, modules, and micro-drills.</p>
             </a>
             <a href="lesson.html" class="bg-white border border-slate-200 hover:border-indigo-400 p-5 rounded-2xl shadow-sm transition space-y-2 block group">
