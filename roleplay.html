@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Role-play - French Study App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
+    <script src="js/ai.js"></script>
+    <script src="js/scenes.js"></script>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen">
+
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-50">
+        <div class="max-w-3xl mx-auto px-4 h-14 flex items-center justify-between">
+            <a href="index.html" id="back-link" class="text-sm font-semibold text-slate-600 hover:text-indigo-600">← Home</a>
+            <h1 class="text-base font-bold text-slate-900">🎭 Role-play</h1>
+            <button id="logoutBtn" class="text-sm text-slate-600 hover:text-red-600 px-2 py-1 rounded-lg">Logout</button>
+        </div>
+    </header>
+
+    <!-- View 1: choose a character -->
+    <main id="picker-view" class="max-w-3xl mx-auto px-4 py-5 space-y-4">
+        <div>
+            <h2 class="text-xl font-black text-slate-900">Who do you want to talk to?</h2>
+            <p class="text-sm text-slate-500 mt-1">Pick a scene at your level. Speak or type in French; if you get stuck, tap “What can I say?”. You get a short report at the end.</p>
+        </div>
+        <div id="character-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+        <p class="text-sm text-slate-500">Nervous? Rehearse the lines first in <a href="shadowing.html?track=6" class="text-indigo-600 font-semibold underline">Shadowing, track 6</a>.</p>
+    </main>
+
+    <!-- View 2: the conversation -->
+    <main id="chat-view" class="hidden max-w-3xl mx-auto px-4 py-4 flex flex-col" style="min-height: calc(100vh - 56px);">
+        <div class="bg-white border border-slate-200 rounded-2xl p-4 flex items-start gap-3">
+            <div id="chat-emoji" class="text-3xl leading-none"></div>
+            <div class="min-w-0 flex-1">
+                <div class="font-bold text-slate-900"><span id="chat-name"></span> <span id="chat-level" class="ml-1 text-xs font-bold bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-full align-middle"></span></div>
+                <div id="chat-scene" class="text-sm text-slate-500"></div>
+                <div id="chat-goal" class="text-sm text-slate-700 mt-1"></div>
+            </div>
+        </div>
+
+        <div id="messages" class="flex-1 py-4 space-y-3" aria-live="polite"></div>
+
+        <!-- Suggestions -->
+        <div id="suggestions" class="hidden mb-3 bg-amber-50 border border-amber-200 rounded-2xl p-3 space-y-2">
+            <div class="text-sm font-semibold text-amber-900">You could say… (tap to use)</div>
+            <div id="suggestion-list" class="flex flex-col gap-2"></div>
+        </div>
+
+        <div id="report" class="hidden mb-4"></div>
+
+        <!-- Input -->
+        <div id="input-area" class="sticky bottom-0 bg-slate-50 pt-2 pb-4 space-y-2">
+            <div class="flex items-center gap-2">
+                <button id="btn-mic" class="shrink-0 w-12 h-12 rounded-xl bg-rose-500 hover:bg-rose-600 text-white text-xl" aria-label="Speak">🎙️</button>
+                <input id="msg-input" type="text" autocomplete="off" placeholder="Écrivez en français…" class="flex-1 min-w-0 h-12 text-base px-3 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <button id="btn-send" class="shrink-0 h-12 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold disabled:opacity-40">Send</button>
+            </div>
+            <div class="flex items-center justify-between gap-2 flex-wrap">
+                <button id="btn-help" class="min-h-[44px] px-3 text-sm font-semibold text-amber-800 bg-amber-100 hover:bg-amber-200 rounded-xl">💡 What can I say?</button>
+                <label class="flex items-center gap-2 text-sm text-slate-600 select-none">
+                    <input id="auto-speak" type="checkbox" checked class="w-5 h-5 accent-indigo-600"> Read replies aloud
+                </label>
+                <button id="btn-finish" class="min-h-[44px] px-3 text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl">✅ Finish &amp; get feedback</button>
+            </div>
+            <p id="mic-note" class="hidden text-sm text-amber-700"></p>
+        </div>
+    </main>
+
+    <script>
+        const MAX_TURNS = 12;
+        let scene = null;
+        let chat = [];        // { role: 'assistant' | 'user', text, english }
+        let busy = false;
+        let finished = false;
+        let suggestionOffset = 0;
+        let recognition = null;
+        const $ = (id) => document.getElementById(id);
+
+        // ---------- Character picker ----------
+        function renderPicker() {
+            $('character-grid').innerHTML = window.SCENES.map(s => `
+                <button data-scene="${s.id}" class="text-left bg-white border border-slate-200 hover:border-indigo-400 rounded-2xl p-4 transition flex gap-3 min-h-[44px]">
+                    <span class="text-3xl leading-none">${s.emoji}</span>
+                    <span class="min-w-0">
+                        <span class="block font-bold text-slate-900">${escapeHtml(s.name)} <span class="ml-1 text-xs font-bold bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-full">${escapeHtml(s.level)}</span></span>
+                        <span class="block text-sm text-slate-500">${escapeHtml(s.role)}</span>
+                        <span class="block text-sm text-slate-700 mt-1">${escapeHtml(s.scene)}</span>
+                    </span>
+                </button>`).join('');
+            $('character-grid').querySelectorAll('[data-scene]').forEach(btn =>
+                btn.addEventListener('click', () => startScene(btn.dataset.scene)));
+        }
+
+        // ---------- Conversation ----------
+        function startScene(id) {
+            scene = window.SCENES.find(s => s.id === id);
+            scene._lastHint = '';
+            chat = [{ role: 'assistant', text: scene.opener[0], english: scene.opener[1] }];
+            finished = false;
+            suggestionOffset = 0;
+            $('chat-emoji').textContent = scene.emoji;
+            $('chat-name').textContent = `${scene.name}, ${scene.role}`;
+            $('chat-level').textContent = scene.level;
+            $('chat-scene').textContent = scene.scene;
+            $('chat-goal').textContent = `Your goal: ${scene.goal}`;
+            $('report').classList.add('hidden');
+            $('suggestions').classList.add('hidden');
+            $('input-area').classList.remove('hidden');
+            $('picker-view').classList.add('hidden');
+            $('chat-view').classList.remove('hidden');
+            $('back-link').textContent = '← Characters';
+            window.history.replaceState(null, '', `?scene=${id}`);
+            renderMessages();
+            if ($('auto-speak').checked) speakFrench(scene.opener[0]);
+        }
+
+        function backToPicker(event) {
+            if ($('chat-view').classList.contains('hidden')) return;
+            event.preventDefault();
+            window.speechSynthesis && window.speechSynthesis.cancel();
+            $('chat-view').classList.add('hidden');
+            $('picker-view').classList.remove('hidden');
+            $('back-link').textContent = '← Home';
+            window.history.replaceState(null, '', 'roleplay.html');
+        }
+
+        function renderMessages() {
+            $('messages').innerHTML = chat.map((m, i) => m.role === 'assistant' ? `
+                <div class="max-w-[85%] bg-white border border-slate-200 rounded-2xl rounded-tl-sm p-3 shadow-sm">
+                    <div class="text-base text-slate-900">${escapeHtml(m.text)}</div>
+                    ${m.english ? `<div class="hidden text-sm text-slate-500 mt-1" id="en-${i}">${escapeHtml(m.english)}</div>` : ''}
+                    <div class="flex gap-3 mt-2 text-sm">
+                        <button data-speak="${i}" class="text-indigo-600 font-semibold min-h-[32px]">🔊 Listen</button>
+                        ${m.english ? `<button data-en="${i}" class="text-slate-500 font-semibold min-h-[32px]">English</button>` : ''}
+                    </div>
+                </div>` : `
+                <div class="max-w-[85%] ml-auto bg-indigo-600 text-white rounded-2xl rounded-tr-sm p-3 text-base">${escapeHtml(m.text)}</div>`
+            ).join('') + (busy ? `<div class="text-sm text-slate-400 animate-pulse">${escapeHtml(scene.name)} is typing…</div>` : '');
+
+            $('messages').querySelectorAll('[data-speak]').forEach(b =>
+                b.addEventListener('click', () => speakFrench(chat[b.dataset.speak].text)));
+            $('messages').querySelectorAll('[data-en]').forEach(b =>
+                b.addEventListener('click', () => $('en-' + b.dataset.en).classList.toggle('hidden')));
+            const learnerTurns = chat.filter(m => m.role === 'user').length;
+            $('btn-send').disabled = busy || finished || learnerTurns >= MAX_TURNS;
+            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+        }
+
+        function addError(text) {
+            const div = document.createElement('div');
+            div.className = 'text-sm text-rose-700 bg-rose-50 border border-rose-100 rounded-xl p-3';
+            div.textContent = text;
+            $('messages').appendChild(div);
+        }
+
+        function systemPrompt() {
+            const levelRules = {
+                'A1': 'Use very short sentences (at most 12 words), the present tense and very common words.',
+                'A1–A2': 'Use short sentences, mostly the present tense, and common words.',
+                'A2': 'Use short sentences; the passé composé and futur proche are fine.',
+                'A2–B1': 'Use clear everyday French with short sentences.',
+                'B1': 'Use natural everyday French at a moderate pace, including past tenses.',
+                'B2': 'Use natural, fluent French; some idioms are fine.'
+            }[scene.level] || 'Use simple French.';
+            return `You are ${scene.persona}
+You are role-playing this scene with a learner of French (CEFR ${scene.level}): ${scene.scene}.
+The learner's goal: ${scene.goal}
+Rules:
+- Stay in character and reply only in French. ${levelRules}
+- Reply in 1 or 2 sentences, then keep the scene moving with one simple question or prompt.
+- Do not correct the learner's mistakes during the scene; just answer naturally (you may echo the correct form).
+- If the learner writes in English or seems stuck, answer in simple French and put a short French sentence they could say next in "hint".
+- When the learner's goal is reached, wrap the scene up kindly.
+Return a JSON object: {"reply": "<your French reply>", "english": "<English translation of your reply>", "hint": "<a French sentence the learner could say next, or empty>"}`;
+        }
+
+        async function sendMessage(text) {
+            text = (text || '').trim();
+            if (!text || busy || finished) return;
+            chat.push({ role: 'user', text });
+            $('msg-input').value = '';
+            $('suggestions').classList.add('hidden');
+            busy = true;
+            renderMessages();
+
+            const messages = [{ role: 'system', content: systemPrompt() }]
+                .concat(chat.map(m => ({ role: m.role, content: m.text })));
+            try {
+                const out = await askAI(messages, { json: true, temperature: 0.7 });
+                const reply = String(out.reply || '').trim();
+                if (!reply) throw new Error('The AI reply was empty. Please try again.');
+                chat.push({ role: 'assistant', text: reply, english: out.english || '' });
+                if (out.hint) scene._lastHint = String(out.hint);
+                busy = false;
+                renderMessages();
+                if ($('auto-speak').checked) speakFrench(reply);
+                if (chat.filter(m => m.role === 'user').length >= MAX_TURNS) {
+                    addError('That is the end of this scene. Tap “Finish & get feedback” for your report.');
+                }
+            } catch (err) {
+                busy = false;
+                chat.pop();
+                $('msg-input').value = text;
+                renderMessages();
+                addError(err.message);
+            }
+        }
+
+        // ---------- "What can I say?" ----------
+        function showSuggestions() {
+            const list = [];
+            if (scene._lastHint) list.push([scene._lastHint, 'Suggested by ' + scene.name]);
+            for (let i = 0; list.length < 3 && i < scene.phrases.length; i++) {
+                list.push(scene.phrases[(suggestionOffset + i) % scene.phrases.length]);
+            }
+            suggestionOffset = (suggestionOffset + 2) % scene.phrases.length;
+            $('suggestion-list').innerHTML = list.map((p, i) => `
+                <button data-sugg="${i}" class="text-left bg-white border border-amber-200 hover:border-amber-400 rounded-xl px-3 py-2 min-h-[44px]">
+                    <span class="block text-base text-slate-900">${escapeHtml(p[0])}</span>
+                    <span class="block text-sm text-slate-500">${escapeHtml(p[1])}</span>
+                </button>`).join('');
+            $('suggestion-list').querySelectorAll('[data-sugg]').forEach(b => b.addEventListener('click', () => {
+                const fr = list[b.dataset.sugg][0];
+                $('msg-input').value = fr;
+                $('msg-input').focus();
+                speakFrench(fr);
+            }));
+            $('suggestions').classList.remove('hidden');
+        }
+
+        // ---------- Voice input ----------
+        function toggleMic() {
+            const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SR) {
+                $('mic-note').textContent = 'Voice input is not available in this browser. Type your answer instead (Chrome and Edge support voice).';
+                $('mic-note').classList.remove('hidden');
+                return;
+            }
+            if (recognition) { recognition.stop(); return; }
+            window.speechSynthesis && window.speechSynthesis.cancel();
+            recognition = new SR();
+            recognition.lang = 'fr-FR';
+            recognition.interimResults = true;
+            $('btn-mic').classList.add('animate-pulse');
+            recognition.onresult = (e) => {
+                $('msg-input').value = Array.from(e.results).map(r => r[0].transcript).join(' ');
+            };
+            recognition.onerror = (e) => {
+                if (e.error === 'not-allowed') {
+                    $('mic-note').textContent = 'Microphone access was blocked. Allow it in your browser settings, or type instead.';
+                    $('mic-note').classList.remove('hidden');
+                }
+            };
+            recognition.onend = () => {
+                recognition = null;
+                $('btn-mic').classList.remove('animate-pulse');
+                $('msg-input').focus();
+            };
+            recognition.start();
+        }
+
+        // ---------- End-of-scene report ----------
+        async function finishScene() {
+            const learnerLines = chat.filter(m => m.role === 'user').map(m => m.text);
+            if (!learnerLines.length) {
+                addError('Say at least one thing to get feedback.');
+                return;
+            }
+            if (busy) return;
+            busy = true;
+            $('btn-finish').disabled = true;
+            $('report').classList.remove('hidden');
+            $('report').innerHTML = '<div class="text-sm text-slate-500 animate-pulse">Preparing your report…</div>';
+
+            const transcript = chat.map(m => `${m.role === 'user' ? 'Learner' : scene.name}: ${m.text}`).join('\n');
+            try {
+                const r = await askAI([
+                    { role: 'system', content: `You are a warm, encouraging French teacher. A learner at CEFR ${scene.level} just did a role-play (${scene.scene}). Review ONLY the learner's lines. Return a JSON object:
+{"summary": "<one encouraging sentence in English>",
+ "went_well": ["<up to 3 short points in English>"],
+ "corrections": [{"you_said": "<learner's words>", "better": "<correct natural French>", "why": "<short English explanation>"}],
+ "new_words": [{"fr": "<useful French word or phrase from this scene>", "en": "<English>"}]}
+Give at most 3 corrections, only for real mistakes (an empty list if there are none), and at most 5 new words.` },
+                    { role: 'user', content: transcript }
+                ], { json: true, temperature: 0.3 });
+                finished = true;
+                renderReport(r);
+                $('input-area').classList.add('hidden');
+            } catch (err) {
+                $('report').innerHTML = `<div class="text-sm text-rose-700 bg-rose-50 rounded-xl p-3">${escapeHtml(err.message)}</div>`;
+                $('btn-finish').disabled = false;
+            }
+            busy = false;
+            renderMessages();
+        }
+
+        function renderReport(r) {
+            const list = (arr) => Array.isArray(arr) ? arr : [];
+            const corrections = list(r.corrections).slice(0, 3);
+            const words = list(r.new_words).slice(0, 5);
+            $('report').innerHTML = `
+                <section class="bg-white border border-emerald-200 rounded-2xl p-4 space-y-4">
+                    <h3 class="text-lg font-black text-emerald-800">Your report</h3>
+                    <p class="text-base text-slate-800">${escapeHtml(r.summary || 'Well done for finishing the scene!')}</p>
+                    ${list(r.went_well).length ? `<div><div class="text-sm font-bold text-slate-700 mb-1">What went well</div>
+                        <ul class="list-disc pl-5 text-base text-slate-700 space-y-1">${list(r.went_well).slice(0, 3).map(w => `<li>${escapeHtml(w)}</li>`).join('')}</ul></div>` : ''}
+                    <div><div class="text-sm font-bold text-slate-700 mb-1">Corrections</div>
+                        ${corrections.length ? corrections.map(c => `
+                            <div class="border border-slate-100 rounded-xl p-3 mb-2">
+                                <div class="text-sm text-rose-700 line-through">${escapeHtml(c.you_said)}</div>
+                                <div class="text-base font-semibold text-emerald-800">${escapeHtml(c.better)}
+                                    <button data-say="${escapeHtml(c.better)}" class="ml-1 text-indigo-600 text-sm">🔊</button></div>
+                                <div class="text-sm text-slate-500">${escapeHtml(c.why)}</div>
+                            </div>`).join('') : '<p class="text-base text-slate-600">No mistakes to fix this time. Great job!</p>'}
+                    </div>
+                    ${words.length ? `<div><div class="text-sm font-bold text-slate-700 mb-1">New words from this scene</div>
+                        <div class="flex flex-wrap gap-2">${words.map(w => `
+                            <button data-say="${escapeHtml(w.fr)}" class="text-left bg-indigo-50 hover:bg-indigo-100 rounded-xl px-3 py-2">
+                                <span class="block text-base font-semibold text-indigo-900">🔊 ${escapeHtml(w.fr)}</span>
+                                <span class="block text-sm text-indigo-700">${escapeHtml(w.en)}</span>
+                            </button>`).join('')}</div></div>` : ''}
+                    <div class="flex flex-wrap gap-2 pt-1">
+                        <button id="btn-again" class="min-h-[44px] px-4 bg-indigo-600 text-white font-bold rounded-xl">Try this scene again</button>
+                        <a href="shadowing.html?track=6" class="min-h-[44px] px-4 inline-flex items-center bg-slate-100 text-slate-700 font-bold rounded-xl">Rehearse the lines</a>
+                    </div>
+                </section>`;
+            $('report').querySelectorAll('[data-say]').forEach(b => b.addEventListener('click', () => speakFrench(b.dataset.say)));
+            $('btn-again').addEventListener('click', () => { $('btn-finish').disabled = false; startScene(scene.id); });
+        }
+
+        // ---------- Wiring ----------
+        $('back-link').addEventListener('click', backToPicker);
+        $('btn-send').addEventListener('click', () => sendMessage($('msg-input').value));
+        $('msg-input').addEventListener('keydown', (e) => { if (e.key === 'Enter') sendMessage($('msg-input').value); });
+        $('btn-help').addEventListener('click', showSuggestions);
+        $('btn-mic').addEventListener('click', toggleMic);
+        $('btn-finish').addEventListener('click', finishScene);
+
+        renderPicker();
+        const startId = new URLSearchParams(location.search).get('scene');
+        if (startId && window.SCENES.some(s => s.id === startId)) startScene(startId);
+    </script>
+</body>
+</html>
