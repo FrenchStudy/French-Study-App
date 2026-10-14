@@ -1,16 +1,17 @@
 <!DOCTYPE html>
-<html lang="fr" class="h-full">
+<html lang="en" class="h-full">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Atelier de Français - Vocabulary & Flashcard Suite</title>
+    <title>Vocabulary - French Study App</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="config.js"></script>
+    <script src="js/ai.js"></script>
+    <script src="js/cheatsheet-data.js"></script>
 </head>
-<body class="h-full bg-slate-100 flex flex-col overflow-hidden font-sans">
+<body class="h-full bg-slate-100 flex flex-col overflow-hidden font-sans text-slate-800">
 
-    <!-- Top Sticky Navigation Header -->
     <header class="bg-white border-b border-slate-200 sticky top-0 z-50 shrink-0">
         <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
             <div class="flex items-center space-x-1 sm:space-x-2 text-xs font-semibold overflow-x-auto py-2">
@@ -27,471 +28,769 @@
                 <a href="admin.html" class="text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 px-3 py-1.5 rounded-lg transition font-bold">Administration</a>
             </div>
             <div class="flex items-center space-x-2">
-                <span class="text-xs text-slate-400 font-medium">Banque de Vocabulaire & Flashcards (5000 Mots)</span>
+                
                 <button id="logoutBtn" class="text-slate-600 hover:text-red-600 hover:bg-slate-100 px-3 py-1.5 rounded-lg transition">Logout</button>
             </div>
         </div>
     </header>
 
-    <!-- Main Workspace Layout -->
-    <div class="flex-1 flex overflow-hidden relative">
-        
-        <!-- LEFT: Categorization Sidebar -->
-        <aside class="w-80 bg-white border-r border-slate-200 flex flex-col shrink-0">
-            <div class="p-4 border-b border-slate-100 space-y-3">
+    <main class="flex-1 overflow-y-auto">
+        <div class="max-w-3xl mx-auto px-4 py-5 space-y-4">
+
+            <!-- Deck picker and progress -->
+            <section class="space-y-3">
                 <div>
-                    <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Catégorisation Intelligente</h2>
-                    <p class="text-[11px] text-slate-500">Explorez par niveau CEFR ou par catégorie grammaticale.</p>
+                    <label for="deck-select" class="block text-sm font-semibold text-slate-700 mb-1">Deck</label>
+                    <select id="deck-select" class="w-full text-base px-3 py-3 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500"></select>
                 </div>
-            </div>
-
-            <!-- Sidebar Categorization List Container -->
-            <div id="vocab-modules-container" class="flex-1 overflow-y-auto p-3 space-y-4">
-                <p class="text-xs text-slate-400 p-2">Calcul des comptes et chargement...</p>
-            </div>
-        </aside>
-
-        <!-- RIGHT: Flashcard & Vocabulary Grid Workspace -->
-        <main class="flex-1 flex overflow-hidden">
-            
-            <!-- Content Pane -->
-            <div class="flex-1 overflow-y-auto p-6 space-y-6 relative flex flex-col justify-between">
-                <div>
-                    <div class="flex items-center justify-between shrink-0 mb-4 flex-wrap gap-3">
-                        <div>
-                            <span id="vocab-module-badge" class="text-[10px] font-bold uppercase tracking-wider bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded">CEFR / Grammaire</span>
-                            <h2 id="vocab-module-title" class="text-xl font-extrabold text-slate-900 tracking-tight mt-1">Banque Complète</h2>
-                        </div>
-                        <div class="flex items-center space-x-3">
-                            <!-- Instant Live Search Bar for French or English Name -->
-                            <div class="relative">
-                                <input type="text" id="live-word-search" placeholder="Rechercher (Français / English)..." oninput="applyLiveSearch(this.value)" class="text-xs px-3 py-2 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 w-64 shadow-sm">
-                            </div>
-                            <button onclick="generateAIQuizVocab()" class="text-xs bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl font-bold transition shadow-sm">⚡ Quiz de Vocabulaire IA</button>
-                        </div>
+                <div class="bg-white border border-slate-200 rounded-2xl p-4 space-y-2">
+                    <div class="flex items-center justify-between text-sm">
+                        <span id="deck-title" class="font-bold text-slate-900"></span>
+                        <span id="deck-counts" class="text-slate-500"></span>
                     </div>
-
-                    <!-- Flashcard Grid Container -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="vocab-cards-grid">
-                        <p class="text-xs text-slate-400 p-4">Sélectionnez une catégorie à gauche pour charger les cartes...</p>
+                    <div class="h-2.5 bg-slate-100 rounded-full overflow-hidden flex">
+                        <div id="bar-known" class="h-full bg-emerald-500" style="width:0%"></div>
+                        <div id="bar-learning" class="h-full bg-amber-400" style="width:0%"></div>
                     </div>
-                </div>
-
-                <!-- Pagination Controls Bar -->
-                <div id="pagination-controls" class="bg-white border border-slate-200 p-3 rounded-2xl flex items-center justify-between shrink-0 mt-4 shadow-sm">
-                    <button onclick="changePage(-1)" id="prev-btn" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-4 py-2 rounded-xl transition disabled:opacity-50" disabled>← Précédent</button>
-                    <span id="page-indicator" class="text-xs font-semibold text-slate-600">Page 1</span>
-                    <button onclick="changePage(1)" id="next-btn" class="text-xs bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-4 py-2 rounded-xl transition">Suivant →</button>
-                </div>
-
-                <!-- AI Vocab Quiz Modal / Container -->
-                <div id="vocab-quiz-section" class="hidden bg-amber-50/60 border border-amber-200/60 rounded-2xl p-6 space-y-4 shrink-0">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center space-x-2">
-                            <span class="text-amber-600 font-bold">📝</span>
-                            <h3 class="text-xs font-bold text-amber-900 uppercase tracking-wide">Quiz d'Entraînement Généré par l'IA</h3>
-                        </div>
-                        <button onclick="closeVocabQuiz()" class="text-slate-400 hover:text-slate-700 font-bold text-xs">✕ Fermer</button>
-                    </div>
-                    <div id="vocab-quiz-container" class="space-y-4 text-xs text-slate-700"></div>
-                </div>
-            </div>
-
-            <!-- AI Vocabulary Tutor Sidebar -->
-            <section class="w-96 bg-white border-l border-slate-200 flex flex-col shrink-0">
-                <div class="p-4 border-b border-slate-100 flex items-center justify-between">
-                    <span class="text-xs font-bold uppercase tracking-wider text-slate-600">🤖 Tuteur de Vocabulaire IA</span>
-                    <span class="text-[10px] bg-emerald-50 text-emerald-600 font-semibold px-2 py-0.5 rounded">En ligne</span>
-                </div>
-                
-                <div id="ai-chat-box" class="flex-1 p-4 overflow-y-auto space-y-3">
-                    <div class="bg-slate-50 border border-slate-100 p-3 rounded-xl text-xs text-slate-700 space-y-2">
-                        <p>Bonjour ! Posez-moi des questions sur les niveaux CEFR ou la grammaire de cette sélection.</p>
-                    </div>
-                </div>
-
-                <!-- Suggestion Chips -->
-                <div class="p-3 bg-slate-50 border-t border-slate-100 flex flex-wrap gap-1.5">
-                    <button onclick="sendPresetPrompt('Expliquez la structure grammaticale et les règles d usage de cette sélection.')" class="text-[10px] bg-white border border-slate-200 text-slate-700 px-2.5 py-1 rounded-lg hover:bg-indigo-50 hover:text-indigo-600 transition font-medium">💡 Analyse grammaticale</button>
-                    <button onclick="sendPresetPrompt('Donnez-moi des astuces mnémotechniques pour retenir ces mots.')" class="text-[10px] bg-white border border-slate-200 text-slate-700 px-2.5 py-1 rounded-lg hover:bg-indigo-50 hover:text-indigo-600 transition font-medium">🎨 Astuces mnémoniques</button>
-                </div>
-
-                <!-- Chat Input Bar -->
-                <div class="p-3 border-t border-slate-100">
-                    <div class="flex items-center space-x-2">
-                        <input type="text" id="ai-input" placeholder="Posez une question..." class="flex-1 text-xs px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                        <button onclick="sendAIChat()" class="bg-indigo-600 text-white p-2.5 rounded-xl text-xs font-bold hover:bg-indigo-700 transition">➔</button>
+                    <div class="flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-500">
+                        <span><span class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500 align-middle"></span> Known</span>
+                        <span><span class="inline-block w-2.5 h-2.5 rounded-full bg-amber-400 align-middle"></span> Learning</span>
+                        <span><span class="inline-block w-2.5 h-2.5 rounded-full bg-slate-200 align-middle"></span> New</span>
+                        <span class="ml-auto"><span class="text-sky-700 font-bold">blue</span> = masculine · <span class="text-rose-600 font-bold">red</span> = feminine</span>
                     </div>
                 </div>
             </section>
 
-        </main>
-    </div>
+            <!-- Mode tabs -->
+            <nav class="grid grid-cols-3 gap-1 bg-slate-200/70 p-1 rounded-xl text-sm font-semibold" role="tablist">
+                <button data-mode="cards" class="mode-tab min-h-[44px] rounded-lg">🃏 Flashcards</button>
+                <button data-mode="list" class="mode-tab min-h-[44px] rounded-lg">📋 Word list</button>
+                <button data-mode="quiz" class="mode-tab min-h-[44px] rounded-lg">🎯 Quiz</button>
+            </nav>
 
-    <!-- Script Integration -->
+            <div id="loading" class="hidden text-sm text-indigo-600 animate-pulse">Loading words…</div>
+            <div id="load-error" class="hidden text-sm text-rose-700 bg-rose-50 rounded-xl p-3"></div>
+
+            <!-- FLASHCARDS -->
+            <section id="mode-cards" class="space-y-3">
+                <div class="flex items-center justify-between text-sm text-slate-500">
+                    <span id="session-info"></span>
+                    <button id="btn-review-all" class="hidden text-indigo-600 font-semibold min-h-[44px]">Review all words anyway</button>
+                </div>
+
+                <div id="card-done" class="hidden bg-white border border-emerald-200 rounded-2xl p-6 text-center space-y-2">
+                    <div class="text-3xl">🎉</div>
+                    <p class="text-lg font-bold text-emerald-800">Done for today in this deck</p>
+                    <p id="card-done-text" class="text-sm text-slate-600"></p>
+                </div>
+
+                <div id="card-area">
+                    <button id="card" type="button" class="w-full text-left bg-white border border-slate-200 rounded-2xl shadow-sm p-6 min-h-[260px] flex flex-col justify-center gap-3 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <div class="flex items-center justify-between">
+                            <span id="card-status" class="text-xs font-bold px-2 py-0.5 rounded-full"></span>
+                            <span class="text-xs text-slate-400">Tap the card to flip</span>
+                        </div>
+                        <div id="card-front" class="text-center space-y-2">
+                            <div id="card-word" class="text-3xl font-black break-words"></div>
+                            <div id="card-pos" class="text-sm text-slate-400"></div>
+                        </div>
+                        <div id="card-back" class="hidden space-y-3 border-t border-slate-100 pt-3">
+                            <div id="card-en" class="text-xl font-bold text-emerald-700 text-center"></div>
+                            <div id="card-pron" class="text-sm text-indigo-600 text-center"></div>
+                            <div id="card-note" class="text-sm text-amber-700 text-center"></div>
+                            <div id="card-example" class="hidden bg-slate-50 rounded-xl p-3 text-sm">
+                                <div id="card-ex-fr" class="italic text-slate-800"></div>
+                                <div id="card-ex-en" class="text-slate-500"></div>
+                            </div>
+                        </div>
+                    </button>
+
+                    <div class="flex justify-center gap-2 mt-2">
+                        <button id="btn-say" class="min-h-[44px] px-4 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-semibold rounded-xl">🔊 Listen</button>
+                        <button id="btn-say-ex" class="hidden min-h-[44px] px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl">🔊 Example</button>
+                    </div>
+
+                    <!-- Memory hook -->
+                    <div id="hook-box" class="hidden mt-3 bg-amber-50 border border-amber-200 rounded-2xl p-4 space-y-2">
+                        <div class="text-sm font-bold text-amber-900">💡 Memory hook</div>
+                        <p id="hook-text" class="text-base text-slate-800"></p>
+                        <div id="hook-edit" class="hidden space-y-2">
+                            <textarea id="hook-input" rows="2" class="w-full text-base p-3 border border-amber-200 rounded-xl" placeholder="Write a picture or sound-alike that helps you remember…"></textarea>
+                            <button id="btn-hook-save" class="min-h-[44px] px-4 bg-amber-600 text-white font-semibold rounded-xl">Save my hook</button>
+                        </div>
+                        <div class="flex flex-wrap gap-2">
+                            <button id="btn-hook-ai" class="min-h-[44px] px-3 bg-white border border-amber-300 text-amber-800 font-semibold rounded-xl">✨ Create with AI</button>
+                            <button id="btn-hook-own" class="min-h-[44px] px-3 bg-white border border-amber-300 text-amber-800 font-semibold rounded-xl">✏️ Write my own</button>
+                        </div>
+                        <p id="hook-error" class="hidden text-sm text-rose-700"></p>
+                    </div>
+
+                    <!-- Grading -->
+                    <div id="grade-buttons" class="hidden grid grid-cols-3 gap-2 mt-3">
+                        <button data-grade="dontknow" class="min-h-[56px] bg-rose-500 hover:bg-rose-600 text-white font-bold rounded-xl text-sm">Don't know<span class="block text-xs font-normal opacity-90">again soon</span></button>
+                        <button data-grade="learning" class="min-h-[56px] bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-xl text-sm">Still learning<span class="block text-xs font-normal opacity-90">tomorrow</span></button>
+                        <button data-grade="know" class="min-h-[56px] bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-sm">I know it<span class="block text-xs font-normal opacity-90">later</span></button>
+                    </div>
+                    <p id="flip-hint" class="text-center text-sm text-slate-500 mt-3">Try to recall the meaning, then flip the card.</p>
+                </div>
+            </section>
+
+            <!-- WORD LIST -->
+            <section id="mode-list" class="hidden space-y-3">
+                <div class="flex flex-col sm:flex-row gap-2">
+                    <input id="list-search" type="search" placeholder="Search this deck (French or English)" class="flex-1 text-base px-3 py-3 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <select id="list-filter" class="text-base px-3 py-3 bg-white border border-slate-200 rounded-xl">
+                        <option value="all">All words</option>
+                        <option value="notknown">Words I don't know yet</option>
+                        <option value="known">Words I know</option>
+                    </select>
+                </div>
+                <div id="word-list" class="bg-white border border-slate-200 rounded-2xl divide-y divide-slate-100"></div>
+            </section>
+
+            <!-- QUIZ -->
+            <section id="mode-quiz" class="hidden space-y-3">
+                <div class="grid grid-cols-3 gap-2">
+                    <button data-quiz="meaning" class="quiz-type min-h-[56px] bg-white border border-slate-200 rounded-xl text-sm font-semibold">Pick the meaning</button>
+                    <button data-quiz="type" class="quiz-type min-h-[56px] bg-white border border-slate-200 rounded-xl text-sm font-semibold">Type the French</button>
+                    <button data-quiz="listen" class="quiz-type min-h-[56px] bg-white border border-slate-200 rounded-xl text-sm font-semibold">Listen and pick</button>
+                </div>
+                <div id="quiz-box" class="bg-white border border-slate-200 rounded-2xl p-5 space-y-4">
+                    <p class="text-base text-slate-600">Choose a quiz above. Questions use the words you don't know yet first.</p>
+                </div>
+            </section>
+
+            <p class="text-xs text-slate-400">Your progress is saved on this device for now; it will sync to your account in a later update.</p>
+        </div>
+    </main>
+
     <script>
         const db = window.mySupabase;
+        const CS = window.CHEATSHEET;
+        const $ = (id) => document.getElementById(id);
+        const FREQ_DECK_SIZE = 50;
+        const FREQ_TOTAL = 5000;
+        const SESSION_SIZE = 20;
+        const DAY = 86400000;
+        const INTERVAL_DAYS = { 1: 0, 2: 1, 3: 3, 4: 7, 5: 21 };   // Leitner box -> days until next review
 
-        let activeSelection = null;
-        let currentPage = 0;
-        const pageSize = 24; 
-        let cachedAllRows = null;
-        let currentSearchQuery = '';
+        let deck = null;          // { id, title, words: [] }
+        let mode = 'cards';
+        let queue = [];           // flashcard session
+        let current = null;
+        let reviewAll = false;
+        let quiz = null;
 
-        async function saveProgressToDatabase(moduleType, moduleId, score = null) {
-            const { data: { user }, error: userError } = await db.auth.getUser();
-            if (userError || !user) return;
+        // ---------- Saved data (this device) ----------
+        const store = {
+            get(k, d) { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch (e) { return d; } },
+            set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+        };
+        let progress = store.get('vocab_progress', {});   // key -> { box, due }
+        let hooks = store.get('vocab_hooks', {});         // key -> { text, source }
+        const saveProgress = () => store.set('vocab_progress', progress);
 
-            await db.from('user_progress').upsert({
-                user_id: user.id,
-                module_type: moduleType, 
-                module_id: moduleId.toString(),
-                completed: true,
-                score: score, 
-                updated_at: new Date()
-            }, { onConflict: 'user_id, module_type, module_id' });
+        // ---------- Word helpers ----------
+        const ARTICLE = /^(le |la |les |l['’]|un |une )/i;
+        function wordKey(fr) {
+            return String(fr).toLowerCase().replace(/[’]/g, "'").replace(ARTICLE, '').replace(/\s+/g, ' ').trim();
+        }
+        // ---- Word bank codes (Part_of_Speech like "nf", "nm,nf", "nadj(f)"; Register like "+s -l") ----
+        const POS_LABELS = {
+            nm: 'noun (m)', nf: 'noun (f)', nmi: 'noun (m, invariable)', nfi: 'noun (f, invariable)', nmpl: 'noun (m, plural)', nfpl: 'noun (f, plural)',
+            nadj: 'noun / adjective', v: 'verb', adj: 'adjective', adji: 'adjective (invariable)', adv: 'adverb',
+            prep: 'preposition', pro: 'pronoun', conj: 'conjunction', det: 'determiner', intj: 'interjection', phrase: 'phrase'
+        };
+        function parsePos(pos) {
+            const tokens = String(pos || '').split(',').map(s => s.trim()).filter(Boolean);
+            const base = tokens.map(s => s.replace(/\(.*?\)/g, ''));
+            const hasM = base.some(b => /^nm/.test(b));
+            const hasF = base.some(b => /^nf/.test(b));
+            const nounTokens = base.filter(b => /^n[mf]/.test(b));   // "(pl)" only means the plural looks the same
+            return {
+                // only words that are nouns and nothing else get an article and a gender colour
+                pureNoun: base.length > 0 && base.every(b => /^n[mf]/.test(b)),
+                gender: hasM && hasF ? 'mf' : hasM ? 'm' : hasF ? 'f' : '',
+                plural: nounTokens.length > 0 && nounTokens.every(b => /^n[mf]pl$/.test(b)),
+                label: [...new Set(base.map(b => POS_LABELS[b] || b))].join(' · ')
+            };
+        }
+        // Words starting with an "aspirated" h take le/la, not l'
+        const H_ASPIRE = new Set(['hasard', 'hausse', 'hauteur', 'haut', 'honte', 'héros', 'hall', 'halte', 'hameau', 'hanche', 'handicap',
+            'hangar', 'haricot', 'hâte', 'hache', 'haine', 'harcèlement', 'hérisson', 'hêtre', 'hibou', 'hiérarchie', 'hockey', 'homard',
+            'hors-d\'œuvre', 'hotte', 'houle', 'housse', 'hublot', 'huit', 'hurlement', 'hutte', 'haie', 'halle', 'hamac', 'hamburger',
+            'hamster', 'hareng', 'harpe', 'hargne', 'havre', 'hernie', 'héron', 'hoquet', 'huée', 'hall']);
+        function withArticle(word, gender, plural) {
+            if (!gender || gender === '') return word;
+            if (plural) return 'les ' + word;
+            const elide = /^[aeiouyàâäéèêëîïôöùûüœæ]/i.test(word) || (/^h/i.test(word) && !H_ASPIRE.has(word.toLowerCase()));
+            if (elide) return "l'" + word;
+            return (gender === 'm' ? 'le ' : gender === 'f' ? 'la ' : 'le/la ') + word;
+        }
+        const REGISTER_LABELS = { l: 'books', s: 'speech', n: 'news' };
+        function registerLabel(reg) {
+            const codes = String(reg || '').replace(/register:/i, '').trim().split(/\s+/).filter(Boolean);
+            const more = codes.filter(c => c[0] === '+').map(c => REGISTER_LABELS[c[1]]).filter(Boolean);
+            const less = codes.filter(c => c[0] === '-').map(c => REGISTER_LABELS[c[1]]).filter(Boolean);
+            const text = [more.length && `more common in ${more.join(' and ')}`, less.length && `less common in ${less.join(' and ')}`]
+                .filter(Boolean).join('; ');
+            return text ? text[0].toUpperCase() + text.slice(1) : '';
+        }
+        const cleanIpa = (ipa) => String(ipa || '').replace(/^[\[\/]|[\]\/]$/g, '').trim();
+
+        function genderOf(g, fr) {
+            const v = String(g || '').trim().toLowerCase();
+            if (v.startsWith('m')) return 'm';
+            if (v.startsWith('f')) return 'f';
+            if (/^(le |un )/i.test(fr)) return 'm';
+            if (/^(la |une )/i.test(fr)) return 'f';
+            return '';
+        }
+        function statusOf(w) {
+            const p = progress[w.key];
+            if (!p || !p.box) return 'new';
+            return p.box >= 4 ? 'known' : 'learning';
+        }
+        function isDue(w) {
+            const p = progress[w.key];
+            return p && p.box && p.due <= Date.now();
+        }
+        const STATUS_STYLE = {
+            new: ['New', 'bg-slate-100 text-slate-600'],
+            learning: ['Learning', 'bg-amber-100 text-amber-800'],
+            known: ['Known', 'bg-emerald-100 text-emerald-800']
+        };
+        const genderClass = (w) => w.gender === 'm' ? 'text-sky-700' : w.gender === 'f' ? 'text-rose-600' : 'text-slate-900';
+
+        // ---------- Grading (Leitner boxes) ----------
+        function grade(w, result) {
+            const p = progress[w.key] || { box: 0, due: 0 };
+            if (result === 'know') p.box = p.box === 0 ? 4 : Math.min(5, p.box + 1);
+            else if (result === 'learning') p.box = 2;
+            else p.box = 1;
+            p.due = Date.now() + INTERVAL_DAYS[p.box] * DAY;
+            progress[w.key] = p;
+            saveProgress();
+        }
+        function setKnown(w, known) {
+            if (known) progress[w.key] = { box: 5, due: Date.now() + INTERVAL_DAYS[5] * DAY };
+            else delete progress[w.key];
+            saveProgress();
         }
 
-        const navigationCategories = [
-            {
-                groupTitle: "1. Par Fréquence & Niveau CEFR",
-                items: [
-                    { type: 'all', code: 'ALL', title: 'Banque Complète', icon: '📚' },
-                    { type: 'complexity', code: 'A1', title: 'Beginner / A1', minRank: 1, maxRank: 500, icon: '🟢' },
-                    { type: 'complexity', code: 'A2', title: 'Elementary / A2', minRank: 501, maxRank: 1500, icon: '🟡' },
-                    { type: 'complexity', code: 'B1B2', title: 'Intermediate / B1–B2', minRank: 1501, maxRank: 3500, icon: '🟠' },
-                    { type: 'complexity', code: 'C1C2', title: 'Advanced / C1–C2', minRank: 3501, maxRank: 5000, icon: '🔴' }
-                ]
-            },
-            {
-                groupTitle: "2. Par Partie du Discours (Grammaire)",
-                items: [
-                    { type: 'grammar', code: 'VERB', title: 'Verbes', filterVal: 'v', icon: '⚡' },
-                    { type: 'grammar', code: 'NOUN', title: 'Noms', filterVal: 'n', icon: '🏷️' },
-                    { type: 'grammar', code: 'ADJ', title: 'Adjectifs & Adverbes', filterVal: 'adj', icon: '✨' },
-                    { type: 'grammar', code: 'TOOL', title: 'Mots Outils (Prépositions)', filterVal: 'prep', icon: '🔗' }
-                ]
-            }
-        ];
+        // ---------- Decks ----------
+        function themeWords(id) {
+            return CS.blocks[id].sections.flatMap(s => s.items.map(it => {
+                const isNote = /^not:/i.test(it[1] || '');
+                return {
+                    key: wordKey(it[0]), fr: it[0], en: it[2] || '',
+                    pron: isNote ? '' : (it[1] || ''), note: isNote ? it[1] : '',
+                    gender: it[3] ? genderOf(it[3], '') : '', pos: '', ipa: '', exFr: '', exEn: ''   // only nouns the cheat sheet marks
+                };
+            }));
+        }
 
-        async function loadVocabModulesFromDatabase() {
-            const container = document.getElementById('vocab-modules-container');
-            container.innerHTML = `<p class="text-xs text-indigo-600 font-bold animate-pulse p-2">⏳ Chargement de la base complète (5000 mots)...</p>`;
+        // Themes come from the database (themes + word_themes tables) when they exist,
+        // otherwise from the cheat sheet file, so the page works before and after the SQL is run.
+        let dbThemes = null;
+        const themeCounts = {};   // theme id -> { known, total } once a deck has been opened
 
+        async function loadThemeList() {
             try {
-                let allData = [];
-                let step = 1000;
-                for (let i = 0; i < 5000; i += step) {
-                    const { data, error } = await db.from('vocabulary_bank').select('Rank, French, English, Part_of_Speech').range(i, i + step - 1);
-                    if (error) throw error;
-                    if (data) allData = allData.concat(data);
-                    if (data.length < step) break;
-                }
-                cachedAllRows = allData;
+                const { data, error } = await db.from('themes')
+                    .select('id, title, group_name, level, sort_order')
+                    .order('sort_order', { ascending: true });
+                if (!error && data && data.length) dbThemes = data;
             } catch (err) {
-                console.error("Error fetching rows:", err);
-                cachedAllRows = [];
+                dbThemes = null;
             }
-
-            renderNavigationList(navigationCategories);
-            selectNavigationItem(navigationCategories[0].items[0]);
         }
 
-        function getFilteredRowsForItem(itemObj) {
-            if (!cachedAllRows) return [];
-            return cachedAllRows.filter(r => {
-                const rank = r.Rank;
-                const pos = (r.Part_of_Speech || '').toLowerCase();
-                const french = r.French || r.french || '';
-                const english = r.English || r.english || '';
-
-                let matchesCategory = false;
-                if (itemObj.type === 'all') {
-                    matchesCategory = true;
-                } else if (itemObj.type === 'complexity') {
-                    matchesCategory = (rank >= itemObj.minRank && rank <= itemObj.maxRank);
-                } else if (itemObj.type === 'grammar') {
-                    const val = itemObj.filterVal;
-                    if (val === 'n') {
-                        matchesCategory = (pos.includes('n') && !pos.includes('prep'));
-                    } else {
-                        matchesCategory = pos.includes(val);
-                    }
-                }
-
-                if (!matchesCategory) return false;
-
-                if (currentSearchQuery) {
-                    return french.toLowerCase().includes(currentSearchQuery) || english.toLowerCase().includes(currentSearchQuery);
-                }
-                return true;
-            });
+        function themeOptionLabel(id, title, level) {
+            const c = themeCounts[id];
+            const counts = c ? ` (${c.known}/${c.total} known)` : '';
+            return `${id}. ${escapeHtml(title)}${level ? ' · ' + escapeHtml(level) : ''}${counts}`;
         }
 
-        function renderNavigationList(categories) {
-            const container = document.getElementById('vocab-modules-container');
-            container.innerHTML = '';
-
-            categories.forEach((cat) => {
-                const groupDiv = document.createElement('div');
-                groupDiv.className = 'space-y-1';
-                
-                const headerEl = document.createElement('div');
-                headerEl.className = 'text-[10px] font-bold uppercase tracking-wider text-slate-400 px-2 pt-2';
-                headerEl.innerText = cat.groupTitle;
-                groupDiv.appendChild(headerEl);
-
-                cat.items.forEach((itemObj) => {
-                    const allFilteredForCat = cachedAllRows ? cachedAllRows.filter(r => {
-                        const rank = r.Rank;
-                        const pos = (r.Part_of_Speech || '').toLowerCase();
-                        if (itemObj.type === 'all') return true;
-                        if (itemObj.type === 'complexity') return (rank >= itemObj.minRank && rank <= itemObj.maxRank);
-                        if (itemObj.type === 'grammar') {
-                            const val = itemObj.filterVal;
-                            if (val === 'n') return pos.includes('n') && !pos.includes('prep');
-                            return pos.includes(val);
-                        }
-                        return false;
-                    }).length : 0;
-
-                    const item = document.createElement('button');
-                    item.className = 'w-full text-left p-2.5 rounded-xl text-xs font-medium transition bg-slate-50 border border-slate-100 text-slate-700 hover:bg-indigo-50 flex items-center justify-between';
-                    item.innerHTML = `
-                        <div class="flex items-center space-x-2 truncate pr-2">
-                            <span class="text-base shrink-0">${itemObj.icon}</span>
-                            <span class="font-bold text-slate-950 truncate">${itemObj.title}</span>
-                        </div>
-                        <span class="text-[10px] font-bold bg-slate-200/80 text-slate-600 px-2 py-0.5 rounded-full shrink-0">${allFilteredForCat}</span>
-                    `;
-                    item.onclick = () => {
-                        currentPage = 0;
-                        selectNavigationItem(itemObj);
-                    };
-                    groupDiv.appendChild(item);
+        function renderDeckOptions() {
+            let groups = '';
+            if (dbThemes) {
+                const byGroup = new Map();
+                dbThemes.forEach(th => {
+                    const g = th.group_name || 'Themes';
+                    if (!byGroup.has(g)) byGroup.set(g, []);
+                    byGroup.get(g).push(th);
                 });
-
-                container.appendChild(groupDiv);
-            });
+                byGroup.forEach((list, g) => {
+                    groups += `<optgroup label="Themes: ${escapeHtml(g)}">` +
+                        list.map(th => `<option value="theme:${th.id}">${themeOptionLabel(th.id, th.title, th.level)}</option>`).join('') +
+                        '</optgroup>';
+                });
+            } else {
+                groups = CS.groups.map(([name, ids]) => `
+                <optgroup label="Themes: ${escapeHtml(name)}">
+                    ${ids.filter(id => CS.blocks[id]).map(id => {
+                        const words = themeWords(id);
+                        themeCounts[id] = { known: words.filter(w => statusOf(w) === 'known').length, total: words.length };
+                        return `<option value="theme:${id}">${themeOptionLabel(id, CS.blocks[id].title, '')}</option>`;
+                    }).join('')}
+                </optgroup>`).join('');
+            }
+            let freq = '<optgroup label="Most frequent words">';
+            for (let start = 1; start <= FREQ_TOTAL; start += FREQ_DECK_SIZE) {
+                freq += `<option value="freq:${start}">Words ${start}–${start + FREQ_DECK_SIZE - 1}</option>`;
+            }
+            $('deck-select').innerHTML = groups + freq + '</optgroup>';
         }
 
-        async function selectNavigationItem(itemObj) {
-            activeSelection = itemObj;
-            document.getElementById('vocab-module-badge').innerText = `${itemObj.type.toUpperCase()} - ${itemObj.code}`;
-            document.getElementById('vocab-module-title').innerText = itemObj.title;
-            
-            await fetchAndRenderPage();
-            await saveProgressToDatabase('vocab_module', itemObj.code);
+        // One word bank row -> one card. Uses the Article column when filled (after the SQL),
+        // otherwise works the article out from Part_of_Speech.
+        function rowToWord(r) {
+            const pos = parsePos(r.Part_of_Speech);
+            const art = String(r.Article || '').trim();
+            let fr = r.French, gender = '';
+            if (art) {
+                fr = art.endsWith("'") ? art + r.French : art + ' ' + r.French;
+                const g = String(r.Noun_Gender || '').trim();
+                gender = g === 'm' || g === 'f' ? g : (pos.pureNoun && pos.gender !== 'mf' ? pos.gender : '');
+            } else if (pos.pureNoun) {
+                fr = withArticle(r.French, pos.gender, pos.plural);
+                gender = pos.gender !== 'mf' ? pos.gender : '';
+            }
+            return {
+                key: wordKey(r.French), fr, en: r.English || '', pron: r.pron_guide || '', note: '',
+                ipa: cleanIpa(r.IPA), gender, pos: pos.label, register: registerLabel(r.Register),
+                exFr: r.SentenceFR || '', exEn: r.SentenceEN || '', rank: r.Rank
+            };
         }
 
-        function applyLiveSearch(query) {
-            currentSearchQuery = query.toLowerCase().trim();
-            currentPage = 0;
-            fetchAndRenderPage();
+        async function loadDbTheme(id) {
+            const { data: links, error } = await db.from('word_themes')
+                .select('word_id, sort_order').eq('theme_id', id).order('sort_order', { ascending: true });
+            if (error) throw error;
+            const ids = (links || []).map(l => l.word_id);
+            if (!ids.length) return [];
+            const { data: rows, error: err2 } = await db.from('vocabulary_bank')
+                .select('id, Rank, French, English, Part_of_Speech, Article, Noun_Gender, IPA, SentenceFR, SentenceEN, Register, pron_guide')
+                .in('id', ids);
+            if (err2) throw err2;
+            const byId = new Map((rows || []).map(r => [r.id, r]));
+            return ids.map(i => byId.get(i)).filter(Boolean).map(rowToWord);
         }
 
-        async function fetchAndRenderPage() {
-            const grid = document.getElementById('vocab-cards-grid');
-            grid.innerHTML = `<p class="text-xs text-indigo-600 font-bold animate-pulse p-4">📥 Chargement des mots (Page ${currentPage + 1})...</p>`;
-            document.getElementById('vocab-quiz-section').classList.add('hidden');
-
-            const startIdx = currentPage * pageSize;
-
+        async function loadDeck(value) {
+            const [type, raw] = value.split(':');
+            const n = Number(raw);
+            $('loading').classList.remove('hidden');
+            $('load-error').classList.add('hidden');
             try {
-                const matchedRowsFull = getFilteredRowsForItem(activeSelection);
-                const sliceRanks = matchedRowsFull.slice(startIdx, startIdx + pageSize).map(r => r.Rank);
-
-                let matchedRows = [];
-                if (sliceRanks.length > 0) {
-                    const { data, error } = await db.from('vocabulary_bank').select('*').in('Rank', sliceRanks).order('Rank', { ascending: true });
+                if (type === 'theme' && dbThemes) {
+                    const th = dbThemes.find(x => x.id === n) || dbThemes[0];
+                    const words = await loadDbTheme(th.id);
+                    deck = { id: `theme:${th.id}`, title: `${th.id}. ${th.title}`, words };
+                    themeCounts[th.id] = { known: words.filter(w => statusOf(w) === 'known').length, total: words.length };
+                } else if (type === 'theme') {
+                    const id = CS.blocks[n] ? n : 1;
+                    const words = themeWords(id);
+                    deck = { id: `theme:${id}`, title: `${id}. ${CS.blocks[id].title}`, words };
+                    await enrichFromBank(words);
+                } else {
+                    // pron_guide only exists after the SQL update; retry without it before then
+                    const fetchRanks = (cols) => db.from('vocabulary_bank').select(cols)
+                        .order('Rank', { ascending: true }).range(n - 1, n + FREQ_DECK_SIZE - 2);
+                    let { data, error } = await fetchRanks('Rank, French, English, Part_of_Speech, Article, Noun_Gender, IPA, SentenceFR, SentenceEN, Register, pron_guide');
+                    if (error) ({ data, error } = await fetchRanks('Rank, French, English, Part_of_Speech, Article, Noun_Gender, IPA, SentenceFR, SentenceEN, Register'));
                     if (error) throw error;
-                    matchedRows = sliceRanks.map(rank => data.find(d => d.Rank === rank)).filter(Boolean);
+                    const words = (data || []).map(rowToWord);
+                    deck = { id: value, title: `Most frequent words ${n}–${n + FREQ_DECK_SIZE - 1}`, words };
                 }
-
-                const totalItems = matchedRowsFull.length;
-
-                if (!matchedRows || matchedRows.length === 0) {
-                    grid.innerHTML = `<p class="text-xs text-slate-500 p-4">Aucun mot trouvé sur cette page pour cette recherche.</p>`;
-                    document.getElementById('page-indicator').innerText = `Page ${currentPage + 1} (0 résultats)`;
-                    document.getElementById('next-btn').disabled = true;
-                    document.getElementById('prev-btn').disabled = currentPage === 0;
-                    return;
-                }
-
-                renderFlashcardsFromSupabase(matchedRows);
-
-                const displayStart = startIdx + 1;
-                const displayEnd = startIdx + matchedRows.length;
-                document.getElementById('page-indicator').innerText = `Page ${currentPage + 1} (Mots ${displayStart} - ${displayEnd} sur ${totalItems})`;
-                
-                document.getElementById('prev-btn').disabled = currentPage === 0;
-                document.getElementById('next-btn').disabled = displayEnd >= totalItems;
-
+                store.set('vocab_deck', value);
             } catch (err) {
                 console.error(err);
-                grid.innerHTML = `<p class="text-xs text-rose-500 p-4">Erreur lors de la récupération des données Supabase.</p>`;
+                deck = { id: value, title: 'Deck', words: [] };
+                $('load-error').textContent = 'Could not load this deck. Check your connection and try again.';
+                $('load-error').classList.remove('hidden');
+            }
+            $('loading').classList.add('hidden');
+            reviewAll = false;
+            renderAll();
+        }
+
+        // Add IPA and example sentences from the word bank to a theme deck
+        async function enrichFromBank(words) {
+            const candidates = [...new Set(words.flatMap(w => [w.fr, w.fr.replace(ARTICLE, '')]))];
+            try {
+                const { data } = await db.from('vocabulary_bank')
+                    .select('French, IPA, SentenceFR, SentenceEN, Part_of_Speech, Register')
+                    .in('French', candidates);
+                const byKey = {};
+                (data || []).forEach(r => { byKey[wordKey(r.French)] = r; });
+                words.forEach(w => {
+                    const r = byKey[w.key];
+                    if (!r) return;
+                    w.ipa = cleanIpa(r.IPA);
+                    w.register = registerLabel(r.Register);
+                    w.exFr = r.SentenceFR || '';
+                    w.exEn = r.SentenceEN || '';
+                    w.pos = parsePos(r.Part_of_Speech).label;
+                });
+            } catch (err) {
+                console.warn('Word bank lookup failed; showing cheat sheet data only.', err);
             }
         }
 
-        async function changePage(direction) {
-            currentPage += direction;
-            if (currentPage < 0) currentPage = 0;
-            await fetchAndRenderPage();
-            const mainContent = document.querySelector('main .flex-1');
-            if (mainContent) mainContent.scrollTop = 0;
+        // ---------- Progress bar ----------
+        function renderProgress() {
+            const total = deck.words.length;
+            if (deck.id.startsWith('theme:')) {
+                themeCounts[Number(deck.id.split(':')[1])] = { known: deck.words.filter(w => statusOf(w) === 'known').length, total };
+            }
+            const known = deck.words.filter(w => statusOf(w) === 'known').length;
+            const learning = deck.words.filter(w => statusOf(w) === 'learning').length;
+            const due = deck.words.filter(isDue).length;
+            $('deck-title').textContent = deck.title;
+            $('deck-counts').textContent = total ? `${known} of ${total} known · ${due} to review` : '';
+            $('bar-known').style.width = total ? (known / total * 100) + '%' : '0%';
+            $('bar-learning').style.width = total ? (learning / total * 100) + '%' : '0%';
         }
 
-        // Escape text before inserting it into HTML (handles l'homme, "quotes", <tags>)
-        function escapeHtml(value) {
-            return String(value ?? '')
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;')
-                .replace(/'/g, '&#39;');
+        // ---------- Flashcards ----------
+        function buildQueue() {
+            const words = deck.words;
+            if (reviewAll) return words.slice();
+            const due = words.filter(isDue);
+            const fresh = words.filter(w => statusOf(w) === 'new');
+            return due.concat(fresh).slice(0, SESSION_SIZE);
         }
 
-        function renderFlashcardsFromSupabase(rows) {
-            const grid = document.getElementById('vocab-cards-grid');
-            grid.innerHTML = '';
+        function startCards() {
+            queue = buildQueue();
+            nextCard();
+        }
 
-            rows.forEach((row) => {
-                const cardEl = document.createElement('div');
-                cardEl.className = 'bg-white border border-slate-200 p-5 rounded-2xl shadow-sm space-y-3 flex flex-col justify-between hover:border-indigo-300 transition';
+        function nextCard() {
+            current = queue.shift() || null;
+            const done = !current;
+            $('card-done').classList.toggle('hidden', !done);
+            $('card-area').classList.toggle('hidden', done);
+            $('btn-review-all').classList.toggle('hidden', !done || !deck.words.length);
+            if (done) {
+                const known = deck.words.filter(w => statusOf(w) === 'known').length;
+                $('card-done-text').textContent = deck.words.length
+                    ? `${known} of ${deck.words.length} words known. Come back tomorrow for your reviews, or pick another deck.`
+                    : 'This deck has no words yet.';
+                $('session-info').textContent = '';
+                renderProgress();
+                return;
+            }
+            $('session-info').textContent = `${queue.length + 1} card${queue.length ? 's' : ''} left in this session`;
+            const [label, cls] = STATUS_STYLE[statusOf(current)];
+            $('card-status').textContent = label;
+            $('card-status').className = 'text-xs font-bold px-2 py-0.5 rounded-full ' + cls;
+            $('card-word').textContent = current.fr;
+            $('card-word').className = 'text-3xl font-black break-words ' + genderClass(current);
+            $('card-pos').textContent = current.pos || '';
+            $('card-en').textContent = current.en;
+            $('card-pron').textContent = [current.pron && `Say: ${current.pron}`, current.ipa && `/${current.ipa}/`].filter(Boolean).join(' · ');
+            $('card-note').textContent = [current.note, current.register].filter(Boolean).join(' · ');
+            $('card-example').classList.toggle('hidden', !current.exFr);
+            $('btn-say-ex').classList.toggle('hidden', !current.exFr);
+            $('card-ex-fr').textContent = current.exFr;
+            $('card-ex-en').textContent = current.exEn;
+            showFront();
+            speakFrench(current.fr);
+        }
 
-                const frenchWord = row.French || row.french || '';
-                const englishMeaning = row.English || row.english || '';
-                const sentenceFr = row.SentenceFR || row.sentence_fr || '';
-                const pos = row.Part_of_Speech || row.part_of_speech || '';
-                const rankNum = row.Rank || row.rank || '';
+        function showFront() {
+            $('card-back').classList.add('hidden');
+            $('grade-buttons').classList.add('hidden');
+            $('hook-box').classList.add('hidden');
+            $('flip-hint').classList.remove('hidden');
+        }
 
-                cardEl.innerHTML = `
-                    <div class="space-y-2">
-                        <div class="flex items-center justify-between">
-                            <span class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-mono font-bold">#${escapeHtml(rankNum)}</span>
-                            <button type="button" data-speak class="bg-indigo-50 hover:bg-indigo-100 text-indigo-600 p-1.5 rounded-lg text-xs transition" aria-label="Listen">🔊</button>
-                        </div>
-                        <div class="text-base font-bold text-slate-900 break-words">${escapeHtml(frenchWord)}</div>
-                        <div class="flex items-center justify-between">
-                            <span class="text-xs text-emerald-600 font-semibold">${escapeHtml(englishMeaning)}</span>
-                            <span class="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded">${escapeHtml(pos)}</span>
-                        </div>
-                    </div>
-                    <div class="bg-slate-50 p-2.5 rounded-xl text-[11px] text-slate-600 italic">
-                        "${escapeHtml(sentenceFr)}"
-                    </div>
-                `;
-                cardEl.querySelector('[data-speak]').addEventListener('click', () => speakWord(frenchWord));
-                grid.appendChild(cardEl);
+        function flipCard() {
+            if (!current) return;
+            const showingBack = !$('card-back').classList.contains('hidden');
+            if (showingBack) { showFront(); return; }
+            $('card-back').classList.remove('hidden');
+            $('grade-buttons').classList.remove('hidden');
+            $('flip-hint').classList.add('hidden');
+            renderHook();
+        }
+
+        function onGrade(result) {
+            if (!current) return;
+            grade(current, result);
+            if (result === 'dontknow') queue.splice(Math.min(3, queue.length), 0, current);  // see it again soon
+            renderProgress();
+            nextCard();
+        }
+
+        // ---------- Memory hooks ----------
+        function renderHook() {
+            const h = hooks[current.key];
+            $('hook-box').classList.remove('hidden');
+            $('hook-edit').classList.add('hidden');
+            $('hook-error').classList.add('hidden');
+            $('hook-text').textContent = h ? h.text : 'No memory hook yet. Create one with AI or write your own.';
+            $('hook-text').classList.toggle('text-slate-500', !h);
+            $('btn-hook-ai').textContent = h ? '✨ New AI hook' : '✨ Create with AI';
+        }
+
+        async function aiHook() {
+            const w = current;
+            $('btn-hook-ai').disabled = true;
+            $('hook-text').textContent = 'Thinking of a memory hook…';
+            try {
+                const out = await askAI([
+                    { role: 'system', content: 'You write short, vivid memory hooks (mnemonics) that help English speakers remember French words. Use a sound-alike English word or image. For nouns, include a cue for the gender (masculine or feminine). Two sentences at most. Return JSON: {"hook": "<the memory hook in English>"}' },
+                    { role: 'user', content: `French: ${w.fr}\nMeaning: ${w.en}${w.gender ? `\nGender: ${w.gender === 'm' ? 'masculine' : 'feminine'}` : ''}${w.pron ? `\nPronunciation: ${w.pron}` : ''}` }
+                ], { json: true, temperature: 0.8 });
+                const text = String(out.hook || '').trim();
+                if (!text) throw new Error('The AI did not return a hook. Please try again.');
+                hooks[w.key] = { text, source: 'ai' };
+                store.set('vocab_hooks', hooks);
+                if (current === w) renderHook();
+            } catch (err) {
+                if (current === w) {
+                    renderHook();
+                    $('hook-error').textContent = err.message;
+                    $('hook-error').classList.remove('hidden');
+                }
+            }
+            $('btn-hook-ai').disabled = false;
+        }
+
+        function editHook() {
+            $('hook-edit').classList.remove('hidden');
+            $('hook-input').value = hooks[current.key]?.source === 'own' ? hooks[current.key].text : '';
+            $('hook-input').focus();
+        }
+        function saveOwnHook() {
+            const text = $('hook-input').value.trim();
+            if (text) hooks[current.key] = { text, source: 'own' };
+            else delete hooks[current.key];
+            store.set('vocab_hooks', hooks);
+            renderHook();
+        }
+
+        // ---------- Word list ----------
+        function plain(s) { return String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, ''); }
+
+        function renderList() {
+            const q = plain($('list-search').value.trim());
+            const filter = $('list-filter').value;
+            const rows = deck.words.filter(w => {
+                const st = statusOf(w);
+                if (filter === 'known' && st !== 'known') return false;
+                if (filter === 'notknown' && st === 'known') return false;
+                return !q || plain(w.fr).includes(q) || plain(w.en).includes(q);
             });
-        }
-
-        function speakWord(word) {
-            if (!('speechSynthesis' in window)) return;
-            window.speechSynthesis.cancel();
-            const utterance = new SpeechSynthesisUtterance(word);
-            utterance.lang = 'fr-FR';
-            window.speechSynthesis.speak(utterance);
-        }
-
-        async function generateAIQuizVocab() {
-            const section = document.getElementById('vocab-quiz-section');
-            const container = document.getElementById('vocab-quiz-container');
-            section.classList.remove('hidden');
-            container.innerHTML = `<p class="italic text-slate-400">Préparation du quiz de vocabulaire...</p>`;
-
-            const apiUrl = localStorage.getItem('ai_api_url') || "https://api.groq.com/openai/v1/chat/completions";
-            const apiKey = localStorage.getItem('ai_api_key') || "";
-            const modelName = localStorage.getItem('ai_model_name') || "openai/gpt-oss-120b";
-
-            try {
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
-                    body: JSON.stringify({
-                        model: modelName,
-                        messages: [
-                            { role: "system", content: "Create 3 multiple-choice vocabulary questions in French based on this selection. Format strictly as JSON with key 'quiz' containing objects with 'question', 'options' (array of 3 strings), and 'answer' (integer index). Do not include markdown codeblocks." },
-                            { role: "user", content: `Create vocab quiz for category: ${activeSelection.title}` }
-                        ],
-                        temperature: 0.7
-                    })
-                });
-                const data = await response.json();
-                let rawContent = data.choices?.[0]?.message?.content || "";
-                rawContent = rawContent.replace(/```json/g, '').replace(/```/g, '').trim();
-                const quizData = JSON.parse(rawContent);
-
-                container.innerHTML = '';
-                quizData.quiz.forEach((q, qIndex) => {
-                    const qDiv = document.createElement('div');
-                    qDiv.className = 'bg-white p-4 rounded-xl border border-amber-200 space-y-2 shadow-sm';
-                    let opts = '';
-                    q.options.forEach((opt, oIndex) => {
-                        opts += `<label class="block text-xs text-slate-700 hover:bg-slate-50 p-2 rounded-lg cursor-pointer border border-slate-100"><input type="radio" name="vquiz-${qIndex}" value="${oIndex}" class="mr-2">${opt}</label>`;
-                    });
-                    qDiv.innerHTML = `<p class="font-bold text-slate-900">${qIndex+1}. ${q.question}</p><div class="space-y-1">${opts}</div>`;
-                    container.appendChild(qDiv);
-                });
-
-                await saveProgressToDatabase('vocab_quiz', activeSelection.code, 100);
-            } catch (err) {
-                container.innerHTML = `<p class="text-rose-600">Erreur lors de la création du quiz.</p>`;
+            if (!rows.length) {
+                $('word-list').innerHTML = '<p class="p-4 text-sm text-slate-500">No words match.</p>';
+                return;
             }
+            $('word-list').innerHTML = rows.map(w => {
+                const st = statusOf(w);
+                const [label, cls] = STATUS_STYLE[st];
+                return `
+                <div class="flex items-center gap-3 p-3">
+                    <button data-say="${escapeHtml(w.key)}" class="shrink-0 w-11 h-11 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700" aria-label="Listen">🔊</button>
+                    <div class="min-w-0 flex-1">
+                        <div class="text-base font-bold break-words ${genderClass(w)}">${escapeHtml(w.fr)}</div>
+                        <div class="text-sm text-slate-500 break-words">${escapeHtml(w.en)}</div>
+                    </div>
+                    <span class="hidden sm:inline text-xs font-bold px-2 py-0.5 rounded-full ${cls}">${label}</span>
+                    <label class="shrink-0 flex items-center gap-2 text-sm text-slate-600 min-h-[44px] cursor-pointer">
+                        <input type="checkbox" data-known="${escapeHtml(w.key)}" class="w-5 h-5 accent-emerald-600" ${st === 'known' ? 'checked' : ''}>
+                        I know it
+                    </label>
+                </div>`;
+            }).join('');
+            const byKey = Object.fromEntries(deck.words.map(w => [w.key, w]));
+            $('word-list').querySelectorAll('[data-say]').forEach(b => b.addEventListener('click', () => speakFrench(byKey[b.dataset.say].fr)));
+            $('word-list').querySelectorAll('[data-known]').forEach(c => c.addEventListener('change', () => {
+                setKnown(byKey[c.dataset.known], c.checked);
+                renderProgress();
+                renderDeckOptionsKeepSelection();
+                if ($('list-filter').value !== 'all') renderList();
+            }));
         }
 
-        function closeVocabQuiz() {
-            document.getElementById('vocab-quiz-section').classList.add('hidden');
+        // ---------- Quiz (no AI) ----------
+        function quizPool() {
+            const order = { new: 0, learning: 1, known: 2 };
+            // Words you don't know come first, in deck order
+            return deck.words.slice().sort((a, b) => order[statusOf(a)] - order[statusOf(b)]);
         }
-
-        function sendPresetPrompt(promptText) {
-            const input = document.getElementById('ai-input');
-            if (input) { input.value = promptText; sendAIChat(); }
+        function shuffle(arr) {
+            const a = arr.slice();
+            for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+            return a;
         }
-
-        async function sendAIChat() {
-            const input = document.getElementById('ai-input');
-            const chatBox = document.getElementById('ai-chat-box');
-            if (!input || !input.value.trim() || !chatBox) return;
-
-            const userText = input.value.trim();
-            const userMsg = document.createElement('div');
-            userMsg.className = 'bg-indigo-50 border border-indigo-100 p-3 rounded-xl text-xs text-indigo-900 ml-4 shadow-sm';
-            userMsg.innerText = userText;
-            chatBox.appendChild(userMsg);
-            input.value = '';
-            chatBox.scrollTop = chatBox.scrollHeight;
-
-            const apiUrl = localStorage.getItem('ai_api_url') || "https://api.groq.com/openai/v1/chat/completions";
-            const apiKey = localStorage.getItem('ai_api_key') || "";
-            const modelName = localStorage.getItem('ai_model_name') || "openai/gpt-oss-120b";
-
-            try {
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
-                    body: JSON.stringify({
-                        model: modelName,
-                        messages: [
-                            { role: "system", content: `You are a helpful French vocabulary and grammar tutor assisting with category: "${activeSelection?.title}".` },
-                            { role: "user", content: userText }
-                        ],
-                        temperature: 0.7
-                    })
-                });
-                const data = await response.json();
-                let aiReply = data.choices?.[0]?.message?.content || "Réponse non disponible.";
-                const aiMsg = document.createElement('div');
-                aiMsg.className = 'bg-slate-50 border border-slate-200 p-3.5 rounded-2xl text-xs text-slate-700 mr-4 shadow-sm space-y-2';
-                aiMsg.innerHTML = `🤖 <strong>Tuteur :</strong><br>${aiReply.replace(/\n/g, '<br>')}`;
-                chatBox.appendChild(aiMsg);
-                chatBox.scrollTop = chatBox.scrollHeight;
-            } catch (err) {
-                console.error(err);
+        function startQuiz(type) {
+            document.querySelectorAll('.quiz-type').forEach(b => {
+                const on = b.dataset.quiz === type;
+                b.classList.toggle('bg-indigo-600', on); b.classList.toggle('text-white', on); b.classList.toggle('border-indigo-600', on);
+                b.classList.toggle('bg-white', !on);
+            });
+            if (deck.words.length < 4) {
+                $('quiz-box').innerHTML = '<p class="text-base text-slate-600">This deck needs at least 4 words for a quiz.</p>';
+                return;
             }
+            quiz = { type, items: quizPool().slice(0, 10), i: 0, score: 0, answered: false };
+            renderQuestion();
+        }
+        function choicesFor(w, field) {
+            const others = shuffle(deck.words.filter(o => o.key !== w.key && o[field] && o[field] !== w[field])).slice(0, 3);
+            return shuffle([w, ...others]);
+        }
+        function acceptedAnswers(fr) {
+            return fr.split(' / ').map(s => plain(s.replace(/[…?!.]/g, '').trim())).filter(Boolean);
+        }
+        function renderQuestion() {
+            if (quiz.i >= quiz.items.length) {
+                $('quiz-box').innerHTML = `
+                    <div class="text-center space-y-3">
+                        <div class="text-3xl">🏁</div>
+                        <p class="text-xl font-black text-slate-900">${quiz.score} / ${quiz.items.length}</p>
+                        <p class="text-base text-slate-600">Correct answers moved those words up a box; missed words will come back sooner in Flashcards.</p>
+                        <button id="quiz-again" class="min-h-[48px] px-5 bg-indigo-600 text-white font-bold rounded-xl">Play again</button>
+                    </div>`;
+                $('quiz-again').addEventListener('click', () => startQuiz(quiz.type));
+                renderProgress();
+                return;
+            }
+            const w = quiz.items[quiz.i];
+            quiz.answered = false;
+            const head = `<div class="text-sm text-slate-500">Question ${quiz.i + 1} of ${quiz.items.length} · Score ${quiz.score}</div>`;
+            if (quiz.type === 'type') {
+                $('quiz-box').innerHTML = `${head}
+                    <p class="text-base text-slate-600">Type the French for:</p>
+                    <p class="text-2xl font-black text-slate-900">${escapeHtml(w.en)}</p>
+                    <input id="quiz-input" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" class="w-full text-base px-3 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="En français…">
+                    <div class="flex gap-2">
+                        <button id="quiz-check" class="min-h-[48px] px-5 bg-indigo-600 text-white font-bold rounded-xl">Check</button>
+                        <button id="quiz-skip" class="min-h-[48px] px-4 bg-slate-100 text-slate-700 font-semibold rounded-xl">I don't know</button>
+                    </div>
+                    <div id="quiz-feedback"></div>`;
+                const check = (giveUp) => {
+                    if (quiz.answered) return;
+                    const typed = $('quiz-input').value.trim();
+                    const answers = acceptedAnswers(w.fr).concat(acceptedAnswers(w.fr.replace(ARTICLE, '')));
+                    const ok = !giveUp && answers.includes(plain(typed.replace(/[…?!.]/g, '').trim()));
+                    const accentNote = ok && !w.fr.split(' / ').some(a => a.replace(/[…?!.]/g, '').trim().toLowerCase() === typed.toLowerCase() || a.replace(ARTICLE, '').replace(/[…?!.]/g, '').trim().toLowerCase() === typed.toLowerCase())
+                        ? ' Check the accents.' : '';
+                    finishQuestion(w, ok, ok ? `Correct!${accentNote} ${w.fr}` : `The answer is: ${w.fr}`);
+                };
+                $('quiz-check').addEventListener('click', () => check(false));
+                $('quiz-skip').addEventListener('click', () => check(true));
+                $('quiz-input').addEventListener('keydown', (e) => { if (e.key === 'Enter') check(false); });
+                $('quiz-input').focus();
+                return;
+            }
+            const listen = quiz.type === 'listen';
+            const options = choicesFor(w, listen ? 'fr' : 'en');
+            $('quiz-box').innerHTML = `${head}
+                ${listen
+                    ? `<p class="text-base text-slate-600">Listen and pick the word you hear.</p>
+                       <button id="quiz-play" class="min-h-[56px] px-6 bg-indigo-600 text-white text-lg font-bold rounded-xl">🔊 Play again</button>`
+                    : `<p class="text-base text-slate-600">What does this mean?</p>
+                       <p class="text-3xl font-black break-words ${genderClass(w)}">${escapeHtml(w.fr)}</p>`}
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    ${options.map((o, idx) => `<button data-opt="${idx}" class="quiz-opt min-h-[52px] text-left text-base px-4 py-2 bg-white border border-slate-200 hover:border-indigo-400 rounded-xl">${escapeHtml(listen ? o.fr : o.en)}</button>`).join('')}
+                </div>
+                <div id="quiz-feedback"></div>`;
+            if (listen) {
+                $('quiz-play').addEventListener('click', () => speakFrench(w.fr, 0.9));
+                speakFrench(w.fr, 0.9);
+            } else {
+                speakFrench(w.fr);
+            }
+            $('quiz-box').querySelectorAll('.quiz-opt').forEach(b => b.addEventListener('click', () => {
+                if (quiz.answered) return;
+                const chosen = options[Number(b.dataset.opt)];
+                const ok = chosen.key === w.key;
+                b.classList.add(ok ? 'bg-emerald-100' : 'bg-rose-100', ok ? 'border-emerald-500' : 'border-rose-500');
+                if (!ok) {
+                    const right = options.findIndex(o => o.key === w.key);
+                    $('quiz-box').querySelector(`[data-opt="${right}"]`).classList.add('bg-emerald-100', 'border-emerald-500');
+                }
+                finishQuestion(w, ok, ok ? 'Correct!' : `It was: ${listen ? w.fr : w.en}`);
+            }));
+        }
+        function finishQuestion(w, ok, message) {
+            quiz.answered = true;
+            if (ok) quiz.score += 1;
+            const p = progress[w.key] || { box: 0 };
+            grade(w, ok ? (p.box === 0 ? 'learning' : 'know') : 'dontknow');
+            $('quiz-feedback').innerHTML = `
+                <div class="rounded-xl p-3 text-base ${ok ? 'bg-emerald-50 text-emerald-800' : 'bg-rose-50 text-rose-800'}">${escapeHtml(message)}
+                    <span class="block text-sm text-slate-600 mt-1">${escapeHtml(w.fr)} = ${escapeHtml(w.en)}</span></div>
+                <button id="quiz-next" class="mt-3 min-h-[48px] px-5 bg-slate-900 text-white font-bold rounded-xl">Next →</button>`;
+            $('quiz-next').addEventListener('click', () => { quiz.i += 1; renderQuestion(); });
+            $('quiz-next').focus();
         }
 
-        loadVocabModulesFromDatabase();
+        // ---------- Modes and rendering ----------
+        function setMode(m) {
+            mode = m;
+            store.set('vocab_mode', m);
+            document.querySelectorAll('.mode-tab').forEach(t => {
+                const on = t.dataset.mode === m;
+                t.classList.toggle('bg-white', on); t.classList.toggle('shadow-sm', on); t.classList.toggle('text-indigo-700', on);
+                t.classList.toggle('text-slate-600', !on);
+                t.setAttribute('aria-selected', on);
+            });
+            ['cards', 'list', 'quiz'].forEach(x => $('mode-' + x).classList.toggle('hidden', x !== m));
+            if (m === 'cards') startCards();
+            if (m === 'list') renderList();
+        }
+        function renderAll() {
+            renderProgress();
+            renderDeckOptionsKeepSelection();
+            quiz = null;
+            $('quiz-box').innerHTML = '<p class="text-base text-slate-600">Choose a quiz above. Questions use the words you don\'t know yet first.</p>';
+            setMode(mode);
+        }
+        function renderDeckOptionsKeepSelection() {
+            const v = deck ? deck.id : $('deck-select').value;
+            renderDeckOptions();
+            $('deck-select').value = v;
+        }
+
+        // ---------- Wiring ----------
+        $('deck-select').addEventListener('change', (e) => loadDeck(e.target.value));
+        document.querySelectorAll('.mode-tab').forEach(t => t.addEventListener('click', () => setMode(t.dataset.mode)));
+        $('card').addEventListener('click', flipCard);
+        $('btn-say').addEventListener('click', () => current && speakFrench(current.fr));
+        $('btn-say-ex').addEventListener('click', () => current && speakFrench(current.exFr));
+        document.querySelectorAll('[data-grade]').forEach(b => b.addEventListener('click', () => onGrade(b.dataset.grade)));
+        $('btn-review-all').addEventListener('click', () => { reviewAll = true; startCards(); });
+        $('btn-hook-ai').addEventListener('click', aiHook);
+        $('btn-hook-own').addEventListener('click', editHook);
+        $('btn-hook-save').addEventListener('click', saveOwnHook);
+        $('list-search').addEventListener('input', renderList);
+        $('list-filter').addEventListener('change', renderList);
+        document.querySelectorAll('.quiz-type').forEach(b => b.addEventListener('click', () => startQuiz(b.dataset.quiz)));
+        document.addEventListener('keydown', (e) => {
+            if (mode !== 'cards' || !current || /input|textarea|select/i.test(e.target.tagName)) return;
+            if (e.key === ' ') { e.preventDefault(); flipCard(); }
+            if (!$('card-back').classList.contains('hidden')) {
+                if (e.key === '1') onGrade('dontknow');
+                if (e.key === '2') onGrade('learning');
+                if (e.key === '3') onGrade('know');
+            }
+        });
+
+        // ---------- Start: last deck and mode are remembered ----------
+        mode = store.get('vocab_mode', 'cards');
+        (async () => {
+            await loadThemeList();
+            renderDeckOptions();
+            $('deck-select').value = store.get('vocab_deck', 'theme:1');
+            loadDeck($('deck-select').value || 'theme:1');
+        })();
     </script>
 </body>
-</html>
+</html>
