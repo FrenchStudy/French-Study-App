@@ -17,8 +17,8 @@
         <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
             <div class="flex items-center space-x-1 sm:space-x-2 text-xs font-semibold overflow-x-auto py-2">
                 <a href="index.html" class="text-slate-600 hover:text-indigo-600 hover:bg-slate-100 px-3 py-1.5 rounded-lg transition">Dashboard</a>
-                <a href="lesson.html" class="text-slate-600 hover:text-indigo-600 hover:bg-slate-100 px-3 py-1.5 rounded-lg transition">Grammar</a>
                  <a href="vocab.html" class="bg-indigo-600 text-white px-3 py-1.5 rounded-lg shadow-sm transition">Vocab</a>
+                <a href="lesson.html" class="text-slate-600 hover:text-indigo-600 hover:bg-slate-100 px-3 py-1.5 rounded-lg transition">Grammar</a>
                 <a href="conjugations.html" class="text-slate-600 hover:text-indigo-600 hover:bg-slate-100 px-3 py-1.5 rounded-lg transition">Conjugates</a>
                  <a href="reading.html" class="text-slate-600 hover:text-indigo-600 hover:bg-slate-100 px-3 py-1.5 rounded-lg transition">Reading</a>
                 <a href="listening.html" class="text-slate-600 hover:text-indigo-600 hover:bg-slate-100 px-3 py-1.5 rounded-lg transition">Listening</a>
@@ -35,10 +35,24 @@
     </header>
 
     <main class="flex-1 overflow-y-auto">
-        <div class="max-w-3xl mx-auto px-4 py-5 space-y-4">
+        <div class="max-w-6xl mx-auto px-4 py-5 space-y-4">
+            <div>
+                <h1 class="text-2xl font-black text-slate-900">Vocabulary</h1>
+                <p class="text-sm text-slate-500 mt-1">Flashcards for 44 themes and 5,000 frequent words, plus hands-on lessons.</p>
+            </div>
 
+            <nav class="grid grid-cols-4 gap-1 bg-slate-200/70 p-1 rounded-xl text-sm font-semibold lg:max-w-2xl" role="tablist">
+                <button data-mode="cards" class="mode-tab min-h-[44px] rounded-lg">🃏 <span class="sm:hidden">Cards</span><span class="hidden sm:inline">Flashcards</span></button>
+                <button data-mode="list" class="mode-tab min-h-[44px] rounded-lg">📋 <span class="sm:hidden">List</span><span class="hidden sm:inline">Word list</span></button>
+                <button data-mode="lessons" class="mode-tab min-h-[44px] rounded-lg">▶️ Lessons</button>
+                <button data-mode="quiz" class="mode-tab min-h-[44px] rounded-lg">🎯 Quiz</button>
+            </nav>
+
+            <!-- Cards, List and Quiz share the deck panel -->
+            <div id="deck-modes">
+            <div class="lg:grid lg:grid-cols-[20rem_minmax(0,1fr)] lg:gap-6 space-y-4 lg:space-y-0">
             <!-- Deck picker and progress -->
-            <section id="deck-block" class="space-y-3">
+            <aside id="deck-block" class="space-y-3 lg:sticky lg:top-4 lg:self-start">
                 <div>
                     <label for="deck-select" class="block text-sm font-semibold text-slate-700 mb-1">Deck</label>
                     <select id="deck-select" class="w-full text-base px-3 py-3 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500"></select>
@@ -59,28 +73,20 @@
                         <span class="ml-auto"><span class="text-sky-700 font-bold">blue</span> = masculine · <span class="text-rose-600 font-bold">red</span> = feminine</span>
                     </div>
                 </div>
-            </section>
-
-            <!-- Mode tabs -->
-            <a id="lesson-shortcut" href="#" class="hidden flex items-center gap-3 bg-emerald-50 border border-emerald-100 hover:border-emerald-300 rounded-2xl p-3">
+                <a id="lesson-shortcut" href="#" class="hidden flex items-center gap-3 bg-emerald-50 border border-emerald-100 hover:border-emerald-300 rounded-2xl p-3">
                 <span class="text-2xl">▶️</span>
                 <span class="min-w-0"><span class="block text-sm font-bold text-emerald-900">Interactive lesson for this theme</span>
                 <span id="lesson-shortcut-title" class="block text-sm text-emerald-800/80"></span></span>
                 <span class="ml-auto text-emerald-700 font-bold">→</span>
             </a>
+            </aside>
 
-            <nav class="grid grid-cols-4 gap-1 bg-slate-200/70 p-1 rounded-xl text-sm font-semibold" role="tablist">
-                <button data-mode="cards" class="mode-tab min-h-[44px] rounded-lg">🃏 <span class="sm:hidden">Cards</span><span class="hidden sm:inline">Flashcards</span></button>
-                <button data-mode="list" class="mode-tab min-h-[44px] rounded-lg">📋 <span class="sm:hidden">List</span><span class="hidden sm:inline">Word list</span></button>
-                <button data-mode="quiz" class="mode-tab min-h-[44px] rounded-lg">🎯 Quiz</button>
-                <button data-mode="lessons" class="mode-tab min-h-[44px] rounded-lg">▶️ Lessons</button>
-            </nav>
-
+                <div class="min-w-0 space-y-3">
             <div id="loading" class="hidden text-sm text-indigo-600 animate-pulse">Loading words…</div>
             <div id="load-error" class="hidden text-sm text-rose-700 bg-rose-50 rounded-xl p-3"></div>
 
             <!-- FLASHCARDS -->
-            <section id="mode-cards" class="space-y-3">
+            <section id="mode-cards" class="space-y-3 max-w-2xl">
                 <div class="flex items-center justify-between text-sm text-slate-500">
                     <span id="session-info"></span>
                     <button id="btn-review-all" class="hidden text-indigo-600 font-semibold min-h-[44px]">Review all words anyway</button>
@@ -157,7 +163,7 @@
             </section>
 
             <!-- QUIZ -->
-            <section id="mode-quiz" class="hidden space-y-3">
+            <section id="mode-quiz" class="hidden space-y-3 max-w-2xl">
                 <div class="grid grid-cols-3 gap-2">
                     <button data-quiz="meaning" class="quiz-type min-h-[56px] bg-white border border-slate-200 rounded-xl text-sm font-semibold">Pick the meaning</button>
                     <button data-quiz="type" class="quiz-type min-h-[56px] bg-white border border-slate-200 rounded-xl text-sm font-semibold">Type the French</button>
@@ -167,6 +173,10 @@
                     <p class="text-base text-slate-600">Choose a quiz above. Questions use the words you don't know yet first.</p>
                 </div>
             </section>
+
+                </div>
+            </div>
+            </div>
 
             <!-- INTERACTIVE LESSONS -->
             <section id="mode-lessons" class="hidden">
@@ -511,7 +521,6 @@
             $('card-ex-fr').textContent = current.exFr;
             $('card-ex-en').textContent = current.exEn;
             showFront();
-            speakFrench(current.fr);
         }
 
         function showFront() {
@@ -716,9 +725,7 @@
                 <div id="quiz-feedback"></div>`;
             if (listen) {
                 $('quiz-play').addEventListener('click', () => speakFrench(w.fr, 0.9));
-                speakFrench(w.fr, 0.9);
-            } else {
-                speakFrench(w.fr);
+                speakFrench(w.fr, 0.9);   // the listening quiz needs the sound
             }
             $('quiz-box').querySelectorAll('.quiz-opt').forEach(b => b.addEventListener('click', () => {
                 if (quiz.answered) return;
@@ -757,7 +764,7 @@
             });
             ['cards', 'list', 'quiz', 'lessons'].forEach(x => $('mode-' + x).classList.toggle('hidden', x !== m));
             // Decks don't apply to the interactive lessons
-            $('deck-block').classList.toggle('hidden', m === 'lessons');
+            $('deck-modes').classList.toggle('hidden', m === 'lessons');
             renderLessonShortcut();
             if (m === 'cards') startCards();
             if (m === 'list') renderList();
