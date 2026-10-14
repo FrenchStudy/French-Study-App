@@ -5,6 +5,7 @@
     <title>Atelier de Français - Connexion</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
 </head>
 <body class="h-full bg-slate-100 flex items-center justify-center font-sans">
 
@@ -33,14 +34,6 @@
     </div>
 
     <script>
-        const SUPABASE_URL = 'https://bkawfexaikntyivqvetk.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrYXdmZXhhaWtudHlpdnF2ZXRrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcyMDU3ODAsImV4cCI6MjEwMjc4MTc4MH0.8YYkD8pzn97DeqA-o83KoGQ4yHb6WT1HB4DcoPPAMwA';
-        
-        if (!window.mySupabase) {
-            window.mySupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-                db: { schema: 'French-schema' }
-            });
-        }
         const db = window.mySupabase;
 
         async function handleLogin() {
@@ -66,4 +59,4 @@
         }
     </script>
 </body>
-</html>
+</html>
