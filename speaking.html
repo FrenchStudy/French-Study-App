@@ -2,6 +2,7 @@
 <html lang="fr" class="h-full">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Atelier de Français - Speaking & Oral Expression Suite</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -182,10 +183,12 @@
         let generatedPromptData = null;
         let isPromptTranslated = false;
 
-        async function saveProgressToDatabase(moduleType, moduleId, score = null) {
+        // silent = true: save in the background (no pop-ups, no redirect)
+        async function saveProgressToDatabase(moduleType, moduleId, score = null, silent = false) {
             const { data: { user }, error: userError } = await db.auth.getUser();
             
             if (userError || !user) {
+                if (silent) return;
                 alert("Veuillez vous connecter pour sauvegarder votre progression.");
                 window.location.href = 'login.html';
                 return;
@@ -204,8 +207,8 @@
 
             if (error) {
                 console.error("Erreur de sauvegarde :", error.message);
-                alert("Erreur lors de la synchronisation de la progression.");
-            } else {
+                if (!silent) alert("Erreur lors de la synchronisation de la progression.");
+            } else if (!silent) {
                 alert("💾 Progression et habitudes enregistrées avec succès !");
             }
         }
@@ -770,10 +773,17 @@
                 rawContent = rawContent.replace(/```json/g, '').replace(/```/g, '').trim();
                 const evalJson = JSON.parse(rawContent);
 
-                scoreBadge.innerText = `Score : ${evalJson.score || '14'}/20`;
+                const score = Number(evalJson.score);
+                if (!Number.isFinite(score) || score < 0 || score > 20) {
+                    scoreBadge.innerText = "Score : --/20";
+                    body.innerText = "Impossible de noter cette réponse pour le moment. Veuillez réessayer.";
+                    return;
+                }
+                scoreBadge.innerText = `Score : ${score}/20`;
+                if (activeSubjectObj) saveProgressToDatabase('speaking', activeSubjectObj.id, score, true);
                 body.innerHTML = `
                     <div class="space-y-2">
-                        <div><strong>Évaluation de l'examinateur :</strong><br>${evalJson.feedback || 'Bonne fluidité générale.'}</div>
+                        <div><strong>Évaluation de l'examinateur :</strong><br>${evalJson.feedback || ''}</div>
                         <div class="border-t border-emerald-200 pt-2"><strong>Version orale améliorée :</strong><br><span class="text-emerald-950 italic">${evalJson.improved_transcript || text}</span></div>
                     </div>
                 `;

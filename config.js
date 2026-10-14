@@ -26,3 +26,20 @@ const CONFIG = {
         return localStorage.getItem('ai_api_url') || 'https://api.groq.com/openai/v1/chat/completions';
     }
 };
+
+// Logout: signs the user out of Supabase, then returns to the login page.
+async function logout() {
+    try {
+        if (window.mySupabase) await window.mySupabase.auth.signOut();
+    } catch (err) {
+        console.error('Logout error:', err);
+    }
+    window.location.href = 'login.html';
+}
+
+// Wire every Logout button (id="logoutBtn" or data-logout) on page load.
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('#logoutBtn, [data-logout]').forEach((btn) => {
+        btn.addEventListener('click', logout);
+    });
+});
