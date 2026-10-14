@@ -74,6 +74,7 @@ const LessonKit = (function () {
         done = store.get('lessons_done', {});
         if (value) done[doneKey(section, id)] = true; else delete done[doneKey(section, id)];
         store.set('lessons_done', done);
+        if (value && typeof Activity !== 'undefined') Activity.record();
         try {
             const { data: { user } } = await db.auth.getUser();
             if (!user) return;

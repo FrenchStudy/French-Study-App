@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome - Apprendre le Français</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-emerald-50 font-sans text-slate-800">
+    <main class="min-h-screen flex items-start sm:items-center justify-center px-4 py-8">
+        <div class="w-full max-w-xl space-y-5">
+            <!-- Progress dots -->
+            <div class="flex items-center justify-center gap-2" aria-hidden="true">
+                <span data-dot="goal" class="dot w-8 h-2 rounded-full bg-slate-200"></span>
+                <span data-dot="level" class="dot w-8 h-2 rounded-full bg-slate-200"></span>
+                <span data-dot="result" class="dot w-8 h-2 rounded-full bg-slate-200"></span>
+            </div>
+
+            <!-- Step 1: name and goal -->
+            <section id="step-goal" class="step bg-white border border-slate-200 rounded-3xl shadow-sm p-6 space-y-5">
+                <div class="space-y-1">
+                    <h1 class="text-2xl font-black text-slate-900">Bienvenue ! 👋</h1>
+                    <p class="text-base text-slate-600">Two quick questions so we can start you in the right place.</p>
+                </div>
+                <div>
+                    <label for="name" class="block text-sm font-semibold text-slate-700 mb-1">What should we call you?</label>
+                    <input id="name" type="text" autocomplete="given-name" class="w-full text-base px-3 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Your first name">
+                </div>
+                <div class="space-y-2">
+                    <div class="text-sm font-semibold text-slate-700">Why are you learning French?</div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button type="button" data-goal="travel" class="choice min-h-[88px] p-3 rounded-2xl border-2 border-slate-200 bg-white text-left hover:border-indigo-400"><span class="block text-2xl">✈️</span><span class="block font-bold">Travel</span><span class="block text-xs text-slate-500">Get around and chat on holiday</span></button>
+                        <button type="button" data-goal="work" class="choice min-h-[88px] p-3 rounded-2xl border-2 border-slate-200 bg-white text-left hover:border-indigo-400"><span class="block text-2xl">💼</span><span class="block font-bold">Work or study</span><span class="block text-xs text-slate-500">Meetings, emails, university</span></button>
+                        <button type="button" data-goal="exam" class="choice min-h-[88px] p-3 rounded-2xl border-2 border-slate-200 bg-white text-left hover:border-indigo-400"><span class="block text-2xl">📝</span><span class="block font-bold">Pass an exam</span><span class="block text-xs text-slate-500">TCF, TEF or DELF</span></button>
+                        <button type="button" data-goal="fun" class="choice min-h-[88px] p-3 rounded-2xl border-2 border-slate-200 bg-white text-left hover:border-indigo-400"><span class="block text-2xl">🎉</span><span class="block font-bold">For fun</span><span class="block text-xs text-slate-500">Family, friends, films, books</span></button>
+                    </div>
+                </div>
+                <button type="button" id="btn-goal-next" class="w-full min-h-[48px] bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl disabled:opacity-40" disabled>Next</button>
+            </section>
+
+            <!-- Step 2: level -->
+            <section id="step-level" class="step hidden bg-white border border-slate-200 rounded-3xl shadow-sm p-6 space-y-4">
+                <div class="space-y-1">
+                    <h1 class="text-2xl font-black text-slate-900">How much French do you know?</h1>
+                    <p class="text-base text-slate-600">Pick the closest. You can change it any time.</p>
+                </div>
+                <div class="space-y-2">
+                    <button type="button" data-level="A1" class="choice w-full min-h-[64px] p-3 rounded-2xl border-2 border-slate-200 bg-white text-left hover:border-indigo-400 flex items-center gap-3"><span class="shrink-0 w-11 h-11 rounded-full bg-emerald-500 text-white font-black flex items-center justify-center">A1</span><span><span class="block font-bold">I'm a complete beginner</span><span class="block text-sm text-slate-500">Bonjour, merci… and not much more</span></span></button>
+                    <button type="button" data-level="A2" class="choice w-full min-h-[64px] p-3 rounded-2xl border-2 border-slate-200 bg-white text-left hover:border-indigo-400 flex items-center gap-3"><span class="shrink-0 w-11 h-11 rounded-full bg-teal-500 text-white font-black flex items-center justify-center">A2</span><span><span class="block font-bold">I know the basics</span><span class="block text-sm text-slate-500">I can introduce myself and order in a café</span></span></button>
+                    <button type="button" data-level="B1" class="choice w-full min-h-[64px] p-3 rounded-2xl border-2 border-slate-200 bg-white text-left hover:border-indigo-400 flex items-center gap-3"><span class="shrink-0 w-11 h-11 rounded-full bg-sky-500 text-white font-black flex items-center justify-center">B1</span><span><span class="block font-bold">I can hold a simple conversation</span><span class="block text-sm text-slate-500">About my day, my plans, my past</span></span></button>
+                    <button type="button" data-level="B2" class="choice w-full min-h-[64px] p-3 rounded-2xl border-2 border-slate-200 bg-white text-left hover:border-indigo-400 flex items-center gap-3"><span class="shrink-0 w-11 h-11 rounded-full bg-indigo-500 text-white font-black flex items-center justify-center">B2</span><span><span class="block font-bold">I'm comfortable in most situations</span><span class="block text-sm text-slate-500">I follow the news and give my opinion</span></span></button>
+                    <button type="button" id="btn-test" class="w-full min-h-[64px] p-3 rounded-2xl border-2 border-dashed border-indigo-300 bg-indigo-50 text-left hover:border-indigo-500 flex items-center gap-3"><span class="shrink-0 w-11 h-11 rounded-full bg-white text-2xl flex items-center justify-center">🧭</span><span><span class="block font-bold text-indigo-900">Not sure? Take a 2-minute test</span><span class="block text-sm text-indigo-800/80">12 quick questions</span></span></button>
+                </div>
+                <button type="button" id="btn-level-back" class="w-full min-h-[44px] text-sm font-semibold text-slate-600">← Back</button>
+            </section>
+
+            <!-- Step 2b: placement quiz -->
+            <section id="step-quiz" class="step hidden bg-white border border-slate-200 rounded-3xl shadow-sm p-6 space-y-4">
+                <div class="flex items-center justify-between text-sm text-slate-500">
+                    <span id="quiz-count"></span>
+                    <button type="button" id="btn-quiz-quit" class="font-semibold text-slate-500 hover:text-slate-800">Skip the test</button>
+                </div>
+                <div class="h-2 bg-slate-100 rounded-full overflow-hidden"><div id="quiz-bar" class="h-full bg-indigo-500 rounded-full transition-all" style="width:0%"></div></div>
+                <p id="quiz-hint" class="text-sm font-semibold text-slate-500"></p>
+                <p id="quiz-question" class="text-xl font-bold text-slate-900"></p>
+                <div id="quiz-options" class="grid grid-cols-1 sm:grid-cols-2 gap-2"></div>
+                <button type="button" id="btn-idk" class="w-full min-h-[44px] text-sm font-semibold text-slate-500 hover:text-slate-800">I don't know</button>
+            </section>
+
+            <!-- Step 3: result -->
+            <section id="step-result" class="step hidden bg-white border border-slate-200 rounded-3xl shadow-sm p-6 space-y-5 text-center">
+                <div class="text-5xl">🎯</div>
+                <div class="space-y-1">
+                    <p class="text-sm font-bold uppercase tracking-wide text-slate-500">Your starting level</p>
+                    <p id="result-level" class="text-4xl font-black text-indigo-700"></p>
+                    <p id="result-text" class="text-base text-slate-600"></p>
+                    <p id="result-score" class="text-sm text-slate-500"></p>
+                </div>
+                <button type="button" id="btn-start" class="w-full min-h-[52px] bg-indigo-600 hover:bg-indigo-700 text-white text-lg font-bold rounded-xl disabled:opacity-60">Start learning →</button>
+                <button type="button" id="btn-change" class="w-full min-h-[44px] text-sm font-semibold text-slate-600">Choose a different level</button>
+            </section>
+        </div>
+    </main>
+
+    <script>
+        const $ = (id) => document.getElementById(id);
+        const LEVELS = {
+            A1: 'Complete beginner: greetings, numbers, everyday words and the present tense.',
+            A2: 'Elementary: talking about your day, the past and simple plans.',
+            B1: 'Intermediate: opinions, stories and the conditional.',
+            B2: 'Upper intermediate: the subjunctive, nuance and debate.',
+            C1: 'Advanced: formal and literary French.'
+        };
+        // 12 placement questions, easiest first. Each has exactly one correct answer (index 0 before shuffling).
+        const QUIZ = [
+            { level: 'A1', q: 'Bonjour ! Comment ___ appelles-tu ?', a: ['te', 'me', 'se', 'vous'] },
+            { level: 'A1', q: 'Je ___ étudiant.', a: ['suis', 'es', 'est', 'ai'] },
+            { level: 'A1', q: 'What do you buy at « la boulangerie » ?', a: ['Bread', 'Meat', 'Books', 'Flowers'] },
+            { level: 'A2', q: 'Hier, nous ___ au cinéma.', a: ['sommes allés', 'avons allé', 'allons', 'irons'] },
+            { level: 'A2', q: "Quand j'étais petit, je ___ au foot tous les samedis.", a: ['jouais', 'ai joué', 'jouerai', 'joue'] },
+            { level: 'A2', q: 'Tu as vu Marie ? — Oui, je ___ ai vue hier.', a: ["l'", 'lui', 'leur', 'y'] },
+            { level: 'B1', q: "Si j'avais plus de temps, j'___ le piano.", a: ['apprendrais', 'apprendrai', 'apprenais', 'apprends'] },
+            { level: 'B1', q: 'Il faut que tu ___ tes devoirs avant ce soir.', a: ['fasses', 'fais', 'feras', 'faisais'] },
+            { level: 'B2', q: "Bien qu'il ___ malade, il est venu travailler.", a: ['soit', 'est', 'sera', 'serait'] },
+            { level: 'B2', q: "C'est le livre ___ je t'ai parlé.", a: ['dont', 'que', 'qui', 'où'] },
+            { level: 'C1', q: "Quoi qu'il ___, je ne changerai pas d'avis.", a: ['dise', 'dit', 'dira', 'disait'] },
+            { level: 'C1', q: 'Le rapport, ___ conclusions ont surpris tout le monde, sera publié demain.', a: ['dont les', 'que les', 'où les', 'qui les'] }
+        ];
+        const ORDER = ['A1', 'A2', 'B1', 'B2', 'C1'];
+        let goal = null, level = null, qi = 0, answers = [], shuffled = [];
+
+        function step(name) {
+            document.querySelectorAll('.step').forEach(s => s.classList.add('hidden'));
+            $('step-' + name).classList.remove('hidden');
+            const dot = name === 'quiz' ? 'level' : name;
+            const reached = ['goal', 'level', 'result'].indexOf(dot);
+            document.querySelectorAll('.dot').forEach((d, i) => {
+                d.classList.toggle('bg-indigo-500', i <= reached);
+                d.classList.toggle('bg-slate-200', i > reached);
+            });
+            window.scrollTo(0, 0);
+        }
+        function select(group, btn) {
+            document.querySelectorAll(group).forEach(b => {
+                const on = b === btn;
+                b.classList.toggle('border-indigo-500', on); b.classList.toggle('bg-indigo-50', on);
+                b.classList.toggle('border-slate-200', !on); b.classList.toggle('bg-white', !on);
+            });
+        }
+
+        // ----- Step 1 -----
+        document.querySelectorAll('[data-goal]').forEach(b => b.addEventListener('click', () => {
+            goal = b.dataset.goal;
+            select('[data-goal]', b);
+            $('btn-goal-next').disabled = false;
+        }));
+        $('btn-goal-next').addEventListener('click', () => step('level'));
+
+        // ----- Step 2 -----
+        document.querySelectorAll('[data-level]').forEach(b => b.addEventListener('click', () => {
+            select('[data-level]', b);
+            showResult(b.dataset.level, null);
+        }));
+        $('btn-level-back').addEventListener('click', () => step('goal'));
+        $('btn-test').addEventListener('click', startQuiz);
+
+        // ----- Placement quiz -----
+        function shuffle(a) { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+        function startQuiz() {
+            qi = 0; answers = [];
+            shuffled = QUIZ.map(item => shuffle(item.a.map((text, i) => ({ text, right: i === 0 }))));
+            step('quiz');
+            renderQuestion();
+        }
+        function renderQuestion() {
+            const item = QUIZ[qi];
+            $('quiz-count').textContent = `Question ${qi + 1} of ${QUIZ.length}`;
+            $('quiz-bar').style.width = `${(qi / QUIZ.length) * 100}%`;
+            $('quiz-hint').textContent = item.q.includes('___') ? 'Fill in the blank' : 'Choose the answer';
+            $('quiz-question').textContent = item.q;
+            $('quiz-options').innerHTML = shuffled[qi].map((o, i) =>
+                `<button type="button" data-opt="${i}" class="min-h-[52px] px-4 py-2 text-left text-base font-semibold bg-white border-2 border-slate-200 hover:border-indigo-400 rounded-xl">${escapeText(o.text)}</button>`).join('');
+            $('quiz-options').querySelectorAll('[data-opt]').forEach(b => b.addEventListener('click', () => answer(shuffled[qi][Number(b.dataset.opt)].right)));
+        }
+        function escapeText(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+        function answer(right) {
+            answers[qi] = !!right;
+            qi += 1;
+            if (qi < QUIZ.length) renderQuestion(); else finishQuiz();
+        }
+        $('btn-idk').addEventListener('click', () => answer(false));
+        $('btn-quiz-quit').addEventListener('click', () => step('level'));
+
+        // Start at the highest level where at least half the questions were right,
+        // counting up from A1 and stopping at the first level that wasn't passed.
+        function placement(results) {
+            let placed = 'A1';
+            for (const lv of ORDER) {
+                const idx = QUIZ.map((q, i) => q.level === lv ? i : -1).filter(i => i >= 0);
+                const right = idx.filter(i => results[i]).length;
+                if (right * 2 >= idx.length) placed = lv; else break;
+            }
+            return placed;
+        }
+        function finishQuiz() {
+            const right = answers.filter(Boolean).length;
+            showResult(placement(answers), `You got ${right} of ${QUIZ.length} right.`);
+        }
+
+        // ----- Step 3 -----
+        function showResult(lv, scoreText) {
+            level = lv;
+            $('result-level').textContent = lv;
+            $('result-text').textContent = LEVELS[lv] || '';
+            $('result-score').textContent = scoreText || '';
+            step('result');
+        }
+        $('btn-change').addEventListener('click', () => step('level'));
+        $('btn-start').addEventListener('click', async () => {
+            $('btn-start').disabled = true;
+            await Account.save({
+                display_name: $('name').value.trim() || undefined,
+                goal: goal || 'fun',
+                level,
+                onboarded_at: new Date().toISOString()
+            });
+            location.href = 'index.html';
+        });
+
+        // ----- Start: must be signed in; prefill when changing settings -----
+        (async () => {
+            const { user, profile } = await Account.profile();
+            if (!user) { location.replace('login.html'); return; }
+            if (profile.display_name) $('name').value = profile.display_name;
+            if (profile.goal) {
+                const b = document.querySelector(`[data-goal="${profile.goal}"]`);
+                if (b) { goal = profile.goal; select('[data-goal]', b); $('btn-goal-next').disabled = false; }
+            }
+            step('goal');
+        })();
+    </script>
+</body>
+</html>

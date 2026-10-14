@@ -1,63 +1,217 @@
 <!DOCTYPE html>
-<html lang="fr" class="h-full">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Atelier de Français - Connexion</title>
+    <title>Sign in - Apprendre le Français</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="config.js"></script>
 </head>
-<body class="h-full bg-slate-100 flex items-center justify-center font-sans">
-
-    <div class="max-w-md w-full bg-white border border-slate-200 rounded-2xl p-8 shadow-sm space-y-6">
-        <div class="text-center space-y-1">
-            <span class="text-xs font-bold uppercase tracking-wider bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded">Atelier de Français</span>
-            <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight mt-2">Connexion à votre espace</h1>
-            <p class="text-xs text-slate-500">Entrez vos identifiants pour synchroniser votre progression.</p>
-        </div>
-
-        <div class="space-y-4">
-            <div>
-                <label class="block text-xs font-bold text-slate-700 mb-1">Adresse e-mail :</label>
-                <input type="email" id="email-input" placeholder="votre.email@exemple.com" class="w-full text-xs px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+<body class="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-emerald-50 font-sans text-slate-800">
+    <main class="min-h-screen flex items-center justify-center px-4 py-10">
+        <div class="w-full max-w-md space-y-6">
+            <div class="text-center space-y-2">
+                <div class="text-5xl">🇫🇷</div>
+                <h1 class="text-3xl font-black text-slate-900">Apprendre le Français</h1>
+                <p class="text-base text-slate-600">Vocabulary, grammar and real conversation practice, A1 to C2.</p>
             </div>
 
-            <div>
-                <label class="block text-xs font-bold text-slate-700 mb-1">Mot de passe :</label>
-                <input type="password" id="password-input" placeholder="••••••••" class="w-full text-xs px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
-            </div>
+            <section class="bg-white border border-slate-200 rounded-3xl shadow-sm p-6 space-y-5">
+                <!-- Tabs -->
+                <nav id="tabs" class="grid grid-cols-2 gap-1 bg-slate-100 p-1 rounded-xl text-sm font-bold" role="tablist">
+                    <button type="button" data-tab="signin" class="tab min-h-[44px] rounded-lg">Sign in</button>
+                    <button type="button" data-tab="signup" class="tab min-h-[44px] rounded-lg">Create account</button>
+                </nav>
 
-            <button onclick="handleLogin()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold py-3 rounded-xl transition shadow-sm">
-                Se connecter
-            </button>
+                <div id="message" class="hidden text-sm rounded-xl p-3" role="alert"></div>
+
+                <!-- Sign in / Create account -->
+                <form id="auth-form" class="space-y-4" novalidate>
+                    <div id="name-field" class="hidden">
+                        <label for="name" class="block text-sm font-semibold text-slate-700 mb-1">Your first name</label>
+                        <input id="name" type="text" autocomplete="given-name" class="w-full text-base px-3 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="e.g. Sam">
+                    </div>
+                    <div>
+                        <label for="email" class="block text-sm font-semibold text-slate-700 mb-1">Email</label>
+                        <input id="email" type="email" autocomplete="email" required class="w-full text-base px-3 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="you@example.com">
+                    </div>
+                    <div>
+                        <div class="flex items-center justify-between mb-1">
+                            <label for="password" class="block text-sm font-semibold text-slate-700">Password</label>
+                            <button type="button" id="btn-forgot" class="text-sm font-semibold text-indigo-600 hover:underline">Forgot password?</button>
+                        </div>
+                        <div class="relative">
+                            <input id="password" type="password" autocomplete="current-password" required minlength="8" class="w-full text-base pl-3 pr-16 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            <button type="button" id="btn-show" class="absolute right-2 top-1/2 -translate-y-1/2 text-sm font-semibold text-slate-500 px-2 py-1">Show</button>
+                        </div>
+                        <p id="pw-hint" class="hidden text-xs text-slate-500 mt-1">At least 8 characters.</p>
+                    </div>
+                    <button type="submit" id="btn-submit" class="w-full min-h-[48px] bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl disabled:opacity-60">Sign in</button>
+                </form>
+
+                <!-- Forgot password -->
+                <form id="reset-form" class="hidden space-y-4" novalidate>
+                    <p class="text-base text-slate-700">Enter your email and we'll send you a link to choose a new password.</p>
+                    <div>
+                        <label for="reset-email" class="block text-sm font-semibold text-slate-700 mb-1">Email</label>
+                        <input id="reset-email" type="email" autocomplete="email" class="w-full text-base px-3 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    <button type="submit" id="btn-reset" class="w-full min-h-[48px] bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl disabled:opacity-60">Send reset link</button>
+                    <button type="button" id="btn-reset-back" class="w-full min-h-[44px] text-sm font-semibold text-slate-600">← Back to sign in</button>
+                </form>
+
+                <div id="google-block" class="space-y-3">
+                    <div class="flex items-center gap-3 text-xs text-slate-400"><span class="flex-1 h-px bg-slate-200"></span>or<span class="flex-1 h-px bg-slate-200"></span></div>
+                    <button type="button" id="btn-google" class="w-full min-h-[48px] bg-white border border-slate-300 hover:bg-slate-50 rounded-xl font-semibold text-slate-700 flex items-center justify-center gap-2">
+                        <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>
+                        Continue with Google
+                    </button>
+                </div>
+            </section>
+
+            <p class="text-center text-sm text-slate-500">Free lessons and flashcards. AI feedback includes 5 free tries.</p>
         </div>
-    </div>
+    </main>
 
     <script>
         const db = window.mySupabase;
+        const $ = (id) => document.getElementById(id);
+        let mode = 'signin';
 
-        async function handleLogin() {
-            const email = document.getElementById('email-input').value.trim();
-            const password = document.getElementById('password-input').value.trim();
+        const FRIENDLY = [
+            [/invalid login credentials/i, 'Email or password is incorrect.'],
+            [/email not confirmed/i, 'Please confirm your email first: check your inbox for the link we sent.'],
+            [/already registered|already exists/i, 'An account with this email already exists. Sign in instead, or reset your password.'],
+            [/rate limit|too many/i, 'Too many attempts. Please wait a minute and try again.'],
+            [/provider is not enabled|unsupported provider/i, "Google sign-in isn't switched on yet. Use email and password for now."],
+            [/password.*(short|least|characters)/i, 'Your password needs at least 8 characters.'],
+            [/fetch|network/i, 'Could not reach the server. Check your connection and try again.']
+        ];
+        const friendly = (err) => {
+            const msg = String((err && err.message) || err || '');
+            const hit = FRIENDLY.find(([re]) => re.test(msg));
+            return hit ? hit[1] : (msg || 'Something went wrong. Please try again.');
+        };
 
-            if (!email || !password) {
-                alert("Veuillez remplir tous les champs.");
-                return;
-            }
-
-            const { data, error } = await db.auth.signInWithPassword({
-                email: email,
-                password: password
-            });
-
-            if (error) {
-                alert("Erreur de connexion : " + error.message);
-            } else {
-                alert("Connexion réussie ! Redirection...");
-                window.location.href = 'vocab.html';
-            }
+        function show(kind, text) {
+            const box = $('message');
+            box.textContent = text;
+            box.className = 'text-sm rounded-xl p-3 ' + (kind === 'error' ? 'bg-rose-50 text-rose-800 border border-rose-200' : 'bg-emerald-50 text-emerald-800 border border-emerald-200');
         }
+        function clearMessage() { $('message').className = 'hidden'; }
+
+        function setMode(m) {
+            mode = m;
+            clearMessage();
+            const signup = m === 'signup';
+            document.querySelectorAll('.tab').forEach(t => {
+                const on = t.dataset.tab === m;
+                t.classList.toggle('bg-white', on); t.classList.toggle('shadow-sm', on);
+                t.classList.toggle('text-indigo-700', on); t.classList.toggle('text-slate-600', !on);
+                t.setAttribute('aria-selected', on);
+            });
+            $('auth-form').classList.remove('hidden');
+            $('reset-form').classList.add('hidden');
+            $('tabs').classList.remove('hidden');
+            $('google-block').classList.remove('hidden');
+            $('name-field').classList.toggle('hidden', !signup);
+            $('pw-hint').classList.toggle('hidden', !signup);
+            $('btn-forgot').classList.toggle('hidden', signup);
+            $('password').autocomplete = signup ? 'new-password' : 'current-password';
+            $('btn-submit').textContent = signup ? 'Create my account' : 'Sign in';
+            try { history.replaceState(null, '', signup ? 'login.html?mode=signup' : 'login.html'); } catch (e) {}
+        }
+
+        // Where to go once signed in: first-time setup, or Home
+        async function goNext() {
+            const { profile } = await Account.profile();
+            location.href = Account.isOnboarded(profile) ? 'index.html' : 'welcome.html';
+        }
+        const pageUrl = (name) => new URL(name, location.href).href;
+
+        $('auth-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            clearMessage();
+            const email = $('email').value.trim();
+            const password = $('password').value;
+            if (!/^\S+@\S+\.\S+$/.test(email)) return show('error', 'Please enter a valid email address.');
+            if (mode === 'signup' && password.length < 8) return show('error', 'Your password needs at least 8 characters.');
+            if (!password) return show('error', 'Please enter your password.');
+            $('btn-submit').disabled = true;
+            try {
+                if (mode === 'signin') {
+                    const { error } = await db.auth.signInWithPassword({ email, password });
+                    if (error) throw error;
+                    await goNext();
+                } else {
+                    const name = $('name').value.trim();
+                    const { data, error } = await db.auth.signUp({
+                        email, password,
+                        options: { emailRedirectTo: pageUrl('welcome.html'), data: { display_name: name } }
+                    });
+                    if (error) throw error;
+                    if (name) LocalStore.set('fs_profile', { ...Account.local(), display_name: name });
+                    if (data && data.session) {
+                        location.href = 'welcome.html';
+                    } else {
+                        show('ok', `Almost there! We've sent a confirmation link to ${email}. Open it to finish creating your account.`);
+                    }
+                }
+            } catch (err) {
+                show('error', friendly(err));
+            }
+            $('btn-submit').disabled = false;
+        });
+
+        $('btn-show').addEventListener('click', () => {
+            const pw = $('password');
+            pw.type = pw.type === 'password' ? 'text' : 'password';
+            $('btn-show').textContent = pw.type === 'password' ? 'Show' : 'Hide';
+        });
+
+        $('btn-forgot').addEventListener('click', () => {
+            clearMessage();
+            $('auth-form').classList.add('hidden');
+            $('tabs').classList.add('hidden');
+            $('google-block').classList.add('hidden');
+            $('reset-form').classList.remove('hidden');
+            $('reset-email').value = $('email').value.trim();
+            $('reset-email').focus();
+        });
+        $('btn-reset-back').addEventListener('click', () => setMode('signin'));
+        $('reset-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = $('reset-email').value.trim();
+            if (!/^\S+@\S+\.\S+$/.test(email)) return show('error', 'Please enter a valid email address.');
+            $('btn-reset').disabled = true;
+            try {
+                const { error } = await db.auth.resetPasswordForEmail(email, { redirectTo: pageUrl('reset.html') });
+                if (error) throw error;
+                show('ok', `If an account exists for ${email}, a reset link is on its way. Check your inbox.`);
+            } catch (err) {
+                show('error', friendly(err));
+            }
+            $('btn-reset').disabled = false;
+        });
+
+        $('btn-google').addEventListener('click', async () => {
+            clearMessage();
+            try {
+                const { error } = await db.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: pageUrl('login.html') } });
+                if (error) throw error;
+            } catch (err) {
+                show('error', friendly(err));
+            }
+        });
+
+        document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => setMode(t.dataset.tab)));
+
+        // Already signed in (or just back from Google)? Skip this page.
+        (async () => {
+            setMode(new URLSearchParams(location.search).get('mode') === 'signup' ? 'signup' : 'signin');
+            if (await Account.session()) goNext();
+        })();
     </script>
 </body>
-</html>
+</html>
