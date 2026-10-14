@@ -8,9 +8,9 @@ A browser-based French learning suite backed by Supabase (schema `French-schema`
 |---|---|
 | `index.html` | Home / module launcher |
 | `login.html` | Sign in |
-| `lesson.html` | Lessons: 78 grammar and 44 conjugation topics (A1–C2) from the cheat sheet, plus 14 interactive lessons in `content/` |
-| `vocab.html` | Vocabulary flashcards: 44 themes and 5,000 frequency words (`vocabulary_bank`, `themes`, `word_themes`) |
-| `conjugations.html` | Verb conjugation drills |
+| `lesson.html` | Grammar: 78 lessons (A1–C2) from the cheat sheet; topics 2, 3, 10 and 28 include their interactive practice |
+| `vocab.html` | Vocabulary: flashcards for 44 themes and 5,000 frequency words, plus 12 interactive lessons (Lessons tab) |
+| `conjugations.html` | Verb tables for 296 verbs (no AI) and 44 conjugation lessons (Lessons tab) |
 | `reading.html` | Reading practice (`reading_topics`) |
 | `listening.html` | Listening practice (`listening_topics`) |
 | `writing.html` | Writing with AI feedback |
@@ -32,8 +32,9 @@ talks to Supabase loads it right after the Supabase SDK.
 | `conjugate.js` | Rule-based conjugation engine (296 verbs, 12 tenses) |
 | `cheatsheet-data.js` | Cheat sheet vocab themes (fallback for Vocab) |
 | `lessons-data.js` | Cheat sheet grammar and conjugation lessons |
+| `lesson-kit.js` | Shared lesson browser used by Grammar, Conjugations and Vocab |
 
-`syllabus.html` now redirects to Lessons. Database changes live in `supabase/`.
+`syllabus.html` now redirects to Grammar. Database changes live in `supabase/`.
 
 ## Running locally
 
