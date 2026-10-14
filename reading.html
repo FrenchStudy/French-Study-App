@@ -5,6 +5,7 @@
     <title>Atelier de Français - Reading & Exam Suite</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
 </head>
 <body class="h-full bg-slate-100 flex flex-col overflow-hidden font-sans">
 
@@ -160,14 +161,6 @@
 
     <!-- Script Integration -->
     <script>
-        const SUPABASE_URL = 'https://bkawfexaikntyivqvetk.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrYXdmZXhhaWtudHlpdnF2ZXRrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcyMDU3ODAsImV4cCI6MjEwMjc4MTc4MH0.8YYkD8pzn97DeqA-o83KoGQ4yHb6WT1HB4DcoPPAMwA';
-        
-        if (!window.mySupabase) {
-            window.mySupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-                db: { schema: 'French-schema' }
-            });
-        }
         const db = window.mySupabase;
 
         let allReadingTopics = [];
@@ -364,7 +357,7 @@
             isTranslatedVisible = true;
             translationBody.innerText = "Traduction du texte en cours par l'IA...";
 
-            const apiUrl = localStorage.getItem('ai_api_url') || "[https://api.groq.com/openai/v1/chat/completions](https://api.groq.com/openai/v1/chat/completions)";
+            const apiUrl = localStorage.getItem('ai_api_url') || "https://api.groq.com/openai/v1/chat/completions";
             const apiKey = localStorage.getItem('ai_api_key') || "";
             const modelName = localStorage.getItem('ai_model_name') || "openai/gpt-oss-120b";
 
@@ -405,7 +398,7 @@
             defEl.innerText = "Recherche de la définition et traduction par l'IA...";
             modal.classList.remove('hidden');
 
-            const apiUrl = localStorage.getItem('ai_api_url') || "[https://api.groq.com/openai/v1/chat/completions](https://api.groq.com/openai/v1/chat/completions)";
+            const apiUrl = localStorage.getItem('ai_api_url') || "https://api.groq.com/openai/v1/chat/completions";
             const apiKey = localStorage.getItem('ai_api_key') || "";
             const modelName = localStorage.getItem('ai_model_name') || "openai/gpt-oss-120b";
 
@@ -712,4 +705,4 @@
         loadReadingTopicsFromDatabase();
     </script>
 </body>
-</html>
+</html>
