@@ -195,6 +195,49 @@
         function wordKey(fr) {
             return String(fr).toLowerCase().replace(/[’]/g, "'").replace(ARTICLE, '').replace(/\s+/g, ' ').trim();
         }
+        // ---- Word bank codes (Part_of_Speech like "nf", "nm,nf", "nadj(f)"; Register like "+s -l") ----
+        const POS_LABELS = {
+            nm: 'noun (m)', nf: 'noun (f)', nmi: 'noun (m, invariable)', nfi: 'noun (f, invariable)', nmpl: 'noun (m, plural)',
+            nadj: 'noun / adjective', v: 'verb', adj: 'adjective', adji: 'adjective (invariable)', adv: 'adverb',
+            prep: 'preposition', pro: 'pronoun', conj: 'conjunction', det: 'determiner', intj: 'interjection'
+        };
+        function parsePos(pos) {
+            const tokens = String(pos || '').split(',').map(s => s.trim()).filter(Boolean);
+            const base = tokens.map(s => s.replace(/\(.*?\)/g, ''));
+            const hasM = base.some(b => /^nm/.test(b));
+            const hasF = base.some(b => /^nf/.test(b));
+            const nounTokens = tokens.filter(s => /^n[mf]/.test(s));
+            return {
+                // only words that are nouns and nothing else get an article and a gender colour
+                pureNoun: base.length > 0 && base.every(b => /^n[mf]/.test(b)),
+                gender: hasM && hasF ? 'mf' : hasM ? 'm' : hasF ? 'f' : '',
+                plural: nounTokens.length > 0 && nounTokens.every(s => /pl/.test(s)),
+                label: [...new Set(base.map(b => POS_LABELS[b] || b))].join(' · ')
+            };
+        }
+        // Words starting with an "aspirated" h take le/la, not l'
+        const H_ASPIRE = new Set(['hasard', 'hausse', 'hauteur', 'haut', 'honte', 'héros', 'hall', 'halte', 'hameau', 'hanche', 'handicap',
+            'hangar', 'haricot', 'hâte', 'hache', 'haine', 'harcèlement', 'hérisson', 'hêtre', 'hibou', 'hiérarchie', 'hockey', 'homard',
+            'hors-d\'œuvre', 'hotte', 'houle', 'housse', 'hublot', 'huit', 'hurlement', 'hutte', 'haie', 'halle', 'hamac', 'hamburger',
+            'hamster', 'hareng', 'harpe', 'hargne', 'havre', 'hernie', 'héron', 'hoquet', 'huée', 'hall']);
+        function withArticle(word, gender, plural) {
+            if (!gender || gender === '') return word;
+            if (plural) return 'les ' + word;
+            const elide = /^[aeiouyàâäéèêëîïôöùûüœæ]/i.test(word) || (/^h/i.test(word) && !H_ASPIRE.has(word.toLowerCase()));
+            if (elide) return "l'" + word;
+            return (gender === 'm' ? 'le ' : gender === 'f' ? 'la ' : 'le/la ') + word;
+        }
+        const REGISTER_LABELS = { l: 'books', s: 'speech', n: 'news' };
+        function registerLabel(reg) {
+            const codes = String(reg || '').replace(/register:/i, '').trim().split(/\s+/).filter(Boolean);
+            const more = codes.filter(c => c[0] === '+').map(c => REGISTER_LABELS[c[1]]).filter(Boolean);
+            const less = codes.filter(c => c[0] === '-').map(c => REGISTER_LABELS[c[1]]).filter(Boolean);
+            const text = [more.length && `more common in ${more.join(' and ')}`, less.length && `less common in ${less.join(' and ')}`]
+                .filter(Boolean).join('; ');
+            return text ? text[0].toUpperCase() + text.slice(1) : '';
+        }
+        const cleanIpa = (ipa) => String(ipa || '').replace(/^[\[\/]|[\]\/]$/g, '').trim();
+
         function genderOf(g, fr) {
             const v = String(g || '').trim().toLowerCase();
             if (v.startsWith('m')) return 'm';
@@ -275,18 +318,18 @@
                     await enrichFromBank(words);
                 } else {
                     const { data, error } = await db.from('vocabulary_bank')
-                        .select('Rank, French, English, Part_of_Speech, Article, Noun_Gender, IPA, SentenceFR, SentenceEN')
+                        .select('Rank, French, English, Part_of_Speech, IPA, SentenceFR, SentenceEN, Register')
                         .order('Rank', { ascending: true })
                         .range(n - 1, n + FREQ_DECK_SIZE - 2);
                     if (error) throw error;
                     const words = (data || []).map(r => {
-                        const art = (r.Article || '').trim();
-                        const isNoun = /^n/i.test(r.Part_of_Speech || '');
-                        const fr = isNoun && art ? (art.endsWith("'") ? art + r.French : art + ' ' + r.French) : r.French;
+                        const pos = parsePos(r.Part_of_Speech);
+                        const fr = pos.pureNoun ? withArticle(r.French, pos.gender, pos.plural) : r.French;
                         return {
                             key: wordKey(r.French), fr, en: r.English || '', pron: '', note: '',
-                            ipa: r.IPA || '', gender: isNoun ? genderOf(r.Noun_Gender, fr) : '',
-                            pos: r.Part_of_Speech || '', exFr: r.SentenceFR || '', exEn: r.SentenceEN || '', rank: r.Rank
+                            ipa: cleanIpa(r.IPA), gender: pos.pureNoun && pos.gender !== 'mf' ? pos.gender : '',
+                            pos: pos.label, register: registerLabel(r.Register),
+                            exFr: r.SentenceFR || '', exEn: r.SentenceEN || '', rank: r.Rank
                         };
                     });
                     deck = { id: value, title: `Most frequent words ${n}–${n + FREQ_DECK_SIZE - 1}`, words };
@@ -308,17 +351,18 @@
             const candidates = [...new Set(words.flatMap(w => [w.fr, w.fr.replace(ARTICLE, '')]))];
             try {
                 const { data } = await db.from('vocabulary_bank')
-                    .select('French, IPA, SentenceFR, SentenceEN, Part_of_Speech')
+                    .select('French, IPA, SentenceFR, SentenceEN, Part_of_Speech, Register')
                     .in('French', candidates);
                 const byKey = {};
                 (data || []).forEach(r => { byKey[wordKey(r.French)] = r; });
                 words.forEach(w => {
                     const r = byKey[w.key];
                     if (!r) return;
-                    w.ipa = r.IPA || '';
+                    w.ipa = cleanIpa(r.IPA);
+                    w.register = registerLabel(r.Register);
                     w.exFr = r.SentenceFR || '';
                     w.exEn = r.SentenceEN || '';
-                    w.pos = r.Part_of_Speech || '';
+                    w.pos = parsePos(r.Part_of_Speech).label;
                 });
             } catch (err) {
                 console.warn('Word bank lookup failed; showing cheat sheet data only.', err);
@@ -374,8 +418,8 @@
             $('card-word').className = 'text-3xl font-black break-words ' + genderClass(current);
             $('card-pos').textContent = current.pos || '';
             $('card-en').textContent = current.en;
-            $('card-pron').textContent = [current.pron && `Say: ${current.pron}`, current.ipa && `/${current.ipa.replace(/^\/|\/$/g, '')}/`].filter(Boolean).join(' · ');
-            $('card-note').textContent = current.note || '';
+            $('card-pron').textContent = [current.pron && `Say: ${current.pron}`, current.ipa && `/${current.ipa}/`].filter(Boolean).join(' · ');
+            $('card-note').textContent = [current.note, current.register].filter(Boolean).join(' · ');
             $('card-example').classList.toggle('hidden', !current.exFr);
             $('btn-say-ex').classList.toggle('hidden', !current.exFr);
             $('card-ex-fr').textContent = current.exFr;
