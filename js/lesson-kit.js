@@ -19,21 +19,21 @@ const LessonKit = (function () {
 
     // Interactive lessons (hand-built pages in content/)
     const INTERACTIVE = [
-        { id: 'lalphabet', title: "L'alphabet", blurb: 'The alphabet and spelling out loud.', level: 'A1', path: 'content/vocab/lalphabet.html' },
-        { id: 'nombres', title: 'Les nombres', blurb: 'Numbers from 0 upwards, with audio.', level: 'A1', path: 'content/vocab/nombres.html', theme: 4 },
-        { id: 'noms-prenoms', title: 'Noms et prénoms', blurb: 'First names, surnames and introducing yourself.', level: 'A1', path: 'content/vocab/noms-prenoms.html' },
-        { id: 'ladresse', title: "L'adresse", blurb: 'Saying and understanding an address.', level: 'A1', path: 'content/vocab/ladresse.html' },
-        { id: 'objets-personnels', title: 'Objets personnels', blurb: 'Everyday personal objects.', level: 'A1', path: 'content/vocab/objets-personnels.html', theme: 17 },
-        { id: 'objets-classe', title: 'Objets de la classe', blurb: 'Classroom objects.', level: 'A1', path: 'content/vocab/objets-classe.html' },
-        { id: 'nationalites', title: 'Les nationalités', blurb: 'Countries and nationalities.', level: 'A1', path: 'content/vocab/nationalites.html', theme: 10, grammar: [27] },
-        { id: 'professions', title: 'Les professions', blurb: 'Jobs, with and without an article.', level: 'A1', path: 'content/vocab/professions.html', theme: 11, grammar: [11] },
-        { id: 'famille-proche', title: 'La famille', blurb: 'An interactive family tree.', level: 'A1', path: 'content/vocab/famille-proche.html', theme: 9 },
-        { id: 'lheure-prix', title: "L'heure et les prix", blurb: 'Telling the time and prices, with a practice clock.', level: 'A1', path: 'content/vocab/lheure-prix.html', theme: 6, widget: 'clock' },
-        { id: 'meteo-date-jours', title: 'Météo, date et jours', blurb: 'Weather, days and dates, with a sentence builder.', level: 'A1', path: 'content/vocab/meteo-date-jours.html', theme: 8, widget: 'meteo' },
-        { id: 'loisirs-hobbies', title: 'Les loisirs', blurb: 'Hobbies and free time.', level: 'A1', path: 'content/vocab/loisirs-hobbies.html', theme: 26 },
+        { id: 'lalphabet', emoji: '🔤', title: "L'alphabet", blurb: 'The alphabet and spelling out loud.', level: 'A1', path: 'content/vocab/lalphabet.html' },
+        { id: 'nombres', emoji: '🔢', title: 'Les nombres', blurb: 'Numbers from 0 upwards, with audio.', level: 'A1', path: 'content/vocab/nombres.html', theme: 4 },
+        { id: 'noms-prenoms', emoji: '🪪', title: 'Noms et prénoms', blurb: 'First names, surnames and introducing yourself.', level: 'A1', path: 'content/vocab/noms-prenoms.html' },
+        { id: 'ladresse', emoji: '🏠', title: "L'adresse", blurb: 'Saying and understanding an address.', level: 'A1', path: 'content/vocab/ladresse.html' },
+        { id: 'objets-personnels', emoji: '🎒', title: 'Objets personnels', blurb: 'Everyday personal objects.', level: 'A1', path: 'content/vocab/objets-personnels.html', theme: 17 },
+        { id: 'objets-classe', emoji: '✏️', title: 'Objets de la classe', blurb: 'Classroom objects.', level: 'A1', path: 'content/vocab/objets-classe.html' },
+        { id: 'nationalites', emoji: '🌍', title: 'Les nationalités', blurb: 'Countries and nationalities.', level: 'A1', path: 'content/vocab/nationalites.html', theme: 10, grammar: [27] },
+        { id: 'professions', emoji: '👩‍⚕️', title: 'Les professions', blurb: 'Jobs, with and without an article.', level: 'A1', path: 'content/vocab/professions.html', theme: 11, grammar: [11] },
+        { id: 'famille-proche', emoji: '👨‍👩‍👧', title: 'La famille', blurb: 'An interactive family tree.', level: 'A1', path: 'content/vocab/famille-proche.html', theme: 9 },
+        { id: 'lheure-prix', emoji: '⏰', title: "L'heure et les prix", blurb: 'Telling the time and prices, with a practice clock.', level: 'A1', path: 'content/vocab/lheure-prix.html', theme: 6, widget: 'clock' },
+        { id: 'meteo-date-jours', emoji: '⛅', title: 'Météo, date et jours', blurb: 'Weather, days and dates, with a sentence builder.', level: 'A1', path: 'content/vocab/meteo-date-jours.html', theme: 8, widget: 'meteo' },
+        { id: 'loisirs-hobbies', emoji: '⚽', title: 'Les loisirs', blurb: 'Hobbies and free time.', level: 'A1', path: 'content/vocab/loisirs-hobbies.html', theme: 26 },
         // Grammar practice pages, shown inside their grammar topics
-        { id: 'articles-definis-indefinis-partitifs', title: 'Les articles', blurb: 'le, un, du: definite, indefinite and partitive.', level: 'A1', path: 'content/grammar/articles-definis-indefinis-partitifs.html', embedIn: [2, 3] },
-        { id: 'prepositions-temps-lieu', title: 'Prépositions de temps et de lieu', blurb: 'à, en, dans, depuis, pendant...', level: 'A2', path: 'content/grammar/prepositions-temps-lieu.html', embedIn: [10, 28] }
+        { id: 'articles-definis-indefinis-partitifs', emoji: '📰', title: 'Les articles', blurb: 'le, un, du: definite, indefinite and partitive.', level: 'A1', path: 'content/grammar/articles-definis-indefinis-partitifs.html', embedIn: [2, 3] },
+        { id: 'prepositions-temps-lieu', emoji: '📍', title: 'Prépositions de temps et de lieu', blurb: 'à, en, dans, depuis, pendant...', level: 'A2', path: 'content/grammar/prepositions-temps-lieu.html', embedIn: [10, 28] }
     ];
     const VOCAB_LESSONS = INTERACTIVE.filter(x => !x.embedIn);
 
@@ -338,42 +338,73 @@ const LessonKit = (function () {
         }
     });
 
-    // ---------- The lesson browser ----------
+    // ---------- Level colours (full class names so the CSS build keeps them) ----------
+    const LEVEL_STYLE = {
+        A1: { solid: 'bg-emerald-500', soft: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-400', ring: 'ring-emerald-200', grad: 'from-emerald-400 to-teal-500', bar: 'bg-emerald-500', stroke: '#10b981' },
+        A2: { solid: 'bg-teal-500', soft: 'bg-teal-50', text: 'text-teal-700', border: 'border-teal-400', ring: 'ring-teal-200', grad: 'from-teal-400 to-cyan-500', bar: 'bg-teal-500', stroke: '#14b8a6' },
+        B1: { solid: 'bg-sky-500', soft: 'bg-sky-50', text: 'text-sky-700', border: 'border-sky-400', ring: 'ring-sky-200', grad: 'from-sky-400 to-blue-500', bar: 'bg-sky-500', stroke: '#0ea5e9' },
+        B2: { solid: 'bg-indigo-500', soft: 'bg-indigo-50', text: 'text-indigo-700', border: 'border-indigo-400', ring: 'ring-indigo-200', grad: 'from-indigo-400 to-violet-500', bar: 'bg-indigo-500', stroke: '#6366f1' },
+        C1: { solid: 'bg-purple-500', soft: 'bg-purple-50', text: 'text-purple-700', border: 'border-purple-400', ring: 'ring-purple-200', grad: 'from-purple-400 to-fuchsia-500', bar: 'bg-purple-500', stroke: '#a855f7' },
+        C2: { solid: 'bg-rose-500', soft: 'bg-rose-50', text: 'text-rose-700', border: 'border-rose-400', ring: 'ring-rose-200', grad: 'from-rose-400 to-orange-400', bar: 'bg-rose-500', stroke: '#f43f5e' }
+    };
+    const styleOf = (code) => LEVEL_STYLE[code] || LEVEL_STYLE.A1;
+
+    // ---------- The lesson browser: a learning path, one level at a time ----------
     function mount(root, opts) {
         const section = opts.section;
         const sec = SECTIONS[section];
         const param = opts.param;
         const keep = opts.keepParams || {};
         const pageTitle = document.title;
+        const LEVEL_KEY = 'lk_level_' + section;
         let current = null;
+        let level = store.get(LEVEL_KEY, null);
 
         root.classList.add('lk-root');
         root.innerHTML = `
             <div class="lk-list space-y-4">
                 ${opts.intro || ''}
-                <input type="search" class="lk-search w-full text-base px-3 py-3 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="${escapeHtml(opts.searchPlaceholder || 'Search, e.g. subjonctif')}">
-                <div class="lk-groups space-y-5"></div>
-            </div>
-            <article class="lk-view hidden space-y-4">
-                <div class="flex items-center justify-between gap-2">
-                    <button type="button" class="lk-back min-h-[44px] px-1 text-sm font-semibold text-slate-600 hover:text-indigo-600">← All ${escapeHtml(sec.name.toLowerCase())}</button>
-                    <span class="lk-crumb text-xs font-bold bg-indigo-50 text-indigo-700 px-2 py-1 rounded-full"></span>
+                <input type="search" class="lk-search w-full lg:max-w-md text-base px-3 py-3 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="${escapeHtml(opts.searchPlaceholder || 'Search, e.g. subjonctif')}">
+                <div class="lk-results hidden space-y-5"></div>
+                <div class="lk-pathview space-y-4">
+                    <div class="lk-levels flex gap-2 overflow-x-auto pb-1"></div>
+                    <div class="lg:grid lg:grid-cols-[minmax(0,1fr)_22rem] lg:gap-8 space-y-4 lg:space-y-0">
+                        <div class="space-y-4 min-w-0">
+                            <div class="lk-banner"></div>
+                            <div class="lk-continue lg:hidden"></div>
+                            <div class="lk-path relative mx-auto max-w-xl"></div>
+                        </div>
+                        <aside class="lk-aside hidden lg:block lg:sticky lg:top-4 lg:self-start space-y-4"></aside>
+                    </div>
                 </div>
-                <header class="space-y-1">
-                    <h1 class="lk-title text-2xl font-black text-slate-900 leading-tight"></h1>
-                    <p class="lk-blurb text-base text-slate-600"></p>
-                </header>
-                <div class="lk-body space-y-4"></div>
-                <button type="button" class="lk-done min-h-[48px] px-5 rounded-xl font-bold"></button>
-                <div class="grid grid-cols-2 gap-2">
-                    <button type="button" class="lk-prev min-h-[56px] text-left px-3 py-2 bg-white border border-slate-200 hover:border-indigo-300 rounded-xl text-sm disabled:opacity-40"></button>
-                    <button type="button" class="lk-next min-h-[56px] text-right px-3 py-2 bg-white border border-slate-200 hover:border-indigo-300 rounded-xl text-sm disabled:opacity-40"></button>
+            </div>
+            <article class="lk-view hidden">
+                <div class="lg:grid lg:grid-cols-[minmax(0,1fr)_20rem] lg:gap-8">
+                    <div class="space-y-4 min-w-0">
+                        <div class="flex items-center justify-between gap-2">
+                            <button type="button" class="lk-back min-h-[44px] px-1 text-sm font-semibold text-slate-600 hover:text-indigo-600">← Back to the path</button>
+                            <span class="lk-crumb text-xs font-bold px-2 py-1 rounded-full"></span>
+                        </div>
+                        <header class="space-y-1">
+                            <h1 class="lk-title text-2xl lg:text-3xl font-black text-slate-900 leading-tight"></h1>
+                            <p class="lk-blurb text-base text-slate-600"></p>
+                        </header>
+                        <div class="lk-body space-y-4"></div>
+                        <button type="button" class="lk-done min-h-[48px] px-5 rounded-xl font-bold"></button>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button type="button" class="lk-prev min-h-[56px] text-left px-3 py-2 bg-white border border-slate-200 hover:border-indigo-300 rounded-xl text-sm disabled:opacity-40"></button>
+                            <button type="button" class="lk-next min-h-[56px] text-right px-3 py-2 bg-white border border-slate-200 hover:border-indigo-300 rounded-xl text-sm disabled:opacity-40"></button>
+                        </div>
+                    </div>
+                    <aside class="lk-side hidden lg:block lg:sticky lg:top-4 lg:self-start"></aside>
                 </div>
             </article>`;
         const q = (cls) => root.querySelector('.lk-' + cls);
-        const ids = () => sec.levels().flatMap(([, list]) => list);
+        const levels = () => sec.levels();
+        const ids = () => levels().flatMap(([, list]) => list);
         const toId = (raw) => section === 'interactive' ? String(raw) : Number(raw);
-        const levelOf = (id) => { const lv = sec.levels().find(([, list]) => list.includes(id)); return lv ? levelCode(lv[0]) : ''; };
+        const levelEntry = (id) => levels().find(([, list]) => list.includes(id));
+        const levelOf = (id) => { const lv = levelEntry(id); return lv ? levelCode(lv[0]) : ''; };
         const url = (id) => {
             const p = new URLSearchParams(keep);
             if (id !== undefined) p.set(param, id);
@@ -381,37 +412,154 @@ const LessonKit = (function () {
             return opts.pagePath + (s ? '?' + s : '');
         };
         const scrollTop = () => { const sc = root.closest('.overflow-y-auto'); if (sc) sc.scrollTop = 0; else window.scrollTo(0, 0); };
+        const nodeLabel = (id, t) => section === 'interactive' ? (t.emoji || '▶') : id;
+
+        // Default level: the one you saved, else the first with unfinished lessons
+        function currentLevel() {
+            const all = levels();
+            const found = all.find(([name]) => levelCode(name) === level);
+            if (found) return found;
+            return all.find(([, list]) => list.some(id => !isDone(section, id))) || all[0];
+        }
+
+        function renderLevels(activeName) {
+            q('levels').classList.toggle('hidden', levels().length < 2);   // one level: nothing to choose
+            q('levels').innerHTML = levels().map(([name, list]) => {
+                const code = levelCode(name);
+                const st = styleOf(code);
+                const n = list.filter(id => isDone(section, id)).length;
+                const on = name === activeName;
+                return `<button type="button" data-level="${code}" class="shrink-0 min-h-[48px] px-4 rounded-2xl border-2 text-left transition ${on ? `${st.solid} border-transparent text-white shadow` : `bg-white ${st.border} ${st.text}`}">
+                    <span class="block text-base font-black leading-none">${code}</span>
+                    <span class="block text-[11px] font-semibold ${on ? 'text-white/90' : 'text-slate-500'}">${n}/${list.length}</span>
+                </button>`;
+            }).join('');
+        }
+
+        function nextUp(list) { return list.find(id => !isDone(section, id)); }
+
+        function renderPath() {
+            done = store.get('lessons_done', {});
+            const [name, list] = currentLevel();
+            const code = levelCode(name);
+            const st = styleOf(code);
+            renderLevels(name);
+            const n = list.filter(id => isDone(section, id)).length;
+            const nxt = nextUp(list);
+            const pct = list.length ? Math.round(n / list.length * 100) : 0;
+
+            q('banner').innerHTML = `
+                <div class="rounded-3xl p-5 text-white bg-gradient-to-br ${st.grad} shadow-md">
+                    <div class="text-sm font-bold uppercase tracking-wide text-white/80">${escapeHtml(sec.name)} · Level ${code}</div>
+                    <div class="text-2xl font-black">${escapeHtml(String(name).split(':').slice(1).join(':').trim() || name)}</div>
+                    <div class="mt-3 h-3 bg-white/30 rounded-full overflow-hidden"><div class="h-full bg-white rounded-full" style="width:${pct}%"></div></div>
+                    <div class="mt-1 text-sm font-semibold text-white/90">${n} of ${list.length} done${n === list.length ? ' · Level complete! 🎉' : ''}</div>
+                </div>`;
+
+            // Phone: one tap to carry on
+            q('continue').innerHTML = nxt !== undefined ? `
+                <a href="${url(nxt)}" data-open="${escapeHtml(String(nxt))}" class="flex items-center gap-3 bg-white border-2 ${st.border} rounded-2xl p-3 shadow-sm">
+                    <span class="shrink-0 w-11 h-11 rounded-full ${st.solid} text-white font-black flex items-center justify-center">${escapeHtml(String(nodeLabel(nxt, sec.get(nxt))))}</span>
+                    <span class="min-w-0"><span class="block text-xs font-bold uppercase ${st.text}">Continue</span>
+                    <span class="block font-bold text-slate-900 truncate">${escapeHtml(sec.get(nxt).title)}</span></span>
+                    <span class="ml-auto ${st.text} font-black text-xl">→</span>
+                </a>` : '';
+
+            // The winding path
+            const ROW = 124, TOP = 60, OFF = [0, 22, 30, 22, 0, -22, -30, -22];
+            const pts = list.map((id, i) => ({ id, x: 50 + OFF[i % OFF.length], y: TOP + i * ROW }));
+            const height = TOP + list.length * ROW + 10;
+            const curve = (arr) => arr.map((p, i) => i === 0 ? `M ${p.x} ${p.y}` :
+                `C ${arr[i - 1].x} ${arr[i - 1].y + ROW / 2}, ${p.x} ${p.y - ROW / 2}, ${p.x} ${p.y}`).join(' ');
+            const nextIndex = nxt === undefined ? list.length - 1 : list.indexOf(nxt);
+            const nodes = pts.map(({ id, x, y }) => {
+                const t = sec.get(id);
+                const d = isDone(section, id);
+                const isNext = id === nxt;
+                const circle = d
+                    ? `bg-emerald-500 text-white ring-emerald-200`
+                    : isNext ? `${st.solid} text-white ${st.ring}` : `bg-white ${st.text} ring-slate-100 border-2 ${st.border}`;
+                return `
+                <a href="${url(id)}" data-open="${escapeHtml(String(id))}" title="${escapeHtml(t.title)}"
+                   class="lk-node absolute flex flex-col items-center group w-36 -ml-[4.5rem]" style="left:${x}%; top:${y - 32}px">
+                    ${isNext ? `<span class="absolute -top-7 text-[11px] font-black uppercase tracking-wide ${st.text} bg-white border ${st.border} px-2 py-0.5 rounded-full shadow-sm">Start</span>` : ''}
+                    <span class="relative w-16 h-16 rounded-full flex items-center justify-center text-lg font-black shadow-md ring-4 transition group-hover:scale-110 ${circle}">
+                        ${isNext ? `<span class="absolute inset-0 rounded-full ${st.solid} opacity-30 animate-ping"></span>` : ''}
+                        <span class="relative">${d ? '✓' : escapeHtml(String(nodeLabel(id, t)))}</span>
+                    </span>
+                    <span class="mt-1.5 text-xs font-semibold text-center leading-tight text-slate-700 bg-white/90 rounded-md px-1.5 py-0.5 line-clamp-2">${escapeHtml(t.title)}</span>
+                </a>`;
+            }).join('');
+            q('path').style.height = height + 'px';
+            q('path').innerHTML = `
+                <svg class="absolute inset-0 w-full h-full" viewBox="0 0 100 ${height}" preserveAspectRatio="none" aria-hidden="true">
+                    <path d="${curve(pts)}" fill="none" stroke="#cbd5e1" stroke-width="4" stroke-dasharray="2 10" stroke-linecap="round" vector-effect="non-scaling-stroke"/>
+                    ${nextIndex > 0 ? `<path d="${curve(pts.slice(0, nextIndex + 1))}" fill="none" stroke="${st.stroke}" stroke-width="5" stroke-linecap="round" vector-effect="non-scaling-stroke"/>` : ''}
+                </svg>${nodes}`;
+
+            // Wide screens: Up next card and the whole level at a glance
+            q('aside').innerHTML = `
+                ${nxt !== undefined ? `
+                <div class="rounded-3xl p-5 bg-white border-2 ${st.border} shadow-sm space-y-2">
+                    <div class="text-xs font-black uppercase tracking-wide ${st.text}">Up next</div>
+                    <div class="text-lg font-black text-slate-900 leading-snug">${escapeHtml(sec.get(nxt).title)}</div>
+                    <p class="text-sm text-slate-600">${escapeHtml(sec.get(nxt).blurb || '')}</p>
+                    <a href="${url(nxt)}" data-open="${escapeHtml(String(nxt))}" class="inline-flex items-center justify-center w-full min-h-[48px] rounded-xl ${st.solid} text-white font-bold hover:opacity-90">Start lesson →</a>
+                </div>` : `
+                <div class="rounded-3xl p-5 bg-emerald-50 border-2 border-emerald-300 text-center space-y-1">
+                    <div class="text-3xl">🎉</div><div class="font-black text-emerald-800">Level ${code} complete!</div>
+                </div>`}
+                <div class="bg-white border border-slate-200 rounded-2xl p-3">
+                    <div class="text-xs font-bold uppercase tracking-wide text-slate-500 px-1 pb-2">All ${list.length} lessons in ${code}</div>
+                    <div class="max-h-[50vh] overflow-y-auto divide-y divide-slate-100">
+                        ${list.map(id => `<a href="${url(id)}" data-open="${escapeHtml(String(id))}" class="flex items-center gap-2 px-1 py-2 text-sm hover:bg-slate-50 rounded-lg">
+                            <span class="shrink-0 w-6 h-6 rounded-full text-[11px] font-bold flex items-center justify-center ${isDone(section, id) ? 'bg-emerald-500 text-white' : 'bg-slate-100 text-slate-600'}">${isDone(section, id) ? '✓' : escapeHtml(String(nodeLabel(id, sec.get(id))))}</span>
+                            <span class="truncate ${id === nxt ? 'font-bold text-slate-900' : 'text-slate-700'}">${escapeHtml(sec.get(id).title)}</span></a>`).join('')}
+                    </div>
+                </div>`;
+        }
+
+        // Search: a plain list of matches across all levels
+        function renderResults(words) {
+            const html = levels().map(([levelName, list]) => {
+                const items = list.map(id => ({ id, t: sec.get(id) }))
+                    .filter(({ t }) => t && matches(t.title + ' ' + (t.blurb || ''), words));
+                if (!items.length) return '';
+                return `<section class="space-y-2">
+                    <h2 class="text-base font-black text-slate-900">${escapeHtml(levelName)}</h2>
+                    <div class="bg-white border border-slate-200 rounded-2xl divide-y divide-slate-100 overflow-hidden lg:grid lg:grid-cols-2 lg:divide-y-0 lg:gap-px lg:bg-slate-100">
+                        ${items.map(({ id, t }) => {
+                            const d = isDone(section, id);
+                            return `<a href="${url(id)}" data-open="${escapeHtml(String(id))}" class="flex items-start gap-3 p-3 bg-white hover:bg-indigo-50/60 min-h-[56px]">
+                                <span class="shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${d ? 'bg-emerald-500 text-white' : 'bg-slate-100 text-slate-600'}">${d ? '✓' : escapeHtml(String(nodeLabel(id, t)))}</span>
+                                <span class="min-w-0"><span class="block font-bold text-slate-900">${escapeHtml(t.title)}</span>
+                                <span class="block text-sm text-slate-500">${escapeHtml(t.blurb || '')}</span></span></a>`;
+                        }).join('')}
+                    </div></section>`;
+            }).join('');
+            q('results').innerHTML = html || '<p class="text-sm text-slate-500">No lessons match your search.</p>';
+        }
 
         function renderList() {
             done = store.get('lessons_done', {});
             const words = queryWords(q('search').value.trim());
-            const html = sec.levels().map(([levelName, list]) => {
-                const items = list.map(id => ({ id, t: sec.get(id) }))
-                    .filter(({ t }) => t && (!words.length || matches(t.title + ' ' + (t.blurb || ''), words)));
-                if (!items.length) return '';
-                const doneCount = list.filter(id => isDone(section, id)).length;
-                return `
-                <section class="space-y-2">
-                    <div class="flex items-baseline justify-between">
-                        <h2 class="text-base font-black text-slate-900">${escapeHtml(levelName)}</h2>
-                        <span class="text-xs text-slate-500">${doneCount} / ${list.length} done</span>
+            q('results').classList.toggle('hidden', !words.length);
+            q('pathview').classList.toggle('hidden', !!words.length);
+            if (words.length) renderResults(words); else renderPath();
+        }
+
+        function renderSide(id) {
+            const [name, list] = levelEntry(id);
+            const st = styleOf(levelCode(name));
+            q('side').innerHTML = `
+                <div class="bg-white border border-slate-200 rounded-2xl p-3">
+                    <div class="text-xs font-bold uppercase tracking-wide ${st.text} px-1 pb-2">${escapeHtml(name)}</div>
+                    <div class="max-h-[70vh] overflow-y-auto divide-y divide-slate-100">
+                        ${list.map(x => `<a href="${url(x)}" data-open="${escapeHtml(String(x))}" class="flex items-center gap-2 px-1 py-2 text-sm rounded-lg ${x === id ? `${st.soft} font-bold text-slate-900` : 'text-slate-700 hover:bg-slate-50'}">
+                            <span class="shrink-0 w-6 h-6 rounded-full text-[11px] font-bold flex items-center justify-center ${isDone(section, x) ? 'bg-emerald-500 text-white' : x === id ? `${st.solid} text-white` : 'bg-slate-100 text-slate-600'}">${isDone(section, x) ? '✓' : escapeHtml(String(nodeLabel(x, sec.get(x))))}</span>
+                            <span class="truncate">${escapeHtml(sec.get(x).title)}</span></a>`).join('')}
                     </div>
-                    <div class="bg-white border border-slate-200 rounded-2xl divide-y divide-slate-100 overflow-hidden">
-                        ${items.map(({ id, t }) => {
-                            const d = isDone(section, id);
-                            return `
-                            <a href="${url(id)}" data-open="${escapeHtml(String(id))}" class="flex items-start gap-3 p-3 hover:bg-indigo-50/60 min-h-[56px]">
-                                <span class="shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${d ? 'bg-emerald-500 text-white' : 'bg-slate-100 text-slate-600'}">${d ? '✓' : (section === 'interactive' ? '▶' : id)}</span>
-                                <span class="min-w-0">
-                                    <span class="block font-bold text-slate-900">${escapeHtml(t.title)}</span>
-                                    <span class="block text-sm text-slate-500">${escapeHtml(t.blurb || '')}</span>
-                                </span>
-                            </a>`;
-                        }).join('')}
-                    </div>
-                </section>`;
-            }).join('');
-            q('groups').innerHTML = html || '<p class="text-sm text-slate-500">No lessons match your search.</p>';
+                </div>`;
         }
 
         async function open(rawId, push) {
@@ -419,13 +567,17 @@ const LessonKit = (function () {
             const t = sec.get(id);
             if (!t) { showList(false); return; }
             current = id;
+            level = levelOf(id);
+            store.set(LEVEL_KEY, level);
             if (push) history.pushState({}, '', url(id));
             q('list').classList.add('hidden');
             q('view').classList.remove('hidden');
             if (opts.onViewChange) opts.onViewChange(true);
             scrollTop();
-            q('crumb').textContent = `${sec.name} · ${t.level || levelOf(id)}`;
-            q('title').textContent = section === 'interactive' ? t.title : `${id}. ${t.title}`;
+            const st = styleOf(level);
+            q('crumb').className = `lk-crumb text-xs font-bold px-2 py-1 rounded-full ${st.soft} ${st.text}`;
+            q('crumb').textContent = `${sec.name} · ${level}`;
+            q('title').textContent = section === 'interactive' ? `${t.emoji ? t.emoji + ' ' : ''}${t.title}` : `${id}. ${t.title}`;
             q('blurb').textContent = t.blurb || '';
             document.title = `${t.title} - ${sec.name}`;
             q('body').innerHTML = section === 'interactive' ? interactiveBody(t) : topicBody(section, id, t);
@@ -449,6 +601,7 @@ const LessonKit = (function () {
             q('next').innerHTML = next === undefined ? '' : `<span class="block text-xs text-slate-400">Next →</span><span class="block font-semibold text-slate-800">${label(next)}</span>`;
             q('prev').onclick = () => prev !== undefined && open(prev, true);
             q('next').onclick = () => next !== undefined && open(next, true);
+            renderSide(current);
         }
 
         function showList(push) {
@@ -471,6 +624,8 @@ const LessonKit = (function () {
         q('back').addEventListener('click', () => showList(true));
         q('done').addEventListener('click', async () => { await setDone(section, current, !isDone(section, current)); renderFooter(); });
         root.addEventListener('click', (e) => {
+            const lv = e.target.closest('[data-level]');
+            if (lv) { level = lv.dataset.level; store.set(LEVEL_KEY, level); renderPath(); return; }
             const item = e.target.closest('[data-open]');
             if (item) { e.preventDefault(); open(item.dataset.open, true); return; }
             // Links to another lesson of this same section open in place

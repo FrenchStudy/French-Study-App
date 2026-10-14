@@ -19,8 +19,8 @@
         <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
             <div class="flex items-center space-x-1 sm:space-x-2 text-xs font-semibold overflow-x-auto py-2">
                 <a href="index.html" class="text-slate-600 hover:text-indigo-600 hover:bg-slate-100 px-3 py-1.5 rounded-lg transition">Dashboard</a>
-                <a href="lesson.html" class="text-slate-600 hover:text-indigo-600 hover:bg-slate-100 px-3 py-1.5 rounded-lg transition">Grammar</a>
                 <a href="vocab.html" class="text-slate-600 hover:text-indigo-600 hover:bg-slate-100 px-3 py-1.5 rounded-lg transition">Vocab</a>
+                <a href="lesson.html" class="text-slate-600 hover:text-indigo-600 hover:bg-slate-100 px-3 py-1.5 rounded-lg transition">Grammar</a>
                 <a href="conjugations.html" class="bg-indigo-600 text-white px-3 py-1.5 rounded-lg shadow-sm transition">Conjugates</a>
                 <a href="reading.html" class="text-slate-600 hover:text-indigo-600 hover:bg-slate-100 px-3 py-1.5 rounded-lg transition">Reading</a>
                 <a href="listening.html" class="text-slate-600 hover:text-indigo-600 hover:bg-slate-100 px-3 py-1.5 rounded-lg transition">Listening</a>
@@ -37,7 +37,7 @@
     </header>
 
     <main id="scroller" class="flex-1 overflow-y-auto">
-        <div class="max-w-5xl mx-auto px-4 py-5 space-y-4">
+        <div class="max-w-6xl mx-auto px-4 py-5 space-y-4">
             <div>
                 <h1 class="text-2xl font-black text-slate-900">Conjugations</h1>
                 <p class="text-sm text-slate-500 mt-1">Verb tables for 296 verbs in 12 tenses, and 44 lessons from A1 to C2.</p>
@@ -49,7 +49,8 @@
             </nav>
 
             <!-- ===== VERB TABLES ===== -->
-            <section id="tab-tables" class="md:grid md:grid-cols-[18rem_1fr] md:gap-5 space-y-4 md:space-y-0">
+            <section id="tab-tables">
+              <div class="md:grid md:grid-cols-[18rem_1fr] md:gap-5 space-y-4 md:space-y-0">
                 <aside class="space-y-3 md:sticky md:top-0 md:self-start">
                     <input type="search" id="verb-search" placeholder="Verb (FR) or meaning (EN), Enter to conjugate"
                            oninput="filterVerbList(this.value)" onkeydown="if(event.key==='Enter') conjugateTyped(this.value)"
@@ -88,10 +89,11 @@
 
                     <div id="tense-grid" class="grid grid-cols-1 lg:grid-cols-2 gap-4"></div>
                 </div>
+              </div>
             </section>
 
             <!-- ===== LESSONS ===== -->
-            <section id="tab-lessons" class="hidden max-w-3xl">
+            <section id="tab-lessons" class="hidden">
                 <div id="conj-lessons"></div>
             </section>
         </div>
