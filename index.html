@@ -1,89 +1,184 @@
 <!DOCTYPE html>
-<html lang="en" class="h-full">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>French Study App - Hub</title>
-    <!-- Tailwind CSS CDN for instant styling -->
+    <title>Today - Apprendre le Français</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="config.js"></script>
+    <script src="js/lessons-index.js"></script>
 </head>
-<body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen flex flex-col justify-between">
+<body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen flex flex-col">
 
-    <!-- Header with Progress, Community & Settings Links -->
     <header class="bg-white border-b border-slate-200 sticky top-0 z-50">
-        <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
-            <h1 class="font-bold text-slate-950 flex items-center space-x-2">
-                <span class="w-3 h-3 rounded-full bg-indigo-600"></span>
-                <span>Apprendre le Français</span>
-            </h1>
-            <div class="flex items-center space-x-1 sm:space-x-2 text-xs font-medium overflow-x-auto py-2">
-                <a href="admin.html" class="text-slate-600 hover:text-indigo-600 px-2.5 py-1.5 rounded-lg hover:bg-slate-100 transition">Admin</a>
-                <span class="bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded-full hidden md:inline-block">A1–B2 Curriculum</span>
-            </div>
-            <div class="flex items-center space-x-2">
-                <button id="logoutBtn" class="text-slate-600 hover:text-red-600 hover:bg-slate-100 px-3 py-1.5 rounded-lg transition">Logout</button>
+        <div class="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between gap-3">
+            <a href="index.html" class="font-black text-slate-950 flex items-center gap-2">
+                <span class="text-xl">🇫🇷</span><span>Apprendre le Français</span>
+            </a>
+            <div class="flex items-center gap-1 text-sm">
+                <a href="admin.html" class="text-slate-600 hover:text-indigo-600 px-2.5 py-1.5 rounded-lg hover:bg-slate-100" style="display:none">Admin</a>
+                <button id="logoutBtn" class="text-slate-600 hover:text-red-600 hover:bg-slate-100 px-3 py-1.5 rounded-lg">Log out</button>
             </div>
         </div>
     </header>
 
-    <!-- Main Navigation Grid for Core Pages & Translator -->
-    <main class="max-w-6xl mx-auto px-4 py-10 w-full space-y-6">
-        <div class="text-center space-y-2">
-            <h2 class="text-2xl font-black text-slate-900">Your Study Hub</h2>
-            <p class="text-sm text-slate-500">Select any section below to start practicing.</p>
-        </div>
+    <main class="flex-1 max-w-6xl mx-auto px-4 py-6 w-full space-y-6">
+        <div id="loading" class="text-sm text-slate-400 animate-pulse">Loading your day…</div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            <a href="vocab.html" class="bg-white border border-slate-200 hover:border-indigo-400 p-5 rounded-2xl shadow-sm transition space-y-2 block group">
-                <span class="text-2xl group-hover:scale-110 transition inline-block">🗂️</span>
-                <h3 class="font-bold text-slate-900 group-hover:text-indigo-600 transition">Vocab</h3>
-                <p class="text-xs text-slate-500">Flashcards for 44 themes and 5,000 words, plus interactive lessons.</p>
-            </a>
-            <a href="lesson.html" class="bg-white border border-slate-200 hover:border-indigo-400 p-5 rounded-2xl shadow-sm transition space-y-2 block group">
-                <span class="text-2xl group-hover:scale-110 transition inline-block">📚</span>
-                <h3 class="font-bold text-slate-900 group-hover:text-indigo-600 transition">Grammar</h3>
-                <p class="text-xs text-slate-500">78 grammar lessons, A1 to C2, with tables, examples and practice.</p>
-            </a>
-            <a href="conjugations.html" class="bg-white border border-slate-200 hover:border-indigo-400 p-5 rounded-2xl shadow-sm transition space-y-2 block group">
-                <span class="text-2xl group-hover:scale-110 transition inline-block">⚡</span>
-                <h3 class="font-bold text-slate-900 group-hover:text-indigo-600 transition">Conjugates</h3>
-                <p class="text-xs text-slate-500">Verb tables for 296 verbs and 44 conjugation lessons.</p>
-            </a>
-            <a href="reading.html" class="bg-white border border-slate-200 hover:border-indigo-400 p-5 rounded-2xl shadow-sm transition space-y-2 block group">
-                <span class="text-2xl group-hover:scale-110 transition inline-block">📖</span>
-                <h3 class="font-bold text-slate-900 group-hover:text-indigo-600 transition">Reading</h3>
-                <p class="text-xs text-slate-500">CEFR texts with tap-to-translate tools.</p>
-            </a>
-            <a href="listening.html" class="bg-white border border-slate-200 hover:border-indigo-400 p-5 rounded-2xl shadow-sm transition space-y-2 block group">
-                <span class="text-2xl group-hover:scale-110 transition inline-block">🎧</span>
-                <h3 class="font-bold text-slate-900 group-hover:text-indigo-600 transition">Listening</h3>
-                <p class="text-xs text-slate-500">Audio tracks and synced transcripts.</p>
-            </a>
-            <a href="writing.html" class="bg-white border border-slate-200 hover:border-indigo-400 p-5 rounded-2xl shadow-sm transition space-y-2 block group">
-                <span class="text-2xl group-hover:scale-110 transition inline-block">✍️</span>
-                <h3 class="font-bold text-slate-900 group-hover:text-indigo-600 transition">Writing</h3>
-                <p class="text-xs text-slate-500">Prompts with AI feedback and correction.</p>
-            </a>
-            <a href="speaking.html" class="bg-white border border-slate-200 hover:border-indigo-400 p-5 rounded-2xl shadow-sm transition space-y-2 block group">
-                <span class="text-2xl group-hover:scale-110 transition inline-block">🗣️</span>
-                <h3 class="font-bold text-slate-900 group-hover:text-indigo-600 transition">Speaking</h3>
-                <p class="text-xs text-slate-500">Shadowing, roleplay, and voice scoring.</p>
-            </a>
-            <!-- New Universal Translator & Grammar Card -->
-            <a href="translator.html" class="bg-indigo-50/60 border border-indigo-200 hover:border-indigo-400 p-5 rounded-2xl shadow-sm transition space-y-2 block group">
-                <span class="text-2xl group-hover:scale-110 transition inline-block">💬</span>
-                <h3 class="font-bold text-indigo-950 group-hover:text-indigo-600 transition">Translator & Analyzer</h3>
-                <p class="text-xs text-indigo-900/70">Bidirectional translation with preposition & article breakdowns.</p>
-            </a>
+        <div id="today" class="hidden space-y-6">
+            <!-- Greeting -->
+            <section class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2">
+                <div>
+                    <h1 id="greeting" class="text-3xl font-black text-slate-900"></h1>
+                    <p id="subtitle" class="text-base text-slate-600 mt-1"></p>
+                </div>
+                <a href="welcome.html" class="text-sm font-semibold text-indigo-600 hover:underline">Change level or goal</a>
+            </section>
+
+            <!-- Progress -->
+            <section class="grid grid-cols-3 gap-3">
+                <div class="bg-white border border-slate-200 rounded-2xl p-4">
+                    <div class="text-2xl">🔥</div>
+                    <div id="stat-streak" class="text-2xl font-black text-orange-500">0</div>
+                    <div class="text-sm text-slate-500">day streak</div>
+                </div>
+                <div class="bg-white border border-slate-200 rounded-2xl p-4">
+                    <div class="text-2xl">🗂️</div>
+                    <div id="stat-words" class="text-2xl font-black text-emerald-600">0</div>
+                    <div class="text-sm text-slate-500">words known</div>
+                </div>
+                <div class="bg-white border border-slate-200 rounded-2xl p-4">
+                    <div class="text-2xl">✅</div>
+                    <div id="stat-lessons" class="text-2xl font-black text-indigo-600">0</div>
+                    <div class="text-sm text-slate-500">lessons done</div>
+                </div>
+            </section>
+
+            <!-- Today's plan -->
+            <section class="space-y-3">
+                <div class="flex items-baseline justify-between">
+                    <h2 class="text-xl font-black text-slate-900">Today</h2>
+                    <span id="today-note" class="text-sm text-slate-500"></span>
+                </div>
+                <div id="tasks" class="grid grid-cols-1 md:grid-cols-3 gap-3"></div>
+                <div id="goal-card"></div>
+            </section>
+
+            <!-- Everything -->
+            <section class="space-y-3">
+                <h2 class="text-xl font-black text-slate-900">All sections</h2>
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                    <a href="vocab.html" class="bg-white border border-slate-200 hover:border-indigo-400 p-4 rounded-2xl"><span class="text-2xl">🗂️</span><span class="block font-bold text-slate-900 mt-1">Vocab</span><span class="block text-xs text-slate-500">Flashcards and hands-on lessons</span></a>
+                    <a href="lesson.html" class="bg-white border border-slate-200 hover:border-indigo-400 p-4 rounded-2xl"><span class="text-2xl">📚</span><span class="block font-bold text-slate-900 mt-1">Grammar</span><span class="block text-xs text-slate-500">78 lessons, A1 to C2</span></a>
+                    <a href="conjugations.html" class="bg-white border border-slate-200 hover:border-indigo-400 p-4 rounded-2xl"><span class="text-2xl">⚡</span><span class="block font-bold text-slate-900 mt-1">Conjugations</span><span class="block text-xs text-slate-500">296 verbs and 44 lessons</span></a>
+                    <a href="reading.html" class="bg-white border border-slate-200 hover:border-indigo-400 p-4 rounded-2xl"><span class="text-2xl">📖</span><span class="block font-bold text-slate-900 mt-1">Reading</span><span class="block text-xs text-slate-500">Texts with tap-to-translate</span></a>
+                    <a href="listening.html" class="bg-white border border-slate-200 hover:border-indigo-400 p-4 rounded-2xl"><span class="text-2xl">🎧</span><span class="block font-bold text-slate-900 mt-1">Listening</span><span class="block text-xs text-slate-500">Audio with transcripts</span></a>
+                    <a href="writing.html" class="bg-white border border-slate-200 hover:border-indigo-400 p-4 rounded-2xl"><span class="text-2xl">✍️</span><span class="block font-bold text-slate-900 mt-1">Writing</span><span class="block text-xs text-slate-500">AI feedback on your texts</span></a>
+                    <a href="speaking.html" class="bg-white border border-slate-200 hover:border-indigo-400 p-4 rounded-2xl"><span class="text-2xl">🗣️</span><span class="block font-bold text-slate-900 mt-1">Speaking</span><span class="block text-xs text-slate-500">Role-play and voice practice</span></a>
+                    <a href="translator.html" class="bg-white border border-slate-200 hover:border-indigo-400 p-4 rounded-2xl"><span class="text-2xl">💬</span><span class="block font-bold text-slate-900 mt-1">Translator</span><span class="block text-xs text-slate-500">With gender and preposition notes</span></a>
+                </div>
+            </section>
         </div>
     </main>
 
-    <!-- Footer -->
-    <footer class="bg-white border-t border-slate-200 py-4 text-center text-xs text-slate-400">
-        French Study App Workspace • Powered by Supabase & Tailwind
-    </footer>
+    <script>
+        const IX = window.LESSON_INDEX;
+        const $ = (id) => document.getElementById(id);
+        const esc = (s) => { const d = document.createElement('div'); d.textContent = String(s ?? ''); return d.innerHTML; };
+        const LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
+        const LEVEL_NAMES = { A1: 'Beginner', A2: 'Elementary', B1: 'Intermediate', B2: 'Upper intermediate', C1: 'Advanced', C2: 'Mastery' };
+        const GOALS = { travel: 'travel', work: 'work or study', exam: 'pass an exam', fun: 'for fun' };
+        // First theme deck for each level, and a theme that fits each goal
+        const START_THEME = { A1: 1, A2: 18, B1: 31, B2: 40, C1: 44, C2: 44 };
+        const GOAL_THEME = { travel: 22, work: 27, fun: 26 };
 
+        // Next unfinished lesson, starting at the student's level
+        function nextLesson(levels, prefix, level) {
+            const done = LocalStore.get('lessons_done', {});
+            const from = Math.max(0, LEVELS.indexOf(level));
+            for (const [code, items] of levels) {
+                if (LEVELS.indexOf(code) < from) continue;
+                const hit = items.find(([id]) => !done[`${prefix}:${id}`]);
+                if (hit) return { id: hit[0], title: hit[1], level: code };
+            }
+            return null;
+        }
+
+        function taskCard({ href, emoji, label, title, detail, colour }) {
+            return `<a href="${href}" class="group flex md:flex-col gap-3 bg-white border-2 ${colour} rounded-2xl p-4 hover:shadow-md transition">
+                <span class="shrink-0 w-12 h-12 rounded-xl bg-slate-50 flex items-center justify-center text-2xl">${emoji}</span>
+                <span class="min-w-0 flex-1">
+                    <span class="block text-xs font-black uppercase tracking-wide text-slate-500">${esc(label)}</span>
+                    <span class="block font-bold text-slate-900">${esc(title)}</span>
+                    <span class="block text-sm text-slate-500">${esc(detail)}</span>
+                </span>
+                <span class="self-center md:self-end text-indigo-600 font-black group-hover:translate-x-1 transition">Start →</span>
+            </a>`;
+        }
+
+        function render(profile) {
+            const level = LEVELS.includes(profile.level) ? profile.level : 'A1';
+            const name = profile.display_name ? `, ${profile.display_name}` : '';
+            $('greeting').textContent = `Bonjour${name} 👋`;
+            $('subtitle').textContent = `Level ${level} · ${LEVEL_NAMES[level]}${profile.goal ? ' · Goal: ' + (GOALS[profile.goal] || profile.goal) : ''}`;
+
+            // Progress on this device
+            const vocab = LocalStore.get('vocab_progress', {});
+            const words = Object.values(vocab);
+            const known = words.filter(p => p && p.box >= 4).length;
+            const due = words.filter(p => p && p.box && p.due <= Date.now()).length;
+            const lessonsDone = Object.keys(LocalStore.get('lessons_done', {})).length;
+            $('stat-streak').textContent = Activity.streak();
+            $('stat-words').textContent = known;
+            $('stat-lessons').textContent = lessonsDone;
+            const todayCount = Activity.today();
+            $('today-note').textContent = todayCount ? `${todayCount} done today, nice!` : 'About 15 minutes';
+
+            // 1. Flashcards: reviews first, otherwise new words for your level
+            const theme = START_THEME[level];
+            const cards = due > 0
+                ? { href: 'vocab.html', title: `Review ${due} word${due === 1 ? '' : 's'}`, detail: 'Words due today, before you forget them.' }
+                : { href: `vocab.html?deck=theme:${theme}`, title: `New words: ${IX.themes[theme]}`, detail: 'A deck of flashcards for your level.' };
+            const tasks = [taskCard({ ...cards, emoji: '🗂️', label: 'Flashcards', colour: 'border-emerald-200 hover:border-emerald-400' })];
+
+            // 2. Next grammar lesson
+            const g = nextLesson(IX.grammar, 'g', level);
+            tasks.push(g
+                ? taskCard({ href: `lesson.html?g=${g.id}`, emoji: '📚', label: `Grammar · ${g.level}`, title: g.title, detail: 'Your next lesson on the path.', colour: 'border-sky-200 hover:border-sky-400' })
+                : taskCard({ href: 'lesson.html', emoji: '🏆', label: 'Grammar', title: 'All grammar lessons done!', detail: 'Revise any topic you like.', colour: 'border-sky-200 hover:border-sky-400' }));
+
+            // 3. Next conjugation lesson
+            const c = nextLesson(IX.conjugation, 'c', level);
+            tasks.push(c
+                ? taskCard({ href: `conjugations.html?lesson=${c.id}`, emoji: '⚡', label: `Conjugation · ${c.level}`, title: c.title, detail: 'Verbs that unlock new sentences.', colour: 'border-amber-200 hover:border-amber-400' })
+                : taskCard({ href: 'conjugations.html', emoji: '🏆', label: 'Conjugation', title: 'All conjugation lessons done!', detail: 'Look up any verb in the tables.', colour: 'border-amber-200 hover:border-amber-400' }));
+            $('tasks').innerHTML = tasks.join('');
+
+            // For your goal
+            const goal = profile.goal;
+            let gc = null;
+            if (goal === 'exam') gc = { href: 'writing.html', emoji: '📝', title: 'Practise an exam writing task', detail: 'Get a score and corrections on a short text.' };
+            else if (GOAL_THEME[goal]) gc = { href: `vocab.html?deck=theme:${GOAL_THEME[goal]}`, emoji: goal === 'travel' ? '✈️' : goal === 'work' ? '💼' : '🎉', title: `Words for ${GOALS[goal]}: ${IX.themes[GOAL_THEME[goal]]}`, detail: 'A themed deck picked for your goal.' };
+            $('goal-card').innerHTML = gc ? `
+                <a href="${gc.href}" class="flex items-center gap-3 bg-gradient-to-r from-indigo-500 to-violet-500 text-white rounded-2xl p-4 hover:opacity-95">
+                    <span class="text-3xl">${gc.emoji}</span>
+                    <span class="min-w-0"><span class="block text-xs font-black uppercase tracking-wide text-white/80">For your goal</span>
+                    <span class="block font-bold">${esc(gc.title)}</span><span class="block text-sm text-white/85">${esc(gc.detail)}</span></span>
+                    <span class="ml-auto font-black">→</span>
+                </a>` : '';
+
+            $('loading').classList.add('hidden');
+            $('today').classList.remove('hidden');
+        }
+
+        // Signed out: sign in. Signed in but new: first-time setup.
+        (async () => {
+            const { user, profile } = await Account.profile();
+            if (!user) { location.replace('login.html'); return; }
+            if (!Account.isOnboarded(profile)) { location.replace('welcome.html'); return; }
+            render(profile);
+        })();
+    </script>
 </body>
-</html>
+</html>

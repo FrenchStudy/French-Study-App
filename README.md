@@ -6,8 +6,10 @@ A browser-based French learning suite backed by Supabase (schema `French-schema`
 
 | Page | Purpose |
 |---|---|
-| `index.html` | Home / module launcher |
-| `login.html` | Sign in |
+| `index.html` | Today: greeting, streak, words known, lessons done, today's 3 tasks and a goal suggestion |
+| `login.html` | Sign in, create account, forgot password, Google |
+| `welcome.html` | First-time setup: goal, level or a 12-question placement test |
+| `reset.html` | Choose a new password from the reset email |
 | `lesson.html` | Grammar: 78 lessons (A1–C2) from the cheat sheet; topics 2, 3, 10 and 28 include their interactive practice |
 | `vocab.html` | Vocabulary: flashcards for 44 themes and 5,000 frequency words, plus 12 interactive lessons (Lessons tab) |
 | `conjugations.html` | Verb tables for 296 verbs (no AI) and 44 conjugation lessons (Lessons tab) |
@@ -21,20 +23,23 @@ A browser-based French learning suite backed by Supabase (schema `French-schema`
 ## Shared configuration
 
 `config.js` holds the Supabase URL, anon key and schema, creates the shared client
-(`window.mySupabase`), and exposes AI settings through `CONFIG`. Every page that
+(`window.mySupabase`), and exposes AI settings through `CONFIG`. It also provides `Account`
+(the signed-in student's profile), `Activity` (days practised, for the streak) and hides
+Admin links from everyone except admins. Every page that
 talks to Supabase loads it right after the Supabase SDK.
 
 ## Shared scripts (`js/`)
 
 | File | Purpose |
 | --- | --- |
+| `lessons-index.js` | Lesson and theme titles only, for the Today screen |
 | `ai.js` | `askAI()` for every AI call, `escapeHtml()`, `speakFrench()` |
 | `conjugate.js` | Rule-based conjugation engine (296 verbs, 12 tenses) |
 | `cheatsheet-data.js` | Cheat sheet vocab themes (fallback for Vocab) |
 | `lessons-data.js` | Cheat sheet grammar and conjugation lessons |
 | `lesson-kit.js` | Shared lesson browser used by Grammar, Conjugations and Vocab |
 
-`syllabus.html` now redirects to Grammar. Database changes live in `supabase/`.
+`syllabus.html` now redirects to Grammar. Database changes live in `supabase/`; account setup steps are in `supabase/accounts/README.md`.
 
 ## Running locally
 
