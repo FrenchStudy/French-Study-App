@@ -197,21 +197,21 @@
         }
         // ---- Word bank codes (Part_of_Speech like "nf", "nm,nf", "nadj(f)"; Register like "+s -l") ----
         const POS_LABELS = {
-            nm: 'noun (m)', nf: 'noun (f)', nmi: 'noun (m, invariable)', nfi: 'noun (f, invariable)', nmpl: 'noun (m, plural)',
+            nm: 'noun (m)', nf: 'noun (f)', nmi: 'noun (m, invariable)', nfi: 'noun (f, invariable)', nmpl: 'noun (m, plural)', nfpl: 'noun (f, plural)',
             nadj: 'noun / adjective', v: 'verb', adj: 'adjective', adji: 'adjective (invariable)', adv: 'adverb',
-            prep: 'preposition', pro: 'pronoun', conj: 'conjunction', det: 'determiner', intj: 'interjection'
+            prep: 'preposition', pro: 'pronoun', conj: 'conjunction', det: 'determiner', intj: 'interjection', phrase: 'phrase'
         };
         function parsePos(pos) {
             const tokens = String(pos || '').split(',').map(s => s.trim()).filter(Boolean);
             const base = tokens.map(s => s.replace(/\(.*?\)/g, ''));
             const hasM = base.some(b => /^nm/.test(b));
             const hasF = base.some(b => /^nf/.test(b));
-            const nounTokens = tokens.filter(s => /^n[mf]/.test(s));
+            const nounTokens = base.filter(b => /^n[mf]/.test(b));   // "(pl)" only means the plural looks the same
             return {
                 // only words that are nouns and nothing else get an article and a gender colour
                 pureNoun: base.length > 0 && base.every(b => /^n[mf]/.test(b)),
                 gender: hasM && hasF ? 'mf' : hasM ? 'm' : hasF ? 'f' : '',
-                plural: nounTokens.length > 0 && nounTokens.every(s => /pl/.test(s)),
+                plural: nounTokens.length > 0 && nounTokens.every(b => /^n[mf]pl$/.test(b)),
                 label: [...new Set(base.map(b => POS_LABELS[b] || b))].join(' · ')
             };
         }
@@ -290,20 +290,92 @@
             }));
         }
 
+        // Themes come from the database (themes + word_themes tables) when they exist,
+        // otherwise from the cheat sheet file, so the page works before and after the SQL is run.
+        let dbThemes = null;
+        const themeCounts = {};   // theme id -> { known, total } once a deck has been opened
+
+        async function loadThemeList() {
+            try {
+                const { data, error } = await db.from('themes')
+                    .select('id, title, group_name, level, sort_order')
+                    .order('sort_order', { ascending: true });
+                if (!error && data && data.length) dbThemes = data;
+            } catch (err) {
+                dbThemes = null;
+            }
+        }
+
+        function themeOptionLabel(id, title, level) {
+            const c = themeCounts[id];
+            const counts = c ? ` (${c.known}/${c.total} known)` : '';
+            return `${id}. ${escapeHtml(title)}${level ? ' · ' + escapeHtml(level) : ''}${counts}`;
+        }
+
         function renderDeckOptions() {
-            const groups = CS.groups.map(([name, ids]) => `
+            let groups = '';
+            if (dbThemes) {
+                const byGroup = new Map();
+                dbThemes.forEach(th => {
+                    const g = th.group_name || 'Themes';
+                    if (!byGroup.has(g)) byGroup.set(g, []);
+                    byGroup.get(g).push(th);
+                });
+                byGroup.forEach((list, g) => {
+                    groups += `<optgroup label="Themes: ${escapeHtml(g)}">` +
+                        list.map(th => `<option value="theme:${th.id}">${themeOptionLabel(th.id, th.title, th.level)}</option>`).join('') +
+                        '</optgroup>';
+                });
+            } else {
+                groups = CS.groups.map(([name, ids]) => `
                 <optgroup label="Themes: ${escapeHtml(name)}">
                     ${ids.filter(id => CS.blocks[id]).map(id => {
                         const words = themeWords(id);
-                        const known = words.filter(w => statusOf(w) === 'known').length;
-                        return `<option value="theme:${id}">${id}. ${escapeHtml(CS.blocks[id].title)} (${known}/${words.length} known)</option>`;
+                        themeCounts[id] = { known: words.filter(w => statusOf(w) === 'known').length, total: words.length };
+                        return `<option value="theme:${id}">${themeOptionLabel(id, CS.blocks[id].title, '')}</option>`;
                     }).join('')}
                 </optgroup>`).join('');
+            }
             let freq = '<optgroup label="Most frequent words">';
             for (let start = 1; start <= FREQ_TOTAL; start += FREQ_DECK_SIZE) {
                 freq += `<option value="freq:${start}">Words ${start}–${start + FREQ_DECK_SIZE - 1}</option>`;
             }
             $('deck-select').innerHTML = groups + freq + '</optgroup>';
+        }
+
+        // One word bank row -> one card. Uses the Article column when filled (after the SQL),
+        // otherwise works the article out from Part_of_Speech.
+        function rowToWord(r) {
+            const pos = parsePos(r.Part_of_Speech);
+            const art = String(r.Article || '').trim();
+            let fr = r.French, gender = '';
+            if (art) {
+                fr = art.endsWith("'") ? art + r.French : art + ' ' + r.French;
+                const g = String(r.Noun_Gender || '').trim();
+                gender = g === 'm' || g === 'f' ? g : (pos.pureNoun && pos.gender !== 'mf' ? pos.gender : '');
+            } else if (pos.pureNoun) {
+                fr = withArticle(r.French, pos.gender, pos.plural);
+                gender = pos.gender !== 'mf' ? pos.gender : '';
+            }
+            return {
+                key: wordKey(r.French), fr, en: r.English || '', pron: r.pron_guide || '', note: '',
+                ipa: cleanIpa(r.IPA), gender, pos: pos.label, register: registerLabel(r.Register),
+                exFr: r.SentenceFR || '', exEn: r.SentenceEN || '', rank: r.Rank
+            };
+        }
+
+        async function loadDbTheme(id) {
+            const { data: links, error } = await db.from('word_themes')
+                .select('word_id, sort_order').eq('theme_id', id).order('sort_order', { ascending: true });
+            if (error) throw error;
+            const ids = (links || []).map(l => l.word_id);
+            if (!ids.length) return [];
+            const { data: rows, error: err2 } = await db.from('vocabulary_bank')
+                .select('id, Rank, French, English, Part_of_Speech, Article, Noun_Gender, IPA, SentenceFR, SentenceEN, Register, pron_guide')
+                .in('id', ids);
+            if (err2) throw err2;
+            const byId = new Map((rows || []).map(r => [r.id, r]));
+            return ids.map(i => byId.get(i)).filter(Boolean).map(rowToWord);
         }
 
         async function loadDeck(value) {
@@ -312,26 +384,24 @@
             $('loading').classList.remove('hidden');
             $('load-error').classList.add('hidden');
             try {
-                if (type === 'theme') {
-                    const words = themeWords(n);
-                    deck = { id: value, title: `${n}. ${CS.blocks[n].title}`, words };
+                if (type === 'theme' && dbThemes) {
+                    const th = dbThemes.find(x => x.id === n) || dbThemes[0];
+                    const words = await loadDbTheme(th.id);
+                    deck = { id: `theme:${th.id}`, title: `${th.id}. ${th.title}`, words };
+                    themeCounts[th.id] = { known: words.filter(w => statusOf(w) === 'known').length, total: words.length };
+                } else if (type === 'theme') {
+                    const id = CS.blocks[n] ? n : 1;
+                    const words = themeWords(id);
+                    deck = { id: `theme:${id}`, title: `${id}. ${CS.blocks[id].title}`, words };
                     await enrichFromBank(words);
                 } else {
-                    const { data, error } = await db.from('vocabulary_bank')
-                        .select('Rank, French, English, Part_of_Speech, IPA, SentenceFR, SentenceEN, Register')
-                        .order('Rank', { ascending: true })
-                        .range(n - 1, n + FREQ_DECK_SIZE - 2);
+                    // pron_guide only exists after the SQL update; retry without it before then
+                    const fetchRanks = (cols) => db.from('vocabulary_bank').select(cols)
+                        .order('Rank', { ascending: true }).range(n - 1, n + FREQ_DECK_SIZE - 2);
+                    let { data, error } = await fetchRanks('Rank, French, English, Part_of_Speech, Article, Noun_Gender, IPA, SentenceFR, SentenceEN, Register, pron_guide');
+                    if (error) ({ data, error } = await fetchRanks('Rank, French, English, Part_of_Speech, Article, Noun_Gender, IPA, SentenceFR, SentenceEN, Register'));
                     if (error) throw error;
-                    const words = (data || []).map(r => {
-                        const pos = parsePos(r.Part_of_Speech);
-                        const fr = pos.pureNoun ? withArticle(r.French, pos.gender, pos.plural) : r.French;
-                        return {
-                            key: wordKey(r.French), fr, en: r.English || '', pron: '', note: '',
-                            ipa: cleanIpa(r.IPA), gender: pos.pureNoun && pos.gender !== 'mf' ? pos.gender : '',
-                            pos: pos.label, register: registerLabel(r.Register),
-                            exFr: r.SentenceFR || '', exEn: r.SentenceEN || '', rank: r.Rank
-                        };
-                    });
+                    const words = (data || []).map(rowToWord);
                     deck = { id: value, title: `Most frequent words ${n}–${n + FREQ_DECK_SIZE - 1}`, words };
                 }
                 store.set('vocab_deck', value);
@@ -372,6 +442,9 @@
         // ---------- Progress bar ----------
         function renderProgress() {
             const total = deck.words.length;
+            if (deck.id.startsWith('theme:')) {
+                themeCounts[Number(deck.id.split(':')[1])] = { known: deck.words.filter(w => statusOf(w) === 'known').length, total };
+            }
             const known = deck.words.filter(w => statusOf(w) === 'known').length;
             const learning = deck.words.filter(w => statusOf(w) === 'learning').length;
             const due = deck.words.filter(isDue).length;
@@ -712,10 +785,12 @@
 
         // ---------- Start: last deck and mode are remembered ----------
         mode = store.get('vocab_mode', 'cards');
-        renderDeckOptions();
-        const startDeck = store.get('vocab_deck', 'theme:1');
-        $('deck-select').value = startDeck;
-        loadDeck($('deck-select').value || 'theme:1');
+        (async () => {
+            await loadThemeList();
+            renderDeckOptions();
+            $('deck-select').value = store.get('vocab_deck', 'theme:1');
+            loadDeck($('deck-select').value || 'theme:1');
+        })();
     </script>
 </body>
 </html>
