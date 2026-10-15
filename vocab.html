@@ -597,7 +597,7 @@
                 const out = await askAI([
                     { role: 'system', content: 'You write short, vivid memory hooks (mnemonics) that help English speakers remember French words. Use a sound-alike English word or image. For nouns, include a cue for the gender (masculine or feminine). Two sentences at most. Return JSON: {"hook": "<the memory hook in English>"}' },
                     { role: 'user', content: `French: ${w.fr}\nMeaning: ${w.en}${w.gender ? `\nGender: ${w.gender === 'm' ? 'masculine' : 'feminine'}` : ''}${w.pron ? `\nPronunciation: ${w.pron}` : ''}` }
-                ], { json: true, temperature: 0.8 });
+                ], { json: true, temperature: 0.8, feature: 'vocab-hook', session: `hooks-${deck.id}-${new Date().toISOString().slice(0, 10)}` });   // all hooks in one deck on one day = one AI use
                 const text = String(out.hook || '').trim();
                 if (!text) throw new Error('The AI did not return a hook. Please try again.');
                 hooks[w.key] = { text, source: 'ai' };

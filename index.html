@@ -27,6 +27,7 @@
                     <span class="inline-flex items-center gap-1.5 bg-white border border-slate-200 rounded-full px-3 py-1.5" title="Days in a row"><span aria-hidden="true">🔥</span><b id="stat-streak" class="text-orange-500">0</b><span class="text-slate-500" id="lbl-streak">day streak</span></span>
                     <span class="inline-flex items-center gap-1.5 bg-white border border-slate-200 rounded-full px-3 py-1.5"><span aria-hidden="true">🗂️</span><b id="stat-words" class="text-emerald-600">0</b><span class="text-slate-500" id="lbl-words">words known</span></span>
                     <span class="inline-flex items-center gap-1.5 bg-white border border-slate-200 rounded-full px-3 py-1.5"><span aria-hidden="true">✅</span><b id="stat-lessons" class="text-indigo-600">0</b><span class="text-slate-500" id="lbl-lessons">lessons done</span></span>
+                    <span id="ai-chip" class="hidden inline-flex items-center gap-1.5 bg-white border border-slate-200 rounded-full px-3 py-1.5" title="AI activities: writing checks, conversations, new questions…"><span aria-hidden="true">✨</span><b id="ai-left" class="text-violet-600">0</b><span id="ai-label" class="text-slate-500">free AI uses left</span></span>
                     <a href="welcome.html" class="font-semibold text-indigo-600 hover:underline px-1">Change level or goal</a>
                 </div>
             </section>
@@ -174,8 +175,18 @@
             else if (GOAL_THEME[goal] && GOAL_THEME[goal] !== tp) tasks.push(taskCard({ href: `vocab.html?topic=theme:${GOAL_THEME[goal]}`, emoji: goal === 'travel' ? '✈️' : goal === 'work' ? '💼' : '🎉', label: 'For your goal', title: IX.themes[GOAL_THEME[goal]] }));
             $('tasks').innerHTML = tasks.join('');
 
+            showAiQuota();
             $('loading').classList.add('hidden');
             $('today').classList.remove('hidden');
+        }
+
+        // Free AI uses left (only once the AI function is deployed; premium and admins see nothing)
+        async function showAiQuota() {
+            const q = await AIServer.quota();
+            if (!q || q.unlimited) return;
+            $('ai-left').textContent = q.left;
+            $('ai-label').textContent = q.left === 1 ? 'free AI use left' : 'free AI uses left';
+            $('ai-chip').classList.remove('hidden');
         }
 
         // Signed out: sign in. Signed in but new: first-time setup.

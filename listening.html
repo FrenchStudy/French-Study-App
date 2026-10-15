@@ -246,7 +246,7 @@
             isTranslatedVisible = false;
 
             const apiUrl = localStorage.getItem('ai_api_url') || "https://api.groq.com/openai/v1/chat/completions";
-            const apiKey = localStorage.getItem('ai_api_key') || "";
+            const apiKey = localStorage.getItem('ai_api_key') || "server";
             const modelName = localStorage.getItem('ai_model_name') || "openai/gpt-oss-120b";
 
             if (!apiKey) {
@@ -447,7 +447,7 @@
             translationBody.innerText = "Traduction en cours...";
 
             const apiUrl = localStorage.getItem('ai_api_url') || "https://api.groq.com/openai/v1/chat/completions";
-            const apiKey = localStorage.getItem('ai_api_key') || "";
+            const apiKey = localStorage.getItem('ai_api_key') || "server";
             const modelName = localStorage.getItem('ai_model_name') || "openai/gpt-oss-120b";
 
             try {
@@ -609,7 +609,7 @@
             chatBox.scrollTop = chatBox.scrollHeight;
 
             const apiUrl = localStorage.getItem('ai_api_url') || "https://api.groq.com/openai/v1/chat/completions";
-            const apiKey = localStorage.getItem('ai_api_key') || "";
+            const apiKey = localStorage.getItem('ai_api_key') || "server";
             const modelName = localStorage.getItem('ai_model_name') || "openai/gpt-oss-120b";
 
             try {

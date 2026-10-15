@@ -33,7 +33,7 @@ talks to Supabase loads it right after the Supabase SDK.
 | File | Purpose |
 | --- | --- |
 | `lessons-index.js` | Course order and topic titles/levels only, for Home (generated) |
-| `ai.js` | `askAI()` for every AI call, `escapeHtml()`, `speakFrench()` |
+| `ai.js` | `askAI()` for every AI call (through the server, see `AIServer` in config.js), `escapeHtml()`, `speakFrench()` |
 | `conjugate.js` | Rule-based conjugation engine (296 verbs, 12 tenses) |
 | `cheatsheet-data.js` | Cheat sheet vocab themes (fallback for Vocab) |
 | `writing-tasks.js` | The built-in writing tasks |
@@ -41,9 +41,9 @@ talks to Supabase loads it right after the Supabase SDK.
 | `lessons-data.js` | Cheat sheet grammar and conjugation lessons |
 | `lesson-kit.js` | The Grammar course (which verb lessons merge into which grammar lesson, teaching order) and the hands-on lessons used by Vocab |
 
-`syllabus.html` now redirects to Grammar. Database changes live in `supabase/`; account setup steps are in `supabase/accounts/README.md`.
+AI requests go through the `ai` Edge Function (`supabase/functions/ai`), which keeps the Groq key on the server and gives each student 5 free AI activities; setup steps are in `supabase/ai/README.md`. `syllabus.html` now redirects to Grammar. Database changes live in `supabase/`; account setup steps are in `supabase/accounts/README.md`.
 
 ## Running locally
 
 Serve the folder with any static server, e.g. `npx serve .`, then open `index.html`.
-Set your Groq key on `admin.html` first.
+Until the `ai` Edge Function is deployed, AI uses the Groq key saved on `admin.html` in that browser.
