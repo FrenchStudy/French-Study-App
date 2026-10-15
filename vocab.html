@@ -22,7 +22,7 @@
             <div id="topics-view" class="space-y-4">
                 <div>
                     <h1 class="text-2xl font-black text-slate-900">Vocabulary</h1>
-                    <p class="text-sm text-slate-500 mt-1">Topics from A1 to B2. In each one: learn the words, practise them with flashcards, then test yourself.</p>
+                    <p class="text-sm text-slate-500 mt-1">Topics from A1 to B2, plus the 5,000 most common words. In each one: learn the words, practise them with flashcards, then test yourself.</p>
                 </div>
                 <div id="review-banner"></div>
                 <div class="flex flex-col md:flex-row md:items-center gap-3">
@@ -31,15 +31,6 @@
                 </div>
                 <div id="topic-banner"></div>
                 <div id="topic-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
-                <section class="bg-white border border-slate-200 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center gap-3">
-                    <span class="shrink-0 w-10 h-10 rounded-xl bg-indigo-50 text-indigo-700 flex items-center justify-center text-xl" aria-hidden="true">📈</span>
-                    <div class="flex-1 min-w-0">
-                        <h2 class="font-bold text-slate-900">Most common words</h2>
-                        <p class="text-sm text-slate-500">The 5,000 words used most in French, in 100 sets of 50. Good after the A1 and A2 topics.</p>
-                    </div>
-                    <select id="freq-select" aria-label="Set of words" class="text-base md:text-sm px-3 py-2.5 bg-white border border-slate-200 rounded-xl"></select>
-                    <button id="freq-open" type="button" class="min-h-[44px] px-4 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl">Open</button>
-                </section>
             </div>
 
             <!-- ===== ONE TOPIC ===== -->
@@ -65,6 +56,8 @@
                     </div>
                 </div>
 
+                <div class="lg:grid lg:grid-cols-[minmax(0,1fr)_18rem] lg:gap-6">
+                <div class="space-y-4 min-w-0">
                 <nav id="step-tabs" class="flex gap-1 sm:gap-6 border-b border-slate-200 text-sm font-semibold overflow-x-auto" role="tablist" aria-label="Steps">
                     <button data-step="learn" role="tab" class="step-tab shrink-0 min-h-[44px] px-2 sm:px-0 border-b-2 -mb-px"><span class="step-num">1</span> Learn</button>
                     <button data-step="practise" role="tab" class="step-tab shrink-0 min-h-[44px] px-2 sm:px-0 border-b-2 -mb-px"><span class="step-num">2</span> Practise</button>
@@ -177,6 +170,10 @@
                 </div>
             </section>
                 <div id="step-next" class="pt-2"></div>
+                <div id="topic-nav" class="grid grid-cols-2 gap-2 pt-2 border-t border-slate-200"></div>
+                </div>
+                <aside id="topic-side" class="hidden lg:block lg:sticky lg:top-4 lg:self-start"></aside>
+                </div>
             </div>
 
             <p class="text-xs text-slate-400">Your progress is saved on this device for now; it will sync to your account in a later update.</p>
@@ -344,13 +341,15 @@
 
         // ---------- Topics: the 44 themes, plus small lesson-only topics for the basics ----------
         let TOPICS = [];
-        const LEVEL_NAMES = { A1: 'Beginner', A2: 'Elementary', B1: 'Intermediate', B2: 'Upper intermediate', C1: 'Advanced' };
+        const LEVEL_NAMES = { A1: 'Beginner', A2: 'Elementary', B1: 'Intermediate', B2: 'Upper intermediate', C1: 'Advanced', TOP: 'Most common words' };
+        const levelLabel = (lv) => lv === 'TOP' ? 'Most common' : lv;
         const LEVEL_STYLE = {
             A1: ['text-emerald-700', 'bg-emerald-50', 'bg-emerald-500', 'border-emerald-400', 'ring-emerald-200', 'bg-emerald-600'],
             A2: ['text-teal-700', 'bg-teal-50', 'bg-teal-500', 'border-teal-400', 'ring-teal-200', 'bg-teal-600'],
             B1: ['text-sky-700', 'bg-sky-50', 'bg-sky-500', 'border-sky-400', 'ring-sky-200', 'bg-sky-600'],
             B2: ['text-indigo-700', 'bg-indigo-50', 'bg-indigo-500', 'border-indigo-400', 'ring-indigo-200', 'bg-indigo-600'],
-            C1: ['text-purple-700', 'bg-purple-50', 'bg-purple-500', 'border-purple-400', 'ring-purple-200', 'bg-purple-600']
+            C1: ['text-purple-700', 'bg-purple-50', 'bg-purple-500', 'border-purple-400', 'ring-purple-200', 'bg-purple-600'],
+            TOP: ['text-amber-700', 'bg-amber-50', 'bg-amber-500', 'border-amber-400', 'ring-amber-200', 'bg-amber-600']
         };
         const lvStyle = (lv) => LEVEL_STYLE[lv] || LEVEL_STYLE.A1;
         // Hands-on lessons with no word list of their own, and where they sit
@@ -371,17 +370,21 @@
                 TOPICS.push({ id: 'theme:' + th.n, n: th.n, title: th.title, level: th.level, lesson: lessons.find(x => x.theme === th.n) || null });
                 addLessonTopics(th.n);
             });
+            // The 5,000 most common words, in sets of 50
+            for (let n = 1; n <= FREQ_TOTAL; n += FREQ_DECK_SIZE) {
+                TOPICS.push({ id: 'freq:' + n, start: n, set: (n - 1) / FREQ_DECK_SIZE + 1, title: `Most common words ${n}–${n + FREQ_DECK_SIZE - 1}`, short: `Words ${n}–${n + FREQ_DECK_SIZE - 1}`, level: 'TOP', freq: true });
+            }
         }
         const topicById = (id) => TOPICS.find(x => x.id === id);
         const lessonDone = (l) => !!LocalStore.get('lessons_done', {})['i:' + l.id];
         function topicState(tp) {
-            if (!tp.n) return { done: lessonDone(tp.lesson), started: lessonDone(tp.lesson), label: lessonDone(tp.lesson) ? 'Done' : 'Lesson' };
+            if (tp.lesson && !tp.n) return { done: lessonDone(tp.lesson), started: lessonDone(tp.lesson), label: lessonDone(tp.lesson) ? 'Done' : 'Lesson' };
             const s = topicStats[tp.id];
             if (!s || !s.total) return { done: false, started: false, label: '' };
             return { done: s.known >= s.total, started: s.known > 0, known: s.known, total: s.total };
         }
         function saveTopicStats() {
-            if (!topic || !topic.n || !deck || !deck.words.length) return;
+            if (!topic || !(topic.n || topic.freq) || !deck || !deck.words.length) return;
             topicStats[topic.id] = { known: deck.words.filter(w => statusOf(w) === 'known').length, total: deck.words.length };
             store.set('vocab_topic_stats', topicStats);
         }
@@ -803,7 +806,7 @@
             const nx = STEP_NEXT[s];
             $('step-next').innerHTML = nx && allowed.includes(nx[0])
                 ? `<button type="button" data-goto-step="${nx[0]}" class="min-h-[48px] px-5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl">Next: ${nx[1]} →</button>`
-                : (topic && topic.id !== 'review' ? `<button type="button" id="next-topic" class="min-h-[48px] px-5 bg-white border border-slate-200 hover:border-indigo-300 text-slate-800 font-bold rounded-xl">${nextTopicLabel()}</button>` : '');
+                : '';
             if (s === 'practise') startCards();
             if (s === 'learn') renderList();
             $('scroller').scrollTop = 0;
@@ -833,14 +836,15 @@
             const tp = resolveTopic(id);
             if (!tp) { showTopics(false); return; }
             topic = tp;
-            if (tp.n || tp.lesson) store.set('vocab_last_topic', tp.id);
             if (tp.level) store.set('vocab_level', tp.level);
+            if (tp.id !== 'review') store.set('vocab_last_topic', tp.id);
             if (push) history.pushState({}, '', topicUrl(tp.id, s));
+            renderTopicNav();
             $('topics-view').classList.add('hidden');
             $('topic-view').classList.remove('hidden');
             const st = lvStyle(tp.level);
             $('topic-crumb').className = `text-xs font-bold px-2 py-1 rounded-full ${tp.level ? st[1] + ' ' + st[0] : 'bg-slate-100 text-slate-600'}`;
-            $('topic-crumb').textContent = tp.id === 'review' ? 'Words due today' : tp.freq ? 'Most common words' : `Vocab · ${tp.level}${tp.n ? ' · Topic ' + tp.n : ''}`;
+            $('topic-crumb').textContent = tp.id === 'review' ? 'Words due today' : tp.freq ? `Most common words · Set ${tp.set || ''}` : `Vocab · ${tp.level}${tp.n ? ' · Topic ' + tp.n : ''}`;
             $('deck-title').textContent = tp.lesson && !tp.n ? `${tp.emoji || ''} ${tp.title}`.trim() : tp.title;
             document.title = `${tp.title} - Vocabulary`;
             // The hands-on lesson, if this topic has one
@@ -902,11 +906,31 @@
             if (last && list.includes(last) && !topicState(last).done) return last;
             return list.find(x => !topicState(x).done);
         }
-        function nextTopicLabel() {
-            const list = TOPICS.filter(x => x.level === topic.level);
+        // Previous / next topic, and the whole level beside the page (like Grammar)
+        function renderTopicNav() {
+            const list = topic.level && topic.id !== 'review' ? TOPICS.filter(x => x.level === topic.level) : [];
             const i = list.indexOf(topic);
-            const nx = i >= 0 ? list[i + 1] : null;
-            return nx ? `Next topic: ${escapeHtml(nx.title)} →` : '← All topics';
+            const prev = i > 0 ? list[i - 1] : null, nx = i >= 0 ? list[i + 1] : null;
+            const navBtn = (x, dir) => x ? `<a href="${topicUrl(x.id)}" data-topic="${escapeHtml(x.id)}" class="min-h-[56px] px-3 py-2 bg-white border border-slate-200 hover:border-indigo-300 rounded-xl text-sm ${dir === 'prev' ? 'text-left' : 'text-right col-start-2'}">
+                <span class="block text-xs text-slate-400">${dir === 'prev' ? '← Previous' : 'Next →'}</span><span class="block font-semibold text-slate-800 truncate">${escapeHtml(x.title)}</span></a>` : '';
+            $('topic-nav').innerHTML = navBtn(prev, 'prev') + navBtn(nx, 'next');
+            $('topic-nav').classList.toggle('hidden', !list.length);
+            const side = $('topic-side');
+            side.classList.toggle('lg:block', list.length > 0);
+            if (!list.length) { side.innerHTML = ''; return; }
+            const st = lvStyle(topic.level);
+            side.innerHTML = `<div class="bg-white border border-slate-200 rounded-2xl p-3">
+                <div class="text-xs font-bold uppercase tracking-wide ${st[0]} px-1 pb-2">${topic.level === 'TOP' ? 'Most common words' : `${topic.level} · ${LEVEL_NAMES[topic.level] || ''}`}</div>
+                <div class="side-list max-h-[70vh] overflow-y-auto divide-y divide-slate-100">
+                    ${list.map(x => {
+                        const s = topicState(x), on = x === topic;
+                        return `<a href="${topicUrl(x.id)}" data-topic="${escapeHtml(x.id)}" class="flex items-center gap-2 px-1 py-2 text-sm rounded-lg ${on ? st[1] + ' font-bold text-slate-900' : 'text-slate-700 hover:bg-slate-50'}"${on ? ' aria-current="page"' : ''}>
+                            <span class="shrink-0 w-6 h-6 rounded-full text-[11px] font-bold flex items-center justify-center ${s.done ? 'bg-emerald-500 text-white' : on ? st[2] + ' text-white' : 'bg-slate-100 text-slate-600'}">${s.done ? '✓' : x.n || x.set || x.emoji || '▶'}</span>
+                            <span class="truncate">${escapeHtml(x.short || x.title)}</span></a>`;
+                    }).join('')}
+                </div></div>`;
+            const box = side.querySelector('.side-list'), cur = side.querySelector('[aria-current]');
+            if (box && cur) box.scrollTop = cur.offsetTop - box.offsetTop - box.clientHeight / 2;
         }
         function renderTopics() {
             const words = plain($('topic-search').value.trim()).split(/\s+/).filter(Boolean);
@@ -917,7 +941,7 @@
                 const n = list.filter(x => topicState(x).done).length;
                 const on = lv === level && !words.length;
                 return `<button type="button" role="tab" aria-selected="${on}" data-level="${lv}" class="shrink-0 px-3.5 py-1.5 rounded-lg text-sm font-bold transition ${on ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-800'}">
-                    ${lv}<span class="ml-1.5 text-xs font-semibold ${on ? lvStyle(lv)[0] : 'text-slate-400'}">${n}/${list.length}</span></button>`;
+                    ${levelLabel(lv)}<span class="ml-1.5 text-xs font-semibold ${on ? lvStyle(lv)[0] : 'text-slate-400'}">${n}/${list.length}</span></button>`;
             }).join('');
             // Review banner
             const due = dueWords().length;
@@ -929,7 +953,7 @@
                     <a href="${topicUrl('review', 'practise')}" data-topic="review" class="shrink-0 inline-flex items-center min-h-[44px] px-4 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-xl">Review</a>
                 </div>` : '';
             const list = words.length
-                ? TOPICS.filter(x => words.every(w => plain(x.title + ' ' + (x.lesson ? x.lesson.title : '')).includes(w)))
+                ? TOPICS.filter(x => !x.freq && words.every(w => plain(x.title + ' ' + (x.lesson ? x.lesson.title : '')).includes(w)))
                 : TOPICS.filter(x => x.level === level);
             const nxt = words.length ? null : nextTopicIn(list);
             const st = lvStyle(level);
@@ -937,15 +961,15 @@
             $('topic-banner').innerHTML = words.length ? '' : `
                 <div class="bg-white border border-slate-200 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center gap-4">
                     <div class="sm:w-72 shrink-0">
-                        <div class="text-xs font-bold uppercase tracking-wide ${st[0]}">Vocab · ${level} · ${LEVEL_NAMES[level] || ''}</div>
+                        <div class="text-xs font-bold uppercase tracking-wide ${st[0]}">${level === 'TOP' ? 'Vocab · 5,000 most common words' : `Vocab · ${level} · ${LEVEL_NAMES[level] || ''}`}</div>
                         <div class="mt-2 h-2 bg-slate-100 rounded-full overflow-hidden"><div class="h-full ${st[2]} rounded-full" style="width:${list.length ? Math.round(doneN / list.length * 100) : 0}%"></div></div>
-                        <div class="mt-1 text-xs font-semibold text-slate-500">${doneN} of ${list.length} topics done</div>
+                        <div class="mt-1 text-xs font-semibold text-slate-500">${doneN} of ${list.length} ${level === 'TOP' ? 'sets' : 'topics'} done</div>
                     </div>
                     ${nxt ? `<div class="flex-1 min-w-0 sm:border-l sm:border-slate-100 sm:pl-4">
                         <div class="text-xs font-bold text-slate-500">Continue with</div>
                         <div class="font-bold text-slate-900 truncate">${escapeHtml(nxt.title)}</div></div>
                     <a href="${topicUrl(nxt.id)}" data-topic="${escapeHtml(nxt.id)}" class="topic-start shrink-0 inline-flex items-center justify-center min-h-[44px] px-5 rounded-xl ${st[5]} text-white font-bold hover:opacity-90">Start →</a>`
-                    : `<div class="flex-1 font-bold text-emerald-700">Level ${level} complete! 🎉</div>`}
+                    : `<div class="flex-1 font-bold text-emerald-700">${level === 'TOP' ? 'All 5,000 words done' : 'Level ' + level + ' complete'}! 🎉</div>`}
                 </div>`;
             $('topic-grid').innerHTML = list.length ? list.map(x => {
                 const s = topicState(x);
@@ -953,13 +977,13 @@
                 const isNext = x === nxt;
                 const status = s.done ? '<span class="shrink-0 text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">✓ Done</span>'
                     : isNext ? `<span class="shrink-0 text-xs font-bold ${ls[0]} ${ls[1]} px-2 py-0.5 rounded-full">Next</span>` : '';
-                const sub = x.n
-                    ? (s.total ? `<span class="mt-2 flex items-center gap-2"><span class="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden"><span class="block h-full bg-emerald-500" style="width:${Math.round(s.known / s.total * 100)}%"></span></span><span class="text-xs text-slate-500">${s.known}/${s.total} known</span></span>` : '')
+                const sub = x.n || x.freq
+                    ? (s.total ? `<span class="mt-2 flex items-center gap-2"><span class="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden"><span class="block h-full bg-emerald-500" style="width:${Math.round(s.known / s.total * 100)}%"></span></span><span class="text-xs text-slate-500">${s.known}/${s.total} known</span></span>` : (x.freq ? '<span class="block text-sm text-slate-500 mt-0.5">50 words, most frequent first</span>' : ''))
                     : `<span class="block text-sm text-slate-500 mt-0.5">${escapeHtml(x.lesson.blurb)}</span>`;
                 return `<a href="${topicUrl(x.id)}" data-topic="${escapeHtml(x.id)}" class="group flex gap-3 bg-white border ${isNext ? ls[3] + ' ring-2 ' + ls[4] : 'border-slate-200'} hover:border-indigo-400 hover:shadow-md transition rounded-2xl p-4">
-                    <span class="shrink-0 w-10 h-10 rounded-xl flex items-center justify-center font-black ${s.done ? 'bg-emerald-50 text-emerald-700' : ls[1] + ' ' + ls[0]}">${x.n || x.emoji || '▶'}</span>
+                    <span class="shrink-0 w-10 h-10 rounded-xl flex items-center justify-center font-black ${s.done ? 'bg-emerald-50 text-emerald-700' : ls[1] + ' ' + ls[0]}">${x.n || x.set || x.emoji || '▶'}</span>
                     <span class="min-w-0 flex-1">
-                        <span class="flex items-start justify-between gap-2"><span class="font-bold text-slate-900 leading-snug group-hover:text-indigo-700">${escapeHtml(x.title)}</span>${status}</span>
+                        <span class="flex items-start justify-between gap-2"><span class="font-bold text-slate-900 leading-snug group-hover:text-indigo-700">${escapeHtml(x.short || x.title)}</span>${status}</span>
                         ${sub}
                         ${x.n && x.lesson ? `<span class="inline-block mt-2 text-[11px] font-bold uppercase tracking-wide text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">▶ Hands-on lesson</span>` : ''}
                     </span></a>`;
@@ -981,15 +1005,9 @@
             if (a) { e.preventDefault(); openTopic(a.dataset.topic, a.dataset.topic === 'review' ? 'practise' : 'learn', true); return; }
             const g = e.target.closest('[data-goto-step]');
             if (g) { setStep(g.dataset.gotoStep, true); return; }
-            if (e.target.closest('#next-topic')) {
-                const list = TOPICS.filter(x => x.level === topic.level);
-                const nx = list[list.indexOf(topic) + 1];
-                if (nx) openTopic(nx.id, 'learn', true); else showTopics(true);
-            }
         });
         document.querySelectorAll('.step-tab').forEach(b => b.addEventListener('click', () => setStep(b.dataset.step, true)));
         $('lesson-done').addEventListener('click', toggleLessonDone);
-        $('freq-open').addEventListener('click', () => openTopic(`freq:${$('freq-select').value}`, 'learn', true));
         $('card').addEventListener('click', flipCard);
         $('btn-say').addEventListener('click', () => current && speakFrench(current.fr));
         $('btn-say-ex').addEventListener('click', () => current && speakFrench(current.exFr));
@@ -1030,9 +1048,6 @@
         (async () => {
             await loadThemeList();
             buildTopics();
-            let opts = '';
-            for (let n = 1; n <= FREQ_TOTAL; n += FREQ_DECK_SIZE) opts += `<option value="${n}">Words ${n}–${n + FREQ_DECK_SIZE - 1}</option>`;
-            $('freq-select').innerHTML = opts;
             route();
         })();
     </script>
