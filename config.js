@@ -28,13 +28,15 @@ const CONFIG = {
 };
 
 // ---------- AI through the server ----------
-// Every AI request goes to the "ai" Edge Function, which holds the Groq key and counts each
+// Every AI request goes to the AI Edge Function, which holds the Groq key and counts each
 // student's free uses (supabase/functions/ai). Until that function is deployed, the key saved
 // on the Admin page in this browser is used directly, as before.
-const AI_FUNCTION_URL = SUPABASE_URL + '/functions/v1/ai';
+// Supabase keeps a function's address from when it was first created, so the app tries each of
+// these names and remembers the one that answers ("smooth-handler" was an earlier deployment).
+const AI_FUNCTION_NAMES = ['ai', 'smooth-handler'];
 const AIServer = {
-    missing: false,   // true once we know the function is not deployed yet
-    // Returns { ok, status, data } from the server, or { notDeployed: true }
+    missing: false,     // true once no function name answered (not deployed yet)
+    problem: '',        // why, for the Admin page
     async request(body) {
         if (this.missing) return { notDeployed: true };
         let session = null;
@@ -43,23 +45,35 @@ const AIServer = {
             if (CONFIG.getApiKey()) return { notDeployed: true };   // not signed in, but this browser has the Admin key
             return { status: 401, data: { error: 'Please sign in to use the AI features.', code: 'signin' } };
         }
-        let res;
-        try {
-            res = await (AIServer._fetch || fetch)(AI_FUNCTION_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session.access_token, 'apikey': SUPABASE_ANON_KEY },
-                body: JSON.stringify(body)
-            });
-        } catch (err) {
-            // A function that does not exist yet often fails like this (no CORS headers)
-            if (CONFIG.getApiKey()) { this.missing = true; return { notDeployed: true }; }
-            return { status: 0, data: { error: 'Could not reach the AI service. Check your connection and try again in a moment.' } };
+        let known = '';
+        try { known = sessionStorage.getItem('fs_ai_fn') || ''; } catch (e) {}
+        const names = known ? [known, ...AI_FUNCTION_NAMES.filter(n => n !== known)] : AI_FUNCTION_NAMES;
+        const problems = [];
+        for (const name of names) {
+            let res;
+            try {
+                res = await (AIServer._fetch || fetch)(SUPABASE_URL + '/functions/v1/' + name, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session.access_token, 'apikey': SUPABASE_ANON_KEY },
+                    body: JSON.stringify(body)
+                });
+            } catch (err) {
+                problems.push(`${name}: could not be reached (not deployed, or blocked before it started; check "Enforce JWT verification" is off)`);
+                continue;
+            }
+            if (res.status === 404) { problems.push(`${name}: not found`); continue; }
+            try { sessionStorage.setItem('fs_ai_fn', name); } catch (e) {}
+            let data = {};
+            try { data = await res.json(); } catch (e) {}
+            if (!res.ok && data && !data.error) data.error = data.msg || data.message || `The AI service returned an error (${res.status}).`;
+            if (!res.ok) this.problem = `${name} answered with ${res.status}: ${data.error}`;
+            if (data && data.quota) LocalStore.set('ai_quota', { ...data.quota, at: Date.now() });
+            return { ok: res.ok, status: res.status, data, fn: name };
         }
-        if (res.status === 404) { this.missing = true; return { notDeployed: true }; }
-        let data = {};
-        try { data = await res.json(); } catch (e) {}
-        if (data && data.quota) LocalStore.set('ai_quota', { ...data.quota, at: Date.now() });
-        return { ok: res.ok, status: res.status, data };
+        this.problem = problems.join(' · ');
+        if (CONFIG.getApiKey()) { this.missing = true; return { notDeployed: true }; }
+        if (problems.every(p => p.endsWith('not found'))) return { status: 404, data: { error: 'AI is not set up yet. Please try again later.', code: 'setup' } };
+        return { status: 0, data: { error: 'Could not reach the AI service. Check your connection and try again in a moment.' } };
     },
     // Free uses left, or null when unknown (not signed in, function not deployed)
     async quota() {
@@ -227,10 +241,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const adminLinks = document.querySelectorAll('a[href="admin.html"]');
     let role = '';
     try { role = sessionStorage.getItem('fs_role') || ''; } catch (e) {}
-    adminLinks.forEach(a => { a.style.display = role === 'admin' ? '' : 'none'; });
+    const isAdmin = (r) => String(r || '').trim().toLowerCase() === 'admin';
+    adminLinks.forEach(a => { a.style.display = isAdmin(role) ? '' : 'none'; });
     if (adminLinks.length && window.mySupabase) {
         Account.profile().then(({ profile }) => {
-            adminLinks.forEach(a => { a.style.display = profile && profile.role === 'admin' ? '' : 'none'; });
+            adminLinks.forEach(a => { a.style.display = profile && isAdmin(profile.role) ? '' : 'none'; });
         });
     }
 });
