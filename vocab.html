@@ -35,7 +35,10 @@
 
             <!-- ===== ONE TOPIC ===== -->
             <div id="topic-view" class="hidden space-y-4">
-                <button id="topic-back" type="button" class="min-h-[44px] px-1 text-sm font-semibold text-slate-600 hover:text-indigo-600">← All topics</button>
+                <div class="flex items-center justify-between gap-2">
+                    <button id="topic-back" type="button" class="min-h-[44px] px-1 text-sm font-semibold text-slate-600 hover:text-indigo-600">← All topics</button>
+                    <div id="topic-nav-top" class="flex items-center gap-1"></div>
+                </div>
                 <div class="flex flex-col md:flex-row md:items-end gap-3 md:gap-8">
                     <div class="min-w-0 flex-1">
                         <span id="topic-crumb" class="text-xs font-bold px-2 py-1 rounded-full bg-slate-100 text-slate-600"></span>
@@ -56,8 +59,6 @@
                     </div>
                 </div>
 
-                <div class="lg:grid lg:grid-cols-[minmax(0,1fr)_18rem] lg:gap-6">
-                <div class="space-y-4 min-w-0">
                 <nav id="step-tabs" class="flex gap-1 sm:gap-6 border-b border-slate-200 text-sm font-semibold overflow-x-auto" role="tablist" aria-label="Steps">
                     <button data-step="learn" role="tab" class="step-tab shrink-0 min-h-[44px] px-2 sm:px-0 border-b-2 -mb-px"><span class="step-num">1</span> Learn</button>
                     <button data-step="practise" role="tab" class="step-tab shrink-0 min-h-[44px] px-2 sm:px-0 border-b-2 -mb-px"><span class="step-num">2</span> Practise</button>
@@ -171,9 +172,6 @@
             </section>
                 <div id="step-next" class="pt-2"></div>
                 <div id="topic-nav" class="grid grid-cols-2 gap-2 pt-2 border-t border-slate-200"></div>
-                </div>
-                <aside id="topic-side" class="hidden lg:block lg:sticky lg:top-4 lg:self-start"></aside>
-                </div>
             </div>
 
             <p class="text-xs text-slate-400">Your progress is saved on this device for now; it will sync to your account in a later update.</p>
@@ -816,7 +814,7 @@
             quiz = null;
             $('quiz-box').innerHTML = '<p class="text-base text-slate-600">Choose a quiz above. Questions use the words you don\'t know yet first.</p>';
             $('learn-words').classList.toggle('hidden', !deck.words.length);
-            $('learn-words-title').textContent = `Words in this topic (${deck.words.length})`;
+            $('learn-words-title').textContent = `Words in this ${topic && topic.freq ? 'set' : topic && topic.id === 'review' ? 'review' : 'topic'} (${deck.words.length})`;
             $('topic-progress').classList.toggle('hidden', !deck.words.length);
             setStep(step, false);
         }
@@ -829,8 +827,7 @@
         }
         function resolveTopic(id) {
             if (id === 'review') return { id: 'review', title: 'Review', level: '' };
-            if (String(id).startsWith('freq:')) return freqTopic(id);
-            return topicById(id);
+            return topicById(id) || (String(id).startsWith('freq:') ? freqTopic(id) : null);
         }
         function openTopic(id, s, push) {
             const tp = resolveTopic(id);
@@ -906,31 +903,19 @@
             if (last && list.includes(last) && !topicState(last).done) return last;
             return list.find(x => !topicState(x).done);
         }
-        // Previous / next topic, and the whole level beside the page (like Grammar)
+        // Previous / next topic in the same level: small buttons at the top, bigger ones at the bottom
         function renderTopicNav() {
             const list = topic.level && topic.id !== 'review' ? TOPICS.filter(x => x.level === topic.level) : [];
             const i = list.indexOf(topic);
             const prev = i > 0 ? list[i - 1] : null, nx = i >= 0 ? list[i + 1] : null;
             const navBtn = (x, dir) => x ? `<a href="${topicUrl(x.id)}" data-topic="${escapeHtml(x.id)}" class="min-h-[56px] px-3 py-2 bg-white border border-slate-200 hover:border-indigo-300 rounded-xl text-sm ${dir === 'prev' ? 'text-left' : 'text-right col-start-2'}">
-                <span class="block text-xs text-slate-400">${dir === 'prev' ? '← Previous' : 'Next →'}</span><span class="block font-semibold text-slate-800 truncate">${escapeHtml(x.title)}</span></a>` : '';
+                <span class="block text-xs text-slate-400">${dir === 'prev' ? '← Previous' : 'Next →'}</span><span class="block font-semibold text-slate-800 truncate">${escapeHtml(x.short || x.title)}</span></a>` : '';
             $('topic-nav').innerHTML = navBtn(prev, 'prev') + navBtn(nx, 'next');
             $('topic-nav').classList.toggle('hidden', !list.length);
-            const side = $('topic-side');
-            side.classList.toggle('lg:block', list.length > 0);
-            if (!list.length) { side.innerHTML = ''; return; }
-            const st = lvStyle(topic.level);
-            side.innerHTML = `<div class="bg-white border border-slate-200 rounded-2xl p-3">
-                <div class="text-xs font-bold uppercase tracking-wide ${st[0]} px-1 pb-2">${topic.level === 'TOP' ? 'Most common words' : `${topic.level} · ${LEVEL_NAMES[topic.level] || ''}`}</div>
-                <div class="side-list max-h-[70vh] overflow-y-auto divide-y divide-slate-100">
-                    ${list.map(x => {
-                        const s = topicState(x), on = x === topic;
-                        return `<a href="${topicUrl(x.id)}" data-topic="${escapeHtml(x.id)}" class="flex items-center gap-2 px-1 py-2 text-sm rounded-lg ${on ? st[1] + ' font-bold text-slate-900' : 'text-slate-700 hover:bg-slate-50'}"${on ? ' aria-current="page"' : ''}>
-                            <span class="shrink-0 w-6 h-6 rounded-full text-[11px] font-bold flex items-center justify-center ${s.done ? 'bg-emerald-500 text-white' : on ? st[2] + ' text-white' : 'bg-slate-100 text-slate-600'}">${s.done ? '✓' : x.n || x.set || x.emoji || '▶'}</span>
-                            <span class="truncate">${escapeHtml(x.short || x.title)}</span></a>`;
-                    }).join('')}
-                </div></div>`;
-            const box = side.querySelector('.side-list'), cur = side.querySelector('[aria-current]');
-            if (box && cur) box.scrollTop = cur.offsetTop - box.offsetTop - box.clientHeight / 2;
+            const small = (x, label, dir) => x
+                ? `<a href="${topicUrl(x.id)}" data-topic="${escapeHtml(x.id)}" title="${escapeHtml(x.short || x.title)}" class="min-h-[40px] px-3 inline-flex items-center text-sm font-semibold text-slate-700 bg-white border border-slate-200 hover:border-indigo-300 rounded-xl">${label}</a>`
+                : `<span class="min-h-[40px] px-3 inline-flex items-center text-sm font-semibold text-slate-300 bg-white border border-slate-100 rounded-xl" aria-hidden="true">${label}</span>`;
+            $('topic-nav-top').innerHTML = list.length ? `${small(prev, '‹ Prev', 'prev')}<span class="text-xs text-slate-400 px-1">${i + 1} / ${list.length}</span>${small(nx, 'Next ›', 'next')}` : '';
         }
         function renderTopics() {
             const words = plain($('topic-search').value.trim()).split(/\s+/).filter(Boolean);
