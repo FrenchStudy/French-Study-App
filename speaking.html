@@ -11,10 +11,13 @@
     <script src="js/conjugate.js"></script>
     <script src="js/cheatsheet-data.js"></script>
     <script src="js/scenes.js"></script>
+    <script src="js/speaking-tasks.js"></script>
     <style>
         .fix-del { text-decoration: line-through; text-decoration-thickness: 2px; }
         @keyframes pulse-ring { 0% { box-shadow: 0 0 0 0 rgba(244,63,94,.45); } 100% { box-shadow: 0 0 0 14px rgba(244,63,94,0); } }
         .mic-on { animation: pulse-ring 1.2s infinite; }
+        .make-own > summary::-webkit-details-marker { display: none; }
+        .make-own[open] .chev { transform: rotate(180deg); }
     </style>
 </head>
 <body class="h-full bg-slate-100 flex flex-col overflow-hidden font-sans text-slate-800">
@@ -31,6 +34,7 @@
                     <p class="text-sm text-slate-500 mt-1">Talk with a character, repeat after native audio, or practise an exam task.
                         <a href="speaking-classic.html" class="ml-1 font-semibold text-indigo-700 hover:underline">Open the old version</a></p>
                 </div>
+                <div id="levels" class="flex w-max max-w-full gap-1 p-1 bg-slate-200/70 rounded-xl overflow-x-auto" role="tablist" aria-label="Level"></div>
                 <nav class="flex gap-1 sm:gap-6 text-sm font-semibold overflow-x-auto overflow-y-hidden shadow-[inset_0_-1px_0_#e2e8f0]" role="tablist" aria-label="Speaking">
                     <button data-mode="conversation" role="tab" class="mode-tab shrink-0 min-h-[44px] px-2 sm:px-0 border-b-2">💬 Conversation</button>
                     <button data-mode="shadowing" role="tab" class="mode-tab shrink-0 min-h-[44px] px-2 sm:px-0 border-b-2">🔁 Shadowing</button>
@@ -42,14 +46,18 @@
                 <section id="mode-conversation" class="space-y-3">
                     <p class="text-sm text-slate-600">Chat with a French character in an everyday situation. Speak or type; ask "What can I say?" if you're stuck. Your mistakes are corrected as you go, and at the end you get a short report.</p>
                     <div id="scene-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
-                    <section class="bg-white border border-slate-200 rounded-2xl p-4 space-y-2">
-                        <h2 class="font-black text-slate-900">🎭 Your own scene</h2>
-                        <p class="text-sm text-slate-500">Describe any situation and the AI plays the other person.</p>
-                        <div class="flex flex-col sm:flex-row gap-2">
+                    <p id="scene-note" class="hidden text-sm text-slate-500"></p>
+                    <details class="make-own bg-white border border-slate-200 rounded-2xl">
+                        <summary class="cursor-pointer list-none p-4 flex items-center justify-between gap-3">
+                            <span><span class="font-black text-slate-900">✨ Make your own scene</span>
+                            <span class="block sm:inline sm:ml-2 text-sm text-slate-500">Describe any situation and the AI plays the other person.</span></span>
+                            <span class="chev text-slate-400 transition" aria-hidden="true">▾</span>
+                        </summary>
+                        <div class="px-4 pb-4 flex flex-col sm:flex-row gap-2">
                             <input id="own-scene" type="text" maxlength="160" placeholder="e.g. returning a broken phone to a shop" class="flex-1 text-base md:text-sm px-3 py-2.5 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
                             <button id="own-scene-btn" type="button" class="min-h-[44px] px-4 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl">Start the scene</button>
                         </div>
-                    </section>
+                    </details>
                 </section>
 
                 <!-- Shadowing -->
@@ -60,9 +68,17 @@
 
                 <!-- Exam task -->
                 <section id="mode-exam" class="hidden space-y-3">
-                    <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] gap-3">
-                        <section class="bg-white border border-slate-200 rounded-2xl p-4 space-y-3">
-                            <h2 class="font-black text-slate-900">✨ A new speaking task</h2>
+                    <p class="text-sm text-slate-600">Speak for a minute or two on a DELF-style task, then get a score out of 20, corrections and a sample answer.</p>
+                    <div id="exam-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+                    <details class="make-own bg-white border border-slate-200 rounded-2xl">
+                    <summary class="cursor-pointer list-none p-4 flex items-center justify-between gap-3">
+                        <span><span class="font-black text-slate-900">✨ Make your own</span>
+                        <span class="block sm:inline sm:ml-2 text-sm text-slate-500">A new task on any subject, or a question you paste.</span></span>
+                        <span class="chev text-slate-400 transition" aria-hidden="true">▾</span>
+                    </summary>
+                    <div class="px-4 pb-4 grid grid-cols-1 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] gap-3">
+                        <section class="space-y-3">
+                            <h2 class="font-bold text-slate-900">A new task</h2>
                             <div>
                                 <div class="text-sm font-semibold text-slate-700 mb-1.5">Subject</div>
                                 <div id="subjects" class="flex flex-wrap gap-1.5"></div>
@@ -75,18 +91,15 @@
                             <button id="gen-btn" type="button" class="whitespace-nowrap min-h-[48px] px-5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-bold rounded-xl">Give me a task</button>
                             <p id="gen-error" class="hidden text-sm text-rose-700"></p>
                         </section>
-                        <section class="bg-white border border-slate-200 rounded-2xl p-4 space-y-3 flex flex-col">
-                            <h2 class="font-black text-slate-900">📝 Your own question</h2>
+                        <section class="space-y-3 flex flex-col">
+                            <h2 class="font-bold text-slate-900">Your own question</h2>
                             <p class="text-sm text-slate-500">Paste a speaking question from a book, an exam or your teacher.</p>
                             <textarea id="post-text" rows="4" maxlength="1200" placeholder="e.g. Parlez de votre ville et de ce que vous aimez y faire." class="flex-1 w-full text-base md:text-sm p-3 bg-white border border-slate-200 rounded-xl resize-y focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
                             <button id="post-btn" type="button" class="self-start min-h-[44px] px-4 bg-slate-900 hover:bg-slate-800 disabled:opacity-50 text-white font-bold rounded-xl">Use my question</button>
                             <p id="post-error" class="hidden text-sm text-rose-700"></p>
                         </section>
                     </div>
-                    <section id="exam-mine-box" class="hidden space-y-2">
-                        <h2 class="text-sm font-bold uppercase tracking-wide text-slate-500">Your tasks</h2>
-                        <div id="exam-mine" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
-                    </section>
+                    </details>
                 </section>
             </div>
 
@@ -218,7 +231,25 @@
             get(k, d) { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch (e) { return d; } },
             set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
         };
-        const myLevel = () => { const lv = (LocalStore.get('fs_profile', {}) || {}).level; return LEVELS.includes(lv) ? lv : lv === 'C2' ? 'C1' : 'A1'; };
+        const myLevel = () => {
+            const saved = store.get('speak_level', null);
+            if (LEVELS.includes(saved)) return saved;
+            const lv = (LocalStore.get('fs_profile', {}) || {}).level; return LEVELS.includes(lv) ? lv : lv === 'C2' ? 'C1' : 'A1';
+        };
+        // "A1–A2" covers A1 and A2; "A1–C2" covers every level
+        const ORDER = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
+        const inRange = (lv, range) => { const [a, b] = String(range).split(/[–-]/); const i = ORDER.indexOf(lv); return i >= ORDER.indexOf(a) && i <= ORDER.indexOf(b || a); };
+        const LEVEL_STYLE = { A1: 'text-emerald-700', A2: 'text-teal-700', B1: 'text-sky-700', B2: 'text-indigo-700', C1: 'text-purple-700' };
+        function renderLevels() {
+            const level = myLevel();
+            const count = (lv) => mode === 'conversation' ? [SCENES.filter(x => inRange(lv, x.level)).filter(x => scenesDone[x.id]).length, SCENES.filter(x => inRange(lv, x.level)).length]
+                : mode === 'exam' ? [allExam().filter(t => t.level === lv && examResults[t.id]).length, allExam().filter(t => t.level === lv).length] : null;
+            $('levels').innerHTML = LEVELS.map(lv => {
+                const on = lv === level, c = count(lv);
+                return `<button type="button" role="tab" aria-selected="${on}" data-level="${lv}" class="shrink-0 px-3.5 py-1.5 rounded-lg text-sm font-bold transition ${on ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-800'}">
+                    ${lv}${c ? `<span class="ml-1.5 text-xs font-semibold ${on ? LEVEL_STYLE[lv] : 'text-slate-400'}">${c[0]}/${c[1]}</span>` : ''}</button>`;
+            }).join('');
+        }
         const plain = (s) => String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
         const record = () => { if (typeof Activity !== 'undefined') Activity.record(); };
         const errorBox = (m) => `<div class="bg-rose-50 border border-rose-200 text-rose-800 rounded-2xl p-4 text-sm">${escapeHtml(m)}</div>`;
@@ -272,6 +303,7 @@
             if (mode === 'conversation') renderScenes();
             if (mode === 'shadowing') renderTracks();
             if (mode === 'exam') renderExamHome();
+            renderLevels();
             if (push) history.pushState({}, '', 'speaking.html?mode=' + mode);
         }
         function showHome(push) {
@@ -288,7 +320,11 @@
         let scenesDone = store.get('speak_scenes', {});   // scene id -> date practised
         function renderScenes() {
             const lv = myLevel();
-            $('scene-grid').innerHTML = SCENES.map(s => {
+            let list = SCENES.filter(s => inRange(lv, s.level)), shown = lv;
+            for (let i = ORDER.indexOf(lv) - 1; !list.length && i >= 0; i--) { shown = ORDER[i]; list = SCENES.filter(s => inRange(shown, s.level)); }
+            $('scene-note').textContent = shown !== lv ? `No ready-made scenes at ${lv} yet, so here are the ${shown} ones. Make your own scene below for any situation.` : '';
+            $('scene-note').classList.toggle('hidden', shown === lv);
+            $('scene-grid').innerHTML = list.map(s => {
                 const done = scenesDone[s.id];
                 const suits = s.level.split('–').includes(lv);
                 return `<a href="speaking.html?scene=${s.id}" data-scene="${s.id}" class="group flex gap-3 bg-white border ${suits ? 'border-indigo-300' : 'border-slate-200'} hover:border-indigo-400 hover:shadow-md transition rounded-2xl p-4">
@@ -548,7 +584,7 @@ Give at most 4 corrections, only for real mistakes (an empty list if there are n
         let shadowPos = store.get('speak_shadow', {});    // track id -> { i, best }
         let track = null, idx = 0;
         function renderTracks() {
-            $('track-grid').innerHTML = TRACKS.map(t => {
+            $('track-grid').innerHTML = TRACKS.filter(t => inRange(myLevel(), t.level)).map(t => {
                 const p = shadowPos[t.id] || { i: 0, best: 0 };
                 const pct = Math.round(Math.min(p.best, t.items.length) / t.items.length * 100);
                 return `<a href="speaking.html?track=${t.id}" data-track="${t.id}" class="group flex gap-3 bg-white border border-slate-200 hover:border-indigo-400 hover:shadow-md transition rounded-2xl p-4">
@@ -638,16 +674,18 @@ Give at most 4 corrections, only for real mistakes (an empty list if there are n
             const chip = (on) => `min-h-[36px] px-3 rounded-full text-sm font-semibold border transition ${on ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-white border-slate-200 text-slate-700 hover:border-indigo-300'}`;
             $('subjects').innerHTML = SUBJECTS.map(s => `<button type="button" data-subject="${escapeHtml(s)}" class="${chip(s === pick.subject)}">${escapeHtml(s)}</button>`).join('');
             $('kinds').innerHTML = KINDS.map(([k, label]) => `<button type="button" data-kind="${k}" class="${chip(k === kind)}">${escapeHtml(label)}</button>`).join('');
-            $('exam-mine-box').classList.toggle('hidden', !examTasks.length);
-            $('exam-mine').innerHTML = examTasks.map(t => {
+            const list = allExam().filter(t => t.level === lv);
+            $('exam-grid').innerHTML = list.length ? list.map(t => {
                 const r = examResults[t.id];
+                const badge = t.source === 'ready' ? `${LEVEL_STYLE[t.level] || ''} bg-slate-100` : 'text-violet-700 bg-violet-50';
                 return `<a href="speaking.html?task=${encodeURIComponent(t.id)}" data-task="${escapeHtml(t.id)}" class="group flex flex-col gap-1.5 bg-white border border-slate-200 hover:border-indigo-400 hover:shadow-md transition rounded-2xl p-4">
-                    <span class="flex items-center justify-between gap-2"><span class="text-[11px] font-bold uppercase tracking-wide text-violet-700 bg-violet-50 px-2 py-0.5 rounded-full">${escapeHtml(t.level)} · ${escapeHtml(t.source === 'posted' ? 'Your question' : t.kindLabel)}</span>
+                    <span class="flex items-center justify-between gap-2"><span class="text-[11px] font-bold uppercase tracking-wide ${badge} px-2 py-0.5 rounded-full">${escapeHtml(t.source === 'posted' ? 'Your question' : t.source === 'ready' ? t.kindLabel : 'Yours · ' + t.kindLabel)}</span>
                     ${r ? `<span class="text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">✓ ${r.score}/20</span>` : ''}</span>
                     <span class="font-bold text-slate-900 leading-snug group-hover:text-indigo-700">${escapeHtml(t.title)}</span>
                     <span class="text-sm text-slate-500 line-clamp-2">${escapeHtml(t.en || t.fr)}</span></a>`;
-            }).join('');
+            }).join('') : `<p class="text-sm text-slate-500">No tasks at ${lv} yet. Make your own below.</p>`;
         }
+        const allExam = () => [...window.SPEAKING_TASKS, ...examTasks];
         const cleanLists = (t) => ({
             include: (t.include || []).map(String).filter(Boolean).slice(0, 5),
             bank: (t.bank || []).filter(x => Array.isArray(x) && x.length >= 2).map(([a, b]) => [String(a), String(b)]).slice(0, 10)
@@ -698,7 +736,7 @@ Give at most 4 corrections, only for real mistakes (an empty list if there are n
         }
         let timer = null, seconds = 0;
         function openExam(id, push) {
-            const t = examTasks.find(x => x.id === id);
+            const t = allExam().find(x => x.id === id);
             if (!t) { showHome(false); return; }
             exam = t;
             if (push) history.pushState({}, '', `speaking.html?task=${encodeURIComponent(t.id)}`);
@@ -897,6 +935,8 @@ Only list real mistakes, at most 10, in order. "wrong" must be copied exactly fr
             if (en) { const p = document.querySelector(`[data-en="${en.dataset.showEn}"]`); const h = p.classList.toggle('hidden'); en.textContent = h ? 'English' : 'Hide English'; return; }
             const use = e.target.closest('[data-use]');
             if (use) { $('msg-input').value = use.dataset.use; $('suggestions').classList.add('hidden'); $('msg-input').focus(); return; }
+            const lvb = e.target.closest('[data-level]');
+            if (lvb) { store.set('speak_level', lvb.dataset.level); setMode(mode, false); return; }
             const sj = e.target.closest('[data-subject]');
             if (sj) { pick.subject = sj.dataset.subject; $('subject-other').value = ''; store.set('speak_pick', pick); renderExamHome(); return; }
             const kd = e.target.closest('[data-kind]');
@@ -961,7 +1001,7 @@ Only list real mistakes, at most 10, in order. "wrong" must be copied exactly fr
             const s = SCENES.find(x => x.id === p.get('scene'));
             if (s) { mode = 'conversation'; startScene(s, false); return; }
             if (p.get('track') && TRACKS.find(t => t.id === p.get('track'))) { mode = 'shadowing'; openTrack(p.get('track'), -1, false); return; }
-            if (p.get('task') && examTasks.find(t => t.id === p.get('task'))) { mode = 'exam'; openExam(p.get('task'), false); return; }
+            if (p.get('task') && allExam().find(t => t.id === p.get('task'))) { mode = 'exam'; openExam(p.get('task'), false); return; }
             if (p.get('mode')) mode = p.get('mode');
             showHome(false);
         }
