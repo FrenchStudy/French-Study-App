@@ -59,10 +59,12 @@
         // Is the "ai" Edge Function deployed and working?
         (async () => {
             const el = document.getElementById('ai-server-status');
-            const q = await AIServer.quota();
-            if (q) el.innerHTML = `✅ <b>The AI function is working.</b> Students use the server key; ${q.admin ? 'you are an admin, so you have no limits.' : q.premium ? 'this account is premium.' : `this account has ${q.left} of ${q.free} free uses left.`}`;
-            else if (AIServer.missing) el.innerHTML = '⏳ <b>The AI function is not deployed yet.</b> Until it is, AI only works in browsers that have the key below.';
-            else el.textContent = 'Could not check the AI function. Make sure you are signed in.';
+            const r = await AIServer.request({ quota: true });
+            const esc = (s) => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+            const q = r.ok && r.data && r.data.quota;
+            if (q) el.innerHTML = `✅ <b>The AI function is working</b> (<code>${esc(r.fn)}</code>). Students use the server key; ${q.admin ? 'you are an admin, so you have no limits.' : q.premium ? 'this account is premium.' : `this account has ${q.left} of ${q.free} free uses left.`}`;
+            else if (r.notDeployed) el.innerHTML = `⏳ <b>The AI function could not be reached.</b> Until it can, AI only works in browsers that have the key below.<br><span class="text-xs text-slate-500">${esc(AIServer.problem)}</span>`;
+            else el.innerHTML = `⚠️ <b>The AI function answered with an error.</b><br><span class="text-xs text-slate-500">${esc(AIServer.problem || (r.data && r.data.error) || '')}</span>`;
         })();
 
         function loadAdminSettings() {

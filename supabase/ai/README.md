@@ -37,6 +37,11 @@ Optional secrets (only if you want to change the defaults):
    Wait for the success message.
 
 Supabase gives the function its own URL and server key automatically; there is nothing else to fill in.
+Set the name **before** the first deploy: renaming later changes only the label, not the address
+(the app also accepts the address `smooth-handler`, from an earlier deployment).
+
+Then open the function → **Details** and switch **Enforce JWT verification** off (the function
+checks who is signed in itself).
 
 ## 4. Check it works
 
