@@ -1,652 +1,514 @@
 <!DOCTYPE html>
-<html lang="fr" class="h-full">
+<html lang="en" class="h-full">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Atelier de Français - Listening & Comprehension Suite</title>
+    <title>Listening - French Study App</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="config.js"></script>
+    <script src="js/ai.js"></script>
+    <script src="js/conjugate.js"></script>
+    <script src="js/library.js"></script>
+    <style>
+        .w { cursor: pointer; border-radius: 4px; transition: background-color .12s; }
+        .w:hover { background: #e0e7ff; }
+        .w.on { background: #c7d2fe; color: #1e1b4b; }
+        .sent { cursor: default; }
+        .sent.playing { background: #fef3c7; border-radius: 4px; }
+        #text-body p + p { margin-top: 1rem; }
+    </style>
 </head>
-<body class="h-full bg-slate-100 flex flex-col overflow-hidden font-sans">
+<body class="h-full bg-slate-100 flex flex-col overflow-hidden font-sans text-slate-800">
 
     <header id="app-header" class="bg-white border-b border-slate-200 sticky top-0 z-50 shrink-0 h-14"></header>
 
-    <!-- Main Workspace Layout -->
-    <div class="flex-1 flex overflow-hidden relative">
-        
-        <!-- LEFT: Listening Exam Topics Sidebar (Supabase Driven) -->
-        <aside class="w-80 bg-white border-r border-slate-200 flex flex-col shrink-0">
-            <div class="p-4 border-b border-slate-100 space-y-3">
+    <main id="scroller" class="flex-1 overflow-y-auto">
+        <div class="max-w-6xl mx-auto px-4 py-5 space-y-4">
+
+            <!-- ===== ALL TEXTS ===== -->
+            <div id="list-view" class="space-y-4">
                 <div>
-                    <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Collections Média & TCF</h2>
-                    <p class="text-[11px] text-slate-500">Explorez reportages, interviews et actualités.</p>
+                    <h1 class="text-2xl font-black text-slate-900">Listening</h1>
+                    <p class="text-sm text-slate-500 mt-1">Listen sentence by sentence, answer the questions, then check the transcript. Or write what you hear in Dictation.
+                        <a href="listening-classic.html" class="ml-1 font-semibold text-indigo-700 hover:underline">Open the old version</a></p>
                 </div>
-                
-                <!-- Level Filter Selector -->
+                <div id="levels" class="flex w-max max-w-full gap-1 p-1 bg-slate-200/70 rounded-xl overflow-x-auto" role="tablist" aria-label="Level"></div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] gap-3">
+                    <section class="bg-white border border-slate-200 rounded-2xl p-4 space-y-3">
+                        <h2 class="font-black text-slate-900">✨ A new recording</h2>
+                        <div>
+                            <div class="text-sm font-semibold text-slate-700 mb-1.5">Subject</div>
+                            <div id="subjects" class="flex flex-wrap gap-1.5"></div>
+                            <input id="subject-other" type="text" maxlength="80" placeholder="…or type any subject" class="mt-2 w-full text-base md:text-sm px-3 py-2 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                        <div>
+                            <div class="text-sm font-semibold text-slate-700 mb-1.5">Type of text</div>
+                            <div id="kinds" class="flex flex-wrap gap-1.5"></div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <button id="gen-btn" type="button" class="whitespace-nowrap min-h-[48px] px-5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-bold rounded-xl">Write me a recording</button>
+                            <span class="hidden sm:inline text-xs text-slate-400">Uses AI. New texts are shared with other students at your level.</span>
+                        </div>
+                        <p id="gen-error" class="hidden text-sm text-rose-700"></p>
+                    </section>
+
+                    <section class="bg-white border border-slate-200 rounded-2xl p-4 space-y-3 flex flex-col">
+                        <h2 class="font-black text-slate-900">📋 Your own text</h2>
+                        <p class="text-sm text-slate-500">Paste any French text and listen to it read aloud. It stays on this device.</p>
+                        <textarea id="paste-text" rows="4" maxlength="6000" lang="fr" placeholder="Collez votre texte ici…" class="flex-1 w-full text-base md:text-sm p-3 bg-white border border-slate-200 rounded-xl resize-y focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
+                        <button id="paste-btn" type="button" class="self-start min-h-[44px] px-4 bg-slate-900 hover:bg-slate-800 disabled:opacity-50 text-white font-bold rounded-xl">Listen to my text</button>
+                        <p id="paste-error" class="hidden text-sm text-rose-700"></p>
+                    </section>
+                </div>
+
+                <section class="space-y-2">
+                    <div class="flex items-baseline justify-between gap-2">
+                        <h2 id="texts-heading" class="text-sm font-bold uppercase tracking-wide text-slate-500">Texts</h2>
+                        <span id="lib-note" class="text-xs text-slate-400"></span>
+                    </div>
+                    <div id="text-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+                </section>
+            </div>
+
+            <!-- ===== ONE RECORDING ===== -->
+            <div id="text-view" class="hidden space-y-4">
+                <button id="back" type="button" class="min-h-[44px] px-1 text-sm font-semibold text-slate-600 hover:text-indigo-600">← All recordings</button>
                 <div>
-                    <label class="block text-[11px] font-bold text-slate-700 mb-1">Niveau Cible :</label>
-                    <select id="exam-level-select" onchange="filterListeningTopics()" class="w-full text-xs px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                        <option value="ALL">Tous les niveaux</option>
-                        <option value="A1">Niveau A1 (Débutant)</option>
-                        <option value="A2">Niveau A2 (Élémentaire)</option>
-                        <option value="B1">Niveau B1 (Intermédiaire)</option>
-                        <option value="B2">Niveau B2 (Avancé)</option>
-                        <option value="C1">Niveau C1 (Expert)</option>
-                    </select>
-                </div>
-            </div>
-
-            <!-- List of Topics Loaded From Supabase -->
-            <div id="listening-topics-container" class="flex-1 overflow-y-auto p-3 space-y-2">
-                <p class="text-xs text-slate-400 p-2">Chargement des reportages...</p>
-            </div>
-        </aside>
-
-        <!-- RIGHT: Audio Workspace & Quiz Grid -->
-        <main class="flex-1 flex overflow-hidden">
-            
-            <!-- Content Pane -->
-            <div class="flex-1 overflow-y-auto p-6 space-y-6 relative">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <span id="listening-category" class="text-[10px] font-bold uppercase tracking-wider bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded">Reportage Vidéo / Audio</span>
-                        <h2 id="listening-title" class="text-2xl font-extrabold text-slate-900 tracking-tight mt-1">Sélectionnez un module audio</h2>
-                    </div>
-                    <div class="flex items-center space-x-2">
-                        <button onclick="markListeningCompleted()" class="text-xs bg-emerald-50 text-emerald-600 border border-emerald-200 px-3 py-1.5 rounded-xl font-bold hover:bg-emerald-100 transition">💾 Marquer comme écouté</button>
-                    </div>
+                    <span id="crumb" class="text-xs font-bold px-2 py-1 rounded-full bg-slate-100 text-slate-600"></span>
+                    <h1 id="text-title" class="text-2xl lg:text-3xl font-black text-slate-900 leading-tight mt-2"></h1>
                 </div>
 
-                <!-- Sleek Native TV5Monde Style Audio Player Bar -->
-                <div class="bg-slate-900 text-white p-4 rounded-2xl shadow-md space-y-3">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center space-x-3">
-                            <button onclick="togglePlayPauseAudio()" id="main-play-btn" class="bg-indigo-600 hover:bg-indigo-500 text-white w-10 h-10 rounded-xl flex items-center justify-center font-bold shadow transition text-sm">▶️</button>
-                            <div>
-                                <div id="player-status-label" class="text-xs font-bold text-slate-200">Lecteur Prêt</div>
-                                <div id="player-time-label" class="text-[10px] text-slate-400">0:00 / 0:00</div>
-                            </div>
-                        </div>
-                        <div class="flex items-center space-x-2">
-                            <button onclick="adjustListeningSpeed()" id="speed-btn" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs px-2.5 py-1.5 rounded-lg font-medium transition">⚡ 1.0x</button>
-                            <button onclick="toggleTranscriptPane()" id="transcript-btn" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 px-3 py-1.5 rounded-lg font-bold transition">📜 Transcription</button>
-                            <button onclick="toggleAudioTranslation()" id="translate-btn" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 px-3 py-1.5 rounded-lg font-bold transition">🌐 Traduction (EN)</button>
+                <!-- Player -->
+                <section class="bg-white border border-slate-200 rounded-2xl p-4 space-y-3">
+                    <div class="flex items-center gap-2 sm:gap-3">
+                        <button id="p-prev" type="button" class="w-11 h-11 shrink-0 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 text-lg" aria-label="Previous sentence">⏮</button>
+                        <button id="p-play" type="button" class="w-14 h-14 shrink-0 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white text-2xl shadow" aria-label="Play">▶</button>
+                        <button id="p-next" type="button" class="w-11 h-11 shrink-0 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 text-lg" aria-label="Next sentence">⏭</button>
+                        <button id="p-again" type="button" class="min-h-[44px] px-3 shrink-0 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-semibold" aria-label="Repeat this sentence">↻ <span class="hidden sm:inline">Repeat</span></button>
+                        <div class="min-w-0 flex-1 text-right">
+                            <div id="p-pos" class="text-sm font-bold text-slate-900"></div>
+                            <div id="p-state" class="text-xs text-slate-500"></div>
                         </div>
                     </div>
-                    <!-- Audio Scrubber Timeline Bar -->
-                    <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden cursor-pointer" onclick="seekAudioTimeline(event)">
-                        <div id="audio-progress-bar" class="bg-indigo-500 h-full w-0 transition-all duration-150"></div>
-                    </div>
-                </div>
-
-                <!-- Interactive Synced Transcript Pane -->
-                <div id="transcript-pane" class="hidden bg-white border border-slate-200 rounded-2xl p-6 space-y-4 shadow-sm text-xs leading-relaxed text-slate-800">
-                    <h3 class="font-bold text-slate-900 uppercase tracking-wide border-b border-slate-100 pb-2">Transcription interactive (Suivez le texte en direct)</h3>
-                    <div id="transcript-body" class="space-y-2 text-slate-700">Le script s'affichera ici...</div>
-                </div>
-
-                <!-- Hidden Translation Pane -->
-                <div id="audio-translation-pane" class="hidden bg-emerald-50/60 border border-emerald-200 rounded-2xl p-6 space-y-4 shadow-sm text-xs leading-relaxed text-slate-800">
-                    <h3 class="font-bold text-emerald-900 uppercase tracking-wide border-b border-emerald-200 pb-2">Traduction Complète (EN)</h3>
-                    <div id="translation-content-body" class="space-y-2 text-emerald-950">Chargement de la traduction...</div>
-                </div>
-
-                <!-- Listening Comprehension Quiz Section -->
-                <div id="quiz-section" class="bg-amber-50/60 border border-amber-200/60 rounded-2xl p-6 space-y-4">
-                    <div class="flex items-center space-x-2">
-                        <span class="text-amber-600 font-bold">📝</span>
-                        <h3 class="text-xs font-bold text-amber-900 uppercase tracking-wide">Questions de Compréhension (Style TV5Monde / TCF)</h3>
-                    </div>
-                    <div id="quiz-container" class="space-y-4 text-xs text-slate-700">
-                        <p class="italic text-slate-400">Le questionnaire apparaîtra après la sélection d'un sujet.</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- AI Listening Tutor Sidebar (English-friendly & clear explanations) -->
-            <section class="w-96 bg-white border-l border-slate-200 flex flex-col shrink-0">
-                <div class="p-4 border-b border-slate-100 flex items-center justify-between">
-                    <span class="text-xs font-bold uppercase tracking-wider text-slate-600">🤖 Tuteur d'Écoute IA</span>
-                    <span class="text-[10px] bg-emerald-50 text-emerald-600 font-semibold px-2 py-0.5 rounded">En ligne</span>
-                </div>
-                
-                <div id="ai-chat-box" class="flex-1 p-4 overflow-y-auto space-y-3">
-                    <div class="bg-slate-50 border border-slate-100 p-3 rounded-xl text-xs text-slate-700 space-y-2">
-                        <p>Hello! I am your bilingual listening tutor. Ask me questions about expressions, grammar, or request breakdowns in English:</p>
-                    </div>
-                </div>
-
-                <!-- Suggestion Chips -->
-                <div class="p-3 bg-slate-50 border-t border-slate-100 flex flex-wrap gap-1.5">
-                    <button onclick="sendPresetPrompt('Explain this audio in simple English with key terms.')" class="text-[10px] bg-white border border-slate-200 text-slate-700 px-2.5 py-1 rounded-lg hover:bg-indigo-50 hover:text-indigo-600 transition font-medium">💡 Explain in English</button>
-                    <button onclick="sendPresetPrompt('What are the critical keywords to listen for here?')" class="text-[10px] bg-white border border-slate-200 text-slate-700 px-2.5 py-1 rounded-lg hover:bg-indigo-50 hover:text-indigo-600 transition font-medium">🔑 Key Vocabulary</button>
-                </div>
-
-                <!-- Chat Input Bar with Microphone -->
-                <div class="p-3 border-t border-slate-100">
-                    <div class="flex items-center space-x-2">
-                        <input type="text" id="ai-input" placeholder="Posez une question en FR ou EN..." class="flex-1 text-xs px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                        <button onclick="toggleChatVoiceInput()" id="ai-mic-btn" title="Parler au lieu d'écrire" class="bg-slate-100 text-slate-700 hover:bg-slate-200 p-2 rounded-xl text-xs transition">🎙️</button>
-                        <button onclick="sendAIChat()" class="bg-indigo-600 text-white p-2.5 rounded-xl text-xs font-bold hover:bg-indigo-700 transition">➔</button>
-                    </div>
-                </div>
-            </section>
-
-        </main>
-    </div>
-
-    <!-- Script Integration -->
-    <script>
-        const db = window.mySupabase;
-
-        let allListeningTopics = [];
-        let currentPlaybackSpeed = 1.0;
-        let currentAudioScript = "";
-        let currentActiveTopicId = "1"; // Tracks the active topic ID for progress logging
-        let isTranscriptVisible = false;
-        let isTranslatedVisible = false;
-        let speechUtteranceInstance = null;
-        let isPlayingAudio = false;
-        let simulatedTimer = null;
-        let audioProgressPercent = 0;
-
-        // --- Core Progress Tracking Function ---
-        async function saveProgressToDatabase(moduleType, moduleId, score = null) {
-            const { data: { user }, error: userError } = await db.auth.getUser();
-            
-            if (userError || !user) {
-                alert("Veuillez vous connecter pour sauvegarder votre progression.");
-                window.location.href = 'login.html';
-                return;
-            }
-
-            const { error } = await db
-                .from('user_progress')
-                .upsert({
-                    user_id: user.id,
-                    module_type: moduleType, 
-                    module_id: moduleId.toString(),
-                    completed: true,
-                    score: score, 
-                    updated_at: new Date()
-                }, { onConflict: 'user_id, module_type, module_id' });
-
-            if (error) {
-                console.error("Erreur de sauvegarde :", error.message);
-                alert("Erreur lors de la synchronisation de la progression.");
-            } else {
-                alert("💾 Progression et habitudes enregistrées avec succès !");
-            }
-        }
-
-        async function loadListeningTopicsFromDatabase() {
-            const container = document.getElementById('listening-topics-container');
-            container.innerHTML = `<p class="text-xs text-slate-400 p-2">Chargement des sujets depuis Supabase...</p>`;
-
-            const { data: topics, error } = await db.from('listening_topics').select('*').order('id', { ascending: true });
-
-            if (error || !topics || topics.length === 0) {
-                container.innerHTML = `<p class="text-xs text-rose-500 p-2">Aucun sujet d'écoute trouvé dans la base.</p>`;
-                return;
-            }
-
-            allListeningTopics = topics;
-            renderListeningModulesList(allListeningTopics);
-        }
-
-        function filterListeningTopics() {
-            const selectedLevel = document.getElementById('exam-level-select').value;
-            if (selectedLevel === 'ALL') {
-                renderListeningModulesList(allListeningTopics);
-            } else {
-                const filtered = allListeningTopics.filter(t => t.level.toUpperCase() === selectedLevel);
-                renderListeningModulesList(filtered);
-            }
-        }
-
-        function renderListeningModulesList(topics) {
-            const container = document.getElementById('listening-topics-container');
-            container.innerHTML = '';
-
-            if (topics.length === 0) {
-                container.innerHTML = `<p class="text-xs text-slate-400 p-2">Aucun sujet pour ce niveau.</p>`;
-                return;
-            }
-
-            topics.forEach((m, idx) => {
-                const item = document.createElement('button');
-                item.className = 'w-full text-left p-2.5 rounded-xl text-xs font-medium transition bg-slate-50 text-slate-700 hover:bg-indigo-50 border border-slate-100 flex items-center space-x-2.5';
-                item.innerHTML = `
-                    <span class="text-base">🎬</span>
-                    <div class="flex-1">
-                        <div class="font-bold text-slate-900">${idx + 1}. ${m.title}</div>
-                        <div class="text-[10px] text-slate-400 truncate">Niveau ${m.level} • ${m.category}</div>
-                    </div>
-                `;
-                // Capture the topic ID when clicked
-                item.onclick = () => {
-                    currentActiveTopicId = m.id;
-                    generateListeningExercise(m.title, m.level, m.category);
-                };
-                container.appendChild(item);
-            });
-        }
-
-        async function generateListeningExercise(topicTitle, level, category = 'Reportage') {
-            stopAudioPlayback();
-            document.getElementById('listening-title').innerText = topicTitle;
-            document.getElementById('listening-category').innerText = `${category} - Niveau ${level}`;
-            
-            document.getElementById('player-status-label').innerText = "Génération du reportage en cours...";
-            document.getElementById('quiz-container').innerHTML = `<p class="italic text-slate-400">Préparation du questionnaire...</p>`;
-            document.getElementById('transcript-pane').classList.add('hidden');
-            document.getElementById('audio-translation-pane').classList.add('hidden');
-            isTranscriptVisible = false;
-            isTranslatedVisible = false;
-
-            const apiUrl = localStorage.getItem('ai_api_url') || "https://api.groq.com/openai/v1/chat/completions";
-            const apiKey = localStorage.getItem('ai_api_key') || "server";
-            const modelName = localStorage.getItem('ai_model_name') || "openai/gpt-oss-120b";
-
-            if (!apiKey) {
-                alert("Erreur : Clé API manquante. Veuillez la configurer dans l'administration.");
-                return;
-            }
-
-            try {
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${apiKey}`
-                    },
-                    body: JSON.stringify({
-                        model: modelName,
-                        messages: [
-                            {
-                                role: "system",
-                                content: "You are a professional TV5Monde style French media listening test creator. Generate a JSON response with a spoken French audio script (split cleanly into sentences using periods or newline breaks) and 3 multiple-choice comprehension questions matching the requested topic and CEFR level. Format strictly as valid JSON with keys: script (the spoken French text), quiz (an array of 3 objects, each with 'question', 'options' array of 3 strings, and 'answer' integer index 0-2). Do not include markdown codeblocks like ```json, just output raw valid JSON."
-                            },
-                            {
-                                role: "user",
-                                content: `Generate a media listening script and quiz at level ${level} for the topic: "${topicTitle}".`
-                            }
-                        ],
-                        temperature: 0.7
-                    })
-                });
-
-                const data = await response.json();
-                let rawContent = data.choices?.[0]?.message?.content || "";
-                rawContent = rawContent.replace(/```json/g, '').replace(/```/g, '').trim();
-                const examData = JSON.parse(rawContent);
-
-                currentAudioScript = examData.script;
-                
-                const transcriptBody = document.getElementById('transcript-body');
-                transcriptBody.innerHTML = '';
-                const sentences = currentAudioScript.split(/(?<=[.?!])\s+/);
-                sentences.forEach((sentence, sIdx) => {
-                    const span = document.createElement('span');
-                    span.id = `transcript-sentence-${sIdx}`;
-                    span.className = 'block p-1.5 rounded transition hover:bg-indigo-50';
-                    span.innerText = sentence;
-                    transcriptBody.appendChild(span);
-                });
-
-                document.getElementById('player-status-label').innerText = "Prêt à l'écoute";
-                renderListeningQuiz(examData.quiz);
-
-                playAudioPlayback();
-            } catch (err) {
-                console.error(err);
-                document.getElementById('player-status-label').innerText = "Erreur de génération";
-            }
-        }
-
-        function togglePlayPauseAudio() {
-            if (!currentAudioScript) {
-                alert("Veuillez sélectionner un module d'écoute.");
-                return;
-            }
-            if (isPlayingAudio) {
-                pauseAudioPlayback();
-            } else {
-                playAudioPlayback();
-            }
-        }
-
-        function playAudioPlayback() {
-            if (!('speechSynthesis' in window)) return;
-            window.speechSynthesis.cancel();
-
-            speechUtteranceInstance = new SpeechSynthesisUtterance(currentAudioScript);
-            speechUtteranceInstance.lang = 'fr-FR';
-            speechUtteranceInstance.rate = currentPlaybackSpeed;
-
-            speechUtteranceInstance.onstart = () => {
-                isPlayingAudio = true;
-                document.getElementById('main-play-btn').innerText = "⏸️";
-                document.getElementById('player-status-label').innerText = "Lecture en cours...";
-                startProgressSimulation();
-            };
-
-            speechUtteranceInstance.onend = () => {
-                stopAudioPlayback();
-                document.getElementById('player-status-label').innerText = "Lecture terminée";
-            };
-
-            window.speechSynthesis.speak(speechUtteranceInstance);
-        }
-
-        function pauseAudioPlayback() {
-            if ('speechSynthesis' in window) {
-                window.speechSynthesis.cancel();
-            }
-            stopAudioPlayback();
-            document.getElementById('player-status-label').innerText = "Audio en pause";
-        }
-
-        function stopAudioPlayback() {
-            isPlayingAudio = false;
-            if ('speechSynthesis' in window) {
-                window.speechSynthesis.cancel();
-            }
-            clearInterval(simulatedTimer);
-            document.getElementById('main-play-btn').innerText = "▶️";
-            audioProgressPercent = 0;
-            updateProgressBarUI();
-        }
-
-        function startProgressSimulation() {
-            clearInterval(simulatedTimer);
-            const totalChars = currentAudioScript.length || 100;
-            const estimatedDurationSecs = (totalChars / 15) / currentPlaybackSpeed; 
-            let elapsedSecs = 0;
-
-            simulatedTimer = setInterval(() => {
-                if (!isPlayingAudio) {
-                    clearInterval(simulatedTimer);
-                    return;
-                }
-                elapsedSecs += 0.5;
-                audioProgressPercent = Math.min(100, (elapsedSecs / estimatedDurationSecs) * 100);
-                updateProgressBarUI();
-
-                const mins = Math.floor(elapsedSecs / 60);
-                const secs = Math.floor(elapsedSecs % 60);
-                const totalMins = Math.floor(estimatedDurationSecs / 60);
-                const totalSecs = Math.floor(estimatedDurationSecs % 60);
-                document.getElementById('player-time-label').innerText = `${mins}:${secs < 10 ? '0':''}${secs} / ${totalMins}:${totalSecs < 10 ? '0':''}${totalSecs}`;
-
-                if (audioProgressPercent >= 100) {
-                    clearInterval(simulatedTimer);
-                }
-            }, 500);
-        }
-
-        function updateProgressBarUI() {
-            const bar = document.getElementById('audio-progress-bar');
-            if (bar) bar.style.width = `${audioProgressPercent}%`;
-        }
-
-        function seekAudioTimeline(event) {
-            const rect = event.currentTarget.getBoundingClientRect();
-            const clickX = event.clientX - rect.left;
-            const width = rect.width;
-            audioProgressPercent = (clickX / width) * 100;
-            updateProgressBarUI();
-        }
-
-        function adjustListeningSpeed() {
-            const speeds = [1.0, 1.25, 1.5, 0.75];
-            const currentIndex = speeds.indexOf(currentPlaybackSpeed);
-            currentPlaybackSpeed = speeds[(currentIndex + 1) % speeds.length];
-            const speedBtn = document.getElementById('speed-btn');
-            if (speedBtn) speedBtn.innerText = `⚡ ${currentPlaybackSpeed}x`;
-
-            if (isPlayingAudio) {
-                playAudioPlayback();
-            }
-        }
-
-        function toggleTranscriptPane() {
-            const pane = document.getElementById('transcript-pane');
-            const btn = document.getElementById('transcript-btn');
-            if (!currentAudioScript) return;
-
-            if (isTranscriptVisible) {
-                pane.classList.add('hidden');
-                btn.innerText = "📜 Transcription";
-                isTranscriptVisible = false;
-            } else {
-                pane.classList.remove('hidden');
-                btn.innerText = "📜 Masquer";
-                isTranscriptVisible = true;
-            }
-        }
-
-        async function toggleAudioTranslation() {
-            const pane = document.getElementById('audio-translation-pane');
-            const btn = document.getElementById('translate-btn');
-            const translationBody = document.getElementById('translation-content-body');
-
-            if (!currentAudioScript) return;
-
-            if (isTranslatedVisible) {
-                pane.classList.add('hidden');
-                btn.innerText = "🌐 Traduction (EN)";
-                isTranslatedVisible = false;
-                return;
-            }
-
-            pane.classList.remove('hidden');
-            btn.innerText = "🌐 Masquer Traduction";
-            isTranslatedVisible = true;
-            translationBody.innerText = "Traduction en cours...";
-
-            const apiUrl = localStorage.getItem('ai_api_url') || "https://api.groq.com/openai/v1/chat/completions";
-            const apiKey = localStorage.getItem('ai_api_key') || "server";
-            const modelName = localStorage.getItem('ai_model_name') || "openai/gpt-oss-120b";
-
-            try {
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
-                    body: JSON.stringify({
-                        model: modelName,
-                        messages: [
-                            { role: "system", content: "Translate the following French audio script into clear, natural English paragraphs." },
-                            { role: "user", content: currentAudioScript }
-                        ],
-                        temperature: 0.3
-                    })
-                });
-
-                const data = await response.json();
-                let translation = data.choices?.[0]?.message?.content || "Traduction non disponible.";
-                translationBody.innerHTML = translation.replace(/\n/g, '<br>');
-            } catch (err) {
-                translationBody.innerText = "Erreur de traduction.";
-            }
-        }
-
-        function renderListeningQuiz(quizData) {
-            const container = document.getElementById('quiz-container');
-            if (!quizData || quizData.length === 0) {
-                container.innerHTML = "<p>Aucun quiz disponible.</p>";
-                return;
-            }
-
-            container.innerHTML = '';
-            quizData.forEach((q, qIndex) => {
-                const qDiv = document.createElement('div');
-                qDiv.className = 'bg-white p-4 rounded-xl border border-amber-200 space-y-2 shadow-sm';
-                
-                let optionsHtml = '';
-                q.options.forEach((opt, oIndex) => {
-                    optionsHtml += `
-                        <label class="block text-xs text-slate-700 hover:bg-slate-50 p-2 rounded-lg cursor-pointer border border-slate-100 transition">
-                            <input type="radio" name="question-${qIndex}" value="${oIndex}" class="mr-2"> ${opt}
+                    <div id="p-bar" class="flex gap-0.5 h-2.5" aria-label="Sentences"></div>
+                    <div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
+                        <div class="flex items-center gap-1" role="group" aria-label="Speed">
+                            <span class="text-slate-500 mr-1">Speed</span>
+                            <button type="button" data-rate="0.7" class="px-2.5 py-1 rounded-lg font-semibold">0.7×</button>
+                            <button type="button" data-rate="0.85" class="px-2.5 py-1 rounded-lg font-semibold">0.85×</button>
+                            <button type="button" data-rate="1" class="px-2.5 py-1 rounded-lg font-semibold">1×</button>
+                        </div>
+                        <label class="inline-flex items-center gap-2 text-slate-700 cursor-pointer select-none">
+                            <input id="p-pause" type="checkbox" class="w-4 h-4 accent-indigo-600"> Stop after each sentence
                         </label>
-                    `;
-                });
+                    </div>
+                </section>
 
-                qDiv.innerHTML = `
-                    <p class="font-bold text-slate-900">${qIndex + 1}. ${q.question}</p>
-                    <div class="space-y-1">${optionsHtml}</div>
-                    <button onclick="checkQuizAnswer(${qIndex}, ${q.answer})" class="mt-2 bg-amber-600 hover:bg-amber-700 text-white text-[11px] font-bold px-3 py-1.5 rounded-lg transition">Vérifier</button>
-                    <span id="quiz-feedback-${qIndex}" class="ml-2 font-bold text-xs"></span>
-                `;
-                container.appendChild(qDiv);
+                <div id="tabs" class="flex w-max max-w-full gap-1 p-1 bg-slate-200/70 rounded-xl overflow-x-auto" role="tablist">
+                    <button type="button" role="tab" data-tab="questions" class="shrink-0 px-4 py-1.5 rounded-lg text-sm font-bold">Questions</button>
+                    <button type="button" role="tab" data-tab="dictation" class="shrink-0 px-4 py-1.5 rounded-lg text-sm font-bold">Dictation</button>
+                    <button type="button" role="tab" data-tab="transcript" class="shrink-0 px-4 py-1.5 rounded-lg text-sm font-bold">Transcript</button>
+                </div>
+
+                <!-- Questions -->
+                <section id="tab-questions" class="bg-white border border-slate-200 rounded-2xl p-4 sm:p-5 space-y-3 max-w-3xl">
+                    <div class="flex items-center justify-between gap-2">
+                        <p class="text-sm text-slate-500">Listen first, then answer. The transcript opens when you have answered.</p>
+                        <span id="q-score" class="shrink-0 text-sm font-bold text-slate-500"></span>
+                    </div>
+                    <div id="questions" class="space-y-4"></div>
+                    <button id="btn-retry" type="button" class="hidden min-h-[40px] px-3 text-sm font-semibold text-slate-600 hover:text-indigo-700">↺ Try again</button>
+                </section>
+
+                <!-- Dictation -->
+                <section id="tab-dictation" class="hidden bg-white border border-slate-200 rounded-2xl p-4 sm:p-5 space-y-3 max-w-3xl">
+                    <div class="flex items-center justify-between gap-2">
+                        <p class="text-sm text-slate-500">Listen to one sentence and write exactly what you hear.</p>
+                        <span id="d-score" class="shrink-0 text-sm font-bold text-slate-500"></span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button id="d-play" type="button" class="min-h-[44px] px-4 text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl">🔊 Play sentence <span id="d-num"></span></button>
+                        <button id="d-slow" type="button" class="min-h-[44px] px-3 text-sm font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl">🐢 Slowly</button>
+                    </div>
+                    <div class="border border-slate-200 rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-indigo-500">
+                        <textarea id="d-input" rows="2" lang="fr" spellcheck="false" autocomplete="off" placeholder="Écrivez la phrase…" class="block w-full p-3 text-base leading-relaxed resize-y focus:outline-none"></textarea>
+                        <div id="d-accents" class="flex flex-wrap gap-1 px-2 py-1.5 border-t border-slate-100 bg-slate-50" aria-label="French letters"></div>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-2">
+                        <button id="d-check" type="button" class="min-h-[44px] px-4 text-sm font-bold text-white bg-slate-900 hover:bg-slate-800 rounded-xl">Check</button>
+                        <button id="d-next" type="button" class="hidden min-h-[44px] px-4 text-sm font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 rounded-xl">Next sentence →</button>
+                        <button id="d-show" type="button" class="min-h-[44px] px-2 text-sm font-semibold text-slate-500 hover:text-slate-800">Show the answer</button>
+                    </div>
+                    <div id="d-result" class="hidden space-y-2"></div>
+                </section>
+
+                <!-- Transcript -->
+                <section id="tab-transcript" class="hidden space-y-3 max-w-3xl">
+                    <div id="t-locked" class="bg-white border border-slate-200 rounded-2xl p-5 text-center space-y-3">
+                        <p class="text-slate-600">Try the questions first: reading the transcript makes them too easy.</p>
+                        <button id="t-unlock" type="button" class="min-h-[44px] px-4 text-sm font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl">Show it anyway</button>
+                    </div>
+                    <div id="t-open" class="hidden space-y-3">
+                        <div class="flex flex-wrap items-center gap-2">
+                            <button id="btn-en" type="button" class="min-h-[40px] px-3 text-sm font-semibold text-slate-700 bg-white border border-slate-200 hover:border-indigo-300 rounded-xl">Show English</button>
+                            <span class="text-xs text-slate-400">Tap a word for its meaning. The sentence being read is highlighted.</span>
+                        </div>
+                        <article id="text-body" lang="fr" class="bg-white border border-slate-200 rounded-2xl p-5 sm:p-7 text-lg leading-8 text-slate-900"></article>
+                        <section id="en-box" class="hidden bg-slate-50 border border-slate-200 rounded-2xl p-5 sm:p-7 text-base leading-7 text-slate-600 whitespace-pre-line"></section>
+                    </div>
+                </section>
+                <p id="text-note" class="hidden text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-xl p-3 max-w-3xl"></p>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const $ = (id) => document.getElementById(id);
+        const store = LIB.store;
+        const LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1'];
+        const LEVEL_STYLE = {
+            A1: ['text-emerald-700', 'bg-emerald-50'], A2: ['text-teal-700', 'bg-teal-50'], B1: ['text-sky-700', 'bg-sky-50'],
+            B2: ['text-indigo-700', 'bg-indigo-50'], C1: ['text-purple-700', 'bg-purple-50']
+        };
+        const SUBJECTS = ['Daily life', 'Family and friends', 'Food', 'Travel', 'Home', 'Work', 'Studies', 'Health and sport',
+            'Free time', 'Shopping', 'Technology', 'Environment', 'Culture and media', 'Society'];
+        const KINDS = ['Dialogue', 'Phone call', 'Voicemail', 'Announcement', 'Radio news', 'Story', 'Interview'];
+        const ACCENTS = ['é', 'è', 'ê', 'à', 'â', 'ç', 'ù', 'û', 'î', 'ï', 'ô', 'œ', 'ë', 'É', 'À'];
+        const PAGE = 'listening';
+        let pick = store.get('listening_pick', { subject: 'Daily life', kind: 'Dialogue' });
+        let dbSubjects = [];
+        let libTexts = {};
+        let text = null, sents = [], answers = {}, tab = 'questions', unlocked = false;
+        let cur = 0, playing = false, rate = Number(store.get('listening_rate', 0.85)) || 0.85;
+        let dict = { i: 0, results: {} };   // dictation: sentence index, sentence -> score 0..1
+
+        function currentLevel() {
+            const saved = store.get('listening_level', null);
+            if (LEVELS.includes(saved)) return saved;
+            const lv = (LocalStore.get('fs_profile', {}) || {}).level;
+            return LEVELS.includes(lv) ? lv : lv === 'C2' ? 'C1' : 'A1';
+        }
+        const textsFor = (lv) => {
+            const seen = new Set();
+            return [...LIB.mine().filter(t => t.level === lv), ...(libTexts[lv] || []), ...LIB.BUILT_IN.filter(t => t.level === lv)]
+                .filter(t => !seen.has(t.id) && seen.add(t.id));
+        };
+        const result = (id) => LIB.results()[PAGE + ':' + id];
+
+        // ---------- List ----------
+        function renderList() {
+            const level = currentLevel();
+            $('levels').innerHTML = LEVELS.map(lv => {
+                const list = textsFor(lv);
+                const n = list.filter(t => result(t.id)).length;
+                const on = lv === level;
+                return `<button type="button" role="tab" aria-selected="${on}" data-level="${lv}" class="shrink-0 px-3.5 py-1.5 rounded-lg text-sm font-bold transition ${on ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-800'}">
+                    ${lv}<span class="ml-1.5 text-xs font-semibold ${on ? LEVEL_STYLE[lv][0] : 'text-slate-400'}">${n}/${list.length}</span></button>`;
+            }).join('');
+            renderPicker();
+            const st = LEVEL_STYLE[level];
+            const list = textsFor(level);
+            $('texts-heading').textContent = `Recordings for ${level}`;
+            $('text-grid').innerHTML = list.length ? list.map(t => {
+                const r = result(t.id);
+                const status = r ? `<span class="shrink-0 text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">✓ ${r.score}/${r.total}</span>` : '';
+                const badge = t.source === 'mine' ? ['Your text', 'text-violet-700 bg-violet-50'] : t.source === 'library' ? ['Library', 'text-amber-700 bg-amber-50'] : [t.kind, st[0] + ' ' + st[1]];
+                const n = LIB.allSentences(t.fr).length;
+                const secs = Math.round((String(t.fr).match(/[\p{L}]+/gu) || []).length / 2.2);
+                return `<a href="listening.html?text=${encodeURIComponent(t.id)}" data-text="${escapeHtml(t.id)}" class="group flex flex-col gap-1.5 bg-white border border-slate-200 hover:border-indigo-400 hover:shadow-md transition rounded-2xl p-4">
+                    <span class="flex items-center justify-between gap-2">
+                        <span class="text-[11px] font-bold uppercase tracking-wide ${badge[1]} px-2 py-0.5 rounded-full">${escapeHtml(badge[0])}</span>${status}
+                    </span>
+                    <span class="font-bold text-slate-900 group-hover:text-indigo-700 leading-snug">🎧 ${escapeHtml(t.title)}</span>
+                    <span class="text-xs text-slate-500">${escapeHtml([t.source === 'mine' ? '' : t.subject, n + ' sentences', '≈ ' + (secs >= 60 ? Math.round(secs / 60) + ' min' : secs + ' s')].filter(Boolean).join(' · '))}</span>
+                </a>`;
+            }).join('') : '<p class="text-sm text-slate-500">No recordings yet at this level. Ask for a new one above.</p>';
+            $('lib-note').textContent = LIB.libraryReady() === false ? 'Shared library not set up yet' : '';
+        }
+        function renderPicker() {
+            const subjects = [...SUBJECTS, ...dbSubjects.filter(s => !SUBJECTS.includes(s))];
+            const chip = (on) => `min-h-[36px] px-3 rounded-full text-sm font-semibold border transition ${on ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-white border-slate-200 text-slate-700 hover:border-indigo-300'}`;
+            $('subjects').innerHTML = subjects.map(s => `<button type="button" data-subject="${escapeHtml(s)}" class="${chip(s === pick.subject)}">${escapeHtml(s)}</button>`).join('');
+            $('kinds').innerHTML = KINDS.map(k => `<button type="button" data-kind="${escapeHtml(k)}" class="${chip(k === pick.kind)}">${escapeHtml(k)}</button>`).join('');
+        }
+        async function loadLevel(lv) {
+            libTexts[lv] = await LIB.loadLibrary(lv);
+            if (!text) renderList();
+        }
+        async function loadDbSubjects() {
+            try {
+                const { data, error } = await window.mySupabase.from('listening_topics').select('title, category').order('id', { ascending: true });
+                if (error || !data) return;
+                dbSubjects = [...new Set(data.map(r => String(r.title || r.category || '').trim()).filter(Boolean))].slice(0, 16);
+                if (!text) renderPicker();
+            } catch (e) { /* the built-in subjects are enough */ }
+        }
+
+        // ---------- One recording ----------
+        function openText(id, push) {
+            const t = LIB.find(id);
+            if (!t) { showList(false); return; }
+            stop();
+            text = t; answers = {}; unlocked = false; cur = 0; dict = { i: 0, results: {} };
+            sents = LIB.allSentences(t.fr);
+            if (push) history.pushState({ text: id }, '', 'listening.html?text=' + encodeURIComponent(id));
+            $('list-view').classList.add('hidden');
+            $('text-view').classList.remove('hidden');
+            $('crumb').textContent = [t.level, t.source === 'mine' ? 'Your text' : t.kind, t.source === 'mine' ? '' : t.subject].filter(Boolean).join(' · ');
+            $('crumb').className = `text-xs font-bold px-2 py-1 rounded-full ${LEVEL_STYLE[t.level] ? LEVEL_STYLE[t.level].join(' ') : 'bg-slate-100 text-slate-600'}`;
+            $('text-title').textContent = t.title;
+            $('text-body').innerHTML = LIB.renderText(t.fr).html;
+            $('en-box').textContent = t.en || '';
+            $('en-box').classList.add('hidden');
+            $('btn-en').textContent = 'Show English';
+            $('btn-en').classList.toggle('hidden', !t.en);
+            $('text-note').classList.toggle('hidden', !t.note);
+            $('text-note').textContent = t.note ? 'The AI could not add questions and a translation: ' + t.note : '';
+            setTab((t.questions || []).length ? 'questions' : 'transcript');
+            renderPlayer(); renderQuestions(); renderDictation();
+            $('scroller').scrollTop = 0;
+        }
+        function showList(push) {
+            stop(); text = null; LIB.closeWord();
+            if (push) history.pushState({}, '', 'listening.html');
+            $('text-view').classList.add('hidden');
+            $('list-view').classList.remove('hidden');
+            renderList();
+        }
+        function setTab(name) {
+            tab = name;
+            document.querySelectorAll('#tabs [data-tab]').forEach(b => {
+                const on = b.dataset.tab === name;
+                b.setAttribute('aria-selected', on);
+                b.className = `shrink-0 px-4 py-1.5 rounded-lg text-sm font-bold transition ${on ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-800'}`;
+            });
+            ['questions', 'dictation', 'transcript'].forEach(n => $('tab-' + n).classList.toggle('hidden', n !== name));
+            renderTranscript();
+        }
+
+        // ---------- Player: one sentence at a time ----------
+        function renderPlayer() {
+            $('p-pos').textContent = `Sentence ${Math.min(cur + 1, sents.length)} of ${sents.length}`;
+            $('p-state').textContent = playing ? 'Playing…' : cur >= sents.length - 1 && cur > 0 ? '' : 'Tap ▶ to listen';
+            $('p-play').textContent = playing ? '❚❚' : '▶';
+            $('p-play').setAttribute('aria-label', playing ? 'Pause' : 'Play');
+            $('p-bar').innerHTML = sents.map((_, i) => `<button type="button" data-seek="${i}" aria-label="Sentence ${i + 1}" class="flex-1 rounded-full transition ${i < cur ? 'bg-indigo-300' : i === cur ? 'bg-indigo-600' : 'bg-slate-200 hover:bg-slate-300'}"></button>`).join('');
+            document.querySelectorAll('[data-rate]').forEach(b => b.className = `px-2.5 py-1 rounded-lg font-semibold ${Number(b.dataset.rate) === rate ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`);
+            document.querySelectorAll('#text-body .sent').forEach((s, i) => s.classList.toggle('playing', playing && i === cur));
+        }
+        let playToken = 0;
+        function playSentence(i, chain) {
+            cur = Math.max(0, Math.min(sents.length - 1, i));
+            playing = true;
+            const token = ++playToken;
+            renderPlayer();
+            LIB.say(sents[cur], rate, () => {
+                if (token !== playToken) return;
+                if (chain && !$('p-pause').checked && cur < sents.length - 1) { setTimeout(() => { if (token === playToken && playing) playSentence(cur + 1, true); }, 350); return; }
+                playing = false;
+                if (chain && $('p-pause').checked && cur < sents.length - 1) cur++;
+                renderPlayer();
             });
         }
+        function stop() { playToken++; playing = false; LIB.stop(); if (text) renderPlayer(); }
 
-        function checkQuizAnswer(qIndex, correctIndex) {
-            const selected = document.querySelector(`input[name="question-${qIndex}"]:checked`);
-            const feedback = document.getElementById(`quiz-feedback-${qIndex}`);
-            if (!selected) {
-                feedback.className = "ml-2 font-bold text-xs text-rose-600";
-                feedback.innerText = "Veuillez choisir une option !";
-                return;
-            }
-
-            if (parseInt(selected.value) === correctIndex) {
-                feedback.className = "ml-2 font-bold text-xs text-emerald-600";
-                feedback.innerText = "🎉 Correct !";
-            } else {
-                feedback.className = "ml-2 font-bold text-xs text-rose-600";
-                feedback.innerText = "❌ Incorrect, essayez encore.";
-            }
+        // ---------- Questions ----------
+        function renderQuestions() {
+            const qs = text.questions || [];
+            const done = Object.keys(answers).length;
+            const right = qs.filter((q, i) => answers[i] !== undefined && LIB.shuffled(q, text.id + i)[answers[i]].right).length;
+            $('q-score').textContent = done ? `${right}/${qs.length}` : '';
+            $('btn-retry').classList.toggle('hidden', !done);
+            if (!qs.length) { $('questions').innerHTML = '<p class="text-sm text-slate-500">This recording has no questions. Try Dictation or the Transcript.</p>'; return; }
+            $('questions').innerHTML = qs.map((q, i) => {
+                const opts = LIB.shuffled(q, text.id + i);
+                const chosen = answers[i];
+                return `<div class="space-y-2">
+                    <p class="font-semibold text-slate-900">${i + 1}. ${escapeHtml(q.q)}</p>
+                    <div class="space-y-1.5">${opts.map((o, j) => {
+                        let cls = 'bg-white border-slate-200 hover:border-indigo-400 text-slate-800';
+                        if (chosen !== undefined) cls = o.right ? 'bg-emerald-50 border-emerald-400 text-emerald-900' : j === chosen ? 'bg-rose-50 border-rose-400 text-rose-900' : 'bg-white border-slate-200 text-slate-400';
+                        return `<button type="button" data-q="${i}" data-o="${j}" ${chosen !== undefined ? 'disabled' : ''} class="w-full text-left min-h-[44px] px-3 py-2 text-sm border rounded-xl transition ${cls}">${escapeHtml(o.text)}</button>`;
+                    }).join('')}</div>
+                    ${chosen !== undefined ? `<p class="text-sm ${opts[chosen].right ? 'text-emerald-800' : 'text-rose-800'}"><b>${opts[chosen].right ? 'Right.' : 'Not quite.'}</b> ${escapeHtml(q.why || '')}</p>` : ''}
+                </div>`;
+            }).join('') + (done === qs.length ? `<div class="rounded-xl p-3 flex flex-wrap items-center justify-center gap-3 font-bold ${right === qs.length ? 'bg-emerald-50 text-emerald-800' : 'bg-slate-50 text-slate-700'}">
+                    <span>${right === qs.length ? '🎉 All right!' : `You got ${right} out of ${qs.length}.`}</span>
+                    <button type="button" data-tab="transcript" class="min-h-[40px] px-3 text-sm font-bold text-indigo-700 bg-white border border-indigo-200 rounded-lg">Read the transcript →</button></div>` : '');
+            if (done === qs.length) { unlocked = true; LIB.saveResult(text.id, PAGE, right, qs.length); }
         }
 
-        async function markListeningCompleted() {
-            await saveProgressToDatabase('listening', currentActiveTopicId);
+        // ---------- Transcript ----------
+        function renderTranscript() {
+            const open = unlocked || !(text && (text.questions || []).length);
+            $('t-locked').classList.toggle('hidden', open);
+            $('t-open').classList.toggle('hidden', !open);
         }
 
-        function sendPresetPrompt(promptText) {
-            const input = document.getElementById('ai-input');
-            if (input) {
-                input.value = promptText;
-                sendAIChat();
+        // ---------- Dictation ----------
+        // Compares word by word (longest common subsequence), forgiving capitals and punctuation;
+        // a word that is right except for its accents counts half.
+        const words = (s) => String(s).replace(/[’]/g, "'").match(/[\p{L}\p{N}]+(?:['-][\p{L}\p{N}]+)*'?/gu) || [];
+        function compare(target, typed) {
+            const T = words(target), U = words(typed);
+            const tp = T.map(w => LIB.plain(w)), up = U.map(w => LIB.plain(w));
+            const L = Array.from({ length: T.length + 1 }, () => new Array(U.length + 1).fill(0));
+            for (let i = T.length - 1; i >= 0; i--) for (let j = U.length - 1; j >= 0; j--)
+                L[i][j] = tp[i] === up[j] ? L[i + 1][j + 1] + 1 : Math.max(L[i + 1][j], L[i][j + 1]);
+            const out = []; let i = 0, j = 0;
+            while (i < T.length || j < U.length) {
+                if (i < T.length && j < U.length && tp[i] === up[j]) {
+                    out.push({ w: T[i], st: T[i].toLowerCase() === U[j].toLowerCase() ? 'ok' : 'accent', typed: U[j] }); i++; j++;
+                } else if (j < U.length && (i >= T.length || L[i][j + 1] >= L[i + 1][j])) { out.push({ w: U[j], st: 'extra' }); j++; }
+                else { out.push({ w: T[i], st: 'missed' }); i++; }
             }
+            // A typed word next to a missed one is the same word, misspelt: show it as one slip
+            for (let k = 0; k < out.length - 1; k++) {
+                const a = out[k], c = out[k + 1];
+                if ((a.st === 'extra' && c.st === 'missed') || (a.st === 'missed' && c.st === 'extra')) {
+                    const typedW = a.st === 'extra' ? a.w : c.w, rightW = a.st === 'missed' ? a.w : c.w;
+                    out.splice(k, 2, { w: rightW, st: 'wrong', typed: typedW });
+                }
+            }
+            const score = T.length ? out.reduce((s, x) => s + (x.st === 'ok' ? 1 : x.st === 'accent' ? 0.5 : 0), 0) / Math.max(T.length, out.filter(x => x.st !== 'missed' && x.st !== 'wrong').length + out.filter(x => x.st === 'wrong').length) : 0;
+            return { out, score };
+        }
+        function renderDictation() {
+            const n = sents.length;
+            $('d-num').textContent = `${Math.min(dict.i + 1, n)}/${n}`;
+            const vals = Object.values(dict.results);
+            $('d-score').textContent = vals.length ? `${Math.round(vals.reduce((a, b) => a + b, 0) / vals.length * 100)}% right` : '';
+            $('d-input').value = '';
+            $('d-result').classList.add('hidden');
+            $('d-next').classList.add('hidden');
+            $('d-check').classList.remove('hidden');
+        }
+        function checkDictation(reveal) {
+            const target = sents[dict.i];
+            const typed = $('d-input').value.trim();
+            if (!typed && !reveal) { $('d-input').focus(); return; }
+            const { out, score } = compare(target, reveal ? '' : typed);
+            if (!reveal || !(dict.i in dict.results)) dict.results[dict.i] = reveal ? 0 : score;
+            const STY = { ok: 'text-emerald-800 bg-emerald-50', accent: 'text-amber-800 bg-amber-100', missed: 'text-rose-700 bg-rose-50 underline decoration-dotted', extra: 'text-slate-400 line-through', wrong: 'text-rose-700 bg-rose-50' };
+            const word = (x) => x.st === 'wrong' ? `<span class="px-1 rounded ${STY.wrong}" data-st="wrong"><s class="text-slate-400">${escapeHtml(x.typed)}</s> ${escapeHtml(x.w)}</span>`
+                : `<span class="px-1 rounded ${STY[x.st]}" data-st="${x.st}" ${x.st === 'accent' ? `title="You wrote: ${escapeHtml(x.typed)}"` : ''}>${escapeHtml(x.w)}</span>`;
+            const pct = Math.round(score * 100);
+            $('d-result').innerHTML = (reveal ? '' : `<p class="font-bold ${pct === 100 ? 'text-emerald-700' : pct >= 70 ? 'text-slate-800' : 'text-rose-700'}">${pct === 100 ? '🎉 Perfect!' : pct + '% right'}</p>
+                <p class="text-base leading-8">${out.map(word).join(' ')}</p>
+                <p class="text-xs text-slate-500"><span class="px-1 rounded bg-emerald-50 text-emerald-800">right</span> <span class="px-1 rounded bg-amber-100 text-amber-800">accent</span> <span class="px-1 rounded bg-rose-50 text-rose-700">missed or misspelt</span> <span class="text-slate-400 line-through">extra</span></p>`)
+                + `<p class="text-sm text-slate-600 bg-slate-50 rounded-lg p-3"><span class="font-semibold text-slate-800">The sentence:</span> <span lang="fr">${escapeHtml(target)}</span></p>`;
+            $('d-result').classList.remove('hidden');
+            $('d-check').classList.add('hidden');
+            $('d-next').classList.toggle('hidden', false);
+            $('d-next').textContent = dict.i < sents.length - 1 ? 'Next sentence →' : 'Start again ↺';
+            const vals = Object.values(dict.results);
+            $('d-score').textContent = `${Math.round(vals.reduce((a, b) => a + b, 0) / vals.length * 100)}% right`;
+            if (vals.length === sents.length) LIB.saveResult(text.id, 'dictation', Math.round(vals.reduce((a, b) => a + b, 0)), sents.length);
         }
 
-        let chatSpeechRecognition = null;
-        let isChatListening = false;
-
-        window.toggleChatVoiceInput = function() {
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            if (!SpeechRecognition) {
-                alert("La reconnaissance vocale nécessite Google Chrome.");
-                return;
-            }
-
-            const micBtn = document.getElementById('ai-mic-btn');
-            const inputField = document.getElementById('ai-input');
-
-            if (!isChatListening) {
-                chatSpeechRecognition = new SpeechRecognition();
-                chatSpeechRecognition.lang = 'fr-FR';
-                chatSpeechRecognition.interimResults = false;
-
-                chatSpeechRecognition.onstart = () => {
-                    isChatListening = true;
-                    if (micBtn) {
-                        micBtn.innerHTML = "⏹️";
-                        micBtn.className = "bg-rose-600 text-white p-2 rounded-xl text-xs transition shadow-sm animate-pulse";
-                    }
-                    if (inputField) inputField.placeholder = "Écoute en cours...";
-                };
-
-                chatSpeechRecognition.onresult = (event) => {
-                    const spokenText = event.results[0][0].transcript;
-                    if (inputField) inputField.value = spokenText;
-                };
-
-                chatSpeechRecognition.onerror = () => { stopChatMicUI(); };
-                chatSpeechRecognition.onend = () => { stopChatMicUI(); };
-
-                chatSpeechRecognition.start();
-            } else {
-                if (chatSpeechRecognition) chatSpeechRecognition.stop();
-                stopChatMicUI();
-            }
-        };
-
-        function stopChatMicUI() {
-            isChatListening = false;
-            const micBtn = document.getElementById('ai-mic-btn');
-            const inputField = document.getElementById('ai-input');
-            if (micBtn) {
-                micBtn.innerHTML = "🎙️";
-                micBtn.className = "bg-slate-100 text-slate-700 hover:bg-slate-200 p-2 rounded-xl text-xs transition";
-            }
-            if (inputField) inputField.placeholder = "Posez une question...";
-        }
-
-        async function sendAIChat() {
-            const input = document.getElementById('ai-input');
-            const chatBox = document.getElementById('ai-chat-box');
-            if (!input || !input.value.trim() || !chatBox) return;
-
-            const userText = input.value.trim();
-            const currentTitle = document.getElementById('listening-title')?.innerText || '';
-
-            const userMsg = document.createElement('div');
-            userMsg.className = 'bg-indigo-50 border border-indigo-100 p-3 rounded-xl text-xs text-indigo-900 ml-4 shadow-sm';
-            userMsg.innerText = userText;
-            chatBox.appendChild(userMsg);
-            input.value = '';
-            chatBox.scrollTop = chatBox.scrollHeight;
-
-            const typingMsg = document.createElement('div');
-            typingMsg.id = 'ai-typing';
-            typingMsg.className = 'bg-slate-50 border border-slate-100 p-3 rounded-xl text-xs text-slate-500 mr-4 italic';
-            typingMsg.innerText = '🤖 Tutor is analyzing your question...';
-            chatBox.appendChild(typingMsg);
-            chatBox.scrollTop = chatBox.scrollHeight;
-
-            const apiUrl = localStorage.getItem('ai_api_url') || "https://api.groq.com/openai/v1/chat/completions";
-            const apiKey = localStorage.getItem('ai_api_key') || "server";
-            const modelName = localStorage.getItem('ai_model_name') || "openai/gpt-oss-120b";
-
+        // ---------- New recordings ----------
+        async function generateText() {
+            const subject = $('subject-other').value.trim() || pick.subject;
+            $('gen-error').classList.add('hidden');
+            $('gen-btn').disabled = true; $('gen-btn').textContent = 'Writing…';
             try {
-                const apiResponse = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
-                    body: JSON.stringify({
-                        model: modelName,
-                        messages: [
-                            { role: "system", content: `You are an expert bilingual listening tutor for French learners. The student is practicing listening comprehension for the topic: "${currentTitle}" with script: "${currentAudioScript}". Always reply with clear explanations in English (with French terminology highlighted where relevant) so the student can easily follow without confusion.` },
-                            { role: "user", content: userText }
-                        ],
-                        temperature: 0.7
-                    })
-                });
-
-                const data = await apiResponse.json();
-                document.getElementById('ai-typing')?.remove();
-
-                let aiReply = data.choices?.[0]?.message?.content || "Réponse non disponible.";
-
-                const aiMsg = document.createElement('div');
-                aiMsg.className = 'bg-slate-50 border border-slate-200 p-3.5 rounded-2xl text-xs text-slate-700 mr-4 shadow-sm space-y-2';
-                aiMsg.innerHTML = `🤖 <strong>Tuteur (Bilingual):</strong><br>${aiReply.replace(/\n/g, '<br>')}`;
-                chatBox.appendChild(aiMsg);
-                chatBox.scrollTop = chatBox.scrollHeight;
-
+                const t = await LIB.generate({ subject, kind: pick.kind, level: currentLevel(), purpose: PAGE });
+                $('subject-other').value = '';
+                if (t.source === 'library') libTexts[t.level] = [t, ...(libTexts[t.level] || []).filter(x => x.id !== t.id)];
+                openText(t.id, true);
             } catch (err) {
-                document.getElementById('ai-typing')?.remove();
-                const errorMsg = document.createElement('div');
-                errorMsg.className = 'bg-rose-50 border border-rose-100 p-3 rounded-xl text-xs text-rose-700 mr-4 shadow-sm';
-                errorMsg.innerText = "Erreur de connexion : " + err.message;
-                chatBox.appendChild(errorMsg);
+                $('gen-error').textContent = err.message; $('gen-error').classList.remove('hidden');
             }
+            $('gen-btn').disabled = false; $('gen-btn').textContent = 'Write me a recording';
+        }
+        async function pasteText() {
+            const fr = $('paste-text').value.trim();
+            $('paste-error').classList.add('hidden');
+            if (fr.length < 40) { $('paste-error').textContent = 'Paste a longer text (at least a few sentences).'; $('paste-error').classList.remove('hidden'); return; }
+            $('paste-btn').disabled = true; $('paste-btn').textContent = 'Preparing questions…';
+            const t = await LIB.fromPasted(fr, currentLevel());
+            $('paste-text').value = '';
+            $('paste-btn').disabled = false; $('paste-btn').textContent = 'Listen to my text';
+            openText(t.id, true);
         }
 
-        loadListeningTopicsFromDatabase();
+        // ---------- Events ----------
+        document.addEventListener('click', (e) => {
+            const lv = e.target.closest('[data-level]');
+            if (lv) { store.set('listening_level', lv.dataset.level); renderList(); if (!libTexts[lv.dataset.level]) loadLevel(lv.dataset.level); return; }
+            const card = e.target.closest('[data-text]');
+            if (card && !e.metaKey && !e.ctrlKey) { e.preventDefault(); openText(card.dataset.text, true); return; }
+            const s = e.target.closest('[data-subject]');
+            if (s) { pick.subject = s.dataset.subject; $('subject-other').value = ''; store.set('listening_pick', pick); renderPicker(); return; }
+            const k = e.target.closest('[data-kind]');
+            if (k) { pick.kind = k.dataset.kind; store.set('listening_pick', pick); renderPicker(); return; }
+            if (!text) return;
+            const tb = e.target.closest('[data-tab]');
+            if (tb) { setTab(tb.dataset.tab); return; }
+            const opt = e.target.closest('[data-q]');
+            if (opt) { answers[opt.dataset.q] = Number(opt.dataset.o); renderQuestions(); renderTranscript(); return; }
+            const seek = e.target.closest('[data-seek]');
+            if (seek) { playSentence(Number(seek.dataset.seek), true); return; }
+            const r = e.target.closest('[data-rate]');
+            if (r) { rate = Number(r.dataset.rate); store.set('listening_rate', rate); renderPlayer(); return; }
+            const ins = e.target.closest('[data-insert]');
+            if (ins) {
+                const el = $('d-input'), a = el.selectionStart, b = el.selectionEnd;
+                el.value = el.value.slice(0, a) + ins.dataset.insert + el.value.slice(b);
+                el.focus(); el.selectionStart = el.selectionEnd = a + ins.dataset.insert.length;
+                return;
+            }
+            const w = e.target.closest('#text-body .w');
+            if (w) { LIB.openWord(w, text.id); return; }
+            const sen = e.target.closest('#text-body .sent');
+            if (sen) { playSentence(Number(sen.dataset.s), false); }
+        });
+        $('p-play').addEventListener('click', () => {
+            if (playing) { stop(); return; }
+            playSentence(cur >= sents.length - 1 && !$('p-pause').checked && cur > 0 ? 0 : cur, true);
+        });
+        $('p-prev').addEventListener('click', () => { const was = playing; stop(); cur = Math.max(0, cur - 1); if (was) playSentence(cur, true); else renderPlayer(); });
+        $('p-next').addEventListener('click', () => { const was = playing; stop(); cur = Math.min(sents.length - 1, cur + 1); if (was) playSentence(cur, true); else renderPlayer(); });
+        $('p-again').addEventListener('click', () => playSentence(cur, false));
+        $('d-play').addEventListener('click', () => { stop(); LIB.say(sents[dict.i], rate); });
+        $('d-slow').addEventListener('click', () => { stop(); LIB.say(sents[dict.i], 0.6); });
+        $('d-check').addEventListener('click', () => checkDictation(false));
+        $('d-show').addEventListener('click', () => checkDictation(true));
+        $('d-next').addEventListener('click', () => {
+            if (dict.i < sents.length - 1) dict.i++; else dict = { i: 0, results: {} };
+            renderDictation();
+            stop(); LIB.say(sents[dict.i], rate);
+            $('d-input').focus();
+        });
+        $('d-input').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                if (!$('d-check').classList.contains('hidden')) checkDictation(false); else $('d-next').click();
+            }
+        });
+        $('t-unlock').addEventListener('click', () => { unlocked = true; renderTranscript(); });
+        $('back').addEventListener('click', () => showList(true));
+        $('gen-btn').addEventListener('click', generateText);
+        $('paste-btn').addEventListener('click', pasteText);
+        $('btn-retry').addEventListener('click', () => { answers = {}; renderQuestions(); });
+        $('btn-en').addEventListener('click', () => {
+            const hidden = $('en-box').classList.toggle('hidden');
+            $('btn-en').textContent = hidden ? 'Show English' : 'Hide English';
+        });
+        $('d-accents').innerHTML = ACCENTS.map(c => `<button type="button" data-insert="${c}" class="min-w-[34px] min-h-[34px] px-1.5 bg-white border border-slate-200 hover:bg-indigo-50 hover:text-indigo-700 text-sm font-semibold rounded-lg">${c}</button>`).join('');
+        window.addEventListener('popstate', () => {
+            const id = new URLSearchParams(location.search).get('text');
+            if (id) openText(id, false); else showList(false);
+        });
+
+        const startId = new URLSearchParams(location.search).get('text');
+        if (startId && LIB.find(startId)) openText(startId, false);
+        else if (startId) { renderList(); LIB.fetchOne(startId).then(t => { if (t) openText(t.id, false); }); }
+        else renderList();
+        loadLevel(currentLevel());
+        loadDbSubjects();
     </script>
 </body>
-</html>
+</html>
