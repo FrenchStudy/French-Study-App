@@ -31,16 +31,16 @@
                     <p class="text-sm text-slate-500 mt-1">Talk with a character, repeat after native audio, or practise an exam task.
                         <a href="speaking-classic.html" class="ml-1 font-semibold text-indigo-700 hover:underline">Open the old version</a></p>
                 </div>
-                <nav class="flex gap-1 sm:gap-6 border-b border-slate-200 text-sm font-semibold overflow-x-auto" role="tablist" aria-label="Speaking">
-                    <button data-mode="conversation" role="tab" class="mode-tab shrink-0 min-h-[44px] px-2 sm:px-0 border-b-2 -mb-px">💬 Conversation</button>
-                    <button data-mode="shadowing" role="tab" class="mode-tab shrink-0 min-h-[44px] px-2 sm:px-0 border-b-2 -mb-px">🔁 Shadowing</button>
-                    <button data-mode="exam" role="tab" class="mode-tab shrink-0 min-h-[44px] px-2 sm:px-0 border-b-2 -mb-px">🎤 Exam task</button>
+                <nav class="flex gap-1 sm:gap-6 text-sm font-semibold overflow-x-auto overflow-y-hidden shadow-[inset_0_-1px_0_#e2e8f0]" role="tablist" aria-label="Speaking">
+                    <button data-mode="conversation" role="tab" class="mode-tab shrink-0 min-h-[44px] px-2 sm:px-0 border-b-2">💬 Conversation</button>
+                    <button data-mode="shadowing" role="tab" class="mode-tab shrink-0 min-h-[44px] px-2 sm:px-0 border-b-2">🔁 Shadowing</button>
+                    <button data-mode="exam" role="tab" class="mode-tab shrink-0 min-h-[44px] px-2 sm:px-0 border-b-2">🎤 Exam task</button>
                 </nav>
                 <p id="mic-note" class="hidden text-sm text-amber-900 bg-amber-50 border border-amber-200 rounded-xl p-3">Your browser can't turn speech into text, so you can type instead of speaking. For the full experience, use Chrome or Edge.</p>
 
                 <!-- Conversation -->
                 <section id="mode-conversation" class="space-y-3">
-                    <p class="text-sm text-slate-600">Chat with a French character in an everyday situation. Speak or type; ask "What can I say?" if you're stuck. At the end you get corrections and new words.</p>
+                    <p class="text-sm text-slate-600">Chat with a French character in an everyday situation. Speak or type; ask "What can I say?" if you're stuck. Your mistakes are corrected as you go, and at the end you get a short report.</p>
                     <div id="scene-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
                     <section class="bg-white border border-slate-200 rounded-2xl p-4 space-y-2">
                         <h2 class="font-black text-slate-900">🎭 Your own scene</h2>
@@ -318,10 +318,14 @@ The learner's goal: ${scene.goal}
 Rules:
 - Stay in character and reply only in French. ${LEVEL_RULES[sceneLevel()] || LEVEL_RULES.A1}
 - Reply in 1 or 2 sentences, then keep the scene moving with one simple question or prompt.
-- Do not correct the learner's mistakes during the scene; just answer naturally (you may echo the correct form).
+- In your reply, stay in the scene: don't lecture. Corrections go in "fix" (see below), not in "reply".
 - If the learner writes in English or seems stuck, answer in simple French.
 - When the learner's goal is reached, wrap the scene up kindly.
-Return a JSON object: {"reply": "your French reply", "english": "English translation of your reply", "hints": ["2 or 3 short French sentences the learner could say next"]}`;
+- The learner may speak through speech recognition: ignore missing punctuation and capitals.
+Return a JSON object:
+{"reply": "your French reply", "english": "English translation of your reply",
+ "fix": null if the learner's last message was correct and natural French, otherwise {"better": "their message corrected (same meaning, natural French)", "why": "one short explanation in simple English"},
+ "hints": ["2 or 3 short French sentences the learner could say next"]}`;
         }
         function startScene(s, push) {
             scene = s; chat = []; busy = false; finished = false; lastHints = [];
@@ -349,7 +353,14 @@ Return a JSON object: {"reply": "your French reply", "english": "English transla
         }
         function renderMessages() {
             $('messages').innerHTML = chat.map((m, i) => m.role === 'user' ? `
-                <div class="flex justify-end"><div class="max-w-[85%] bg-indigo-600 text-white rounded-2xl rounded-br-md px-4 py-2.5 text-base">${escapeHtml(m.text)}</div></div>` : `
+                <div class="flex flex-col items-end gap-1">
+                    <div class="max-w-[85%] bg-indigo-600 text-white rounded-2xl rounded-br-md px-4 py-2.5 text-base">${escapeHtml(m.text)}</div>
+                    ${m.fix ? `<div class="max-w-[85%] bg-amber-50 border border-amber-200 rounded-xl px-3 py-2 text-sm">
+                        <span class="font-bold text-amber-900">✏️ Better:</span> <span lang="fr" class="font-semibold text-emerald-800">${escapeHtml(m.fix.better)}</span>
+                        <button type="button" data-say="${escapeHtml(m.fix.better)}" class="ml-1 text-indigo-600" aria-label="Listen">🔊</button>
+                        ${m.fix.why ? `<span class="block text-slate-600">${escapeHtml(m.fix.why)}</span>` : ''}
+                    </div>` : ''}
+                </div>` : `
                 <div class="flex gap-2 items-end">
                     <span class="shrink-0 w-8 h-8 rounded-full bg-white border border-slate-200 flex items-center justify-center">${scene.emoji}</span>
                     <div class="max-w-[85%] bg-white border border-slate-200 rounded-2xl rounded-bl-md px-4 py-2.5 space-y-1">
@@ -365,15 +376,36 @@ Return a JSON object: {"reply": "your French reply", "english": "English transla
             const sc = $('scroller'); sc.scrollTop = sc.scrollHeight;
         }
         let lastHints = [];
+        // The AI sometimes names its fields differently, or doesn't return JSON: accept both
+        const pickText = (o, keys) => { for (const k of keys) if (o && typeof o[k] === 'string' && o[k].trim()) return o[k].trim(); return ''; };
         async function askCharacter(first) {
             busy = true; renderMessages();
             const messages = [{ role: 'system', content: systemPrompt() }].concat(chat.map(m => ({ role: m.role, content: m.text })));
             if (first) messages.push({ role: 'user', content: '(Start the scene: say your first line to the learner.)' });
             try {
-                const out = await askAI(messages, { json: true, temperature: 0.7 });
-                const reply = String(out.reply || '').trim();
-                if (!reply) throw new Error('The AI reply was empty. Please try again.');
-                chat.push({ role: 'assistant', text: reply, english: String(out.english || '') });
+                let out;
+                try {
+                    out = await askAI(messages, { json: true, temperature: 0.7 });
+                } catch (err) {
+                    if (!/could not be read|returned an error \(400\)/.test(err.message)) throw err;
+                    // Fall back to a plain reply
+                    const plainMsgs = messages.slice();
+                    plainMsgs[0] = { role: 'system', content: systemPrompt().split('Return a JSON object')[0] + 'Reply with your French line only.' };
+                    out = { reply: await askAI(plainMsgs, { temperature: 0.7 }) };
+                }
+                if (typeof out === 'string') out = { reply: out };
+                const reply = pickText(out, ['reply', 'response', 'message', 'answer', 'text', 'french']);
+                if (!reply) throw new Error('The character didn\'t answer. Tap ➤ to send your message again.');
+                // Correction of the learner's last message, shown under it
+                const last = chat.length && chat[chat.length - 1];
+                const fix = out.fix || out.correction;
+                if (!first && last && last.role === 'user' && fix && typeof fix === 'object') {
+                    const better = pickText(fix, ['better', 'corrected', 'correct']);
+                    if (better && plain(better).replace(/[^a-z0-9]/g, '') !== plain(last.text).replace(/[^a-z0-9]/g, '')) {
+                        last.fix = { better, why: pickText(fix, ['why', 'explanation', 'reason']) };
+                    }
+                }
+                chat.push({ role: 'assistant', text: reply, english: pickText(out, ['english', 'translation', 'en']) });
                 lastHints = (Array.isArray(out.hints) ? out.hints : []).map(String).filter(Boolean).slice(0, 3);
                 busy = false; renderMessages();
                 if ($('auto-speak').checked) speakFrench(reply);
@@ -415,6 +447,7 @@ Return a JSON object: {"reply": "your French reply", "english": "English transla
             $('report').classList.remove('hidden');
             $('report').innerHTML = '<div class="bg-white border border-slate-200 rounded-2xl p-4 text-sm text-indigo-600 animate-pulse">Preparing your report…</div>';
             const transcript = chat.map(m => `${m.role === 'user' ? 'Learner' : scene.name}: ${m.text}`).join('\n');
+            const fixesSoFar = chat.filter(m => m.fix).map(m => ({ you_said: m.text, better: m.fix.better, why: m.fix.why }));
             try {
                 const r = await askAI([
                     { role: 'system', content: `You are a warm, encouraging French teacher. A learner at CEFR ${scene.level} just did a role-play (${scene.scene}). Review ONLY the learner's lines. Their lines may come from speech recognition, so ignore missing punctuation and capitals. Return a JSON object:
@@ -428,6 +461,9 @@ Give at most 4 corrections, only for real mistakes (an empty list if there are n
                 if (scene.id) { scenesDone[scene.id] = new Date().toISOString().slice(0, 10); store.set('speak_scenes', scenesDone); }
                 record();
                 saveProgress('speaking-scene', scene.id || 'own', null);
+                // Corrections made during the scene come first, then any the report adds
+                const seen = new Set(fixesSoFar.map(c => plain(c.you_said)));
+                r.corrections = [...fixesSoFar, ...(Array.isArray(r.corrections) ? r.corrections : []).filter(c => !seen.has(plain(c.you_said || '')))];
                 renderReport(r);
                 $('input-area').classList.add('hidden');
             } catch (err) {
@@ -438,7 +474,7 @@ Give at most 4 corrections, only for real mistakes (an empty list if there are n
         }
         function renderReport(r) {
             const list = (a) => Array.isArray(a) ? a : [];
-            const corr = list(r.corrections).slice(0, 4), words = list(r.new_words).slice(0, 5);
+            const corr = list(r.corrections).slice(0, 8), words = list(r.new_words).slice(0, 5);
             $('report').innerHTML = `
                 <section class="bg-white border border-emerald-200 rounded-2xl p-4 space-y-4">
                     <h2 class="text-lg font-black text-emerald-800">Your report</h2>
