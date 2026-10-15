@@ -1,688 +1,345 @@
 <!DOCTYPE html>
-<html lang="fr" class="h-full">
+<html lang="en" class="h-full">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Atelier de Français - Reading & Exam Suite</title>
+    <title>Reading - French Study App</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="config.js"></script>
+    <script src="js/ai.js"></script>
+    <script src="js/conjugate.js"></script>
+    <script src="js/library.js"></script>
+    <style>
+        .w { cursor: pointer; border-radius: 4px; transition: background-color .12s; }
+        .w:hover { background: #e0e7ff; }
+        .w.on { background: #c7d2fe; color: #1e1b4b; }
+        .sent.playing { background: #fef3c7; border-radius: 4px; }
+        #text-body p + p { margin-top: 1rem; }
+    </style>
 </head>
-<body class="h-full bg-slate-100 flex flex-col overflow-hidden font-sans">
+<body class="h-full bg-slate-100 flex flex-col overflow-hidden font-sans text-slate-800">
 
     <header id="app-header" class="bg-white border-b border-slate-200 sticky top-0 z-50 shrink-0 h-14"></header>
 
-    <!-- Main Workspace Layout (Master-Detail Split) -->
-    <div class="flex-1 flex overflow-hidden relative">
-        
-        <!-- LEFT: TCF/DELF Exam Topics Sidebar (Supabase Driven) -->
-        <aside class="w-80 bg-white border-r border-slate-200 flex flex-col shrink-0">
-            <div class="p-4 border-b border-slate-100 space-y-3">
+    <main id="scroller" class="flex-1 overflow-y-auto">
+        <div class="max-w-6xl mx-auto px-4 py-5 space-y-4">
+
+            <!-- ===== ALL TEXTS ===== -->
+            <div id="list-view" class="space-y-4">
                 <div>
-                    <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Modules d'Examen TCF/DELF</h2>
-                    <p class="text-[11px] text-slate-500">Sélectionnez un thème depuis la base de données.</p>
+                    <h1 class="text-2xl font-black text-slate-900">Reading</h1>
+                    <p class="text-sm text-slate-500 mt-1">Read a text at your level, tap any word for its meaning, then answer the questions.
+                        <a href="reading-classic.html" class="ml-1 font-semibold text-indigo-700 hover:underline">Open the old version</a></p>
                 </div>
-                
-                <!-- Level Filter Selector -->
+                <div id="levels" class="flex w-max max-w-full gap-1 p-1 bg-slate-200/70 rounded-xl overflow-x-auto" role="tablist" aria-label="Level"></div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] gap-3">
+                    <section class="bg-white border border-slate-200 rounded-2xl p-4 space-y-3">
+                        <h2 class="font-black text-slate-900">✨ A new text</h2>
+                        <div>
+                            <div class="text-sm font-semibold text-slate-700 mb-1.5">Subject</div>
+                            <div id="subjects" class="flex flex-wrap gap-1.5"></div>
+                            <input id="subject-other" type="text" maxlength="80" placeholder="…or type any subject" class="mt-2 w-full text-base md:text-sm px-3 py-2 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                        <div>
+                            <div class="text-sm font-semibold text-slate-700 mb-1.5">Type of text</div>
+                            <div id="kinds" class="flex flex-wrap gap-1.5"></div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <button id="gen-btn" type="button" class="whitespace-nowrap min-h-[48px] px-5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-bold rounded-xl">Write me a text</button>
+                            <span class="hidden sm:inline text-xs text-slate-400">Uses AI. New texts are shared with other students at your level.</span>
+                        </div>
+                        <p id="gen-error" class="hidden text-sm text-rose-700"></p>
+                    </section>
+
+                    <section class="bg-white border border-slate-200 rounded-2xl p-4 space-y-3 flex flex-col">
+                        <h2 class="font-black text-slate-900">📋 Your own text</h2>
+                        <p class="text-sm text-slate-500">Paste a French text from a book, a website or your teacher. It stays on this device.</p>
+                        <textarea id="paste-text" rows="4" maxlength="6000" lang="fr" placeholder="Collez votre texte ici…" class="flex-1 w-full text-base md:text-sm p-3 bg-white border border-slate-200 rounded-xl resize-y focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
+                        <button id="paste-btn" type="button" class="self-start min-h-[44px] px-4 bg-slate-900 hover:bg-slate-800 disabled:opacity-50 text-white font-bold rounded-xl">Read my text</button>
+                        <p id="paste-error" class="hidden text-sm text-rose-700"></p>
+                    </section>
+                </div>
+
+                <section class="space-y-2">
+                    <div class="flex items-baseline justify-between gap-2">
+                        <h2 id="texts-heading" class="text-sm font-bold uppercase tracking-wide text-slate-500">Texts</h2>
+                        <span id="lib-note" class="text-xs text-slate-400"></span>
+                    </div>
+                    <div id="text-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+                </section>
+            </div>
+
+            <!-- ===== ONE TEXT ===== -->
+            <div id="text-view" class="hidden space-y-4">
+                <button id="back" type="button" class="min-h-[44px] px-1 text-sm font-semibold text-slate-600 hover:text-indigo-600">← All texts</button>
                 <div>
-                    <label class="block text-[11px] font-bold text-slate-700 mb-1">Niveau Cible :</label>
-                    <select id="exam-level-select" onchange="filterReadingTopics()" class="w-full text-xs px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                        <option value="ALL">Tous les niveaux</option>
-                        <option value="A1">Niveau A1 (Débutant)</option>
-                        <option value="A2">Niveau A2 (Élémentaire)</option>
-                        <option value="B1">Niveau B1 (Intermédiaire)</option>
-                        <option value="B2" selected>Niveau B2 (Avancé)</option>
-                        <option value="C1">Niveau C1 (Expert)</option>
-                    </select>
+                    <span id="crumb" class="text-xs font-bold px-2 py-1 rounded-full bg-slate-100 text-slate-600"></span>
+                    <h1 id="text-title" class="text-2xl lg:text-3xl font-black text-slate-900 leading-tight mt-2"></h1>
+                </div>
+
+                <div class="flex flex-col lg:grid lg:grid-cols-[minmax(0,1fr)_24rem] gap-4 lg:gap-6">
+                    <div class="space-y-3 min-w-0">
+                        <div class="flex flex-wrap items-center gap-2">
+                            <button id="btn-play" type="button" class="min-h-[44px] px-4 text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl">▶ Read it to me</button>
+                            <button id="btn-en" type="button" class="min-h-[44px] px-4 text-sm font-semibold text-slate-700 bg-white border border-slate-200 hover:border-indigo-300 rounded-xl">Show English</button>
+                            <span class="text-xs text-slate-400">Tap any word for its meaning.</span>
+                        </div>
+                        <article id="text-body" lang="fr" class="bg-white border border-slate-200 rounded-2xl p-5 sm:p-7 text-lg leading-8 text-slate-900"></article>
+                        <section id="en-box" class="hidden bg-slate-50 border border-slate-200 rounded-2xl p-5 sm:p-7 text-base leading-7 text-slate-600 whitespace-pre-line"></section>
+                        <p id="text-note" class="hidden text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-xl p-3"></p>
+                    </div>
+
+                    <aside class="space-y-3 lg:sticky lg:top-4 lg:self-start">
+                        <section class="bg-white border border-slate-200 rounded-2xl p-4 space-y-3">
+                            <div class="flex items-center justify-between gap-2">
+                                <h2 class="text-sm font-bold uppercase tracking-wide text-slate-500">Questions</h2>
+                                <span id="q-score" class="text-sm font-bold text-slate-500"></span>
+                            </div>
+                            <div id="questions" class="space-y-4"></div>
+                            <button id="btn-retry" type="button" class="hidden min-h-[40px] px-3 text-sm font-semibold text-slate-600 hover:text-indigo-700">↺ Try again</button>
+                        </section>
+                        <section id="saved-box" class="hidden bg-white border border-slate-200 rounded-2xl p-4 space-y-2">
+                            <h2 class="text-sm font-bold uppercase tracking-wide text-slate-500">Words you saved</h2>
+                            <div id="saved-words" class="flex flex-wrap gap-1.5"></div>
+                            <a href="vocab.html?topic=review&amp;step=practise" class="inline-block text-sm font-semibold text-indigo-700 hover:underline">Review them in Vocab →</a>
+                        </section>
+                    </aside>
                 </div>
             </div>
-
-            <!-- List of Topics Loaded From Supabase -->
-            <div id="exam-topics-container" class="flex-1 overflow-y-auto p-3 space-y-2">
-                <p class="text-xs text-slate-400 p-2">Chargement des sujets de lecture...</p>
-            </div>
-        </aside>
-
-        <!-- RIGHT: Reader Detail Pane & AI Companion Grid -->
-        <main class="flex-1 flex overflow-hidden">
-            
-            <!-- Article Reader Content Pane -->
-            <div class="flex-1 overflow-y-auto p-6 space-y-6 relative">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <span id="reading-category" class="text-[10px] font-bold uppercase tracking-wider bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded">Épreuve de Lecture</span>
-                        <h2 id="reading-title" class="text-2xl font-extrabold text-slate-900 tracking-tight mt-1">Sélectionnez un module à gauche</h2>
-                    </div>
-                    <div class="flex items-center space-x-2">
-                        <button onclick="markReadingCompleted()" class="text-xs bg-emerald-50 text-emerald-600 border border-emerald-200 px-3 py-1.5 rounded-xl font-bold hover:bg-emerald-100 transition">💾 Marquer comme lu</button>
-                    </div>
-                </div>
-
-                <!-- Interactive Audio Bar & Translation Toggle -->
-                <div class="bg-white border border-slate-200 p-3 rounded-2xl flex items-center justify-between shadow-sm">
-                    <div class="flex items-center space-x-2">
-                        <button onclick="playArticleAudio()" class="bg-indigo-600 text-white text-xs px-3 py-2 rounded-xl font-bold hover:bg-indigo-700 transition">▶️ Lire</button>
-                        <button onclick="pauseArticleAudio()" class="bg-amber-500 text-white text-xs px-3 py-2 rounded-xl font-bold hover:bg-amber-600 transition">⏸️ Pause</button>
-                        <button onclick="stopArticleAudio()" class="bg-rose-500 text-white text-xs px-3 py-2 rounded-xl font-bold hover:bg-rose-600 transition">⏹️ Stop</button>
-                        <button onclick="adjustReadingSpeed()" id="speed-btn" class="bg-slate-100 text-slate-700 text-xs px-3 py-2 rounded-xl font-medium hover:bg-slate-200 transition">⚡ 1.0x</button>
-                    </div>
-                    <button onclick="toggleArticleTranslation()" id="translate-btn" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 px-3 py-2 rounded-xl font-bold transition">🌐 Traduction (EN)</button>
-                </div>
-
-                <!-- Article Body Card (Natural Flow Paragraphs) -->
-                <div id="article-content-body" class="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm space-y-4 text-sm leading-relaxed text-slate-800">
-                    <p class="text-xs text-slate-500">Choisissez un module dans la barre latérale pour générer l'article d'examen...</p>
-                </div>
-
-                <!-- Hidden Translation Pane -->
-                <div id="article-translation-pane" class="hidden bg-emerald-50/60 border border-emerald-200 rounded-2xl p-8 shadow-sm space-y-4 text-sm leading-relaxed text-slate-800">
-                    <h3 class="text-xs font-bold text-emerald-900 uppercase tracking-wide">Traduction Complète (EN)</h3>
-                    <div id="translation-content-body" class="text-xs text-emerald-950 space-y-2">Chargement de la traduction...</div>
-                </div>
-
-                <!-- Comprehension Quiz Section -->
-                <div id="quiz-section" class="bg-amber-50/60 border border-amber-200/60 rounded-2xl p-6 space-y-4">
-                    <div class="flex items-center space-x-2">
-                        <span class="text-amber-600 font-bold">📝</span>
-                        <h3 class="text-xs font-bold text-amber-900 uppercase tracking-wide">Questions de Compréhension (Style TCF)</h3>
-                    </div>
-                    <div id="quiz-container" class="space-y-4 text-xs text-slate-700">
-                        <p class="italic text-slate-400">Le quiz apparaîtra ici après la génération du texte.</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- AI Reading Assistant Sidebar Pane with Quick Suggestions -->
-            <section class="w-96 bg-white border-l border-slate-200 flex flex-col shrink-0">
-                <div class="p-4 border-b border-slate-100 flex items-center justify-between">
-                    <span class="text-xs font-bold uppercase tracking-wider text-slate-600">🤖 Assistant d'Examen</span>
-                    <span class="text-[10px] bg-emerald-50 text-emerald-600 font-semibold px-2 py-0.5 rounded">En ligne</span>
-                </div>
-                
-                <!-- Chat Messages Box -->
-                <div id="ai-chat-box" class="flex-1 p-4 overflow-y-auto space-y-3">
-                    <div class="bg-slate-50 border border-slate-100 p-3 rounded-xl text-xs text-slate-700 space-y-2">
-                        <p>Bonjour ! Je suis votre tuteur d'examen. Choisissez une suggestion ci-dessous ou posez-moi des questions sur ce texte :</p>
-                    </div>
-                </div>
-
-                <!-- Suggestion Chips Container -->
-                <div class="p-3 bg-slate-50 border-t border-slate-100 flex flex-wrap gap-1.5">
-                    <button onclick="sendPresetPrompt('Expliquez la structure logique de ce texte.')" class="text-[10px] bg-white border border-slate-200 text-slate-700 px-2.5 py-1 rounded-lg hover:bg-indigo-50 hover:text-indigo-600 transition font-medium">💡 Structure logique</button>
-                    <button onclick="sendPresetPrompt('Donnez-moi 3 expressions clés de ce texte pour le TCF.')" class="text-[10px] bg-white border border-slate-200 text-slate-700 px-2.5 py-1 rounded-lg hover:bg-indigo-50 hover:text-indigo-600 transition font-medium">📚 Vocabulaire clé</button>
-                    <button onclick="sendPresetPrompt('Pourquoi cette réponse au quiz est-elle correcte ?')" class="text-[10px] bg-white border border-slate-200 text-slate-700 px-2.5 py-1 rounded-lg hover:bg-indigo-50 hover:text-indigo-600 transition font-medium">❓ Expliquer le quiz</button>
-                    <button onclick="sendPresetPrompt('Résumez ce texte en 2 phrases simples.')" class="text-[10px] bg-white border border-slate-200 text-slate-700 px-2.5 py-1 rounded-lg hover:bg-indigo-50 hover:text-indigo-600 transition font-medium">📝 Résumé simple</button>
-                </div>
-
-                <!-- Chat Input Bar with Microphone -->
-                <div class="p-3 border-t border-slate-100">
-                    <div class="flex items-center space-x-2">
-                        <input type="text" id="ai-input" placeholder="Posez une question..." class="flex-1 text-xs px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                        <button onclick="toggleChatVoiceInput()" id="ai-mic-btn" title="Parler au lieu d'écrire" class="bg-slate-100 text-slate-700 hover:bg-slate-200 p-2 rounded-xl text-xs transition">🎙️</button>
-                        <button onclick="sendAIChat()" class="bg-indigo-600 text-white p-2.5 rounded-xl text-xs font-bold hover:bg-indigo-700 transition">➔</button>
-                    </div>
-                </div>
-            </section>
-
-        </main>
-    </div>
-
-    <!-- Floating Tap-to-Translate Definition Tooltip Modal -->
-    <div id="word-modal" class="hidden fixed bottom-6 left-6 bg-slate-900 text-white p-4 rounded-2xl shadow-2xl z-50 max-w-sm space-y-2 border border-slate-700 text-xs">
-        <div class="flex items-center justify-between border-b border-slate-700 pb-1">
-            <span id="modal-word" class="font-bold text-amber-400 text-sm">...</span>
-            <button onclick="closeWordModal()" class="text-slate-400 hover:text-white px-1">✕</button>
         </div>
-        <div><span id="modal-definition" class="text-slate-200">...</span></div>
-        <div class="pt-1 flex items-center space-x-2">
-            <button onclick="speakModalWord()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-xl font-bold transition">🔊 Écouter</button>
-        </div>
-    </div>
+    </main>
 
-    <!-- Script Integration -->
     <script>
-        const db = window.mySupabase;
-
-        let allReadingTopics = [];
-        let currentPlaybackSpeed = 1.0;
-        let selectedWordGlobal = "";
-        let currentRawContent = "";
-        let isTranslatedVisible = false;
-        let currentActiveTopicId = "1"; // Tracks active topic ID for logging
-
-        // --- Core Progress Tracking Function ---
-        async function saveProgressToDatabase(moduleType, moduleId, score = null) {
-            const { data: { user }, error: userError } = await db.auth.getUser();
-            
-            if (userError || !user) {
-                alert("Veuillez vous connecter pour sauvegarder votre progression.");
-                window.location.href = 'login.html';
-                return;
-            }
-
-            const { error } = await db
-                .from('user_progress')
-                .upsert({
-                    user_id: user.id,
-                    module_type: moduleType, 
-                    module_id: moduleId.toString(),
-                    completed: true,
-                    score: score, 
-                    updated_at: new Date()
-                }, { onConflict: 'user_id, module_type, module_id' });
-
-            if (error) {
-                console.error("Erreur de sauvegarde :", error.message);
-                alert("Erreur lors de la synchronisation de la progression.");
-            } else {
-                alert("💾 Progression et habitudes enregistrées avec succès !");
-            }
-        }
-
-        async function loadReadingTopicsFromDatabase() {
-            const container = document.getElementById('exam-topics-container');
-            container.innerHTML = `<p class="text-xs text-slate-400 p-2">Chargement des sujets depuis Supabase...</p>`;
-
-            const { data: topics, error } = await db.from('reading_topics').select('*').order('id', { ascending: true });
-
-            if (error || !topics || topics.length === 0) {
-                container.innerHTML = `<p class="text-xs text-rose-500 p-2">Aucun sujet de lecture trouvé dans la base.</p>`;
-                return;
-            }
-
-            allReadingTopics = topics;
-            renderReadingModulesList(allReadingTopics);
-        }
-
-        function filterReadingTopics() {
-            const selectedLevel = document.getElementById('exam-level-select').value;
-            if (selectedLevel === 'ALL') {
-                renderReadingModulesList(allReadingTopics);
-            } else {
-                const filtered = allReadingTopics.filter(t => t.level.toUpperCase() === selectedLevel);
-                renderReadingModulesList(filtered);
-            }
-        }
-
-        function renderReadingModulesList(topics) {
-            const container = document.getElementById('exam-topics-container');
-            container.innerHTML = '';
-
-            if (topics.length === 0) {
-                container.innerHTML = `<p class="text-xs text-slate-400 p-2">Aucun sujet pour ce niveau.</p>`;
-                return;
-            }
-
-            topics.forEach((m, idx) => {
-                const item = document.createElement('button');
-                item.className = 'w-full text-left p-2.5 rounded-xl text-xs font-medium transition bg-slate-50 text-slate-700 hover:bg-indigo-50 border border-slate-100 flex items-center space-x-2.5';
-                item.innerHTML = `
-                    <span class="text-base">📚</span>
-                    <div class="flex-1">
-                        <div class="font-bold text-slate-900">${idx + 1}. ${m.title}</div>
-                        <div class="text-[10px] text-slate-400 truncate">Niveau ${m.level} • ${m.category}</div>
-                    </div>
-                `;
-                item.onclick = () => {
-                    currentActiveTopicId = m.id;
-                    generateExamReading(m.title, m.level);
-                };
-                container.appendChild(item);
-            });
-        }
-
-        async function generateExamReading(topicTitle, level) {
-            document.getElementById('reading-title').innerText = topicTitle;
-            document.getElementById('reading-category').innerText = `Examen TCF/DELF - Niveau ${level}`;
-            
-            const contentBody = document.getElementById('article-content-body');
-            contentBody.innerHTML = `<p class="text-indigo-600 font-bold animate-pulse text-xs">🤖 Génération d'un texte fluide de niveau ${level} sur "${topicTitle}"...</p>`;
-            document.getElementById('quiz-container').innerHTML = `<p class="italic text-slate-400">Préparation des questions d'examen...</p>`;
-            document.getElementById('article-translation-pane').classList.add('hidden');
-            isTranslatedVisible = false;
-            document.getElementById('translate-btn').innerText = "🌐 Traduction (EN)";
-
-            const apiUrl = localStorage.getItem('ai_api_url') || "https://api.groq.com/openai/v1/chat/completions";
-            const apiKey = localStorage.getItem('ai_api_key') || "server";
-            const modelName = localStorage.getItem('ai_model_name') || "openai/gpt-oss-120b";
-
-            if (!apiKey) {
-                contentBody.innerHTML = `<p class="text-rose-600 text-xs">Erreur : Aucune clé API globale n'a été configurée dans l'administration.</p>`;
-                return;
-            }
-
-            try {
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${apiKey}`
-                    },
-                    body: JSON.stringify({
-                        model: modelName,
-                        messages: [
-                            {
-                                role: "system",
-                                content: "You are a professional TCF Canada and DELF exam creator. Generate a JSON response with a formal reading passage (structured in clean paragraphs separated by newline characters \n) and 3 multiple-choice comprehension questions matching the requested topic and CEFR level. Format strictly as valid JSON with keys: content (the French reading passage with paragraph breaks), quiz (an array of 3 objects, each with 'question', 'options' array of 3 strings, and 'answer' integer index 0-2). Do not include markdown codeblocks like ```json, just output raw valid JSON."
-                            },
-                            {
-                                role: "user",
-                                content: `Generate a reading test passage and quiz at level ${level} for the topic: "${topicTitle}".`
-                            }
-                        ],
-                        temperature: 0.7
-                    })
-                });
-
-                const data = await response.json();
-                let rawContent = data.choices?.[0]?.message?.content || "";
-                rawContent = rawContent.replace(/```json/g, '').replace(/```/g, '').trim();
-                const examData = JSON.parse(rawContent);
-
-                currentRawContent = examData.content;
-
-                contentBody.innerHTML = '';
-                const paragraphs = examData.content.split('\n').filter(p => p.trim().length > 0);
-                
-                paragraphs.forEach(paraText => {
-                    const pEl = document.createElement('p');
-                    pEl.className = 'mb-4 leading-relaxed';
-                    
-                    const words = paraText.split(' ');
-                    words.forEach(w => {
-                        const span = document.createElement('span');
-                        span.className = 'cursor-pointer hover:bg-indigo-100 hover:text-indigo-900 rounded transition px-0.5 inline';
-                        span.innerText = w + ' ';
-                        
-                        span.onmouseenter = () => {
-                            const cleanW = w.replace(/[.,/#!$%^&*;:{}=\-_`~()]/g, "");
-                            if (cleanW.length > 1) {
-                                speakSingleWord(cleanW);
-                            }
-                        };
-
-                        span.onclick = () => triggerTapToTranslate(w.replace(/[.,/#!$%^&*;:{}=\-_`~()]/g, ""));
-                        pEl.appendChild(span);
-                    });
-                    
-                    contentBody.appendChild(pEl);
-                });
-
-                renderQuiz(examData.quiz);
-            } catch (err) {
-                console.error(err);
-                contentBody.innerHTML = `<p class="text-rose-600 text-xs">Erreur lors de la génération de l'épreuve. Vérifiez votre clé API.</p>`;
-            }
-        }
-
-        async function toggleArticleTranslation() {
-            const pane = document.getElementById('article-translation-pane');
-            const btn = document.getElementById('translate-btn');
-            const translationBody = document.getElementById('translation-content-body');
-
-            if (!currentRawContent) {
-                alert("Veuillez d'abord générer un texte de lecture.");
-                return;
-            }
-
-            if (isTranslatedVisible) {
-                pane.classList.add('hidden');
-                btn.innerText = "🌐 Traduction (EN)";
-                isTranslatedVisible = false;
-                return;
-            }
-
-            pane.classList.remove('hidden');
-            btn.innerText = "🌐 Masquer Traduction";
-            isTranslatedVisible = true;
-            translationBody.innerText = "Traduction du texte en cours par l'IA...";
-
-            const apiUrl = localStorage.getItem('ai_api_url') || "https://api.groq.com/openai/v1/chat/completions";
-            const apiKey = localStorage.getItem('ai_api_key') || "server";
-            const modelName = localStorage.getItem('ai_model_name') || "openai/gpt-oss-120b";
-
-            try {
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${apiKey}`
-                    },
-                    body: JSON.stringify({
-                        model: modelName,
-                        messages: [
-                            { role: "system", content: "Translate the following French text into clear, natural English paragraphs." },
-                            { role: "user", content: currentRawContent }
-                        ],
-                        temperature: 0.3
-                    })
-                });
-
-                const data = await response.json();
-                let translation = data.choices?.[0]?.message?.content || "Traduction non disponible.";
-                translationBody.innerHTML = translation.replace(/\n/g, '<br>');
-            } catch (err) {
-                translationBody.innerText = "Erreur lors de la récupération de la traduction.";
-            }
-        }
-
-        async function triggerTapToTranslate(word) {
-            if (!word || word.length < 2) return;
-            selectedWordGlobal = word;
-            
-            const modal = document.getElementById('word-modal');
-            const wordEl = document.getElementById('modal-word');
-            const defEl = document.getElementById('modal-definition');
-
-            wordEl.innerText = word;
-            defEl.innerText = "Recherche de la définition et traduction par l'IA...";
-            modal.classList.remove('hidden');
-
-            const apiUrl = localStorage.getItem('ai_api_url') || "https://api.groq.com/openai/v1/chat/completions";
-            const apiKey = localStorage.getItem('ai_api_key') || "server";
-            const modelName = localStorage.getItem('ai_model_name') || "openai/gpt-oss-120b";
-
-            try {
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${apiKey}`
-                    },
-                    body: JSON.stringify({
-                        model: modelName,
-                        messages: [
-                            {
-                                role: "system",
-                                content: "You are a bilingual French-English dictionary assistant. Provide a concise French definition and an English translation for the given word. Format strictly as JSON with keys: 'definition_fr' and 'translation_en'. Do not include markdown codeblocks like ```json, just output raw valid JSON."
-                            },
-                            {
-                                role: "user",
-                                content: `Define and translate the French word: "${word}"`
-                            }
-                        ],
-                        temperature: 0.3
-                    })
-                });
-
-                const data = await response.json();
-                let rawContent = data.choices?.[0]?.message?.content || "";
-                rawContent = rawContent.replace(/```json/g, '').replace(/```/g, '').trim();
-                const resJson = JSON.parse(rawContent);
-
-                defEl.innerHTML = `
-                    <div class="space-y-1">
-                        <div><strong>Définition (FR) :</strong> ${resJson.definition_fr || 'Non disponible'}</div>
-                        <div><strong>Traduction (EN) :</strong> <span class="text-emerald-400 font-semibold">${resJson.translation_en || 'Non disponible'}</span></div>
-                    </div>
-                `;
-            } catch (err) {
-                defEl.innerHTML = `
-                    <div class="space-y-1">
-                        <div><strong>Définition (FR) :</strong> Définition contextuelle pour "${word}"</div>
-                        <div><strong>Traduction (EN) :</strong> <span class="text-emerald-400 font-semibold">Erreur de chargement API</span></div>
-                    </div>
-                `;
-            }
-        }
-
-        function closeWordModal() {
-            document.getElementById('word-modal').classList.add('hidden');
-        }
-
-        function speakModalWord() {
-            if (selectedWordGlobal) speakText(selectedWordGlobal);
-        }
-
-        function renderQuiz(quizData) {
-            const container = document.getElementById('quiz-container');
-            if (!quizData || quizData.length === 0) {
-                container.innerHTML = "<p>Aucun quiz disponible pour ce texte.</p>";
-                return;
-            }
-
-            container.innerHTML = '';
-            quizData.forEach((q, qIndex) => {
-                const qDiv = document.createElement('div');
-                qDiv.className = 'bg-white p-4 rounded-xl border border-amber-200 space-y-2 shadow-sm';
-                
-                let optionsHtml = '';
-                q.options.forEach((opt, oIndex) => {
-                    optionsHtml += `
-                        <label class="block text-xs text-slate-700 hover:bg-slate-50 p-2 rounded-lg cursor-pointer border border-slate-100 transition">
-                            <input type="radio" name="question-${qIndex}" value="${oIndex}" class="mr-2"> ${opt}
-                        </label>
-                    `;
-                });
-
-                qDiv.innerHTML = `
-                    <p class="font-bold text-slate-900">${qIndex + 1}. ${q.question}</p>
-                    <div class="space-y-1">${optionsHtml}</div>
-                    <button onclick="checkQuizAnswer(${qIndex}, ${q.answer})" class="mt-2 bg-amber-600 hover:bg-amber-700 text-white text-[11px] font-bold px-3 py-1.5 rounded-lg transition">Vérifier</button>
-                    <span id="quiz-feedback-${qIndex}" class="ml-2 font-bold text-xs"></span>
-                `;
-                container.appendChild(qDiv);
-            });
-        }
-
-        function checkQuizAnswer(qIndex, correctIndex) {
-            const selected = document.querySelector(`input[name="question-${qIndex}"]:checked`);
-            const feedback = document.getElementById(`quiz-feedback-${qIndex}`);
-            if (!selected) {
-                feedback.className = "ml-2 font-bold text-xs text-rose-600";
-                feedback.innerText = "Veuillez choisir une option !";
-                return;
-            }
-
-            if (parseInt(selected.value) === correctIndex) {
-                feedback.className = "ml-2 font-bold text-xs text-emerald-600";
-                feedback.innerText = "🎉 Correct !";
-            } else {
-                feedback.className = "ml-2 font-bold text-xs text-rose-600";
-                feedback.innerText = "❌ Incorrect, essayez encore.";
-            }
-        }
-
-        function speakText(text) {
-            if (!('speechSynthesis' in window)) return;
-            window.speechSynthesis.cancel();
-            
-            const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = 'fr-FR';
-            utterance.rate = currentPlaybackSpeed;
-            window.speechSynthesis.speak(utterance);
-        }
-
-        function speakSingleWord(word) {
-            if (!('speechSynthesis' in window)) return;
-            if (window.speechSynthesis.speaking && !window.speechSynthesis.paused) return;
-
-            const wordUtterance = new SpeechSynthesisUtterance(word);
-            wordUtterance.lang = 'fr-FR';
-            wordUtterance.rate = 0.85;
-            window.speechSynthesis.speak(wordUtterance);
-        }
-
-        function playArticleAudio() {
-            if ('speechSynthesis' in window && window.speechSynthesis.paused) {
-                window.speechSynthesis.resume();
-                return;
-            }
-            const content = document.getElementById('article-content-body')?.innerText || '';
-            speakText(content);
-        }
-
-        function pauseArticleAudio() {
-            if ('speechSynthesis' in window) {
-                if (window.speechSynthesis.paused) {
-                    window.speechSynthesis.resume();
-                } else {
-                    window.speechSynthesis.pause();
-                }
-            }
-        }
-
-        function stopArticleAudio() {
-            if ('speechSynthesis' in window) {
-                window.speechSynthesis.cancel();
-            }
-        }
-
-        function adjustReadingSpeed() {
-            const speeds = [1.0, 0.75, 0.5];
-            const currentIndex = speeds.indexOf(currentPlaybackSpeed);
-            currentPlaybackSpeed = speeds[(currentIndex + 1) % speeds.length];
-            const speedBtn = document.getElementById('speed-btn');
-            if (speedBtn) speedBtn.innerText = `⚡ ${currentPlaybackSpeed}x`;
-        }
-
-        async function markReadingCompleted() {
-            await saveProgressToDatabase('reading', currentActiveTopicId);
-        }
-
-        function sendPresetPrompt(promptText) {
-            const input = document.getElementById('ai-input');
-            if (input) {
-                input.value = promptText;
-                sendAIChat();
-            }
-        }
-
-        // --- INTERACTIVE CHAT MICROPHONE (Speech-to-Text) ---
-        let chatSpeechRecognition = null;
-        let isChatListening = false;
-
-        window.toggleChatVoiceInput = function() {
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            if (!SpeechRecognition) {
-                alert("La reconnaissance vocale nécessite Google Chrome.");
-                return;
-            }
-
-            const micBtn = document.getElementById('ai-mic-btn');
-            const inputField = document.getElementById('ai-input');
-
-            if (!isChatListening) {
-                chatSpeechRecognition = new SpeechRecognition();
-                chatSpeechRecognition.lang = 'fr-FR';
-                chatSpeechRecognition.interimResults = false;
-
-                chatSpeechRecognition.onstart = () => {
-                    isChatListening = true;
-                    if (micBtn) {
-                        micBtn.innerHTML = "⏹️";
-                        micBtn.className = "bg-rose-600 text-white p-2 rounded-xl text-xs transition shadow-sm animate-pulse";
-                    }
-                    if (inputField) inputField.placeholder = "Écoute en cours (parlez en français)...";
-                };
-
-                chatSpeechRecognition.onresult = (event) => {
-                    const spokenText = event.results[0][0].transcript;
-                    if (inputField) inputField.value = spokenText;
-                };
-
-                chatSpeechRecognition.onerror = () => {
-                    stopChatMicUI();
-                };
-
-                chatSpeechRecognition.onend = () => {
-                    stopChatMicUI();
-                };
-
-                chatSpeechRecognition.start();
-            } else {
-                if (chatSpeechRecognition) chatSpeechRecognition.stop();
-                stopChatMicUI();
-            }
+        const $ = (id) => document.getElementById(id);
+        const store = LIB.store;
+        const LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1'];
+        const LEVEL_STYLE = {
+            A1: ['text-emerald-700', 'bg-emerald-50'], A2: ['text-teal-700', 'bg-teal-50'], B1: ['text-sky-700', 'bg-sky-50'],
+            B2: ['text-indigo-700', 'bg-indigo-50'], C1: ['text-purple-700', 'bg-purple-50']
         };
+        const SUBJECTS = ['Daily life', 'Family and friends', 'Food', 'Travel', 'Home', 'Work', 'Studies', 'Health and sport',
+            'Free time', 'Shopping', 'Technology', 'Environment', 'Culture and media', 'Society'];
+        const KINDS = ['Article', 'Story', 'Dialogue', 'Email or message', 'Blog', 'Advert or notice'];
+        const PAGE = 'reading';
+        let pick = store.get('reading_pick', { subject: 'Daily life', kind: 'Article' });
+        let dbSubjects = [];
+        let libTexts = {};          // level -> texts from the shared library
+        let text = null;            // the open text
+        let answers = {};           // question index -> chosen option (shuffled index)
 
-        function stopChatMicUI() {
-            isChatListening = false;
-            const micBtn = document.getElementById('ai-mic-btn');
-            const inputField = document.getElementById('ai-input');
-            if (micBtn) {
-                micBtn.innerHTML = "🎙️";
-                micBtn.className = "bg-slate-100 text-slate-700 hover:bg-slate-200 p-2 rounded-xl text-xs transition";
-            }
-            if (inputField) {
-                inputField.placeholder = "Posez une question...";
-            }
+        function currentLevel() {
+            const saved = store.get('reading_level', null);
+            if (LEVELS.includes(saved)) return saved;
+            const lv = (LocalStore.get('fs_profile', {}) || {}).level;
+            return LEVELS.includes(lv) ? lv : lv === 'C2' ? 'C1' : 'A1';
         }
+        const textsFor = (lv) => {
+            const seen = new Set();
+            return [...LIB.mine().filter(t => t.level === lv), ...(libTexts[lv] || []), ...LIB.BUILT_IN.filter(t => t.level === lv)]
+                .filter(t => !seen.has(t.id) && seen.add(t.id));
+        };
+        const wordCount = (fr) => (String(fr).match(/[\p{L}]+/gu) || []).length;
+        const result = (id) => LIB.results()[PAGE + ':' + id];
 
-        async function sendAIChat() {
-            const input = document.getElementById('ai-input');
-            const chatBox = document.getElementById('ai-chat-box');
-            if (!input || !input.value.trim() || !chatBox) return;
-
-            const userText = input.value.trim();
-            const currentTitle = document.getElementById('reading-title')?.innerText || '';
-
-            const userMsg = document.createElement('div');
-            userMsg.className = 'bg-indigo-50 border border-indigo-100 p-3 rounded-xl text-xs text-indigo-900 ml-4 shadow-sm';
-            userMsg.innerText = userText;
-            chatBox.appendChild(userMsg);
-            input.value = '';
-            chatBox.scrollTop = chatBox.scrollHeight;
-
-            const typingMsg = document.createElement('div');
-            typingMsg.id = 'ai-typing';
-            typingMsg.className = 'bg-slate-50 border border-slate-100 p-3 rounded-xl text-xs text-slate-500 mr-4 italic';
-            typingMsg.innerText = '🤖 L\'examinateur analyse votre question...';
-            chatBox.appendChild(typingMsg);
-            chatBox.scrollTop = chatBox.scrollHeight;
-
-            const apiUrl = localStorage.getItem('ai_api_url') || "https://api.groq.com/openai/v1/chat/completions";
-            const apiKey = localStorage.getItem('ai_api_key') || "server";
-            const modelName = localStorage.getItem('ai_model_name') || "openai/gpt-oss-120b";
-
-            if (!apiKey) {
-                document.getElementById('ai-typing')?.remove();
-                const errorMsg = document.createElement('div');
-                errorMsg.className = 'bg-rose-50 border border-rose-100 p-3 rounded-xl text-xs text-rose-700 mr-4 shadow-sm';
-                errorMsg.innerText = "Erreur : Clé API manquante. Veuillez la configurer dans l'administration.";
-                chatBox.appendChild(errorMsg);
-                return;
-            }
-
+        // ---------- List ----------
+        function renderList() {
+            const level = currentLevel();
+            $('levels').innerHTML = LEVELS.map(lv => {
+                const list = textsFor(lv);
+                const n = list.filter(t => result(t.id)).length;
+                const on = lv === level;
+                return `<button type="button" role="tab" aria-selected="${on}" data-level="${lv}" class="shrink-0 px-3.5 py-1.5 rounded-lg text-sm font-bold transition ${on ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-800'}">
+                    ${lv}<span class="ml-1.5 text-xs font-semibold ${on ? LEVEL_STYLE[lv][0] : 'text-slate-400'}">${n}/${list.length}</span></button>`;
+            }).join('');
+            renderPicker();
+            const st = LEVEL_STYLE[level];
+            const list = textsFor(level);
+            $('texts-heading').textContent = `Texts for ${level}`;
+            $('text-grid').innerHTML = list.length ? list.map(t => {
+                const r = result(t.id);
+                const status = r ? `<span class="shrink-0 text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">✓ ${r.score}/${r.total}</span>` : '';
+                const badge = t.source === 'mine' ? ['Your text', 'text-violet-700 bg-violet-50'] : t.source === 'library' ? ['Library', 'text-amber-700 bg-amber-50'] : [t.kind, st[0] + ' ' + st[1]];
+                const words = wordCount(t.fr);
+                return `<a href="reading.html?text=${encodeURIComponent(t.id)}" data-text="${escapeHtml(t.id)}" class="group flex flex-col gap-1.5 bg-white border border-slate-200 hover:border-indigo-400 hover:shadow-md transition rounded-2xl p-4">
+                    <span class="flex items-center justify-between gap-2">
+                        <span class="text-[11px] font-bold uppercase tracking-wide ${badge[1]} px-2 py-0.5 rounded-full">${escapeHtml(badge[0])}</span>${status}
+                    </span>
+                    <span class="font-bold text-slate-900 group-hover:text-indigo-700 leading-snug">${escapeHtml(t.title)}</span>
+                    <span class="text-xs text-slate-500">${escapeHtml([t.source === 'built-in' ? t.subject : t.kind !== 'Your text' ? t.kind + ' · ' + t.subject : '', words + ' words', Math.max(1, Math.round(words / 120)) + ' min'].filter(Boolean).join(' · '))}</span>
+                    <span class="text-sm text-slate-500 line-clamp-2">${escapeHtml(t.fr.slice(0, 140))}…</span>
+                </a>`;
+            }).join('') : '<p class="text-sm text-slate-500">No texts yet at this level. Ask for a new one above.</p>';
+            $('lib-note').textContent = LIB.libraryReady() === false ? 'Shared library not set up yet' : '';
+        }
+        function renderPicker() {
+            const subjects = [...SUBJECTS, ...dbSubjects.filter(s => !SUBJECTS.includes(s))];
+            const chip = (on) => `min-h-[36px] px-3 rounded-full text-sm font-semibold border transition ${on ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-white border-slate-200 text-slate-700 hover:border-indigo-300'}`;
+            $('subjects').innerHTML = subjects.map(s => `<button type="button" data-subject="${escapeHtml(s)}" class="${chip(s === pick.subject)}">${escapeHtml(s)}</button>`).join('');
+            $('kinds').innerHTML = KINDS.map(k => `<button type="button" data-kind="${escapeHtml(k)}" class="${chip(k === pick.kind)}">${escapeHtml(k)}</button>`).join('');
+        }
+        async function loadLevel(lv) {
+            libTexts[lv] = await LIB.loadLibrary(lv);
+            if (!text) renderList();
+        }
+        async function loadDbSubjects() {
             try {
-                const apiResponse = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${apiKey}`
-                    },
-                    body: JSON.stringify({
-                        model: modelName,
-                        messages: [
-                            { role: "system", content: `You are an expert TCF exam tutor. The student is practicing reading for the topic: "${currentTitle}". Provide guidance or answer comprehension questions based on the active article content: "${currentRawContent}".` },
-                            { role: "user", content: userText }
-                        ],
-                        temperature: 0.7
-                    })
-                });
-
-                const data = await apiResponse.json();
-                document.getElementById('ai-typing')?.remove();
-
-                let aiReply = data.choices?.[0]?.message?.content || "Réponse non disponible.";
-
-                const aiMsg = document.createElement('div');
-                aiMsg.className = 'bg-slate-50 border border-slate-200 p-3.5 rounded-2xl text-xs text-slate-700 mr-4 shadow-sm space-y-2';
-                aiMsg.innerHTML = `🤖 <strong>Examinateur :</strong><br>${aiReply.replace(/\n/g, '<br>')}`;
-                chatBox.appendChild(aiMsg);
-                chatBox.scrollTop = chatBox.scrollHeight;
-
-            } catch (err) {
-                document.getElementById('ai-typing')?.remove();
-                const errorMsg = document.createElement('div');
-                errorMsg.className = 'bg-rose-50 border border-rose-100 p-3 rounded-xl text-xs text-rose-700 mr-4 shadow-sm';
-                errorMsg.innerText = "Erreur de connexion : " + err.message;
-                chatBox.appendChild(errorMsg);
-            }
+                const { data, error } = await window.mySupabase.from('reading_topics').select('title, category').order('id', { ascending: true });
+                if (error || !data) return;
+                dbSubjects = [...new Set(data.map(r => String(r.title || r.category || '').trim()).filter(Boolean))].slice(0, 16);
+                if (!text) renderPicker();
+            } catch (e) { /* the built-in subjects are enough */ }
         }
 
-        // Initialize topic fetching from Supabase on startup
-        loadReadingTopicsFromDatabase();
+        // ---------- One text ----------
+        function openText(id, push) {
+            const t = LIB.find(id);
+            if (!t) { showList(false); return; }
+            text = t; answers = {};
+            LIB.stop(); stopPlay();
+            if (push) history.pushState({ text: id }, '', 'reading.html?text=' + encodeURIComponent(id));
+            $('list-view').classList.add('hidden');
+            $('text-view').classList.remove('hidden');
+            $('crumb').textContent = [t.level, t.source === 'mine' ? 'Your text' : t.kind, t.source === 'mine' ? '' : t.subject].filter(Boolean).join(' · ');
+            $('crumb').className = `text-xs font-bold px-2 py-1 rounded-full ${LEVEL_STYLE[t.level] ? LEVEL_STYLE[t.level].join(' ') : 'bg-slate-100 text-slate-600'}`;
+            $('text-title').textContent = t.title;
+            $('text-body').innerHTML = LIB.renderText(t.fr).html;
+            $('en-box').textContent = t.en || '';
+            $('en-box').classList.add('hidden');
+            $('btn-en').textContent = 'Show English';
+            $('btn-en').classList.toggle('hidden', !t.en);
+            $('text-note').classList.toggle('hidden', !t.note);
+            $('text-note').textContent = t.note ? 'The AI could not add questions and a translation: ' + t.note : '';
+            renderQuestions();
+            renderSaved();
+            $('scroller').scrollTop = 0;
+        }
+        function showList(push) {
+            text = null; LIB.stop(); stopPlay(); LIB.closeWord();
+            if (push) history.pushState({}, '', 'reading.html');
+            $('text-view').classList.add('hidden');
+            $('list-view').classList.remove('hidden');
+            renderList();
+        }
+        function renderQuestions() {
+            const qs = text.questions || [];
+            const done = Object.keys(answers).length;
+            const right = qs.filter((q, i) => answers[i] !== undefined && LIB.shuffled(q, text.id + i)[answers[i]].right).length;
+            $('q-score').textContent = done ? `${right}/${qs.length}` : '';
+            $('btn-retry').classList.toggle('hidden', !done);
+            if (!qs.length) { $('questions').innerHTML = '<p class="text-sm text-slate-500">This text has no questions.</p>'; return; }
+            $('questions').innerHTML = qs.map((q, i) => {
+                const opts = LIB.shuffled(q, text.id + i);
+                const chosen = answers[i];
+                return `<div class="space-y-2">
+                    <p class="font-semibold text-slate-900">${i + 1}. ${escapeHtml(q.q)}</p>
+                    <div class="space-y-1.5">${opts.map((o, j) => {
+                        let cls = 'bg-white border-slate-200 hover:border-indigo-400 text-slate-800';
+                        if (chosen !== undefined) cls = o.right ? 'bg-emerald-50 border-emerald-400 text-emerald-900' : j === chosen ? 'bg-rose-50 border-rose-400 text-rose-900' : 'bg-white border-slate-200 text-slate-400';
+                        return `<button type="button" data-q="${i}" data-o="${j}" ${chosen !== undefined ? 'disabled' : ''} class="w-full text-left min-h-[44px] px-3 py-2 text-sm border rounded-xl transition ${cls}">${escapeHtml(o.text)}</button>`;
+                    }).join('')}</div>
+                    ${chosen !== undefined ? `<p class="text-sm ${opts[chosen].right ? 'text-emerald-800' : 'text-rose-800'}"><b>${opts[chosen].right ? 'Right.' : 'Not quite.'}</b> ${escapeHtml(q.why || '')}</p>` : ''}
+                </div>`;
+            }).join('') + (done === qs.length ? `<div class="rounded-xl p-3 text-center font-bold ${right === qs.length ? 'bg-emerald-50 text-emerald-800' : 'bg-slate-50 text-slate-700'}">${right === qs.length ? '🎉 All right!' : `You got ${right} out of ${qs.length}.`}</div>` : '');
+            if (done === qs.length) LIB.saveResult(text.id, PAGE, right, qs.length);
+        }
+        function renderSaved() {
+            const words = [...$('text-body').querySelectorAll('.w')].map(w => w.dataset.w);
+            const progress = store.get('vocab_progress', {});
+            const cache = store.get('vocab_words', {});
+            const saved = Object.values(cache).filter(c => progress[c.key] && c.exFr && $('text-body').textContent.includes(c.exFr));
+            $('saved-box').classList.toggle('hidden', !saved.length);
+            $('saved-words').innerHTML = saved.map(c => `<span class="text-sm font-semibold px-2.5 py-1 bg-slate-100 text-slate-800 rounded-full">${escapeHtml(c.fr)}</span>`).join('');
+            return words;
+        }
+
+        // ---------- Read aloud: sentence by sentence, highlighting each ----------
+        let playing = false;
+        function stopPlay() {
+            playing = false; LIB.stop();
+            document.querySelectorAll('.sent.playing').forEach(s => s.classList.remove('playing'));
+            if ($('btn-play')) $('btn-play').textContent = '▶ Read it to me';
+        }
+        function playFrom(i) {
+            const sents = [...$('text-body').querySelectorAll('.sent')];
+            document.querySelectorAll('.sent.playing').forEach(s => s.classList.remove('playing'));
+            if (!playing || i >= sents.length) { stopPlay(); return; }
+            sents[i].classList.add('playing');
+            sents[i].scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+            LIB.say(sents[i].textContent, 0.9, () => { if (playing) setTimeout(() => playFrom(i + 1), 250); });
+        }
+
+        // ---------- New texts ----------
+        async function generateText() {
+            const subject = $('subject-other').value.trim() || pick.subject;
+            $('gen-error').classList.add('hidden');
+            $('gen-btn').disabled = true; $('gen-btn').textContent = 'Writing…';
+            try {
+                const t = await LIB.generate({ subject, kind: pick.kind, level: currentLevel(), purpose: PAGE });
+                $('subject-other').value = '';
+                if (t.source === 'library') { libTexts[t.level] = [t, ...(libTexts[t.level] || []).filter(x => x.id !== t.id)]; }
+                openText(t.id, true);
+            } catch (err) {
+                $('gen-error').textContent = err.message; $('gen-error').classList.remove('hidden');
+            }
+            $('gen-btn').disabled = false; $('gen-btn').textContent = 'Write me a text';
+        }
+        async function pasteText() {
+            const fr = $('paste-text').value.trim();
+            $('paste-error').classList.add('hidden');
+            if (fr.length < 40) { $('paste-error').textContent = 'Paste a longer text (at least a few sentences).'; $('paste-error').classList.remove('hidden'); return; }
+            $('paste-btn').disabled = true; $('paste-btn').textContent = 'Preparing questions…';
+            const t = await LIB.fromPasted(fr, currentLevel());
+            $('paste-text').value = '';
+            $('paste-btn').disabled = false; $('paste-btn').textContent = 'Read my text';
+            openText(t.id, true);
+        }
+
+        // ---------- Events ----------
+        document.addEventListener('click', (e) => {
+            const lv = e.target.closest('[data-level]');
+            if (lv) { store.set('reading_level', lv.dataset.level); renderList(); if (!libTexts[lv.dataset.level]) loadLevel(lv.dataset.level); return; }
+            const card = e.target.closest('[data-text]');
+            if (card && !e.metaKey && !e.ctrlKey) { e.preventDefault(); openText(card.dataset.text, true); return; }
+            const s = e.target.closest('[data-subject]');
+            if (s) { pick.subject = s.dataset.subject; $('subject-other').value = ''; store.set('reading_pick', pick); renderPicker(); return; }
+            const k = e.target.closest('[data-kind]');
+            if (k) { pick.kind = k.dataset.kind; store.set('reading_pick', pick); renderPicker(); return; }
+            const opt = e.target.closest('[data-q]');
+            if (opt && text) { answers[opt.dataset.q] = Number(opt.dataset.o); renderQuestions(); return; }
+            const w = e.target.closest('#text-body .w');
+            if (w && text) { LIB.openWord(w, text.id); return; }
+            if (e.target.closest('[data-pop="add"]')) setTimeout(renderSaved, 0);
+        });
+        document.addEventListener('keydown', (e) => {
+            const w = e.target.closest && e.target.closest('#text-body .w');
+            if (w && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); LIB.openWord(w, text.id); }
+        });
+        $('back').addEventListener('click', () => showList(true));
+        $('gen-btn').addEventListener('click', generateText);
+        $('paste-btn').addEventListener('click', pasteText);
+        $('btn-retry').addEventListener('click', () => { answers = {}; renderQuestions(); });
+        $('btn-en').addEventListener('click', () => {
+            const hidden = $('en-box').classList.toggle('hidden');
+            $('btn-en').textContent = hidden ? 'Show English' : 'Hide English';
+        });
+        $('btn-play').addEventListener('click', () => {
+            if (playing) { stopPlay(); return; }
+            playing = true; $('btn-play').textContent = '■ Stop';
+            playFrom(0);
+        });
+        window.addEventListener('popstate', () => {
+            const id = new URLSearchParams(location.search).get('text');
+            if (id) openText(id, false); else showList(false);
+        });
+
+        const startId = new URLSearchParams(location.search).get('text');
+        if (startId && LIB.find(startId)) openText(startId, false);
+        else if (startId) { renderList(); LIB.fetchOne(startId).then(t => { if (t) openText(t.id, false); }); }
+        else renderList();
+        loadLevel(currentLevel());
+        loadDbSubjects();
     </script>
 </body>
-</html>
+</html>
