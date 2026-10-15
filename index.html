@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Today - Apprendre le Français</title>
+    <title>Home - Apprendre le Français</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="config.js"></script>
@@ -11,73 +11,71 @@
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen flex flex-col">
 
-    <header class="bg-white border-b border-slate-200 sticky top-0 z-50">
-        <div class="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between gap-3">
-            <a href="index.html" class="font-black text-slate-950 flex items-center gap-2">
-                <span class="inline-flex overflow-hidden rounded-[3px] shadow-sm align-middle" style="width:1.5rem;height:1rem" role="img" aria-label="French flag"><span class="flex-1" style="background:#0055a4"></span><span class="flex-1" style="background:#ffffff"></span><span class="flex-1" style="background:#ef4135"></span></span><span>Apprendre le Français</span>
-            </a>
-            <div class="flex items-center gap-1 text-sm">
-                <a href="admin.html" class="text-slate-600 hover:text-indigo-600 px-2.5 py-1.5 rounded-lg hover:bg-slate-100" style="display:none">Admin</a>
-                <button id="logoutBtn" class="text-slate-600 hover:text-red-600 hover:bg-slate-100 px-3 py-1.5 rounded-lg">Log out</button>
-            </div>
-        </div>
-    </header>
+    <header id="app-header" class="bg-white border-b border-slate-200 sticky top-0 z-50 shrink-0 h-14"></header>
 
-    <main class="flex-1 max-w-6xl mx-auto px-4 py-6 w-full space-y-6">
+    <main class="flex-1 max-w-6xl mx-auto px-4 py-5 sm:py-6 w-full">
         <div id="loading" class="text-sm text-slate-400 animate-pulse">Loading your day…</div>
 
-        <div id="today" class="hidden space-y-6">
-            <!-- Greeting -->
-            <section class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2">
+        <div id="today" class="hidden space-y-5">
+            <!-- Greeting and progress -->
+            <section class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
                 <div>
-                    <h1 id="greeting" class="text-3xl font-black text-slate-900"></h1>
-                    <p id="subtitle" class="text-base text-slate-600 mt-1"></p>
+                    <h1 id="greeting" class="text-2xl sm:text-3xl font-black text-slate-900"></h1>
+                    <p id="subtitle" class="text-sm text-slate-500 mt-0.5"></p>
                 </div>
-                <a href="welcome.html" class="text-sm font-semibold text-indigo-600 hover:underline">Change level or goal</a>
-            </section>
-
-            <!-- Progress -->
-            <section class="grid grid-cols-3 gap-3">
-                <div class="bg-white border border-slate-200 rounded-2xl p-4">
-                    <div class="text-2xl">🔥</div>
-                    <div id="stat-streak" class="text-2xl font-black text-orange-500">0</div>
-                    <div class="text-sm text-slate-500">day streak</div>
-                </div>
-                <div class="bg-white border border-slate-200 rounded-2xl p-4">
-                    <div class="text-2xl">🗂️</div>
-                    <div id="stat-words" class="text-2xl font-black text-emerald-600">0</div>
-                    <div class="text-sm text-slate-500">words known</div>
-                </div>
-                <div class="bg-white border border-slate-200 rounded-2xl p-4">
-                    <div class="text-2xl">✅</div>
-                    <div id="stat-lessons" class="text-2xl font-black text-indigo-600">0</div>
-                    <div class="text-sm text-slate-500">lessons done</div>
+                <div class="flex flex-wrap items-center gap-2 text-sm">
+                    <span class="inline-flex items-center gap-1.5 bg-white border border-slate-200 rounded-full px-3 py-1.5" title="Days in a row"><span aria-hidden="true">🔥</span><b id="stat-streak" class="text-orange-500">0</b><span class="text-slate-500">day streak</span></span>
+                    <span class="inline-flex items-center gap-1.5 bg-white border border-slate-200 rounded-full px-3 py-1.5"><span aria-hidden="true">🗂️</span><b id="stat-words" class="text-emerald-600">0</b><span class="text-slate-500">words known</span></span>
+                    <span class="inline-flex items-center gap-1.5 bg-white border border-slate-200 rounded-full px-3 py-1.5"><span aria-hidden="true">✅</span><b id="stat-lessons" class="text-indigo-600">0</b><span class="text-slate-500">lessons done</span></span>
+                    <a href="welcome.html" class="font-semibold text-indigo-600 hover:underline px-1">Change level or goal</a>
                 </div>
             </section>
 
-            <!-- Today's plan -->
-            <section class="space-y-3">
-                <div class="flex items-baseline justify-between">
-                    <h2 class="text-xl font-black text-slate-900">Today</h2>
+            <!-- The 8 sections -->
+            <section aria-label="Sections">
+                <div id="sections" class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                    <a href="vocab.html" class="group flex flex-col items-start gap-2 sm:gap-3 bg-white border border-slate-200 hover:border-indigo-400 hover:shadow-md transition rounded-2xl p-3 sm:p-4">
+                        <span class="shrink-0 w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-emerald-50 flex items-center justify-center text-2xl">🗂️</span>
+                        <span class="min-w-0"><span class="block font-bold text-slate-900 group-hover:text-indigo-700">Vocab</span><span class="block text-xs sm:text-sm text-slate-500 leading-snug">Lessons, word lists, flashcards and quizzes</span></span>
+                    </a>
+                    <a href="lesson.html" class="group flex flex-col items-start gap-2 sm:gap-3 bg-white border border-slate-200 hover:border-indigo-400 hover:shadow-md transition rounded-2xl p-3 sm:p-4">
+                        <span class="shrink-0 w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-sky-50 flex items-center justify-center text-2xl">📚</span>
+                        <span class="min-w-0"><span class="block font-bold text-slate-900 group-hover:text-indigo-700">Grammar</span><span class="block text-xs sm:text-sm text-slate-500 leading-snug">78 lessons from A1 to C2</span></span>
+                    </a>
+                    <a href="conjugations.html" class="group flex flex-col items-start gap-2 sm:gap-3 bg-white border border-slate-200 hover:border-indigo-400 hover:shadow-md transition rounded-2xl p-3 sm:p-4">
+                        <span class="shrink-0 w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-amber-50 flex items-center justify-center text-2xl">⚡</span>
+                        <span class="min-w-0"><span class="block font-bold text-slate-900 group-hover:text-indigo-700">Conjugations</span><span class="block text-xs sm:text-sm text-slate-500 leading-snug">296 verb tables and 44 lessons</span></span>
+                    </a>
+                    <a href="reading.html" class="group flex flex-col items-start gap-2 sm:gap-3 bg-white border border-slate-200 hover:border-indigo-400 hover:shadow-md transition rounded-2xl p-3 sm:p-4">
+                        <span class="shrink-0 w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-violet-50 flex items-center justify-center text-2xl">📖</span>
+                        <span class="min-w-0"><span class="block font-bold text-slate-900 group-hover:text-indigo-700">Reading</span><span class="block text-xs sm:text-sm text-slate-500 leading-snug">Texts with tap-to-translate</span></span>
+                    </a>
+                    <a href="listening.html" class="group flex flex-col items-start gap-2 sm:gap-3 bg-white border border-slate-200 hover:border-indigo-400 hover:shadow-md transition rounded-2xl p-3 sm:p-4">
+                        <span class="shrink-0 w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-pink-50 flex items-center justify-center text-2xl">🎧</span>
+                        <span class="min-w-0"><span class="block font-bold text-slate-900 group-hover:text-indigo-700">Listening</span><span class="block text-xs sm:text-sm text-slate-500 leading-snug">Audio with transcripts</span></span>
+                    </a>
+                    <a href="writing.html" class="group flex flex-col items-start gap-2 sm:gap-3 bg-white border border-slate-200 hover:border-indigo-400 hover:shadow-md transition rounded-2xl p-3 sm:p-4">
+                        <span class="shrink-0 w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-orange-50 flex items-center justify-center text-2xl">✍️</span>
+                        <span class="min-w-0"><span class="block font-bold text-slate-900 group-hover:text-indigo-700">Writing</span><span class="block text-xs sm:text-sm text-slate-500 leading-snug">Feedback on your texts</span></span>
+                    </a>
+                    <a href="speaking.html" class="group flex flex-col items-start gap-2 sm:gap-3 bg-white border border-slate-200 hover:border-indigo-400 hover:shadow-md transition rounded-2xl p-3 sm:p-4">
+                        <span class="shrink-0 w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-teal-50 flex items-center justify-center text-2xl">🗣️</span>
+                        <span class="min-w-0"><span class="block font-bold text-slate-900 group-hover:text-indigo-700">Speaking</span><span class="block text-xs sm:text-sm text-slate-500 leading-snug">Role-play and voice practice</span></span>
+                    </a>
+                    <a href="translator.html" class="group flex flex-col items-start gap-2 sm:gap-3 bg-white border border-slate-200 hover:border-indigo-400 hover:shadow-md transition rounded-2xl p-3 sm:p-4">
+                        <span class="shrink-0 w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-indigo-50 flex items-center justify-center text-2xl">💬</span>
+                        <span class="min-w-0"><span class="block font-bold text-slate-900 group-hover:text-indigo-700">Translator</span><span class="block text-xs sm:text-sm text-slate-500 leading-snug">With gender and preposition notes</span></span>
+                    </a>
+                </div>
+            </section>
+
+            <!-- Continue where you left off -->
+            <section class="bg-white border border-slate-200 rounded-2xl">
+                <div class="flex items-baseline justify-between px-4 pt-3">
+                    <h2 class="text-sm font-black uppercase tracking-wide text-slate-500">Continue</h2>
                     <span id="today-note" class="text-sm text-slate-500"></span>
                 </div>
-                <div id="tasks" class="grid grid-cols-1 md:grid-cols-3 gap-3"></div>
-                <div id="goal-card"></div>
-            </section>
-
-            <!-- Everything -->
-            <section class="space-y-3">
-                <h2 class="text-xl font-black text-slate-900">All sections</h2>
-                <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
-                    <a href="vocab.html" class="bg-white border border-slate-200 hover:border-indigo-400 p-4 rounded-2xl"><span class="text-2xl">🗂️</span><span class="block font-bold text-slate-900 mt-1">Vocab</span><span class="block text-xs text-slate-500">Flashcards and hands-on lessons</span></a>
-                    <a href="lesson.html" class="bg-white border border-slate-200 hover:border-indigo-400 p-4 rounded-2xl"><span class="text-2xl">📚</span><span class="block font-bold text-slate-900 mt-1">Grammar</span><span class="block text-xs text-slate-500">78 lessons, A1 to C2</span></a>
-                    <a href="conjugations.html" class="bg-white border border-slate-200 hover:border-indigo-400 p-4 rounded-2xl"><span class="text-2xl">⚡</span><span class="block font-bold text-slate-900 mt-1">Conjugations</span><span class="block text-xs text-slate-500">296 verbs and 44 lessons</span></a>
-                    <a href="reading.html" class="bg-white border border-slate-200 hover:border-indigo-400 p-4 rounded-2xl"><span class="text-2xl">📖</span><span class="block font-bold text-slate-900 mt-1">Reading</span><span class="block text-xs text-slate-500">Texts with tap-to-translate</span></a>
-                    <a href="listening.html" class="bg-white border border-slate-200 hover:border-indigo-400 p-4 rounded-2xl"><span class="text-2xl">🎧</span><span class="block font-bold text-slate-900 mt-1">Listening</span><span class="block text-xs text-slate-500">Audio with transcripts</span></a>
-                    <a href="writing.html" class="bg-white border border-slate-200 hover:border-indigo-400 p-4 rounded-2xl"><span class="text-2xl">✍️</span><span class="block font-bold text-slate-900 mt-1">Writing</span><span class="block text-xs text-slate-500">AI feedback on your texts</span></a>
-                    <a href="speaking.html" class="bg-white border border-slate-200 hover:border-indigo-400 p-4 rounded-2xl"><span class="text-2xl">🗣️</span><span class="block font-bold text-slate-900 mt-1">Speaking</span><span class="block text-xs text-slate-500">Role-play and voice practice</span></a>
-                    <a href="translator.html" class="bg-white border border-slate-200 hover:border-indigo-400 p-4 rounded-2xl"><span class="text-2xl">💬</span><span class="block font-bold text-slate-900 mt-1">Translator</span><span class="block text-xs text-slate-500">With gender and preposition notes</span></a>
-                </div>
+                <div id="tasks" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 divide-y md:divide-y-0 divide-slate-100 p-1.5"></div>
             </section>
         </div>
     </main>
@@ -105,15 +103,14 @@
             return null;
         }
 
-        function taskCard({ href, emoji, label, title, detail, colour }) {
-            return `<a href="${href}" class="group flex md:flex-col gap-3 bg-white border-2 ${colour} rounded-2xl p-4 hover:shadow-md transition">
-                <span class="shrink-0 w-12 h-12 rounded-xl bg-slate-50 flex items-center justify-center text-2xl">${emoji}</span>
+        function taskCard({ href, emoji, label, title }) {
+            return `<a href="${href}" class="group flex items-center gap-3 rounded-xl px-2.5 py-2.5 hover:bg-slate-50 min-w-0">
+                <span class="shrink-0 w-9 h-9 rounded-lg bg-slate-100 flex items-center justify-center text-lg">${emoji}</span>
                 <span class="min-w-0 flex-1">
-                    <span class="block text-xs font-black uppercase tracking-wide text-slate-500">${esc(label)}</span>
-                    <span class="block font-bold text-slate-900">${esc(title)}</span>
-                    <span class="block text-sm text-slate-500">${esc(detail)}</span>
+                    <span class="block text-xs font-bold text-slate-500">${esc(label)}</span>
+                    <span class="block text-sm font-semibold text-slate-900 truncate" title="${esc(title)}">${esc(title)}</span>
                 </span>
-                <span class="self-center md:self-end text-indigo-600 font-black group-hover:translate-x-1 transition">Start →</span>
+                <span class="shrink-0 text-indigo-600 font-black group-hover:translate-x-0.5 transition" aria-hidden="true">→</span>
             </a>`;
         }
 
@@ -133,7 +130,7 @@
             $('stat-words').textContent = known;
             $('stat-lessons').textContent = lessonsDone;
             const todayCount = Activity.today();
-            $('today-note').textContent = todayCount ? `${todayCount} done today, nice!` : 'About 15 minutes';
+            $('today-note').textContent = todayCount ? `${todayCount} done today, nice!` : 'About 15 minutes a day';
 
             // 1. Flashcards: reviews first, otherwise new words for your level
             const theme = START_THEME[level];
@@ -153,20 +150,11 @@
             tasks.push(c
                 ? taskCard({ href: `conjugations.html?lesson=${c.id}`, emoji: '⚡', label: `Conjugation · ${c.level}`, title: c.title, detail: 'Verbs that unlock new sentences.', colour: 'border-amber-200 hover:border-amber-400' })
                 : taskCard({ href: 'conjugations.html', emoji: '🏆', label: 'Conjugation', title: 'All conjugation lessons done!', detail: 'Look up any verb in the tables.', colour: 'border-amber-200 hover:border-amber-400' }));
-            $('tasks').innerHTML = tasks.join('');
-
             // For your goal
             const goal = profile.goal;
-            let gc = null;
-            if (goal === 'exam') gc = { href: 'writing.html', emoji: '📝', title: 'Practise an exam writing task', detail: 'Get a score and corrections on a short text.' };
-            else if (GOAL_THEME[goal]) gc = { href: `vocab.html?deck=theme:${GOAL_THEME[goal]}`, emoji: goal === 'travel' ? '✈️' : goal === 'work' ? '💼' : '🎉', title: `Words for ${GOALS[goal]}: ${IX.themes[GOAL_THEME[goal]]}`, detail: 'A themed deck picked for your goal.' };
-            $('goal-card').innerHTML = gc ? `
-                <a href="${gc.href}" class="flex items-center gap-3 bg-gradient-to-r from-indigo-500 to-violet-500 text-white rounded-2xl p-4 hover:opacity-95">
-                    <span class="text-3xl">${gc.emoji}</span>
-                    <span class="min-w-0"><span class="block text-xs font-black uppercase tracking-wide text-white/80">For your goal</span>
-                    <span class="block font-bold">${esc(gc.title)}</span><span class="block text-sm text-white/85">${esc(gc.detail)}</span></span>
-                    <span class="ml-auto font-black">→</span>
-                </a>` : '';
+            if (goal === 'exam') tasks.push(taskCard({ href: 'writing.html', emoji: '📝', label: 'For your goal', title: 'Exam writing task' }));
+            else if (GOAL_THEME[goal]) tasks.push(taskCard({ href: `vocab.html?deck=theme:${GOAL_THEME[goal]}`, emoji: goal === 'travel' ? '✈️' : goal === 'work' ? '💼' : '🎉', label: 'For your goal', title: IX.themes[GOAL_THEME[goal]] }));
+            $('tasks').innerHTML = tasks.join('');
 
             $('loading').classList.add('hidden');
             $('today').classList.remove('hidden');

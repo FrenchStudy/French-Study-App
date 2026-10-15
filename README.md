@@ -6,12 +6,12 @@ A browser-based French learning suite backed by Supabase (schema `French-schema`
 
 | Page | Purpose |
 |---|---|
-| `index.html` | Today: greeting, streak, words known, lessons done, today's 3 tasks and a goal suggestion |
+| `index.html` | Home: greeting and progress, the 8 sections, and a Continue row (next flashcards, grammar, conjugation and goal) |
 | `login.html` | Sign in, create account, forgot password, Google |
 | `welcome.html` | First-time setup: goal, level or a 12-question placement test |
 | `reset.html` | Choose a new password from the reset email |
 | `lesson.html` | Grammar: 78 lessons (A1–C2) from the cheat sheet; topics 2, 3, 10 and 28 include their interactive practice |
-| `vocab.html` | Vocabulary: flashcards for 44 themes and 5,000 frequency words, plus 12 interactive lessons (Lessons tab) |
+| `vocab.html` | Vocabulary tabs: Lessons (12 interactive), Word list, Flashcards and Quiz for 44 themes and 5,000 frequency words |
 | `conjugations.html` | Verb tables for 296 verbs (no AI) and 44 conjugation lessons (Lessons tab) |
 | `reading.html` | Reading practice (`reading_topics`) |
 | `listening.html` | Listening practice (`listening_topics`) |
@@ -24,8 +24,8 @@ A browser-based French learning suite backed by Supabase (schema `French-schema`
 
 `config.js` holds the Supabase URL, anon key and schema, creates the shared client
 (`window.mySupabase`), and exposes AI settings through `CONFIG`. It also provides `Account`
-(the signed-in student's profile), `Activity` (days practised, for the streak) and hides
-Admin links from everyone except admins. Every page that
+(the signed-in student's profile), `Activity` (days practised, for the streak), draws the shared
+page header into `<header id="app-header">`, and hides Admin links from everyone except admins. Every page that
 talks to Supabase loads it right after the Supabase SDK.
 
 ## Shared scripts (`js/`)

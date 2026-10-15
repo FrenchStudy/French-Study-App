@@ -365,25 +365,21 @@ const LessonKit = (function () {
         root.innerHTML = `
             <div class="lk-list space-y-4">
                 ${opts.intro || ''}
-                <input type="search" class="lk-search w-full lg:max-w-md text-base px-3 py-3 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="${escapeHtml(opts.searchPlaceholder || 'Search, e.g. subjonctif')}">
+                <div class="flex flex-col md:flex-row md:items-center gap-3">
+                    <div class="lk-levels flex gap-1 p-1 bg-slate-200/70 rounded-xl overflow-x-auto" role="tablist" aria-label="Level"></div>
+                    <input type="search" class="lk-search md:ml-auto w-full md:w-72 text-base md:text-sm px-3 py-2.5 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="${escapeHtml(opts.searchPlaceholder || 'Search, e.g. subjonctif')}">
+                </div>
                 <div class="lk-results hidden space-y-5"></div>
                 <div class="lk-pathview space-y-4">
-                    <div class="lk-levels flex gap-2 overflow-x-auto pb-1"></div>
-                    <div class="lg:grid lg:grid-cols-[minmax(0,1fr)_22rem] lg:gap-8 space-y-4 lg:space-y-0">
-                        <div class="space-y-4 min-w-0">
-                            <div class="lk-banner"></div>
-                            <div class="lk-continue lg:hidden"></div>
-                            <div class="lk-path relative mx-auto max-w-xl"></div>
-                        </div>
-                        <aside class="lk-aside hidden lg:block lg:sticky lg:top-4 lg:self-start space-y-4"></aside>
-                    </div>
+                    <div class="lk-banner"></div>
+                    <div class="lk-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
                 </div>
             </div>
             <article class="lk-view hidden">
                 <div class="lg:grid lg:grid-cols-[minmax(0,1fr)_20rem] lg:gap-8">
                     <div class="space-y-4 min-w-0">
                         <div class="flex items-center justify-between gap-2">
-                            <button type="button" class="lk-back min-h-[44px] px-1 text-sm font-semibold text-slate-600 hover:text-indigo-600">← Back to the path</button>
+                            <button type="button" class="lk-back min-h-[44px] px-1 text-sm font-semibold text-slate-600 hover:text-indigo-600">← All lessons</button>
                             <span class="lk-crumb text-xs font-bold px-2 py-1 rounded-full"></span>
                         </div>
                         <header class="space-y-1">
@@ -424,15 +420,15 @@ const LessonKit = (function () {
         }
 
         function renderLevels(activeName) {
-            q('levels').classList.toggle('hidden', levels().length < 2);   // one level: nothing to choose
+            const single = levels().length < 2;   // one level: nothing to choose
+            q('levels').classList.toggle('hidden', single);
+            q('search').classList.toggle('md:ml-auto', !single);
             q('levels').innerHTML = levels().map(([name, list]) => {
                 const code = levelCode(name);
-                const st = styleOf(code);
                 const n = list.filter(id => isDone(section, id)).length;
                 const on = name === activeName;
-                return `<button type="button" data-level="${code}" class="shrink-0 min-h-[48px] px-4 rounded-2xl border-2 text-left transition ${on ? `${st.solid} border-transparent text-white shadow` : `bg-white ${st.border} ${st.text}`}">
-                    <span class="block text-base font-black leading-none">${code}</span>
-                    <span class="block text-[11px] font-semibold ${on ? 'text-white/90' : 'text-slate-500'}">${n}/${list.length}</span>
+                return `<button type="button" role="tab" aria-selected="${on}" data-level="${code}" class="shrink-0 px-3.5 py-1.5 rounded-lg text-sm font-bold transition ${on ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-800'}">
+                    ${code}<span class="ml-1.5 text-xs font-semibold ${on ? styleOf(code).text : 'text-slate-400'}">${n}/${list.length}</span>
                 </button>`;
             }).join('');
         }
@@ -448,76 +444,40 @@ const LessonKit = (function () {
             const n = list.filter(id => isDone(section, id)).length;
             const nxt = nextUp(list);
             const pct = list.length ? Math.round(n / list.length * 100) : 0;
+            const levelTitle = String(name).split(':').slice(1).join(':').trim();
 
+            // Continue banner: progress for this level and the next lesson
             q('banner').innerHTML = `
-                <div class="rounded-3xl p-5 text-white bg-gradient-to-br ${st.grad} shadow-md">
-                    <div class="text-sm font-bold uppercase tracking-wide text-white/80">${escapeHtml(sec.name)} · Level ${code}</div>
-                    <div class="text-2xl font-black">${escapeHtml(String(name).split(':').slice(1).join(':').trim() || name)}</div>
-                    <div class="mt-3 h-3 bg-white/30 rounded-full overflow-hidden"><div class="h-full bg-white rounded-full" style="width:${pct}%"></div></div>
-                    <div class="mt-1 text-sm font-semibold text-white/90">${n} of ${list.length} done${n === list.length ? ' · Level complete! 🎉' : ''}</div>
+                <div class="bg-white border border-slate-200 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center gap-4">
+                    <div class="sm:w-72 shrink-0">
+                        <div class="text-xs font-bold uppercase tracking-wide ${st.text}">${escapeHtml(sec.name)} · ${code}${levelTitle ? ' · ' + escapeHtml(levelTitle) : ''}</div>
+                        <div class="mt-2 h-2 bg-slate-100 rounded-full overflow-hidden"><div class="h-full ${st.bar} rounded-full" style="width:${pct}%"></div></div>
+                        <div class="mt-1 text-xs font-semibold text-slate-500">${n} of ${list.length} done</div>
+                    </div>
+                    ${nxt !== undefined ? `
+                    <div class="flex-1 min-w-0 sm:border-l sm:border-slate-100 sm:pl-4">
+                        <div class="text-xs font-bold text-slate-500">Continue with</div>
+                        <div class="font-bold text-slate-900 truncate">${escapeHtml(sec.get(nxt).title)}</div>
+                    </div>
+                    <a href="${url(nxt)}" data-open="${escapeHtml(String(nxt))}" class="lk-start shrink-0 inline-flex items-center justify-center min-h-[44px] px-5 rounded-xl ${st.solid} text-white font-bold hover:opacity-90">Start →</a>`
+                    : `<div class="flex-1 font-bold text-emerald-700">Level ${code} complete! 🎉</div>`}
                 </div>`;
 
-            // Phone: one tap to carry on
-            q('continue').innerHTML = nxt !== undefined ? `
-                <a href="${url(nxt)}" data-open="${escapeHtml(String(nxt))}" class="flex items-center gap-3 bg-white border-2 ${st.border} rounded-2xl p-3 shadow-sm">
-                    <span class="shrink-0 w-11 h-11 rounded-full ${st.solid} text-white font-black flex items-center justify-center">${escapeHtml(String(nodeLabel(nxt, sec.get(nxt))))}</span>
-                    <span class="min-w-0"><span class="block text-xs font-bold uppercase ${st.text}">Continue</span>
-                    <span class="block font-bold text-slate-900 truncate">${escapeHtml(sec.get(nxt).title)}</span></span>
-                    <span class="ml-auto ${st.text} font-black text-xl">→</span>
-                </a>` : '';
-
-            // The winding path
-            const ROW = 124, TOP = 60, OFF = [0, 22, 30, 22, 0, -22, -30, -22];
-            const pts = list.map((id, i) => ({ id, x: 50 + OFF[i % OFF.length], y: TOP + i * ROW }));
-            const height = TOP + list.length * ROW + 10;
-            const curve = (arr) => arr.map((p, i) => i === 0 ? `M ${p.x} ${p.y}` :
-                `C ${arr[i - 1].x} ${arr[i - 1].y + ROW / 2}, ${p.x} ${p.y - ROW / 2}, ${p.x} ${p.y}`).join(' ');
-            const nextIndex = nxt === undefined ? list.length - 1 : list.indexOf(nxt);
-            const nodes = pts.map(({ id, x, y }) => {
+            // Lesson cards
+            q('grid').innerHTML = list.map(id => {
                 const t = sec.get(id);
                 const d = isDone(section, id);
                 const isNext = id === nxt;
-                const circle = d
-                    ? `bg-emerald-500 text-white ring-emerald-200`
-                    : isNext ? `${st.solid} text-white ${st.ring}` : `bg-white ${st.text} ring-slate-100 border-2 ${st.border}`;
-                return `
-                <a href="${url(id)}" data-open="${escapeHtml(String(id))}" title="${escapeHtml(t.title)}"
-                   class="lk-node absolute flex flex-col items-center group w-36 -ml-[4.5rem]" style="left:${x}%; top:${y - 32}px">
-                    ${isNext ? `<span class="absolute -top-7 text-[11px] font-black uppercase tracking-wide ${st.text} bg-white border ${st.border} px-2 py-0.5 rounded-full shadow-sm">Start</span>` : ''}
-                    <span class="relative w-16 h-16 rounded-full flex items-center justify-center text-lg font-black shadow-md ring-4 transition group-hover:scale-110 ${circle}">
-                        ${isNext ? `<span class="absolute inset-0 rounded-full ${st.solid} opacity-30 animate-ping"></span>` : ''}
-                        <span class="relative">${d ? '✓' : escapeHtml(String(nodeLabel(id, t)))}</span>
+                const status = d ? '<span class="text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">✓ Done</span>'
+                    : isNext ? `<span class="text-xs font-bold ${st.text} ${st.soft} px-2 py-0.5 rounded-full">Next</span>` : '';
+                return `<a href="${url(id)}" data-open="${escapeHtml(String(id))}" class="lk-card group flex gap-3 bg-white border ${isNext ? st.border + ' ring-2 ' + st.ring : 'border-slate-200'} hover:border-indigo-400 hover:shadow-md transition rounded-2xl p-4">
+                    <span class="shrink-0 w-10 h-10 rounded-xl flex items-center justify-center font-black ${d ? 'bg-emerald-50 text-emerald-700' : st.soft + ' ' + st.text}">${escapeHtml(String(nodeLabel(id, t)))}</span>
+                    <span class="min-w-0 flex-1">
+                        <span class="flex items-start justify-between gap-2"><span class="font-bold text-slate-900 leading-snug group-hover:text-indigo-700">${escapeHtml(t.title)}</span>${status}</span>
+                        <span class="block text-sm text-slate-500 leading-snug mt-0.5 line-clamp-2">${escapeHtml(t.blurb || '')}</span>
                     </span>
-                    <span class="mt-1.5 text-xs font-semibold text-center leading-tight text-slate-700 bg-white/90 rounded-md px-1.5 py-0.5 line-clamp-2">${escapeHtml(t.title)}</span>
                 </a>`;
             }).join('');
-            q('path').style.height = height + 'px';
-            q('path').innerHTML = `
-                <svg class="absolute inset-0 w-full h-full" viewBox="0 0 100 ${height}" preserveAspectRatio="none" aria-hidden="true">
-                    <path d="${curve(pts)}" fill="none" stroke="#cbd5e1" stroke-width="4" stroke-dasharray="2 10" stroke-linecap="round" vector-effect="non-scaling-stroke"/>
-                    ${nextIndex > 0 ? `<path d="${curve(pts.slice(0, nextIndex + 1))}" fill="none" stroke="${st.stroke}" stroke-width="5" stroke-linecap="round" vector-effect="non-scaling-stroke"/>` : ''}
-                </svg>${nodes}`;
-
-            // Wide screens: Up next card and the whole level at a glance
-            q('aside').innerHTML = `
-                ${nxt !== undefined ? `
-                <div class="rounded-3xl p-5 bg-white border-2 ${st.border} shadow-sm space-y-2">
-                    <div class="text-xs font-black uppercase tracking-wide ${st.text}">Up next</div>
-                    <div class="text-lg font-black text-slate-900 leading-snug">${escapeHtml(sec.get(nxt).title)}</div>
-                    <p class="text-sm text-slate-600">${escapeHtml(sec.get(nxt).blurb || '')}</p>
-                    <a href="${url(nxt)}" data-open="${escapeHtml(String(nxt))}" class="inline-flex items-center justify-center w-full min-h-[48px] rounded-xl ${st.solid} text-white font-bold hover:opacity-90">Start lesson →</a>
-                </div>` : `
-                <div class="rounded-3xl p-5 bg-emerald-50 border-2 border-emerald-300 text-center space-y-1">
-                    <div class="text-3xl">🎉</div><div class="font-black text-emerald-800">Level ${code} complete!</div>
-                </div>`}
-                <div class="bg-white border border-slate-200 rounded-2xl p-3">
-                    <div class="text-xs font-bold uppercase tracking-wide text-slate-500 px-1 pb-2">All ${list.length} lessons in ${code}</div>
-                    <div class="max-h-[50vh] overflow-y-auto divide-y divide-slate-100">
-                        ${list.map(id => `<a href="${url(id)}" data-open="${escapeHtml(String(id))}" class="flex items-center gap-2 px-1 py-2 text-sm hover:bg-slate-50 rounded-lg">
-                            <span class="shrink-0 w-6 h-6 rounded-full text-[11px] font-bold flex items-center justify-center ${isDone(section, id) ? 'bg-emerald-500 text-white' : 'bg-slate-100 text-slate-600'}">${isDone(section, id) ? '✓' : escapeHtml(String(nodeLabel(id, sec.get(id))))}</span>
-                            <span class="truncate ${id === nxt ? 'font-bold text-slate-900' : 'text-slate-700'}">${escapeHtml(sec.get(id).title)}</span></a>`).join('')}
-                    </div>
-                </div>`;
         }
 
         // Search: a plain list of matches across all levels

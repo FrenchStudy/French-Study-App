@@ -120,9 +120,43 @@ const Activity = {
     }
 };
 
+// One header for every page: <header id="app-header"></header>
+const APP_NAV = [
+    ['index.html', 'Home'], ['vocab.html', 'Vocab'], ['lesson.html', 'Grammar'], ['conjugations.html', 'Conjugations'],
+    ['reading.html', 'Reading'], ['listening.html', 'Listening'], ['writing.html', 'Writing'],
+    ['speaking.html', 'Speaking'], ['translator.html', 'Translator']
+];
+function renderAppHeader() {
+    const header = document.getElementById('app-header');
+    if (!header) return;
+    const page = location.pathname.split('/').pop() || 'index.html';
+    const flag = '<span class="inline-flex overflow-hidden rounded-[3px] shadow-sm shrink-0" style="width:1.5rem;height:1rem" role="img" aria-label="French flag"><span class="flex-1" style="background:#0055a4"></span><span class="flex-1" style="background:#ffffff"></span><span class="flex-1" style="background:#ef4135"></span></span>';
+    header.className = 'bg-white border-b border-slate-200 sticky top-0 z-50 shrink-0';
+    header.innerHTML = `
+        <div class="max-w-6xl mx-auto px-4 h-14 flex items-center gap-3">
+            <a href="index.html" class="shrink-0 flex items-center gap-2 font-black text-slate-900 mr-2">${flag}<span class="hidden xl:inline">Apprendre le Français</span></a>
+            <nav class="flex-1 min-w-0 flex items-center gap-1 overflow-x-auto text-sm font-semibold" style="scrollbar-width:none" aria-label="Main">
+                ${APP_NAV.map(([href, label]) => `<a href="${href}" class="shrink-0 px-3 py-1.5 rounded-lg ${href === page ? 'bg-indigo-50 text-indigo-700' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'}"${href === page ? ' aria-current="page"' : ''}>${label}</a>`).join('')}
+            </nav>
+            <a href="admin.html" class="shrink-0 text-sm font-semibold text-slate-600 hover:text-indigo-700 px-2 py-1.5 rounded-lg hover:bg-slate-100" style="display:none">Admin</a>
+            <button id="logoutBtn" type="button" class="shrink-0 text-sm font-semibold text-slate-600 hover:text-rose-600 px-2 py-1.5 rounded-lg hover:bg-slate-100">Log out</button>
+        </div>`;
+    // Small screens: the menu scrolls sideways, so fade its edge and show the current page
+    if (!document.getElementById('app-header-style')) {
+        const st = document.createElement('style');
+        st.id = 'app-header-style';
+        st.textContent = '#app-header nav::-webkit-scrollbar{display:none}@media (max-width:1023px){#app-header nav{-webkit-mask-image:linear-gradient(to right,#000 82%,transparent);mask-image:linear-gradient(to right,#000 82%,transparent)}}';
+        document.head.appendChild(st);
+    }
+    const nav = header.querySelector('nav');
+    const active = nav.querySelector('[aria-current="page"]');
+    if (active && active.offsetLeft + active.offsetWidth > nav.clientWidth) nav.scrollLeft = active.offsetLeft - 16;
+}
+
 // Wire every Logout button (id="logoutBtn" or data-logout) on page load,
 // and show the Admin links only to admins.
 document.addEventListener('DOMContentLoaded', () => {
+    renderAppHeader();
     document.querySelectorAll('#logoutBtn, [data-logout]').forEach((btn) => {
         btn.addEventListener('click', logout);
     });
