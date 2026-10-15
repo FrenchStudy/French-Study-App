@@ -13,79 +13,93 @@
 </head>
 <body class="h-full bg-slate-100 flex flex-col overflow-hidden font-sans text-slate-800">
 
-    <header class="bg-white border-b border-slate-200 sticky top-0 z-50 shrink-0">
-        <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-            <div class="flex items-center space-x-1 sm:space-x-2 text-xs font-semibold overflow-x-auto py-2">
-                <a href="index.html" class="text-slate-600 hover:text-indigo-600 hover:bg-slate-100 px-3 py-1.5 rounded-lg transition">Dashboard</a>
-                 <a href="vocab.html" class="bg-indigo-600 text-white px-3 py-1.5 rounded-lg shadow-sm transition">Vocab</a>
-                <a href="lesson.html" class="text-slate-600 hover:text-indigo-600 hover:bg-slate-100 px-3 py-1.5 rounded-lg transition">Grammar</a>
-                <a href="conjugations.html" class="text-slate-600 hover:text-indigo-600 hover:bg-slate-100 px-3 py-1.5 rounded-lg transition">Conjugations</a>
-                 <a href="reading.html" class="text-slate-600 hover:text-indigo-600 hover:bg-slate-100 px-3 py-1.5 rounded-lg transition">Reading</a>
-                <a href="listening.html" class="text-slate-600 hover:text-indigo-600 hover:bg-slate-100 px-3 py-1.5 rounded-lg transition">Listening</a>
-                <a href="writing.html" class="text-slate-600 hover:text-indigo-600 hover:bg-slate-100 px-3 py-1.5 rounded-lg transition">Writing</a>
-                <a href="speaking.html" class="text-slate-600 hover:text-indigo-600 hover:bg-slate-100 px-3 py-1.5 rounded-lg transition">Speaking</a>
-                <a href="translator.html" class="text-slate-600 hover:text-indigo-600 hover:bg-slate-100 px-3 py-1.5 rounded-lg transition">Translator</a>
-                <a href="admin.html" class="text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 px-3 py-1.5 rounded-lg transition font-bold">Administration</a>
-            </div>
-            <div class="flex items-center space-x-2">
-                
-                <button id="logoutBtn" class="text-slate-600 hover:text-red-600 hover:bg-slate-100 px-3 py-1.5 rounded-lg transition">Logout</button>
-            </div>
-        </div>
-    </header>
+    <header id="app-header" class="bg-white border-b border-slate-200 sticky top-0 z-50 shrink-0 h-14"></header>
 
-    <main class="flex-1 overflow-y-auto">
+    <main id="scroller" class="flex-1 overflow-y-auto">
         <div class="max-w-6xl mx-auto px-4 py-5 space-y-4">
-            <div>
-                <h1 class="text-2xl font-black text-slate-900">Vocabulary</h1>
-                <p class="text-sm text-slate-500 mt-1">Flashcards for 44 themes and 5,000 frequent words, plus hands-on lessons.</p>
+
+            <!-- ===== ALL TOPICS ===== -->
+            <div id="topics-view" class="space-y-4">
+                <div>
+                    <h1 class="text-2xl font-black text-slate-900">Vocabulary</h1>
+                    <p class="text-sm text-slate-500 mt-1">Topics from A1 to B2. In each one: learn the words, practise them with flashcards, then test yourself.</p>
+                </div>
+                <div id="review-banner"></div>
+                <div class="flex flex-col md:flex-row md:items-center gap-3">
+                    <div id="topic-levels" class="flex gap-1 p-1 bg-slate-200/70 rounded-xl overflow-x-auto" role="tablist" aria-label="Level"></div>
+                    <input id="topic-search" type="search" placeholder="Search topics, e.g. famille" class="md:ml-auto w-full md:w-72 text-base md:text-sm px-3 py-2.5 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                </div>
+                <div id="topic-banner"></div>
+                <div id="topic-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+                <section class="bg-white border border-slate-200 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center gap-3">
+                    <span class="shrink-0 w-10 h-10 rounded-xl bg-indigo-50 text-indigo-700 flex items-center justify-center text-xl" aria-hidden="true">📈</span>
+                    <div class="flex-1 min-w-0">
+                        <h2 class="font-bold text-slate-900">Most common words</h2>
+                        <p class="text-sm text-slate-500">The 5,000 words used most in French, in 100 sets of 50. Good after the A1 and A2 topics.</p>
+                    </div>
+                    <select id="freq-select" aria-label="Set of words" class="text-base md:text-sm px-3 py-2.5 bg-white border border-slate-200 rounded-xl"></select>
+                    <button id="freq-open" type="button" class="min-h-[44px] px-4 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl">Open</button>
+                </section>
             </div>
 
-            <nav class="grid grid-cols-4 gap-1 bg-slate-200/70 p-1 rounded-xl text-sm font-semibold lg:max-w-2xl" role="tablist">
-                <button data-mode="cards" class="mode-tab min-h-[44px] rounded-lg">🃏 <span class="sm:hidden">Cards</span><span class="hidden sm:inline">Flashcards</span></button>
-                <button data-mode="list" class="mode-tab min-h-[44px] rounded-lg">📋 <span class="sm:hidden">List</span><span class="hidden sm:inline">Word list</span></button>
-                <button data-mode="lessons" class="mode-tab min-h-[44px] rounded-lg">▶️ Lessons</button>
-                <button data-mode="quiz" class="mode-tab min-h-[44px] rounded-lg">🎯 Quiz</button>
-            </nav>
-
-            <!-- Cards, List and Quiz share the deck panel -->
-            <div id="deck-modes">
-            <div class="lg:grid lg:grid-cols-[20rem_minmax(0,1fr)] lg:gap-6 space-y-4 lg:space-y-0">
-            <!-- Deck picker and progress -->
-            <aside id="deck-block" class="space-y-3 lg:sticky lg:top-4 lg:self-start">
-                <div>
-                    <label for="deck-select" class="block text-sm font-semibold text-slate-700 mb-1">Deck</label>
-                    <select id="deck-select" class="w-full text-base px-3 py-3 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500"></select>
-                </div>
-                <div class="bg-white border border-slate-200 rounded-2xl p-4 space-y-2">
-                    <div class="flex items-center justify-between text-sm">
-                        <span id="deck-title" class="font-bold text-slate-900"></span>
-                        <span id="deck-counts" class="text-slate-500"></span>
+            <!-- ===== ONE TOPIC ===== -->
+            <div id="topic-view" class="hidden space-y-4">
+                <button id="topic-back" type="button" class="min-h-[44px] px-1 text-sm font-semibold text-slate-600 hover:text-indigo-600">← All topics</button>
+                <div class="flex flex-col md:flex-row md:items-end gap-3 md:gap-8">
+                    <div class="min-w-0 flex-1">
+                        <span id="topic-crumb" class="text-xs font-bold px-2 py-1 rounded-full bg-slate-100 text-slate-600"></span>
+                        <h1 id="deck-title" class="text-2xl lg:text-3xl font-black text-slate-900 leading-tight mt-2"></h1>
                     </div>
-                    <div class="h-2.5 bg-slate-100 rounded-full overflow-hidden flex">
-                        <div id="bar-known" class="h-full bg-emerald-500" style="width:0%"></div>
-                        <div id="bar-learning" class="h-full bg-amber-400" style="width:0%"></div>
-                    </div>
-                    <div class="flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-500">
-                        <span><span class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500 align-middle"></span> Known</span>
-                        <span><span class="inline-block w-2.5 h-2.5 rounded-full bg-amber-400 align-middle"></span> Learning</span>
-                        <span><span class="inline-block w-2.5 h-2.5 rounded-full bg-slate-200 align-middle"></span> New</span>
-                        <span class="ml-auto"><span class="text-sky-700 font-bold">blue</span> = masculine · <span class="text-rose-600 font-bold">red</span> = feminine</span>
+                    <div id="topic-progress" class="md:w-96 space-y-1.5">
+                        <div class="flex items-center justify-between text-sm"><span class="font-semibold text-slate-700">Your progress</span><span id="deck-counts" class="text-slate-500"></span></div>
+                        <div class="h-2.5 bg-slate-200 rounded-full overflow-hidden flex">
+                            <div id="bar-known" class="h-full bg-emerald-500" style="width:0%"></div>
+                            <div id="bar-learning" class="h-full bg-amber-400" style="width:0%"></div>
+                        </div>
+                        <div class="flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-500">
+                            <span><span class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500 align-middle"></span> Known</span>
+                            <span><span class="inline-block w-2.5 h-2.5 rounded-full bg-amber-400 align-middle"></span> Learning</span>
+                            <span><span class="inline-block w-2.5 h-2.5 rounded-full bg-slate-200 align-middle"></span> New</span>
+                            <span class="sm:ml-auto"><span class="text-sky-700 font-bold">blue</span> = masculine · <span class="text-rose-600 font-bold">red</span> = feminine</span>
+                        </div>
                     </div>
                 </div>
-                <a id="lesson-shortcut" href="#" class="hidden flex items-center gap-3 bg-emerald-50 border border-emerald-100 hover:border-emerald-300 rounded-2xl p-3">
-                <span class="text-2xl">▶️</span>
-                <span class="min-w-0"><span class="block text-sm font-bold text-emerald-900">Interactive lesson for this theme</span>
-                <span id="lesson-shortcut-title" class="block text-sm text-emerald-800/80"></span></span>
-                <span class="ml-auto text-emerald-700 font-bold">→</span>
-            </a>
-            </aside>
 
-                <div class="min-w-0 space-y-3">
-            <div id="loading" class="hidden text-sm text-indigo-600 animate-pulse">Loading words…</div>
-            <div id="load-error" class="hidden text-sm text-rose-700 bg-rose-50 rounded-xl p-3"></div>
+                <nav id="step-tabs" class="flex gap-1 sm:gap-6 border-b border-slate-200 text-sm font-semibold overflow-x-auto" role="tablist" aria-label="Steps">
+                    <button data-step="learn" role="tab" class="step-tab shrink-0 min-h-[44px] px-2 sm:px-0 border-b-2 -mb-px"><span class="step-num">1</span> Learn</button>
+                    <button data-step="practise" role="tab" class="step-tab shrink-0 min-h-[44px] px-2 sm:px-0 border-b-2 -mb-px"><span class="step-num">2</span> Practise</button>
+                    <button data-step="test" role="tab" class="step-tab shrink-0 min-h-[44px] px-2 sm:px-0 border-b-2 -mb-px"><span class="step-num">3</span> Test</button>
+                </nav>
 
-            <!-- FLASHCARDS -->
+                <div id="loading" class="hidden text-sm text-indigo-600 animate-pulse">Loading words…</div>
+                <div id="load-error" class="hidden text-sm text-rose-700 bg-rose-50 rounded-xl p-3"></div>
+
+                <!-- STEP 1: LEARN -->
+                <section id="step-learn" class="space-y-4">
+                    <div id="learn-lesson" class="hidden bg-white border border-emerald-200 rounded-2xl p-4 space-y-3">
+                        <div class="flex items-center justify-between gap-2">
+                            <h2 id="learn-lesson-title" class="text-sm font-bold uppercase tracking-wide text-emerald-700"></h2>
+                            <button id="lesson-done" type="button" class="min-h-[40px] px-3 rounded-xl text-sm font-bold"></button>
+                        </div>
+                        <div id="learn-lesson-body" class="lk-root text-base"></div>
+                    </div>
+                    <div id="learn-words" class="space-y-3">
+                        <h2 id="learn-words-title" class="text-sm font-bold uppercase tracking-wide text-slate-500">Words</h2>
+                        <p class="text-sm text-slate-500">Tap 🔊 to hear a word. Tick the ones you already know: they skip the flashcards.</p>
+                <div class="flex flex-col sm:flex-row gap-2">
+                    <input id="list-search" type="search" placeholder="Search these words (French or English)" class="flex-1 text-base px-3 py-3 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <select id="list-filter" class="text-base px-3 py-3 bg-white border border-slate-200 rounded-xl">
+                        <option value="all">All words</option>
+                        <option value="notknown">Words I don't know yet</option>
+                        <option value="known">Words I know</option>
+                    </select>
+                </div>
+                <div id="word-list" class="bg-white border border-slate-200 rounded-2xl divide-y divide-slate-100"></div>
+                    </div>
+                </section>
+
+                <!-- STEP 2: PRACTISE -->
+            <!-- (flashcards) -->
             <section id="mode-cards" class="space-y-3 max-w-2xl">
                 <div class="flex items-center justify-between text-sm text-slate-500">
                     <span id="session-info"></span>
@@ -94,7 +108,7 @@
 
                 <div id="card-done" class="hidden bg-white border border-emerald-200 rounded-2xl p-6 text-center space-y-2">
                     <div class="text-3xl">🎉</div>
-                    <p class="text-lg font-bold text-emerald-800">Done for today in this deck</p>
+                    <p class="text-lg font-bold text-emerald-800">Done for today</p>
                     <p id="card-done-text" class="text-sm text-slate-600"></p>
                 </div>
 
@@ -149,20 +163,9 @@
                 </div>
             </section>
 
-            <!-- WORD LIST -->
-            <section id="mode-list" class="hidden space-y-3">
-                <div class="flex flex-col sm:flex-row gap-2">
-                    <input id="list-search" type="search" placeholder="Search this deck (French or English)" class="flex-1 text-base px-3 py-3 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                    <select id="list-filter" class="text-base px-3 py-3 bg-white border border-slate-200 rounded-xl">
-                        <option value="all">All words</option>
-                        <option value="notknown">Words I don't know yet</option>
-                        <option value="known">Words I know</option>
-                    </select>
-                </div>
-                <div id="word-list" class="bg-white border border-slate-200 rounded-2xl divide-y divide-slate-100"></div>
-            </section>
 
-            <!-- QUIZ -->
+                <!-- STEP 3: TEST -->
+            <!-- (quiz) -->
             <section id="mode-quiz" class="hidden space-y-3 max-w-2xl">
                 <div class="grid grid-cols-3 gap-2">
                     <button data-quiz="meaning" class="quiz-type min-h-[56px] bg-white border border-slate-200 rounded-xl text-sm font-semibold">Pick the meaning</button>
@@ -173,15 +176,8 @@
                     <p class="text-base text-slate-600">Choose a quiz above. Questions use the words you don't know yet first.</p>
                 </div>
             </section>
-
-                </div>
+                <div id="step-next" class="pt-2"></div>
             </div>
-            </div>
-
-            <!-- INTERACTIVE LESSONS -->
-            <section id="mode-lessons" class="hidden">
-                <div id="vocab-lessons"></div>
-            </section>
 
             <p class="text-xs text-slate-400">Your progress is saved on this device for now; it will sync to your account in a later update.</p>
         </div>
@@ -198,7 +194,8 @@
         const INTERVAL_DAYS = { 1: 0, 2: 1, 3: 3, 4: 7, 5: 21 };   // Leitner box -> days until next review
 
         let deck = null;          // { id, title, words: [] }
-        let mode = 'cards';
+        let step = 'learn';       // learn | practise | test
+        let topic = null;         // the open topic
         let queue = [];           // flashcard session
         let current = null;
         let reviewAll = false;
@@ -211,6 +208,8 @@
         };
         let progress = store.get('vocab_progress', {});   // key -> { box, due }
         let hooks = store.get('vocab_hooks', {});         // key -> { text, source }
+        let wordCache = store.get('vocab_words', {});     // key -> word, for words you have studied (used by Review)
+        let topicStats = store.get('vocab_topic_stats', {}); // topic id -> { known, total }
         const saveProgress = () => store.set('vocab_progress', progress);
 
         // ---------- Word helpers ----------
@@ -294,13 +293,27 @@
             p.due = Date.now() + INTERVAL_DAYS[p.box] * DAY;
             progress[w.key] = p;
             saveProgress();
+            cacheWords([w]);
             Activity.record();
         }
         function setKnown(w, known) {
             if (known) progress[w.key] = { box: 5, due: Date.now() + INTERVAL_DAYS[5] * DAY };
             else delete progress[w.key];
             saveProgress();
+            cacheWords([w]);
         }
+        // Keep a copy of every studied word, so Review can show them without loading every topic
+        function cacheWords(words) {
+            let changed = false;
+            words.forEach(w => {
+                if (!progress[w.key] || wordCache[w.key]) return;
+                const { key, fr, en, pron, note, ipa, gender, pos, register, exFr, exEn } = w;
+                wordCache[w.key] = { key, fr, en, pron, note, ipa, gender, pos, register, exFr, exEn };
+                changed = true;
+            });
+            if (changed) store.set('vocab_words', wordCache);
+        }
+        const dueWords = () => Object.values(wordCache).filter(isDue);
 
         // ---------- Decks ----------
         function themeWords(id) {
@@ -317,7 +330,6 @@
         // Themes come from the database (themes + word_themes tables) when they exist,
         // otherwise from the cheat sheet file, so the page works before and after the SQL is run.
         let dbThemes = null;
-        const themeCounts = {};   // theme id -> { known, total } once a deck has been opened
 
         async function loadThemeList() {
             try {
@@ -330,41 +342,48 @@
             }
         }
 
-        function themeOptionLabel(id, title, level) {
-            const c = themeCounts[id];
-            const counts = c ? ` (${c.known}/${c.total} known)` : '';
-            return `${id}. ${escapeHtml(title)}${level ? ' · ' + escapeHtml(level) : ''}${counts}`;
-        }
+        // ---------- Topics: the 44 themes, plus small lesson-only topics for the basics ----------
+        let TOPICS = [];
+        const LEVEL_NAMES = { A1: 'Beginner', A2: 'Elementary', B1: 'Intermediate', B2: 'Upper intermediate', C1: 'Advanced' };
+        const LEVEL_STYLE = {
+            A1: ['text-emerald-700', 'bg-emerald-50', 'bg-emerald-500', 'border-emerald-400', 'ring-emerald-200', 'bg-emerald-600'],
+            A2: ['text-teal-700', 'bg-teal-50', 'bg-teal-500', 'border-teal-400', 'ring-teal-200', 'bg-teal-600'],
+            B1: ['text-sky-700', 'bg-sky-50', 'bg-sky-500', 'border-sky-400', 'ring-sky-200', 'bg-sky-600'],
+            B2: ['text-indigo-700', 'bg-indigo-50', 'bg-indigo-500', 'border-indigo-400', 'ring-indigo-200', 'bg-indigo-600'],
+            C1: ['text-purple-700', 'bg-purple-50', 'bg-purple-500', 'border-purple-400', 'ring-purple-200', 'bg-purple-600']
+        };
+        const lvStyle = (lv) => LEVEL_STYLE[lv] || LEVEL_STYLE.A1;
+        // Hands-on lessons with no word list of their own, and where they sit
+        const LESSON_TOPICS = { lalphabet: 0, 'noms-prenoms': 1, ladresse: 4, 'objets-classe': 17 };   // after theme N (0 = first)
 
-        function renderDeckOptions() {
-            let groups = '';
-            if (dbThemes) {
-                const byGroup = new Map();
-                dbThemes.forEach(th => {
-                    const g = th.group_name || 'Themes';
-                    if (!byGroup.has(g)) byGroup.set(g, []);
-                    byGroup.get(g).push(th);
-                });
-                byGroup.forEach((list, g) => {
-                    groups += `<optgroup label="Themes: ${escapeHtml(g)}">` +
-                        list.map(th => `<option value="theme:${th.id}">${themeOptionLabel(th.id, th.title, th.level)}</option>`).join('') +
-                        '</optgroup>';
-                });
-            } else {
-                groups = CS.groups.map(([name, ids]) => `
-                <optgroup label="Themes: ${escapeHtml(name)}">
-                    ${ids.filter(id => CS.blocks[id]).map(id => {
-                        const words = themeWords(id);
-                        themeCounts[id] = { known: words.filter(w => statusOf(w) === 'known').length, total: words.length };
-                        return `<option value="theme:${id}">${themeOptionLabel(id, CS.blocks[id].title, '')}</option>`;
-                    }).join('')}
-                </optgroup>`).join('');
-            }
-            let freq = '<optgroup label="Most frequent words">';
-            for (let start = 1; start <= FREQ_TOTAL; start += FREQ_DECK_SIZE) {
-                freq += `<option value="freq:${start}">Words ${start}–${start + FREQ_DECK_SIZE - 1}</option>`;
-            }
-            $('deck-select').innerHTML = groups + freq + '</optgroup>';
+        function buildTopics() {
+            const themes = dbThemes
+                ? dbThemes.map(th => ({ n: th.id, title: th.title, level: th.level || 'A1' }))
+                : CS.groups.flatMap(([, ids]) => ids).filter(id => CS.blocks[id]).map(id => ({ n: id, title: CS.blocks[id].title, level: id <= 20 ? 'A1' : 'A2' }));
+            const lessons = LessonKit.VOCAB_LESSONS;
+            TOPICS = [];
+            const addLessonTopics = (after) => Object.entries(LESSON_TOPICS).filter(([, a]) => a === after).forEach(([id]) => {
+                const l = lessons.find(x => x.id === id);
+                if (l) TOPICS.push({ id: 'lesson:' + id, title: l.title, level: l.level, lesson: l, emoji: l.emoji });
+            });
+            addLessonTopics(0);
+            themes.forEach(th => {
+                TOPICS.push({ id: 'theme:' + th.n, n: th.n, title: th.title, level: th.level, lesson: lessons.find(x => x.theme === th.n) || null });
+                addLessonTopics(th.n);
+            });
+        }
+        const topicById = (id) => TOPICS.find(x => x.id === id);
+        const lessonDone = (l) => !!LocalStore.get('lessons_done', {})['i:' + l.id];
+        function topicState(tp) {
+            if (!tp.n) return { done: lessonDone(tp.lesson), started: lessonDone(tp.lesson), label: lessonDone(tp.lesson) ? 'Done' : 'Lesson' };
+            const s = topicStats[tp.id];
+            if (!s || !s.total) return { done: false, started: false, label: '' };
+            return { done: s.known >= s.total, started: s.known > 0, known: s.known, total: s.total };
+        }
+        function saveTopicStats() {
+            if (!topic || !topic.n || !deck || !deck.words.length) return;
+            topicStats[topic.id] = { known: deck.words.filter(w => statusOf(w) === 'known').length, total: deck.words.length };
+            store.set('vocab_topic_stats', topicStats);
         }
 
         // One word bank row -> one card. Uses the Article column when filled (after the SQL),
@@ -402,7 +421,10 @@
             return ids.map(i => byId.get(i)).filter(Boolean).map(rowToWord);
         }
 
+        let loadSeq = 0;
         async function loadDeck(value) {
+            const token = ++loadSeq;
+            let next = null;
             const [type, raw] = value.split(':');
             const n = Number(raw);
             $('loading').classList.remove('hidden');
@@ -411,13 +433,16 @@
                 if (type === 'theme' && dbThemes) {
                     const th = dbThemes.find(x => x.id === n) || dbThemes[0];
                     const words = await loadDbTheme(th.id);
-                    deck = { id: `theme:${th.id}`, title: `${th.id}. ${th.title}`, words };
-                    themeCounts[th.id] = { known: words.filter(w => statusOf(w) === 'known').length, total: words.length };
+                    next = { id: `theme:${th.id}`, title: th.title, words };
                 } else if (type === 'theme') {
                     const id = CS.blocks[n] ? n : 1;
                     const words = themeWords(id);
-                    deck = { id: `theme:${id}`, title: `${id}. ${CS.blocks[id].title}`, words };
+                    next = { id: `theme:${id}`, title: CS.blocks[id].title, words };
                     await enrichFromBank(words);
+                } else if (type === 'review') {
+                    next = { id: 'review', title: 'Review', words: dueWords() };
+                } else if (type === 'lesson') {
+                    next = { id: value, title: '', words: [] };
                 } else {
                     // pron_guide only exists after the SQL update; retry without it before then
                     const fetchRanks = (cols) => db.from('vocabulary_bank').select(cols)
@@ -426,15 +451,17 @@
                     if (error) ({ data, error } = await fetchRanks('Rank, French, English, Part_of_Speech, Article, Noun_Gender, IPA, SentenceFR, SentenceEN, Register'));
                     if (error) throw error;
                     const words = (data || []).map(rowToWord);
-                    deck = { id: value, title: `Most frequent words ${n}–${n + FREQ_DECK_SIZE - 1}`, words };
+                    next = { id: value, title: `Most frequent words ${n}–${n + FREQ_DECK_SIZE - 1}`, words };
                 }
-                store.set('vocab_deck', value);
+                cacheWords(next.words);
             } catch (err) {
                 console.error(err);
-                deck = { id: value, title: 'Deck', words: [] };
+                next = { id: value, title: 'Deck', words: [] };
                 $('load-error').textContent = 'Could not load this deck. Check your connection and try again.';
                 $('load-error').classList.remove('hidden');
             }
+            if (token !== loadSeq) return;   // another topic was opened meanwhile
+            deck = next;
             $('loading').classList.add('hidden');
             reviewAll = false;
             renderAll();
@@ -466,13 +493,10 @@
         // ---------- Progress bar ----------
         function renderProgress() {
             const total = deck.words.length;
-            if (deck.id.startsWith('theme:')) {
-                themeCounts[Number(deck.id.split(':')[1])] = { known: deck.words.filter(w => statusOf(w) === 'known').length, total };
-            }
+            saveTopicStats();
             const known = deck.words.filter(w => statusOf(w) === 'known').length;
             const learning = deck.words.filter(w => statusOf(w) === 'learning').length;
             const due = deck.words.filter(isDue).length;
-            $('deck-title').textContent = deck.title;
             $('deck-counts').textContent = total ? `${known} of ${total} known · ${due} to review` : '';
             $('bar-known').style.width = total ? (known / total * 100) + '%' : '0%';
             $('bar-learning').style.width = total ? (learning / total * 100) + '%' : '0%';
@@ -501,7 +525,7 @@
             if (done) {
                 const known = deck.words.filter(w => statusOf(w) === 'known').length;
                 $('card-done-text').textContent = deck.words.length
-                    ? `${known} of ${deck.words.length} words known. Come back tomorrow for your reviews, or pick another deck.`
+                    ? `${known} of ${deck.words.length} words known. Come back tomorrow for your reviews, or take the test.`
                     : 'This deck has no words yet.';
                 $('session-info').textContent = '';
                 renderProgress();
@@ -635,7 +659,6 @@
             $('word-list').querySelectorAll('[data-known]').forEach(c => c.addEventListener('change', () => {
                 setKnown(byKey[c.dataset.known], c.checked);
                 renderProgress();
-                renderDeckOptionsKeepSelection();
                 if ($('list-filter').value !== 'all') renderList();
             }));
         }
@@ -753,47 +776,220 @@
             $('quiz-next').focus();
         }
 
-        // ---------- Modes and rendering ----------
-        function setMode(m) {
-            mode = m;
-            store.set('vocab_mode', m);
-            document.querySelectorAll('.mode-tab').forEach(t => {
-                const on = t.dataset.mode === m;
-                t.classList.toggle('bg-white', on); t.classList.toggle('shadow-sm', on); t.classList.toggle('text-indigo-700', on);
-                t.classList.toggle('text-slate-600', !on);
-                t.setAttribute('aria-selected', on);
+        // ---------- Steps: Learn, Practise, Test ----------
+        const STEPS = ['learn', 'practise', 'test'];
+        const STEP_BOX = { learn: 'step-learn', practise: 'mode-cards', test: 'mode-quiz' };
+        const STEP_NEXT = { learn: ['practise', 'Practise with flashcards'], practise: ['test', 'Take the test'], test: null };
+        function stepsFor(tp) {
+            if (!tp) return STEPS;
+            if (tp.id === 'review') return ['practise'];
+            if (!tp.n && tp.lesson) return ['learn'];
+            return STEPS;
+        }
+        function setStep(s, push) {
+            const allowed = stepsFor(topic);
+            if (!allowed.includes(s)) s = allowed[0];
+            step = s;
+            document.querySelectorAll('.step-tab').forEach(b => {
+                const on = b.dataset.step === s;
+                b.classList.toggle('hidden', !allowed.includes(b.dataset.step));
+                b.classList.toggle('border-indigo-600', on); b.classList.toggle('text-indigo-700', on);
+                b.classList.toggle('border-transparent', !on); b.classList.toggle('text-slate-500', !on); b.classList.toggle('hover:text-slate-800', !on);
+                b.setAttribute('aria-selected', on);
             });
-            ['cards', 'list', 'quiz', 'lessons'].forEach(x => $('mode-' + x).classList.toggle('hidden', x !== m));
-            // Decks don't apply to the interactive lessons
-            $('deck-modes').classList.toggle('hidden', m === 'lessons');
-            renderLessonShortcut();
-            if (m === 'cards') startCards();
-            if (m === 'list') renderList();
+            $('step-tabs').classList.toggle('hidden', allowed.length < 2);
+            STEPS.forEach(x => $(STEP_BOX[x]).classList.toggle('hidden', x !== s));
+            if (push) history.pushState({}, '', topicUrl(topic.id, s));
+            const nx = STEP_NEXT[s];
+            $('step-next').innerHTML = nx && allowed.includes(nx[0])
+                ? `<button type="button" data-goto-step="${nx[0]}" class="min-h-[48px] px-5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl">Next: ${nx[1]} →</button>`
+                : (topic && topic.id !== 'review' ? `<button type="button" id="next-topic" class="min-h-[48px] px-5 bg-white border border-slate-200 hover:border-indigo-300 text-slate-800 font-bold rounded-xl">${nextTopicLabel()}</button>` : '');
+            if (s === 'practise') startCards();
+            if (s === 'learn') renderList();
+            $('scroller').scrollTop = 0;
         }
         function renderAll() {
             renderProgress();
-            renderDeckOptionsKeepSelection();
             quiz = null;
             $('quiz-box').innerHTML = '<p class="text-base text-slate-600">Choose a quiz above. Questions use the words you don\'t know yet first.</p>';
-            setMode(mode);
+            $('learn-words').classList.toggle('hidden', !deck.words.length);
+            $('learn-words-title').textContent = `Words in this topic (${deck.words.length})`;
+            $('topic-progress').classList.toggle('hidden', !deck.words.length);
+            setStep(step, false);
         }
-        function renderDeckOptionsKeepSelection() {
-            const v = deck ? deck.id : $('deck-select').value;
-            renderDeckOptions();
-            $('deck-select').value = v;
+
+        // ---------- Opening a topic ----------
+        const topicUrl = (id, s) => `vocab.html?topic=${encodeURIComponent(id)}${s && s !== 'learn' ? '&step=' + s : ''}`;
+        function freqTopic(id) {
+            const n = Number(id.split(':')[1]) || 1;
+            return { id: `freq:${n}`, title: `Most common words ${n}–${n + FREQ_DECK_SIZE - 1}`, level: '', freq: true };
+        }
+        function resolveTopic(id) {
+            if (id === 'review') return { id: 'review', title: 'Review', level: '' };
+            if (String(id).startsWith('freq:')) return freqTopic(id);
+            return topicById(id);
+        }
+        function openTopic(id, s, push) {
+            const tp = resolveTopic(id);
+            if (!tp) { showTopics(false); return; }
+            topic = tp;
+            if (tp.n || tp.lesson) store.set('vocab_last_topic', tp.id);
+            if (tp.level) store.set('vocab_level', tp.level);
+            if (push) history.pushState({}, '', topicUrl(tp.id, s));
+            $('topics-view').classList.add('hidden');
+            $('topic-view').classList.remove('hidden');
+            const st = lvStyle(tp.level);
+            $('topic-crumb').className = `text-xs font-bold px-2 py-1 rounded-full ${tp.level ? st[1] + ' ' + st[0] : 'bg-slate-100 text-slate-600'}`;
+            $('topic-crumb').textContent = tp.id === 'review' ? 'Words due today' : tp.freq ? 'Most common words' : `Vocab · ${tp.level}${tp.n ? ' · Topic ' + tp.n : ''}`;
+            $('deck-title').textContent = tp.lesson && !tp.n ? `${tp.emoji || ''} ${tp.title}`.trim() : tp.title;
+            document.title = `${tp.title} - Vocabulary`;
+            // The hands-on lesson, if this topic has one
+            const l = tp.lesson;
+            $('learn-lesson').classList.toggle('hidden', !l);
+            if (l) {
+                $('learn-lesson-title').textContent = `${l.emoji || '▶️'} Hands-on lesson: ${l.title}`;
+                $('learn-lesson-body').innerHTML = '<p class="text-sm text-indigo-600 animate-pulse">Loading the lesson…</p>';
+                $('learn-lesson-body').dataset.interactive = l.id;
+                LessonKit.loadInteractive($('learn-lesson').parentElement);
+                renderLessonDone();
+            }
+            step = s || 'learn';
+            $('learn-words').classList.add('hidden');
+            $('topic-progress').classList.add('hidden');
+            loadDeck(tp.id === 'review' ? 'review' : tp.n ? `theme:${tp.n}` : tp.freq ? tp.id : `lesson:${l.id}`);
+        }
+        function showTopics(push) {
+            topic = null;
+            if (push) history.pushState({}, '', 'vocab.html');
+            $('topic-view').classList.add('hidden');
+            $('topics-view').classList.remove('hidden');
+            document.title = 'Vocabulary - French Study App';
+            renderTopics();
+            $('scroller').scrollTop = 0;
+        }
+
+        // Hands-on lesson: mark as done
+        function renderLessonDone() {
+            const d = lessonDone(topic.lesson);
+            $('lesson-done').textContent = d ? '✓ Done' : 'Mark as done';
+            $('lesson-done').className = 'min-h-[40px] px-3 rounded-xl text-sm font-bold ' + (d ? 'bg-emerald-100 text-emerald-800' : 'bg-emerald-600 hover:bg-emerald-700 text-white');
+        }
+        async function toggleLessonDone() {
+            const l = topic.lesson;
+            const all = LocalStore.get('lessons_done', {});
+            const value = !all['i:' + l.id];
+            if (value) all['i:' + l.id] = true; else delete all['i:' + l.id];
+            LocalStore.set('lessons_done', all);
+            if (value) Activity.record();
+            renderLessonDone();
+            try {
+                const { data: { user } } = await db.auth.getUser();
+                if (user) await db.from('user_progress').upsert({ user_id: user.id, module_type: 'lesson-interactive', module_id: l.id, completed: value, updated_at: new Date() },
+                    { onConflict: 'user_id, module_type, module_id' });
+            } catch (err) { console.warn('Progress saved on this device only.', err); }
+        }
+
+        // ---------- The topic list ----------
+        function currentLevel() {
+            const levels = [...new Set(TOPICS.map(x => x.level))];
+            const saved = store.get('vocab_level', null);
+            if (levels.includes(saved)) return saved;
+            const profileLevel = (LocalStore.get('fs_profile', {}) || {}).level;
+            return levels.includes(profileLevel) ? profileLevel : levels[0];
+        }
+        function nextTopicIn(list) {
+            const last = topicById(store.get('vocab_last_topic', ''));
+            if (last && list.includes(last) && !topicState(last).done) return last;
+            return list.find(x => !topicState(x).done);
+        }
+        function nextTopicLabel() {
+            const list = TOPICS.filter(x => x.level === topic.level);
+            const i = list.indexOf(topic);
+            const nx = i >= 0 ? list[i + 1] : null;
+            return nx ? `Next topic: ${escapeHtml(nx.title)} →` : '← All topics';
+        }
+        function renderTopics() {
+            const words = plain($('topic-search').value.trim()).split(/\s+/).filter(Boolean);
+            const level = currentLevel();
+            const levels = [...new Set(TOPICS.map(x => x.level))];
+            $('topic-levels').innerHTML = levels.map(lv => {
+                const list = TOPICS.filter(x => x.level === lv);
+                const n = list.filter(x => topicState(x).done).length;
+                const on = lv === level && !words.length;
+                return `<button type="button" role="tab" aria-selected="${on}" data-level="${lv}" class="shrink-0 px-3.5 py-1.5 rounded-lg text-sm font-bold transition ${on ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-800'}">
+                    ${lv}<span class="ml-1.5 text-xs font-semibold ${on ? lvStyle(lv)[0] : 'text-slate-400'}">${n}/${list.length}</span></button>`;
+            }).join('');
+            // Review banner
+            const due = dueWords().length;
+            $('review-banner').innerHTML = due ? `
+                <div class="flex items-center gap-3 bg-amber-50 border border-amber-200 rounded-2xl p-4">
+                    <span class="text-2xl" aria-hidden="true">🔁</span>
+                    <div class="flex-1 min-w-0"><div class="font-bold text-amber-900">${due} word${due === 1 ? '' : 's'} to review today</div>
+                    <div class="text-sm text-amber-800/80">Words from your topics, before you forget them.</div></div>
+                    <a href="${topicUrl('review', 'practise')}" data-topic="review" class="shrink-0 inline-flex items-center min-h-[44px] px-4 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-xl">Review</a>
+                </div>` : '';
+            const list = words.length
+                ? TOPICS.filter(x => words.every(w => plain(x.title + ' ' + (x.lesson ? x.lesson.title : '')).includes(w)))
+                : TOPICS.filter(x => x.level === level);
+            const nxt = words.length ? null : nextTopicIn(list);
+            const st = lvStyle(level);
+            const doneN = list.filter(x => topicState(x).done).length;
+            $('topic-banner').innerHTML = words.length ? '' : `
+                <div class="bg-white border border-slate-200 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center gap-4">
+                    <div class="sm:w-72 shrink-0">
+                        <div class="text-xs font-bold uppercase tracking-wide ${st[0]}">Vocab · ${level} · ${LEVEL_NAMES[level] || ''}</div>
+                        <div class="mt-2 h-2 bg-slate-100 rounded-full overflow-hidden"><div class="h-full ${st[2]} rounded-full" style="width:${list.length ? Math.round(doneN / list.length * 100) : 0}%"></div></div>
+                        <div class="mt-1 text-xs font-semibold text-slate-500">${doneN} of ${list.length} topics done</div>
+                    </div>
+                    ${nxt ? `<div class="flex-1 min-w-0 sm:border-l sm:border-slate-100 sm:pl-4">
+                        <div class="text-xs font-bold text-slate-500">Continue with</div>
+                        <div class="font-bold text-slate-900 truncate">${escapeHtml(nxt.title)}</div></div>
+                    <a href="${topicUrl(nxt.id)}" data-topic="${escapeHtml(nxt.id)}" class="topic-start shrink-0 inline-flex items-center justify-center min-h-[44px] px-5 rounded-xl ${st[5]} text-white font-bold hover:opacity-90">Start →</a>`
+                    : `<div class="flex-1 font-bold text-emerald-700">Level ${level} complete! 🎉</div>`}
+                </div>`;
+            $('topic-grid').innerHTML = list.length ? list.map(x => {
+                const s = topicState(x);
+                const ls = lvStyle(x.level);
+                const isNext = x === nxt;
+                const status = s.done ? '<span class="shrink-0 text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">✓ Done</span>'
+                    : isNext ? `<span class="shrink-0 text-xs font-bold ${ls[0]} ${ls[1]} px-2 py-0.5 rounded-full">Next</span>` : '';
+                const sub = x.n
+                    ? (s.total ? `<span class="mt-2 flex items-center gap-2"><span class="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden"><span class="block h-full bg-emerald-500" style="width:${Math.round(s.known / s.total * 100)}%"></span></span><span class="text-xs text-slate-500">${s.known}/${s.total} known</span></span>` : '')
+                    : `<span class="block text-sm text-slate-500 mt-0.5">${escapeHtml(x.lesson.blurb)}</span>`;
+                return `<a href="${topicUrl(x.id)}" data-topic="${escapeHtml(x.id)}" class="group flex gap-3 bg-white border ${isNext ? ls[3] + ' ring-2 ' + ls[4] : 'border-slate-200'} hover:border-indigo-400 hover:shadow-md transition rounded-2xl p-4">
+                    <span class="shrink-0 w-10 h-10 rounded-xl flex items-center justify-center font-black ${s.done ? 'bg-emerald-50 text-emerald-700' : ls[1] + ' ' + ls[0]}">${x.n || x.emoji || '▶'}</span>
+                    <span class="min-w-0 flex-1">
+                        <span class="flex items-start justify-between gap-2"><span class="font-bold text-slate-900 leading-snug group-hover:text-indigo-700">${escapeHtml(x.title)}</span>${status}</span>
+                        ${sub}
+                        ${x.n && x.lesson ? `<span class="inline-block mt-2 text-[11px] font-bold uppercase tracking-wide text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">▶ Hands-on lesson</span>` : ''}
+                    </span></a>`;
+            }).join('') : '<p class="text-sm text-slate-500">No topics match your search.</p>';
         }
 
         // ---------- Wiring ----------
-        $('deck-select').addEventListener('change', (e) => loadDeck(e.target.value));
-        document.querySelectorAll('.mode-tab').forEach(t => t.addEventListener('click', () => {
-            setMode(t.dataset.mode);
-            if (t.dataset.mode === 'lessons') {
-                lessons.showList(false);
-                history.replaceState({}, '', 'vocab.html?mode=lessons');
-            } else if (location.search) {
-                history.replaceState({}, '', 'vocab.html');
+        $('topic-back').addEventListener('click', () => showTopics(true));
+        $('topic-search').addEventListener('input', renderTopics);
+        $('topic-levels').addEventListener('click', (e) => {
+            const b = e.target.closest('[data-level]');
+            if (!b) return;
+            store.set('vocab_level', b.dataset.level);
+            $('topic-search').value = '';
+            renderTopics();
+        });
+        document.addEventListener('click', (e) => {
+            const a = e.target.closest('[data-topic]');
+            if (a) { e.preventDefault(); openTopic(a.dataset.topic, a.dataset.topic === 'review' ? 'practise' : 'learn', true); return; }
+            const g = e.target.closest('[data-goto-step]');
+            if (g) { setStep(g.dataset.gotoStep, true); return; }
+            if (e.target.closest('#next-topic')) {
+                const list = TOPICS.filter(x => x.level === topic.level);
+                const nx = list[list.indexOf(topic) + 1];
+                if (nx) openTopic(nx.id, 'learn', true); else showTopics(true);
             }
-        }));
+        });
+        document.querySelectorAll('.step-tab').forEach(b => b.addEventListener('click', () => setStep(b.dataset.step, true)));
+        $('lesson-done').addEventListener('click', toggleLessonDone);
+        $('freq-open').addEventListener('click', () => openTopic(`freq:${$('freq-select').value}`, 'learn', true));
         $('card').addEventListener('click', flipCard);
         $('btn-say').addEventListener('click', () => current && speakFrench(current.fr));
         $('btn-say-ex').addEventListener('click', () => current && speakFrench(current.exFr));
@@ -806,7 +1002,7 @@
         $('list-filter').addEventListener('change', renderList);
         document.querySelectorAll('.quiz-type').forEach(b => b.addEventListener('click', () => startQuiz(b.dataset.quiz)));
         document.addEventListener('keydown', (e) => {
-            if (mode !== 'cards' || !current || /input|textarea|select/i.test(e.target.tagName)) return;
+            if (step !== 'practise' || topic === null || !current || /input|textarea|select/i.test(e.target.tagName)) return;
             if (e.key === ' ') { e.preventDefault(); flipCard(); }
             if (!$('card-back').classList.contains('hidden')) {
                 if (e.key === '1') onGrade('dontknow');
@@ -815,50 +1011,29 @@
             }
         });
 
-        // ---------- Interactive lessons (numbers, family tree, clock...) ----------
-        const lessons = LessonKit.mount($('vocab-lessons'), {
-            section: 'interactive',
-            pagePath: 'vocab.html',
-            param: 'lesson',
-            keepParams: { mode: 'lessons' },
-            searchPlaceholder: 'Search, e.g. famille',
-            intro: '<p class="text-sm text-slate-500">Hands-on lessons with audio: tap any word to hear it. Each one links to the flashcards for its theme.</p>'
-        });
-
-        // Shortcut card when the open theme deck has an interactive lesson
-        function renderLessonShortcut() {
-            const themeId = deck && deck.id.startsWith('theme:') ? Number(deck.id.split(':')[1]) : null;
-            const item = LessonKit.VOCAB_LESSONS.find(x => x.theme === themeId);
-            const show = !!item && mode !== 'lessons';
-            $('lesson-shortcut').classList.toggle('hidden', !show);
-            if (!show) return;
-            $('lesson-shortcut-title').textContent = `${item.title}: ${item.blurb}`;
-            $('lesson-shortcut').href = LessonKit.URLS.interactive(item.id);
-            $('lesson-shortcut').onclick = (e) => { e.preventDefault(); setMode('lessons'); lessons.open(item.id, true); };
-        }
-
-        function routeLessons() {
+        // ---------- Routing: ?topic=theme:9&step=practise, ?topic=freq:51, ?topic=review; older links still work ----------
+        function route() {
             const p = new URLSearchParams(location.search);
-            if (p.get('lesson') || p.get('mode') === 'lessons') {
-                setMode('lessons');
-                lessons.route(p);
-                return true;
+            let id = p.get('topic'), s = p.get('step') || 'learn';
+            if (!id && p.get('deck')) { id = p.get('deck'); }                       // old: ?deck=theme:9
+            if (!id && p.get('review')) { id = 'review'; s = 'practise'; }
+            if (!id && p.get('lesson')) {                                            // old: ?lesson=famille-proche
+                const l = LessonKit.VOCAB_LESSONS.find(x => x.id === p.get('lesson'));
+                if (l) id = l.theme ? 'theme:' + l.theme : 'lesson:' + l.id;
             }
-            return false;
+            if (id && resolveTopic(id)) openTopic(id, s, false);
+            else showTopics(false);
         }
-        window.addEventListener('popstate', () => {
-            if (!routeLessons() && mode === 'lessons') setMode('cards');
-        });
+        window.addEventListener('popstate', route);
 
-        // ---------- Start: last deck and mode are remembered ----------
-        mode = store.get('vocab_mode', 'cards');
-        if (!routeLessons() && mode === 'lessons') lessons.showList(false);
+        // ---------- Start ----------
         (async () => {
             await loadThemeList();
-            renderDeckOptions();
-            const wanted = new URLSearchParams(location.search).get('deck');
-            $('deck-select').value = wanted || store.get('vocab_deck', 'theme:1');
-            loadDeck($('deck-select').value || 'theme:1');
+            buildTopics();
+            let opts = '';
+            for (let n = 1; n <= FREQ_TOTAL; n += FREQ_DECK_SIZE) opts += `<option value="${n}">Words ${n}–${n + FREQ_DECK_SIZE - 1}</option>`;
+            $('freq-select').innerHTML = opts;
+            route();
         })();
     </script>
 </body>

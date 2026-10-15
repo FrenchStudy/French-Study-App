@@ -1,863 +1,455 @@
 <!DOCTYPE html>
-<html lang="fr" class="h-full">
+<html lang="en" class="h-full">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Atelier de Français - Writing & Expression Suite</title>
+    <title>Writing - French Study App</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="config.js"></script>
+    <script src="js/ai.js"></script>
+    <script src="js/writing-tasks.js"></script>
+    <style>
+        .fix-del { text-decoration: line-through; text-decoration-thickness: 2px; }
+        details > summary { list-style: none; } details > summary::-webkit-details-marker { display: none; }
+        details[open] .chev { transform: rotate(180deg); }
+    </style>
 </head>
-<body class="h-full bg-slate-100 flex flex-col overflow-hidden font-sans">
+<body class="h-full bg-slate-100 flex flex-col overflow-hidden font-sans text-slate-800">
 
-    <!-- Top Sticky Navigation Header -->
-    <header class="bg-white border-b border-slate-200 sticky top-0 z-50 shrink-0">
-        <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-            <div class="flex items-center space-x-1 sm:space-x-2 text-xs font-semibold overflow-x-auto py-2">
-                <a href="index.html" class="text-slate-600 hover:text-indigo-600 hover:bg-slate-100 px-3 py-1.5 rounded-lg transition">Dashboard</a>
-                <a href="vocab.html" class="text-slate-600 hover:text-indigo-600 hover:bg-slate-100 px-3 py-1.5 rounded-lg transition">Vocab</a>
-                <a href="lesson.html" class="text-slate-600 hover:text-indigo-600 hover:bg-slate-100 px-3 py-1.5 rounded-lg transition">Grammar</a>
-                <a href="conjugations.html" class="text-slate-600 hover:text-indigo-600 hover:bg-slate-100 px-3 py-1.5 rounded-lg transition">Conjugations</a>
-                <a href="reading.html" class="text-slate-600 hover:text-indigo-600 hover:bg-slate-100 px-3 py-1.5 rounded-lg transition">Reading</a>
-                <a href="listening.html" class="text-slate-600 hover:text-indigo-600 hover:bg-slate-100 px-3 py-1.5 rounded-lg transition">Listening</a>
-                <a href="writing.html" class="bg-indigo-600 text-white px-3 py-1.5 rounded-lg shadow-sm transition">Writing</a>
-                <a href="speaking.html" class="text-slate-600 hover:text-indigo-600 hover:bg-slate-100 px-3 py-1.5 rounded-lg transition">Speaking</a>
-                <a href="translator.html" class="text-slate-600 hover:text-indigo-600 hover:bg-slate-100 px-3 py-1.5 rounded-lg transition">Translator</a>
-                <a href="admin.html" class="text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 px-3 py-1.5 rounded-lg transition font-bold">Administration</a>
+    <header id="app-header" class="bg-white border-b border-slate-200 sticky top-0 z-50 shrink-0 h-14"></header>
+
+    <main id="scroller" class="flex-1 overflow-y-auto">
+        <div class="max-w-6xl mx-auto px-4 py-5 space-y-4">
+
+            <!-- ===== ALL TASKS ===== -->
+            <div id="list-view" class="space-y-4">
+                <div>
+                    <h1 class="text-2xl font-black text-slate-900">Writing</h1>
+                    <p class="text-sm text-slate-500 mt-1">Short writing tasks for your level. Each one has a word bank and a model answer; when you're done, get your text corrected.
+                        <a href="writing-classic.html" class="ml-1 font-semibold text-indigo-700 hover:underline">Open the old version</a></p>
+                </div>
+                <div class="flex flex-col md:flex-row md:items-center gap-3">
+                    <div id="levels" class="flex gap-1 p-1 bg-slate-200/70 rounded-xl overflow-x-auto" role="tablist" aria-label="Level"></div>
+                </div>
+                <div id="task-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+
+                <!-- Your own topic -->
+                <section class="bg-white border border-slate-200 rounded-2xl p-4 space-y-3">
+                    <div class="flex items-start gap-3">
+                        <span class="shrink-0 w-10 h-10 rounded-xl bg-violet-50 text-violet-700 flex items-center justify-center text-xl" aria-hidden="true">💡</span>
+                        <div class="min-w-0">
+                            <h2 class="font-bold text-slate-900">Your own topic</h2>
+                            <p class="text-sm text-slate-500">Type any topic and get a task for your level, with a word bank and a plan. Uses AI.</p>
+                        </div>
+                    </div>
+                    <form id="own-form" class="flex flex-col sm:flex-row gap-2">
+                        <input id="own-topic" type="text" maxlength="120" placeholder="e.g. my favourite sport, a job interview, climate change" class="flex-1 text-base md:text-sm px-3 py-2.5 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <button id="own-btn" type="submit" class="min-h-[44px] px-4 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl">Create task</button>
+                    </form>
+                    <p id="own-error" class="hidden text-sm text-rose-700"></p>
+                </section>
             </div>
-            <div class="flex items-center space-x-2">
-                <span class="text-xs text-slate-400 font-medium">Expression Écrite Active</span>
-                <button id="logoutBtn" class="text-slate-600 hover:text-red-600 hover:bg-slate-100 px-3 py-1.5 rounded-lg transition">Logout</button>
+
+            <!-- ===== ONE TASK ===== -->
+            <div id="task-view" class="hidden space-y-4">
+                <button id="back" type="button" class="min-h-[44px] px-1 text-sm font-semibold text-slate-600 hover:text-indigo-600">← All tasks</button>
+                <div>
+                    <span id="crumb" class="text-xs font-bold px-2 py-1 rounded-full bg-slate-100 text-slate-600"></span>
+                    <h1 id="task-title" class="text-2xl lg:text-3xl font-black text-slate-900 leading-tight mt-2"></h1>
+                </div>
+
+                <div class="flex flex-col lg:grid lg:grid-cols-[minmax(0,1fr)_22rem] gap-4 lg:gap-6">
+                    <!-- Task, checklist and word bank -->
+                    <aside class="space-y-3 lg:order-2 lg:sticky lg:top-4 lg:self-start">
+                        <section class="bg-white border border-slate-200 rounded-2xl p-4 space-y-2">
+                            <div class="flex items-center justify-between gap-2">
+                                <h2 class="text-sm font-bold uppercase tracking-wide text-slate-500">Your task</h2>
+                                <div class="flex gap-1.5">
+                                    <button id="say-task" type="button" class="min-h-[36px] px-2.5 text-sm font-semibold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 rounded-lg" aria-label="Listen to the task">🔊</button>
+                                    <button id="toggle-en" type="button" class="min-h-[36px] px-2.5 text-sm font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg">English</button>
+                                </div>
+                            </div>
+                            <p id="task-fr" class="text-base text-slate-900 leading-relaxed"></p>
+                            <p id="task-en" class="hidden text-sm text-slate-500 leading-relaxed border-t border-slate-100 pt-2"></p>
+                        </section>
+                        <section class="bg-white border border-slate-200 rounded-2xl p-4 space-y-2">
+                            <h2 class="text-sm font-bold uppercase tracking-wide text-slate-500">Include</h2>
+                            <ul id="checklist" class="space-y-1.5 text-sm text-slate-700"></ul>
+                        </section>
+                        <details id="bank-box" class="bg-white border border-slate-200 rounded-2xl group">
+                            <summary class="cursor-pointer p-4 flex items-center justify-between">
+                                <span class="text-sm font-bold uppercase tracking-wide text-slate-500">Word bank</span>
+                                <span class="chev text-slate-400 transition" aria-hidden="true">▾</span>
+                            </summary>
+                            <div class="px-4 pb-4 space-y-2">
+                                <p class="text-xs text-slate-500">Tap a phrase to add it to your text.</p>
+                                <div id="bank" class="space-y-1.5"></div>
+                            </div>
+                        </details>
+                    </aside>
+
+                    <!-- Editor, model answer and feedback -->
+                    <div class="space-y-4 lg:order-1 min-w-0">
+                        <section class="bg-white border border-slate-200 rounded-2xl overflow-hidden focus-within:ring-2 focus-within:ring-indigo-500">
+                            <textarea id="text" rows="10" spellcheck="false" lang="fr" placeholder="Écrivez votre texte ici…" class="block w-full min-h-[14rem] p-4 text-base leading-relaxed text-slate-900 resize-y focus:outline-none"></textarea>
+                            <div class="flex flex-wrap gap-1 px-3 py-2 border-t border-slate-100 bg-slate-50" aria-label="French letters">
+                                <span class="text-xs text-slate-400 self-center mr-1">Accents:</span>
+                            </div>
+                            <div class="px-4 py-2 border-t border-slate-100 space-y-1">
+                                <div class="flex items-center justify-between text-sm">
+                                    <span><b id="word-count" class="text-slate-900">0</b> <span class="text-slate-500">words</span> <span id="word-target" class="text-slate-400"></span></span>
+                                    <span id="saved" class="text-xs text-slate-400"></span>
+                                </div>
+                                <div class="h-1.5 bg-slate-100 rounded-full overflow-hidden"><div id="word-bar" class="h-full bg-slate-300 rounded-full transition-all" style="width:0%"></div></div>
+                            </div>
+                        </section>
+
+                        <div class="flex flex-wrap items-center gap-2">
+                            <button id="btn-check" type="button" class="min-h-[48px] px-5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-bold rounded-xl">✨ Check my writing</button>
+                            <button id="btn-model" type="button" class="min-h-[48px] px-4 bg-white border border-slate-200 hover:border-indigo-300 text-slate-800 font-semibold rounded-xl"></button>
+                            <button id="btn-clear" type="button" class="ml-auto min-h-[44px] px-2 text-sm font-semibold text-slate-500 hover:text-rose-600">Clear</button>
+                        </div>
+
+                        <section id="model-box" class="hidden bg-amber-50 border border-amber-200 rounded-2xl p-4 space-y-2"></section>
+                        <section id="feedback" class="hidden space-y-3"></section>
+                    </div>
+                </div>
             </div>
         </div>
-    </header>
+    </main>
 
-    <!-- Main Workspace Layout -->
-    <div class="flex-1 flex overflow-hidden relative">
-        
-        <!-- LEFT: Writing Setup Sidebar (Custom Topic + Format Selector + Supabase Reading Topics) -->
-        <aside class="w-80 bg-white border-r border-slate-200 flex flex-col shrink-0">
-            <div class="p-4 border-b border-slate-100 space-y-3">
-                <div>
-                    <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Paramètres de Rédaction</h2>
-                    <p class="text-[11px] text-slate-500">Choisissez un format et un sujet.</p>
-                </div>
-                
-                <!-- Format Selector -->
-                <div>
-                    <label class="block text-[11px] font-bold text-slate-700 mb-1">Type d'Écrit :</label>
-                    <select id="writing-format-select" onchange="if(activeSubjectObj) generateWritingPrompt(activeSubjectObj)" class="w-full text-xs px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                        <option value="Message Amical / Courriel informel">Message Amical / Courriel informel</option>
-                        <option value="Courriel Formel / Réclamation">Courriel Formel / Réclamation</option>
-                        <option value="Article de presse / Blog">Article de presse / Blog</option>
-                        <option value="Essai Argumentatif comparatif">Essai Argumentatif comparatif</option>
-                    </select>
-                </div>
-
-                <!-- Custom Topic Input in Left Pane -->
-                <div class="p-3 bg-indigo-50/60 border border-indigo-100 rounded-xl space-y-2">
-                    <div class="text-[11px] font-bold text-indigo-900 uppercase tracking-wide">🎯 Sujet Personnalisé</div>
-                    <div class="flex space-x-1.5">
-                        <input type="text" id="custom-topic-input" placeholder="Ex: Le télétravail..." class="flex-1 text-xs px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                        <button onclick="generateCustomWritingPrompt()" class="bg-indigo-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-indigo-700 transition">OK</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Subject Container Loaded From Supabase reading_topics -->
-            <div id="writing-topics-container" class="flex-1 overflow-y-auto p-3 space-y-2">
-                <p class="text-xs text-slate-400 p-2">Chargement des thèmes...</p>
-            </div>
-        </aside>
-
-        <!-- RIGHT: Writing Workspace & AI Evaluation Grid -->
-        <main class="flex-1 flex overflow-hidden">
-            
-            <!-- Editor Content Pane -->
-            <div class="flex-1 overflow-y-auto p-6 space-y-6 relative flex flex-col">
-                <div class="flex items-center justify-between shrink-0">
-                    <div>
-                        <span id="writing-badge" class="text-[10px] font-bold uppercase tracking-wider bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded">Épreuve d'Écriture</span>
-                        <h2 id="writing-prompt-title" class="text-xl font-extrabold text-slate-900 tracking-tight mt-1">Sélectionnez un thème à gauche</h2>
-                    </div>
-                    <div class="flex items-center space-x-2">
-                        <button onclick="evaluateWriting()" class="text-xs bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl font-bold transition shadow-sm">✨ Évaluer avec l'IA</button>
-                    </div>
-                </div>
-
-                <!-- Prompt Description Card -->
-                <div class="bg-indigo-50/50 border border-indigo-100 p-4 rounded-2xl text-xs text-slate-700 shrink-0 space-y-2">
-                    <div class="flex items-center justify-between">
-                        <strong class="text-indigo-950 font-bold uppercase tracking-wide">Consigne d'Écriture :</strong>
-                        <div class="flex items-center space-x-2">
-                            <button onclick="playPromptAudio()" class="text-[10px] bg-white border border-indigo-200 text-indigo-700 px-2.5 py-1 rounded-lg font-medium hover:bg-indigo-50 transition">🔊 Écouter</button>
-                            <button onclick="togglePromptTranslation()" id="translate-prompt-btn" class="text-[10px] bg-white border border-indigo-200 text-indigo-700 px-2.5 py-1 rounded-lg font-medium hover:bg-indigo-50 transition">🌐 Traduction (EN)</button>
-                        </div>
-                    </div>
-                    <p id="writing-prompt-desc">Choisissez un format et un thème dans le volet de gauche pour générer votre exercice...</p>
-                </div>
-
-                <!-- Hidden Prompt Translation Pane -->
-                <div id="prompt-translation-pane" class="hidden bg-emerald-50/60 border border-emerald-200 rounded-2xl p-4 space-y-1 shadow-sm text-xs leading-relaxed text-emerald-950 shrink-0">
-                    <h4 class="font-bold text-emerald-900 uppercase tracking-wide">English Translation of Prompt:</h4>
-                    <div id="prompt-translation-body">Chargement de la traduction...</div>
-                </div>
-
-                <!-- Utility Options Bar (Copy, Save, Suggestions, Sample Answer) -->
-                <div class="bg-white border border-slate-200 p-2.5 rounded-xl flex items-center justify-between shrink-0 shadow-sm text-xs flex-wrap gap-2">
-                    <div class="flex items-center space-x-2">
-                        <button onclick="copyWritingText()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg font-medium transition">📋 Copier</button>
-                        <button onclick="saveWritingProgress()" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 px-3 py-1.5 rounded-lg font-bold transition">💾 Sauvegarder</button>
-                    </div>
-                    <div class="flex items-center space-x-2">
-                        <button onclick="getWritingSuggestions()" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 px-3 py-1.5 rounded-lg font-bold transition">💡 Obtenir des suggestions</button>
-                        <button onclick="getSampleAnswer()" class="bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 px-3 py-1.5 rounded-lg font-bold transition">📖 Voir un exemple de réponse</button>
-                    </div>
-                </div>
-
-                <!-- French Virtual Keypad -->
-                <div class="bg-white border border-slate-200 p-2 rounded-xl flex items-center justify-between shrink-0 shadow-sm">
-                    <span class="text-[11px] font-bold text-slate-500 pl-2">Clavier français :</span>
-                    <div class="flex items-center space-x-1">
-                        <button onclick="insertChar('é')" class="px-2 py-1 bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 text-xs font-bold rounded border border-slate-200 transition">é</button>
-                        <button onclick="insertChar('à')" class="px-2 py-1 bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 text-xs font-bold rounded border border-slate-200 transition">à</button>
-                        <button onclick="insertChar('è')" class="px-2 py-1 bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 text-xs font-bold rounded border border-slate-200 transition">è</button>
-                        <button onclick="insertChar('ù')" class="px-2 py-1 bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 text-xs font-bold rounded border border-slate-200 transition">ù</button>
-                        <button onclick="insertChar('ç')" class="px-2 py-1 bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 text-xs font-bold rounded border border-slate-200 transition">ç</button>
-                        <button onclick="insertChar('ê')" class="px-2 py-1 bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 text-xs font-bold rounded border border-slate-200 transition">ê</button>
-                        <button onclick="insertChar('ë')" class="px-2 py-1 bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 text-xs font-bold rounded border border-slate-200 transition">ë</button>
-                        <button onclick="insertChar('î')" class="px-2 py-1 bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 text-xs font-bold rounded border border-slate-200 transition">î</button>
-                        <button onclick="insertChar('ô')" class="px-2 py-1 bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 text-xs font-bold rounded border border-slate-200 transition">ô</button>
-                        <button onclick="insertChar('œ')" class="px-2 py-1 bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 text-xs font-bold rounded border border-slate-200 transition">œ</button>
-                        <button onclick="insertChar('«')" class="px-2 py-1 bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 text-xs font-bold rounded border border-slate-200 transition">«</button>
-                        <button onclick="insertChar('»')" class="px-2 py-1 bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 text-xs font-bold rounded border border-slate-200 transition">»</button>
-                    </div>
-                </div>
-
-                <!-- Writing Textarea & Live Word Counter -->
-                <div class="flex-1 flex flex-col relative space-y-2">
-                    <textarea id="writing-textarea" oninput="updateWordCount()" placeholder="Rédigez votre texte en français ici..." class="flex-1 w-full p-4 bg-white border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm leading-relaxed text-slate-800 resize-none shadow-sm"></textarea>
-                    
-                    <div class="flex items-center justify-between text-xs text-slate-500 px-2 shrink-0">
-                        <div>Mots : <span id="word-count" class="font-bold text-slate-900">0</span> <span id="word-target-hint" class="text-slate-400"></span></div>
-                        <button onclick="clearWritingEditor()" class="text-rose-500 hover:text-rose-700 font-bold transition">Effacer le texte</button>
-                    </div>
-                </div>
-
-                <!-- AI Evaluation Feedback Box -->
-                <div id="evaluation-pane" class="hidden bg-emerald-50/60 border border-emerald-200 rounded-2xl p-6 space-y-3 shadow-sm text-xs leading-relaxed text-slate-800 shrink-0">
-                    <h3 class="font-bold text-emerald-900 uppercase tracking-wide border-b border-emerald-200 pb-2 flex items-center justify-between">
-                        <span>Rapport d'Évaluation IA (Style TCF)</span>
-                        <span id="eval-score" class="text-emerald-700 bg-emerald-100 px-2.5 py-0.5 rounded font-extrabold">Score : --/20</span>
-                    </h3>
-                    <div id="evaluation-body" class="space-y-2 text-emerald-950">L'analyse s'affichera ici...</div>
-                </div>
-            </div>
-
-            <!-- RIGHT: AI Writing Tutor Sidebar -->
-            <section class="w-96 bg-white border-l border-slate-200 flex flex-col shrink-0">
-                <div class="p-4 border-b border-slate-100 flex items-center justify-between">
-                    <span class="text-xs font-bold uppercase tracking-wider text-slate-600">🤖 Correcteur d'Écriture IA</span>
-                    <span class="text-[10px] bg-emerald-50 text-emerald-600 font-semibold px-2 py-0.5 rounded">En ligne</span>
-                </div>
-
-                <div id="ai-chat-box" class="flex-1 p-4 overflow-y-auto space-y-3">
-                    <div class="bg-slate-50 border border-slate-100 p-3 rounded-xl text-xs text-slate-700 space-y-2">
-                        <p>Bonjour ! Posez vos questions en français ou utilisez les suggestions ci-dessous.</p>
-                    </div>
-                </div>
-
-                <!-- Suggestion Chips -->
-                <div class="p-3 bg-slate-50 border-t border-slate-100 flex flex-wrap gap-1.5">
-                    <button onclick="sendPresetPrompt('Donnez-moi des connecteurs logiques utiles pour cette tâche.')" class="text-[10px] bg-white border border-slate-200 text-slate-700 px-2.5 py-1 rounded-lg hover:bg-indigo-50 hover:text-indigo-600 transition font-medium">🔗 Connecteurs logiques</button>
-                    <button onclick="sendPresetPrompt('Proposez une structure d’introduction type.')" class="text-[10px] bg-white border border-slate-200 text-slate-700 px-2.5 py-1 rounded-lg hover:bg-indigo-50 hover:text-indigo-600 transition font-medium">📝 Structure type</button>
-                </div>
-
-                <!-- Chat Input Bar with Microphone -->
-                <div class="p-3 border-t border-slate-100">
-                    <div class="flex items-center space-x-2">
-                        <input type="text" id="ai-input" placeholder="Posez une question en français..." class="flex-1 text-xs px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                        <button onclick="toggleChatVoiceInput()" id="ai-mic-btn" title="Parler au lieu d'écrire" class="bg-slate-100 text-slate-700 hover:bg-slate-200 p-2 rounded-xl text-xs transition">🎙️</button>
-                        <button onclick="sendAIChat()" class="bg-indigo-600 text-white p-2.5 rounded-xl text-xs font-bold hover:bg-indigo-700 transition">➔</button>
-                    </div>
-                </div>
-            </section>
-
-        </main>
-    </div>
-
-    <!-- Script Integration -->
     <script>
         const db = window.mySupabase;
-
-        let allReadingTopics = [];
-        let activeSubjectObj = null;
-        let generatedPromptData = null;
-        let isPromptTranslated = false;
-
-        // silent = true: save in the background (no pop-ups, no redirect)
-        async function saveProgressToDatabase(moduleType, moduleId, score = null, silent = false) {
-            const { data: { user }, error: userError } = await db.auth.getUser();
-            
-            if (userError || !user) {
-                if (silent) return;
-                alert("Veuillez vous connecter pour sauvegarder votre progression.");
-                window.location.href = 'login.html';
-                return;
-            }
-
-            const { error } = await db
-                .from('user_progress')
-                .upsert({
-                    user_id: user.id,
-                    module_type: moduleType, 
-                    module_id: moduleId.toString(),
-                    completed: true,
-                    score: score, 
-                    updated_at: new Date()
-                }, { onConflict: 'user_id, module_type, module_id' });
-
-            if (error) {
-                console.error("Erreur de sauvegarde :", error.message);
-                if (!silent) alert("Erreur lors de la synchronisation de la progression.");
-            } else if (!silent) {
-                alert("💾 Progression enregistrée avec succès !");
-            }
-        }
-
-        async function loadWritingTopicsFromDatabase() {
-            const container = document.getElementById('writing-topics-container');
-            container.innerHTML = `<p class="text-xs text-slate-400 p-2">Chargement des thèmes...</p>`;
-
-            const { data: topics, error } = await db.from('reading_topics').select('*').order('id', { ascending: true });
-
-            if (error || !topics || topics.length === 0) {
-                container.innerHTML = `<p class="text-xs text-rose-500 p-2">Aucun thème trouvé dans la base.</p>`;
-                return;
-            }
-
-            allReadingTopics = topics;
-            renderWritingTopicsList(allReadingTopics);
-            if (topics.length > 0) {
-                generateWritingPrompt(topics[0]);
-            }
-        }
-
-        function renderWritingTopicsList(topics) {
-            const container = document.getElementById('writing-topics-container');
-            container.innerHTML = '';
-
-            topics.forEach((t) => {
-                const item = document.createElement('button');
-                item.className = 'w-full text-left p-3 rounded-xl text-xs font-medium transition bg-slate-50 border border-slate-100 text-slate-700 hover:bg-indigo-50 flex items-center space-x-2.5';
-                item.innerHTML = `
-                    <span class="text-base">✍️</span>
-                    <div class="flex-1">
-                        <div class="font-bold text-slate-900">${t.category}</div>
-                        <div class="text-[10px] text-slate-400 truncate">${t.title} • Niveau ${t.level}</div>
-                    </div>
-                `;
-                item.onclick = () => generateWritingPrompt(t);
-                container.appendChild(item);
-            });
-        }
-
-        async function generateWritingPrompt(subjectObj) {
-            activeSubjectObj = subjectObj;
-            const chosenFormat = document.getElementById('writing-format-select').value;
-
-            document.getElementById('writing-badge').innerText = `${chosenFormat} - Niveau ${subjectObj.level}`;
-            document.getElementById('writing-prompt-title').innerText = subjectObj.title;
-            
-            const descEl = document.getElementById('writing-prompt-desc');
-            descEl.innerText = "🤖 L'IA génère une consigne personnalisée en français...";
-            document.getElementById('word-target-hint').innerText = "(Cible : calcul en cours...)";
-            document.getElementById('writing-textarea').value = "";
-            document.getElementById('word-count').innerText = "0";
-            document.getElementById('evaluation-pane').classList.add('hidden');
-            document.getElementById('prompt-translation-pane').classList.add('hidden');
-            isPromptTranslated = false;
-            document.getElementById('translate-prompt-btn').innerText = "🌐 Traduction (EN)";
-
-            const apiUrl = localStorage.getItem('ai_api_url') || "https://api.groq.com/openai/v1/chat/completions";
-            const apiKey = localStorage.getItem('ai_api_key') || "";
-            const modelName = localStorage.getItem('ai_model_name') || "openai/gpt-oss-120b";
-
-            if (!apiKey) {
-                descEl.innerText = "Erreur : Clé API manquante dans l'administration.";
-                return;
-            }
-
-            try {
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${apiKey}`
-                    },
-                    body: JSON.stringify({
-                        model: modelName,
-                        messages: [
-                            {
-                                role: "system",
-                                content: "You are an official TCF/DELF writing test generator. Given a French theme and a requested writing format, generate a detailed exam writing prompt instruction entirely in French and a target word count range. Format strictly as valid JSON with keys: 'instruction' (the detailed prompt in French) and 'word_target' (e.g. '120-150 mots'). Do not include markdown codeblocks like ```json, just output raw valid JSON."
-                            },
-                            {
-                                role: "user",
-                                content: `Generate a writing prompt for level ${subjectObj.level}, theme: "${subjectObj.title}" (Category: ${subjectObj.category}), format type: "${chosenFormat}".`
-                            }
-                        ],
-                        temperature: 0.7
-                    })
-                });
-
-                const data = await response.json();
-                let rawContent = data.choices?.[0]?.message?.content || "";
-                rawContent = rawContent.replace(/```json/g, '').replace(/```/g, '').trim();
-                generatedPromptData = JSON.parse(rawContent);
-
-                descEl.innerText = generatedPromptData.instruction;
-                document.getElementById('word-target-hint').innerText = `(Cible : ${generatedPromptData.word_target})`;
-            } catch (err) {
-                descEl.innerText = subjectObj.description;
-                document.getElementById('word-target-hint').innerText = "(Cible : 120-150 mots)";
-            }
-        }
-
-        async function generateCustomWritingPrompt() {
-            const inputEl = document.getElementById('custom-topic-input');
-            const customTitle = inputEl ? inputEl.value.trim() : "";
-            
-            if (!customTitle) {
-                alert("Veuillez saisir un sujet personnalisé.");
-                return;
-            }
-
-            const chosenFormat = document.getElementById('writing-format-select').value;
-            
-            activeSubjectObj = {
-                id: 'custom_' + Date.now(),
-                title: customTitle,
-                category: 'Sujet Personnalisé',
-                level: 'B2'
-            };
-
-            document.getElementById('writing-badge').innerText = `${chosenFormat} - Sujet Libre`;
-            document.getElementById('writing-prompt-title').innerText = customTitle;
-            
-            const descEl = document.getElementById('writing-prompt-desc');
-            descEl.innerText = "🤖 L'IA convertit votre sujet personnalisé en consigne officielle en français...";
-            document.getElementById('word-target-hint').innerText = "(Cible : calcul en cours...)";
-            document.getElementById('writing-textarea').value = "";
-            document.getElementById('word-count').innerText = "0";
-            document.getElementById('evaluation-pane').classList.add('hidden');
-            document.getElementById('prompt-translation-pane').classList.add('hidden');
-            isPromptTranslated = false;
-            document.getElementById('translate-prompt-btn').innerText = "🌐 Traduction (EN)";
-
-            const apiUrl = localStorage.getItem('ai_api_url') || "https://api.groq.com/openai/v1/chat/completions";
-            const apiKey = localStorage.getItem('ai_api_key') || "";
-            const modelName = localStorage.getItem('ai_model_name') || "openai/gpt-oss-120b";
-
-            if (!apiKey) {
-                descEl.innerText = "Erreur : Clé API manquante dans l'administration.";
-                return;
-            }
-
-            try {
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${apiKey}`
-                    },
-                    body: JSON.stringify({
-                        model: modelName,
-                        messages: [
-                            {
-                                role: "system",
-                                content: "You are an official TCF/DELF writing test generator. Given a custom user theme and a requested writing format, generate a detailed exam writing prompt instruction entirely in French and a target word count range. Format strictly as valid JSON with keys: 'instruction' (the detailed prompt in French) and 'word_target' (e.g. '120-150 mots'). Do not include markdown codeblocks like ```json, just output raw valid JSON."
-                            },
-                            {
-                                role: "user",
-                                content: `Generate a writing prompt for custom theme: "${customTitle}", format type: "${chosenFormat}".`
-                            }
-                        ],
-                        temperature: 0.7
-                    })
-                });
-
-                const data = await response.json();
-                let rawContent = data.choices?.[0]?.message?.content || "";
-                rawContent = rawContent.replace(/```json/g, '').replace(/```/g, '').trim();
-                generatedPromptData = JSON.parse(rawContent);
-
-                descEl.innerText = generatedPromptData.instruction;
-                document.getElementById('word-target-hint').innerText = `(Cible : ${generatedPromptData.word_target})`;
-                inputEl.value = "";
-            } catch (err) {
-                descEl.innerText = `Rédigez un texte argumentatif ou informatif sur le thème : "${customTitle}".`;
-                document.getElementById('word-target-hint').innerText = "(Cible : 120-150 mots)";
-            }
-        }
-
-        function playPromptAudio() {
-            const descText = document.getElementById('writing-prompt-desc')?.innerText || "";
-            if (!descText || descText.includes("🤖")) {
-                alert("Veuillez attendre que la consigne soit générée.");
-                return;
-            }
-            if (!('speechSynthesis' in window)) return;
-            window.speechSynthesis.cancel();
-            const utterance = new SpeechSynthesisUtterance(descText);
-            utterance.lang = 'fr-FR';
-            utterance.rate = 1.0;
-            window.speechSynthesis.speak(utterance);
-        }
-
-        function playTextAudio(buttonElement) {
-            const container = buttonElement.closest('.ai-message-card');
-            const textContent = container ? container.getAttribute('data-reply-text') : "";
-            if (!textContent) return;
-            if (!('speechSynthesis' in window)) return;
-            window.speechSynthesis.cancel();
-            const utterance = new SpeechSynthesisUtterance(textContent);
-            utterance.lang = 'fr-FR';
-            utterance.rate = 1.0;
-            window.speechSynthesis.speak(utterance);
-        }
-
-        async function togglePromptTranslation() {
-            const pane = document.getElementById('prompt-translation-pane');
-            const btn = document.getElementById('translate-prompt-btn');
-            const body = document.getElementById('prompt-translation-body');
-
-            if (!generatedPromptData) { alert("Aucune consigne active."); return; }
-
-            if (isPromptTranslated) {
-                pane.classList.add('hidden');
-                btn.innerText = "🌐 Traduction (EN)";
-                isPromptTranslated = false;
-                return;
-            }
-
-            pane.classList.remove('hidden');
-            btn.innerText = "🌐 Masquer Traduction";
-            isPromptTranslated = true;
-            body.innerText = "Traduction en cours...";
-
-            const apiUrl = localStorage.getItem('ai_api_url') || "https://api.groq.com/openai/v1/chat/completions";
-            const apiKey = localStorage.getItem('ai_api_key') || "";
-            const modelName = localStorage.getItem('ai_model_name') || "openai/gpt-oss-120b";
-
-            try {
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
-                    body: JSON.stringify({
-                        model: modelName,
-                        messages: [
-                            { role: "system", content: "You are a professional translator. Translate the following French writing prompt instruction into clear English." },
-                            { role: "user", content: generatedPromptData.instruction }
-                        ],
-                        temperature: 0.3
-                    })
-                });
-                const data = await response.json();
-                let translation = data.choices?.[0]?.message?.content || "Traduction non disponible.";
-                body.innerHTML = translation.replace(/\n/g, '<br>');
-            } catch (err) {
-                body.innerText = "Erreur de traduction.";
-            }
-        }
-
-        function copyWritingText() {
-            const text = document.getElementById('writing-textarea').value;
-            if (!text) { alert("Aucun texte à copier."); return; }
-            navigator.clipboard.writeText(text);
-            alert("📋 Texte copié dans le presse-papier !");
-        }
-
-        async function saveWritingProgress() {
-            const text = document.getElementById('writing-textarea').value;
-            if (!text) { alert("Veuillez d'abord rédiger un texte."); return; }
-            localStorage.setItem(`writing_draft_${activeSubjectObj?.id || 'save'}`, text);
-            
-            if (activeSubjectObj) {
-                await saveProgressToDatabase('writing', activeSubjectObj.id);
-            } else {
-                alert("💾 Progression de rédaction sauvegardée !");
-            }
-        }
-
-        async function getWritingSuggestions() {
-            if (!generatedPromptData) { alert("Veuillez d'abord sélectionner un sujet."); return; }
-            const chatBox = document.getElementById('ai-chat-box');
-            const promptText = `Donnez-moi des conseils de structure et du vocabulaire clé pour réussir cette consigne : "${generatedPromptData.instruction}"`;
-            
-            const userMsg = document.createElement('div');
-            userMsg.className = 'bg-indigo-50 border border-indigo-100 p-3 rounded-xl text-xs text-indigo-900 ml-4 shadow-sm';
-            userMsg.innerText = "💡 Donnez-moi des suggestions pour cette consigne.";
-            chatBox.appendChild(userMsg);
-            chatBox.scrollTop = chatBox.scrollHeight;
-
-            const apiUrl = localStorage.getItem('ai_api_url') || "https://api.groq.com/openai/v1/chat/completions";
-            const apiKey = localStorage.getItem('ai_api_key') || "";
-            const modelName = localStorage.getItem('ai_model_name') || "openai/gpt-oss-120b";
-
-            try {
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
-                    body: JSON.stringify({
-                        model: modelName,
-                        messages: [
-                            { role: "system", content: "You are a helpful French writing coach responding entirely in French." },
-                            { role: "user", content: promptText }
-                        ],
-                        temperature: 0.7
-                    })
-                });
-                const data = await response.json();
-                let aiReply = data.choices?.[0]?.message?.content || "Conseils non disponibles.";
-                
-                const aiMsg = document.createElement('div');
-                aiMsg.className = 'ai-message-card bg-slate-50 border border-slate-200 p-3.5 rounded-2xl text-xs text-slate-700 mr-4 shadow-sm space-y-2 relative';
-                aiMsg.setAttribute('data-reply-text', aiReply);
-                aiMsg.innerHTML = `
-                    <div class="flex items-center justify-between border-b border-slate-200/60 pb-1.5 mb-1.5">
-                        <span class="font-bold text-indigo-600 flex items-center space-x-1">
-                            <span>🤖</span> <span>Coach IA</span>
-                        </span>
-                        <div class="flex items-center space-x-1.5">
-                            <button onclick="playTextAudio(this)" class="text-[10px] bg-white border border-slate-200 px-2 py-0.5 rounded font-medium text-slate-600 hover:bg-slate-100 transition">🔊 Écouter</button>
-                            <button onclick="translateAIResponse(this)" class="text-[10px] bg-white border border-slate-200 px-2 py-0.5 rounded font-medium text-slate-600 hover:bg-slate-100 transition">🌐 Traduire (EN)</button>
-                        </div>
-                    </div>
-                    <div class="space-y-1.5 leading-relaxed">
-                        ${aiReply.replace(/\n/g, '<br>')}
-                    </div>
-                    <div class="ai-translation-box hidden mt-2 pt-2 border-t border-slate-200/60 text-slate-500 italic bg-slate-100/60 p-2 rounded-lg"></div>
-                `;
-                chatBox.appendChild(aiMsg);
-                chatBox.scrollTop = chatBox.scrollHeight;
-            } catch (err) {
-                console.error(err);
-            }
-        }
-
-        async function getSampleAnswer() {
-            if (!generatedPromptData) { alert("Veuillez d'abord sélectionner un sujet."); return; }
-            const chatBox = document.getElementById('ai-chat-box');
-            const promptText = `Rédige un exemple de réponse complet et de haute qualité (niveau B2) pour cette consigne : "${generatedPromptData.instruction}"`;
-            
-            const userMsg = document.createElement('div');
-            userMsg.className = 'bg-amber-50 border border-amber-200 p-3 rounded-xl text-xs text-amber-900 ml-4 shadow-sm';
-            userMsg.innerText = "📖 Montrez-moi un exemple de réponse type.";
-            chatBox.appendChild(userMsg);
-            chatBox.scrollTop = chatBox.scrollHeight;
-
-            const apiUrl = localStorage.getItem('ai_api_url') || "https://api.groq.com/openai/v1/chat/completions";
-            const apiKey = localStorage.getItem('ai_api_key') || "";
-            const modelName = localStorage.getItem('ai_model_name') || "openai/gpt-oss-120b";
-
-            try {
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
-                    body: JSON.stringify({
-                        model: modelName,
-                        messages: [
-                            { role: "system", content: "You are an expert French exam model writer. Provide an exemplary student response in French." },
-                            { role: "user", content: promptText }
-                        ],
-                        temperature: 0.7
-                    })
-                });
-                const data = await response.json();
-                let aiReply = data.choices?.[0]?.message?.content || "Exemple non disponible.";
-                
-                const aiMsg = document.createElement('div');
-                aiMsg.className = 'ai-message-card bg-amber-50/60 border border-amber-200 p-3.5 rounded-2xl text-xs text-slate-800 mr-4 shadow-sm space-y-2 relative';
-                aiMsg.setAttribute('data-reply-text', aiReply);
-                aiMsg.innerHTML = `
-                    <div class="flex items-center justify-between border-b border-amber-200 pb-1.5 mb-1.5">
-                        <span class="font-bold text-amber-900 flex items-center space-x-1">
-                            <span>📖</span> <span>Exemple de Réponse Modèle</span>
-                        </span>
-                        <div class="flex items-center space-x-1.5">
-                            <button onclick="playTextAudio(this)" class="text-[10px] bg-white border border-amber-300 px-2 py-0.5 rounded font-medium text-slate-700 hover:bg-slate-100 transition">🔊 Écouter</button>
-                            <button onclick="translateAIResponse(this)" class="text-[10px] bg-white border border-amber-300 px-2 py-0.5 rounded font-medium text-slate-700 hover:bg-slate-100 transition">🌐 Traduire (EN)</button>
-                        </div>
-                    </div>
-                    <div class="space-y-1.5 leading-relaxed font-serif">
-                        ${aiReply.replace(/\n/g, '<br>')}
-                    </div>
-                    <div class="ai-translation-box hidden mt-2 pt-2 border-t border-amber-200 text-slate-600 italic bg-white/80 p-2 rounded-lg"></div>
-                `;
-                chatBox.appendChild(aiMsg);
-                chatBox.scrollTop = chatBox.scrollHeight;
-            } catch (err) {
-                console.error(err);
-            }
-        }
-
-        async function translateAIResponse(buttonElement) {
-            const container = buttonElement.closest('.ai-message-card');
-            const textContent = container.getAttribute('data-reply-text');
-            const translationContainer = container.querySelector('.ai-translation-box');
-
-            if (!translationContainer) return;
-
-            if (!translationContainer.classList.contains('hidden')) {
-                translationContainer.classList.add('hidden');
-                buttonElement.innerText = '🌐 Traduire (EN)';
-                return;
-            }
-
-            buttonElement.innerText = '⏳ Traduction...';
-
-            const apiUrl = localStorage.getItem('ai_api_url') || "https://api.groq.com/openai/v1/chat/completions";
-            const apiKey = localStorage.getItem('ai_api_key') || "";
-            const modelName = localStorage.getItem('ai_model_name') || "openai/gpt-oss-120b";
-
-            try {
-                const apiResponse = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${apiKey}`
-                    },
-                    body: JSON.stringify({
-                        model: modelName,
-                        messages: [
-                            {
-                                role: "system",
-                                content: "You are a professional translator. Translate the following French text into clear, natural English. Provide only the translation without extra conversational filler."
-                            },
-                            { role: "user", content: textContent }
-                        ],
-                        temperature: 0.3
-                    })
-                });
-
-                const data = await apiResponse.json();
-                if (data.error) throw new Error(data.error.message || 'Erreur API');
-
-                let translationText = data.choices?.[0]?.message?.content || "Translation not available.";
-                
-                translationContainer.innerHTML = `<strong class="text-slate-600 block mb-1">English Translation:</strong> ${translationText}`;
-                translationContainer.classList.remove('hidden');
-                buttonElement.innerText = '🌐 Masquer';
-
-            } catch (err) {
-                console.error("Translation error:", err);
-                translationContainer.innerHTML = `<span class="text-rose-600">Erreur de traduction : ${err.message}</span>`;
-                translationContainer.classList.remove('hidden');
-                buttonElement.innerText = '🌐 Traduire (EN)';
-            }
-        }
-
-        function updateWordCount() {
-            const text = document.getElementById('writing-textarea').value.trim();
-            const words = text === "" ? 0 : text.split(/\s+/).length;
-            document.getElementById('word-count').innerText = words;
-        }
-
-        function insertChar(char) {
-            const textarea = document.getElementById('writing-textarea');
-            const start = textarea.selectionStart;
-            const end = textarea.selectionEnd;
-            const text = textarea.value;
-            textarea.value = text.substring(0, start) + char + text.substring(end);
-            textarea.selectionStart = textarea.selectionEnd = start + char.length;
-            textarea.focus();
-            updateWordCount();
-        }
-
-        function clearWritingEditor() {
-            document.getElementById('writing-textarea').value = "";
-            updateWordCount();
-        }
-
-        async function evaluateWriting() {
-            const text = document.getElementById('writing-textarea').value.trim();
-            const pane = document.getElementById('evaluation-pane');
-            const body = document.getElementById('evaluation-body');
-            const scoreBadge = document.getElementById('eval-score');
-            const chosenFormat = document.getElementById('writing-format-select').value;
-
-            if (!text) { alert("Veuillez d'abord rédiger un texte avant de lancer l'évaluation."); return; }
-
-            pane.classList.remove('hidden');
-            body.innerText = "Analyse de votre production écrite par l'IA...";
-            scoreBadge.innerText = "Score : --/20";
-
-            const apiUrl = localStorage.getItem('ai_api_url') || "https://api.groq.com/openai/v1/chat/completions";
-            const apiKey = localStorage.getItem('ai_api_key') || "";
-            const modelName = localStorage.getItem('ai_model_name') || "openai/gpt-oss-120b";
-
-            try {
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${apiKey}`
-                    },
-                    body: JSON.stringify({
-                        model: modelName,
-                        messages: [
-                            {
-                                role: "system",
-                                content: "You are a strict official TCF writing examiner. Evaluate the student's French text entirely in French. Format response strictly as JSON with keys: 'score' (number out of 20), 'feedback' (detailed constructive feedback in French), and 'corrected_text' (improved version in French). Do not include markdown codeblocks like ```json, just output raw valid JSON."
-                            },
-                            {
-                                role: "user",
-                                content: `Evaluate this text (Format: ${chosenFormat}, Theme: "${activeSubjectObj?.title}", Prompt: ${generatedPromptData?.instruction}): "${text}"`
-                            }
-                        ],
-                        temperature: 0.3
-                    })
-                });
-
-                const data = await response.json();
-                let rawContent = data.choices?.[0]?.message?.content || "";
-                rawContent = rawContent.replace(/```json/g, '').replace(/```/g, '').trim();
-                const evalJson = JSON.parse(rawContent);
-
-                const score = Number(evalJson.score);
-                if (!Number.isFinite(score) || score < 0 || score > 20) {
-                    scoreBadge.innerText = "Score : --/20";
-                    body.innerText = "Impossible de noter ce texte pour le moment. Veuillez réessayer.";
-                    return;
-                }
-                scoreBadge.innerText = `Score : ${score}/20`;
-                if (activeSubjectObj) saveProgressToDatabase('writing', activeSubjectObj.id, score, true);
-                body.innerHTML = `
-                    <div class="space-y-2">
-                        <div><strong>Commentaires de l'examinateur :</strong><br>${evalJson.feedback || ''}</div>
-                        <div class="border-t border-emerald-200 pt-2"><strong>Version corrigée recommandée :</strong><br><span class="text-emerald-950 italic">${evalJson.corrected_text || text}</span></div>
-                    </div>
-                `;
-            } catch (err) {
-                body.innerText = "Erreur lors de l'évaluation de la rédaction.";
-            }
-        }
-
-        let chatSpeechRecognition = null;
-        let isChatListening = false;
-
-        window.toggleChatVoiceInput = function() {
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            if (!SpeechRecognition) { alert("La reconnaissance vocale nécessite Google Chrome."); return; }
-
-            const micBtn = document.getElementById('ai-mic-btn');
-            const inputField = document.getElementById('ai-input');
-
-            if (!isChatListening) {
-                chatSpeechRecognition = new SpeechRecognition();
-                chatSpeechRecognition.lang = 'fr-FR';
-                chatSpeechRecognition.interimResults = false;
-
-                chatSpeechRecognition.onstart = () => {
-                    isChatListening = true;
-                    if (micBtn) { micBtn.innerHTML = "⏹️"; micBtn.className = "bg-rose-600 text-white p-2 rounded-xl text-xs transition shadow-sm animate-pulse"; }
-                    if (inputField) inputField.placeholder = "Écoute en cours...";
-                };
-                chatSpeechRecognition.onresult = (event) => {
-                    if (inputField) inputField.value = event.results[0][0].transcript;
-                };
-                chatSpeechRecognition.onerror = () => stopChatMicUI();
-                chatSpeechRecognition.onend = () => stopChatMicUI();
-                chatSpeechRecognition.start();
-            } else {
-                if (chatSpeechRecognition) chatSpeechRecognition.stop();
-                stopChatMicUI();
-            }
+        const $ = (id) => document.getElementById(id);
+        const LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1'];
+        const LEVEL_STYLE = {
+            A1: ['text-emerald-700', 'bg-emerald-50'], A2: ['text-teal-700', 'bg-teal-50'], B1: ['text-sky-700', 'bg-sky-50'],
+            B2: ['text-indigo-700', 'bg-indigo-50'], C1: ['text-purple-700', 'bg-purple-50']
         };
+        const ACCENTS = ['é', 'è', 'ê', 'à', 'â', 'ç', 'ù', 'û', 'î', 'ï', 'ô', 'œ', 'ë', '«', '»', 'É', 'À', 'Ç'];
+        const store = {
+            get(k, d) { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch (e) { return d; } },
+            set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+        };
+        let drafts = store.get('writing_drafts', {});     // task id -> text
+        let results = store.get('writing_results', {});   // task id -> { score, at, text, feedback }
+        let ownTasks = store.get('writing_own', []);      // tasks made from your own topic
+        let task = null;
+        const allTasks = () => [...window.WRITING_TASKS, ...ownTasks];
+        const findTask = (id) => allTasks().find(t => t.id === id);
 
-        function stopChatMicUI() {
-            isChatListening = false;
-            const micBtn = document.getElementById('ai-mic-btn');
-            const inputField = document.getElementById('ai-input');
-            if (micBtn) { micBtn.innerHTML = "🎙️"; micBtn.className = "bg-slate-100 text-slate-700 hover:bg-slate-200 p-2 rounded-xl text-xs transition"; }
-            if (inputField) inputField.placeholder = "Posez une question en français...";
+        // ---------- Task list ----------
+        function currentLevel() {
+            const saved = store.get('writing_level', null);
+            if (LEVELS.includes(saved)) return saved;
+            const lv = (LocalStore.get('fs_profile', {}) || {}).level;
+            return LEVELS.includes(lv) ? lv : lv === 'C2' ? 'C1' : 'A1';
+        }
+        function renderList() {
+            const level = currentLevel();
+            $('levels').innerHTML = LEVELS.map(lv => {
+                const list = allTasks().filter(t => t.level === lv);
+                const n = list.filter(t => results[t.id]).length;
+                const on = lv === level;
+                return `<button type="button" role="tab" aria-selected="${on}" data-level="${lv}" class="shrink-0 px-3.5 py-1.5 rounded-lg text-sm font-bold transition ${on ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-800'}">
+                    ${lv}<span class="ml-1.5 text-xs font-semibold ${on ? LEVEL_STYLE[lv][0] : 'text-slate-400'}">${n}/${list.length}</span></button>`;
+            }).join('');
+            const st = LEVEL_STYLE[level];
+            $('task-grid').innerHTML = allTasks().filter(t => t.level === level).map(t => {
+                const r = results[t.id];
+                const status = r ? `<span class="shrink-0 text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">✓ ${r.score}/20</span>`
+                    : drafts[t.id] ? '<span class="shrink-0 text-xs font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full">Draft</span>' : '';
+                return `<a href="writing.html?task=${encodeURIComponent(t.id)}" data-task="${escapeHtml(t.id)}" class="group flex flex-col gap-1.5 bg-white border border-slate-200 hover:border-indigo-400 hover:shadow-md transition rounded-2xl p-4">
+                    <span class="flex items-center justify-between gap-2">
+                        <span class="text-[11px] font-bold uppercase tracking-wide ${st[0]} ${st[1]} px-2 py-0.5 rounded-full">${escapeHtml(t.own ? 'Your topic' : t.type)}</span>${status}
+                    </span>
+                    <span class="font-bold text-slate-900 leading-snug group-hover:text-indigo-700">${escapeHtml(t.title)}</span>
+                    <span class="text-sm text-slate-500 leading-snug line-clamp-2">${escapeHtml(t.en)}</span>
+                    <span class="text-xs font-semibold text-slate-400 mt-auto pt-1">${t.words[0]}–${t.words[1]} words</span>
+                </a>`;
+            }).join('');
         }
 
-        function sendPresetPrompt(promptText) {
-            const input = document.getElementById('ai-input');
-            if (input) { input.value = promptText; sendAIChat(); }
+        // ---------- One task ----------
+        function openTask(id, push) {
+            const t = findTask(id);
+            if (!t) { showList(false); return; }
+            task = t;
+            store.set('writing_level', t.level);
+            if (push) history.pushState({}, '', `writing.html?task=${encodeURIComponent(t.id)}`);
+            $('list-view').classList.add('hidden');
+            $('task-view').classList.remove('hidden');
+            const st = LEVEL_STYLE[t.level];
+            $('crumb').className = `text-xs font-bold px-2 py-1 rounded-full ${st[1]} ${st[0]}`;
+            $('crumb').textContent = `Writing · ${t.level} · ${t.own ? 'Your topic' : t.type}`;
+            $('task-title').textContent = t.title;
+            document.title = `${t.title} - Writing`;
+            $('task-fr').textContent = t.fr;
+            $('task-en').textContent = t.en;
+            $('task-en').classList.add('hidden');
+            $('toggle-en').textContent = 'English';
+            $('checklist').innerHTML = t.include.map((x, i) => `<li class="flex items-start gap-2" data-check="${i}"><span class="check-mark shrink-0 w-5 h-5 mt-0.5 rounded-full border-2 border-slate-300"></span><span>${escapeHtml(x)}</span></li>`).join('');
+            $('bank').innerHTML = (t.bank || []).map(([fr, en]) => `<button type="button" data-insert="${escapeHtml(fr)}" class="w-full text-left px-3 py-2 rounded-xl bg-slate-50 hover:bg-indigo-50 border border-slate-100">
+                <span class="block text-sm font-semibold text-slate-900">${escapeHtml(fr)}</span><span class="block text-xs text-slate-500">${escapeHtml(en)}</span></button>`).join('');
+            $('bank-box').open = window.innerWidth >= 1024;
+            $('text').value = drafts[t.id] || (results[t.id] && results[t.id].text) || '';
+            $('saved').textContent = drafts[t.id] ? 'Draft saved on this device' : '';
+            $('btn-model').textContent = t.model ? '📖 Model answer' : '🗺️ See a plan';
+            $('model-box').classList.add('hidden');
+            updateCount();
+            const r = results[t.id];
+            if (r && r.feedback) renderFeedback(r.feedback, r.text); else $('feedback').classList.add('hidden');
+            $('scroller').scrollTop = 0;
+        }
+        function showList(push) {
+            task = null;
+            if (push) history.pushState({}, '', 'writing.html');
+            $('task-view').classList.add('hidden');
+            $('list-view').classList.remove('hidden');
+            document.title = 'Writing - French Study App';
+            renderList();
+            $('scroller').scrollTop = 0;
         }
 
-        async function sendAIChat() {
-            const input = document.getElementById('ai-input');
-            const chatBox = document.getElementById('ai-chat-box');
-            if (!input || !input.value.trim() || !chatBox) return;
+        // ---------- Editor ----------
+        const countWords = (s) => (s.trim().match(/[\p{L}\p{N}'’-]+/gu) || []).length;
+        function updateCount() {
+            const n = countWords($('text').value);
+            const [min, max] = task.words;
+            $('word-count').textContent = n;
+            $('word-target').textContent = `· aim for ${min}–${max}`;
+            const bar = $('word-bar');
+            bar.style.width = Math.min(100, Math.round(n / max * 100)) + '%';
+            bar.className = 'h-full rounded-full transition-all ' + (n > max * 1.15 ? 'bg-amber-400' : n >= min ? 'bg-emerald-500' : 'bg-indigo-400');
+        }
+        let saveTimer = null;
+        function saveDraft() {
+            const v = $('text').value;
+            if (v.trim()) drafts[task.id] = v; else delete drafts[task.id];
+            store.set('writing_drafts', drafts);
+            $('saved').textContent = v.trim() ? 'Draft saved on this device' : '';
+        }
+        function insertText(s) {
+            const ta = $('text');
+            const start = ta.selectionStart ?? ta.value.length, end = ta.selectionEnd ?? ta.value.length;
+            const before = ta.value.slice(0, start);
+            // Add a space before a phrase when needed, never before a single accent letter
+            const pad = s.length > 1 && before && !/[\s(«'’-]$/.test(before) ? ' ' : '';
+            ta.value = before + pad + s + ta.value.slice(end);
+            const pos = start + pad.length + s.length;
+            ta.focus();
+            ta.setSelectionRange(pos, pos);
+            updateCount();
+            saveDraft();
+        }
 
-            const userText = input.value.trim();
-            const userMsg = document.createElement('div');
-            userMsg.className = 'bg-indigo-50 border border-indigo-100 p-3 rounded-xl text-xs text-indigo-900 ml-4 shadow-sm';
-            userMsg.innerText = userText;
-            chatBox.appendChild(userMsg);
-            input.value = '';
-            chatBox.scrollTop = chatBox.scrollHeight;
+        // ---------- Model answer / plan ----------
+        function toggleModel() {
+            const box = $('model-box');
+            if (!box.classList.contains('hidden')) { box.classList.add('hidden'); return; }
+            const tooEarly = countWords($('text').value) < task.words[0] / 2;
+            box.innerHTML = task.model ? `
+                <div class="flex items-center justify-between gap-2">
+                    <h2 class="text-sm font-bold uppercase tracking-wide text-amber-900">Model answer</h2>
+                    <button type="button" id="say-model" class="min-h-[36px] px-2.5 text-sm font-semibold text-amber-900 bg-white border border-amber-200 rounded-lg" aria-label="Listen">🔊 Listen</button>
+                </div>
+                ${tooEarly ? '<p class="text-sm text-amber-800">Tip: try writing your own text first, then compare.</p>' : ''}
+                <p class="text-base text-slate-900 leading-relaxed whitespace-pre-line">${escapeHtml(task.model)}</p>` : `
+                <h2 class="text-sm font-bold uppercase tracking-wide text-amber-900">A plan you can follow</h2>
+                <ol class="list-decimal pl-5 space-y-1.5 text-base text-slate-800">${(task.plan || []).map(x => `<li>${escapeHtml(x)}</li>`).join('')}</ol>
+                <p class="text-sm text-amber-800">Use the word bank for the linking words.</p>`;
+            box.classList.remove('hidden');
+            const say = $('say-model');
+            if (say) say.onclick = () => speakFrench(task.model);
+        }
 
-            const typingMsg = document.createElement('div');
-            typingMsg.id = 'ai-typing';
-            typingMsg.className = 'bg-slate-50 border border-slate-100 p-3 rounded-xl text-xs text-slate-500 mr-4 italic';
-            typingMsg.innerText = '🤖 Le correcteur prépare sa réponse...';
-            chatBox.appendChild(typingMsg);
-            chatBox.scrollTop = chatBox.scrollHeight;
-
-            const apiUrl = localStorage.getItem('ai_api_url') || "https://api.groq.com/openai/v1/chat/completions";
-            const apiKey = localStorage.getItem('ai_api_key') || "";
-            const modelName = localStorage.getItem('ai_model_name') || "openai/gpt-oss-120b";
-
+        // ---------- Feedback (AI) ----------
+        async function checkWriting() {
+            const text = $('text').value.trim();
+            if (countWords(text) < 5) { showError('Write a few sentences first, then check them.'); return; }
+            const btn = $('btn-check');
+            btn.disabled = true; btn.textContent = 'Checking…';
+            $('feedback').classList.remove('hidden');
+            $('feedback').innerHTML = '<div class="bg-white border border-slate-200 rounded-2xl p-4 text-sm text-indigo-600 animate-pulse">Reading your text…</div>';
             try {
-                const apiResponse = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
-                    body: JSON.stringify({
-                        model: modelName,
-                        messages: [
-                            { role: "system", content: `You are an expert TCF writing coach. Respond entirely in French. The student is writing about the theme: "${activeSubjectObj?.title}".` },
-                            { role: "user", content: userText }
-                        ],
-                        temperature: 0.7
-                    })
-                });
-
-                const data = await apiResponse.json();
-                document.getElementById('ai-typing')?.remove();
-
-                let aiReply = data.choices?.[0]?.message?.content || "Réponse non disponible.";
-                const aiMsg = document.createElement('div');
-                aiMsg.className = 'ai-message-card bg-slate-50 border border-slate-200 p-3.5 rounded-2xl text-xs text-slate-700 mr-4 shadow-sm space-y-2 relative';
-                aiMsg.setAttribute('data-reply-text', aiReply);
-                aiMsg.innerHTML = `
-                    <div class="flex items-center justify-between border-b border-slate-200/60 pb-1.5 mb-1.5">
-                        <span class="font-bold text-indigo-600 flex items-center space-x-1">
-                            <span>🤖</span> <span>Coach IA</span>
-                        </span>
-                        <div class="flex items-center space-x-1.5">
-                            <button onclick="playTextAudio(this)" class="text-[10px] bg-white border border-slate-200 px-2 py-0.5 rounded font-medium text-slate-600 hover:bg-slate-100 transition">🔊 Écouter</button>
-                            <button onclick="translateAIResponse(this)" class="text-[10px] bg-white border border-slate-200 px-2 py-0.5 rounded font-medium text-slate-600 hover:bg-slate-100 transition">🌐 Traduire (EN)</button>
-                        </div>
-                    </div>
-                    <div class="space-y-1.5 leading-relaxed">
-                        ${aiReply.replace(/\n/g, '<br>')}
-                    </div>
-                    <div class="ai-translation-box hidden mt-2 pt-2 border-t border-slate-200/60 text-slate-500 italic bg-slate-100/60 p-2 rounded-lg"></div>
-                `;
-                chatBox.appendChild(aiMsg);
-                chatBox.scrollTop = chatBox.scrollHeight;
+                const fb = await askAI([
+                    { role: 'system', content: `You are a kind, precise French teacher. The student is at CEFR level ${task.level}. Correct their French text.
+Reply with JSON only:
+{"score": number 0-20 for a ${task.level} learner (task done, accuracy, range),
+ "summary": "two short sentences in simple English: overall impression and the main thing to work on",
+ "strengths": ["up to 3 short points in English"],
+ "corrections": [{"wrong": "the exact words copied from the student's text", "right": "the corrected French", "why": "one short explanation in simple English", "type": "grammar|spelling|agreement|conjugation|vocabulary|punctuation|style"}],
+ "checklist": [true/false for each checklist item, in order],
+ "corrected": "the whole text corrected, keeping the student's ideas and level"}
+Only list real mistakes, at most 12, in the order they appear. "wrong" must be copied exactly from the text, as short as possible (a few words).` },
+                    { role: 'user', content: `Task: ${task.fr}\nChecklist: ${JSON.stringify(task.include)}\nTarget length: ${task.words[0]}-${task.words[1]} words.\n\nStudent's text:\n${text}` }
+                ], { json: true, temperature: 0.2 });
+                const score = Math.max(0, Math.min(20, Math.round(Number(fb.score))));
+                if (!Number.isFinite(score)) throw new Error('The AI reply could not be read. Please try again.');
+                fb.score = score;
+                results[task.id] = { score, at: Date.now(), text, feedback: fb };
+                store.set('writing_results', results);
+                delete drafts[task.id]; store.set('writing_drafts', drafts);
+                if (typeof Activity !== 'undefined') Activity.record();
+                saveProgress(task.id, score);
+                renderFeedback(fb, text);
+                $('feedback').scrollIntoView({ behavior: 'smooth', block: 'start' });
             } catch (err) {
-                document.getElementById('ai-typing')?.remove();
-                console.error('Error fetching AI response:', err);
+                showError(err.message + ' Meanwhile, compare your text with the ' + (task.model ? 'model answer.' : 'plan.'));
+            } finally {
+                btn.disabled = false; btn.textContent = '✨ Check my writing';
+            }
+        }
+        function showError(msg) {
+            $('feedback').classList.remove('hidden');
+            $('feedback').innerHTML = `<div class="bg-rose-50 border border-rose-200 text-rose-800 rounded-2xl p-4 text-sm">${escapeHtml(msg)}</div>`;
+        }
+        async function saveProgress(id, score) {
+            try {
+                const { data: { user } } = await db.auth.getUser();
+                if (!user) return;
+                await db.from('user_progress').upsert({ user_id: user.id, module_type: 'writing', module_id: id, completed: true, score, updated_at: new Date() },
+                    { onConflict: 'user_id, module_type, module_id' });
+            } catch (err) { console.warn('Progress saved on this device only.', err); }
+        }
+
+        // The student's text with each mistake crossed out and the correction next to it
+        function markedText(text, corrections) {
+            let html = '', pos = 0;
+            corrections.forEach((c, i) => {
+                const wrong = String(c.wrong || '');
+                const at = wrong ? text.indexOf(wrong, pos) : -1;
+                if (at < 0) { c.unplaced = true; return; }
+                html += escapeHtml(text.slice(pos, at)) +
+                    `<span class="whitespace-normal"><span class="fix-del text-rose-700 decoration-rose-400">${escapeHtml(wrong)}</span> <span class="font-semibold text-emerald-700 bg-emerald-50 rounded px-0.5">${escapeHtml(c.right || '')}</span><sup class="text-[10px] font-bold text-slate-400 ml-0.5">${i + 1}</sup></span>`;
+                pos = at + wrong.length;
+            });
+            return html + escapeHtml(text.slice(pos));
+        }
+        function renderFeedback(fb, text) {
+            const score = fb.score;
+            const tone = score >= 15 ? ['text-emerald-700', 'bg-emerald-50', 'border-emerald-200'] : score >= 10 ? ['text-amber-700', 'bg-amber-50', 'border-amber-200'] : ['text-rose-700', 'bg-rose-50', 'border-rose-200'];
+            const corrections = Array.isArray(fb.corrections) ? fb.corrections.slice(0, 12) : [];
+            const marked = markedText(text, corrections);
+            // Checklist ticks
+            (fb.checklist || []).forEach((ok, i) => {
+                const li = document.querySelector(`#checklist [data-check="${i}"] .check-mark`);
+                if (li) li.className = `check-mark shrink-0 w-5 h-5 mt-0.5 rounded-full flex items-center justify-center text-[11px] font-black text-white ${ok ? 'bg-emerald-500' : 'bg-rose-400'}`, li.textContent = ok ? '✓' : '✗';
+            });
+            $('feedback').innerHTML = `
+                <div class="bg-white border ${tone[2]} rounded-2xl p-4 flex items-start gap-4">
+                    <div class="shrink-0 w-16 h-16 rounded-2xl ${tone[1]} ${tone[0]} flex flex-col items-center justify-center">
+                        <span class="text-2xl font-black leading-none">${score}</span><span class="text-xs font-bold">/ 20</span>
+                    </div>
+                    <div class="min-w-0 space-y-1">
+                        <h2 class="font-black text-slate-900">Your feedback</h2>
+                        <p class="text-sm text-slate-700">${escapeHtml(fb.summary || '')}</p>
+                        ${(fb.strengths || []).length ? `<ul class="text-sm text-emerald-800 space-y-0.5">${fb.strengths.map(s => `<li>✓ ${escapeHtml(s)}</li>`).join('')}</ul>` : ''}
+                    </div>
+                </div>
+                <section class="bg-white border border-slate-200 rounded-2xl p-4 space-y-2">
+                    <h2 class="text-sm font-bold uppercase tracking-wide text-slate-500">Your text, corrected</h2>
+                    <div class="text-base leading-8 text-slate-900 whitespace-pre-wrap">${marked}</div>
+                </section>
+                ${corrections.length ? `<section class="bg-white border border-slate-200 rounded-2xl p-4 space-y-2">
+                    <h2 class="text-sm font-bold uppercase tracking-wide text-slate-500">${corrections.length} correction${corrections.length === 1 ? '' : 's'}</h2>
+                    <ol class="divide-y divide-slate-100">${corrections.map((c, i) => `
+                        <li class="py-2.5 flex gap-3">
+                            <span class="shrink-0 w-6 h-6 rounded-full bg-slate-100 text-slate-600 text-xs font-bold flex items-center justify-center">${i + 1}</span>
+                            <span class="min-w-0 space-y-0.5">
+                                <span class="block text-base"><span class="fix-del text-rose-700">${escapeHtml(c.wrong || '')}</span> → <span class="font-semibold text-emerald-700">${escapeHtml(c.right || '')}</span>
+                                ${c.type ? `<span class="ml-1 text-[11px] font-bold uppercase tracking-wide text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded">${escapeHtml(c.type)}</span>` : ''}</span>
+                                <span class="block text-sm text-slate-600">${escapeHtml(c.why || '')}</span>
+                            </span>
+                        </li>`).join('')}</ol>
+                </section>` : '<p class="text-sm text-emerald-700 font-semibold">No mistakes found. Bravo !</p>'}
+                ${fb.corrected ? `<section class="bg-white border border-slate-200 rounded-2xl p-4 space-y-2">
+                    <div class="flex items-center justify-between gap-2">
+                        <h2 class="text-sm font-bold uppercase tracking-wide text-slate-500">Clean version</h2>
+                        <button type="button" id="say-corrected" class="min-h-[36px] px-2.5 text-sm font-semibold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 rounded-lg">🔊 Listen</button>
+                    </div>
+                    <p class="text-base text-slate-900 leading-relaxed whitespace-pre-line">${escapeHtml(fb.corrected)}</p>
+                </section>` : ''}
+                <button type="button" id="try-again" class="min-h-[44px] px-4 bg-white border border-slate-200 hover:border-indigo-300 font-semibold rounded-xl">✏️ Improve my text and check again</button>`;
+            $('feedback').classList.remove('hidden');
+            const say = $('say-corrected');
+            if (say) say.onclick = () => speakFrench(fb.corrected);
+            $('try-again').onclick = () => { $('text').focus(); $('text').scrollIntoView({ behavior: 'smooth', block: 'center' }); };
+        }
+
+        // ---------- Your own topic (AI) ----------
+        async function createOwnTask(e) {
+            e.preventDefault();
+            const topic = $('own-topic').value.trim();
+            if (!topic) return;
+            const level = currentLevel();
+            $('own-error').classList.add('hidden');
+            $('own-btn').disabled = true; $('own-btn').textContent = 'Creating…';
+            try {
+                const t = await askAI([
+                    { role: 'system', content: `You write short French writing tasks for CEFR level ${level} learners. Reply with JSON only:
+{"title": "short English title", "type": "Message|Email|Story|Description|Opinion|Essay|Letter|Article",
+ "fr": "the task instruction in simple French for ${level}", "en": "the same instruction in English",
+ "include": ["3 or 4 short English checklist items"],
+ "bank": [["useful French phrase", "English meaning"], ... 8 items suited to ${level}],
+ "plan": ["4 short English steps"]}` },
+                    { role: 'user', content: `Topic: ${topic}` }
+                ], { json: true, temperature: 0.5 });
+                const WORDS = { A1: [40, 60], A2: [60, 90], B1: [100, 140], B2: [160, 220], C1: [220, 280] };
+                const own = {
+                    id: 'own-' + Date.now().toString(36), own: true, level, type: String(t.type || 'Task'), title: String(t.title || topic),
+                    fr: String(t.fr || ''), en: String(t.en || ''), words: WORDS[level],
+                    include: (t.include || []).map(String).slice(0, 5),
+                    bank: (t.bank || []).filter(x => Array.isArray(x) && x.length >= 2).map(([a, b]) => [String(a), String(b)]).slice(0, 10),
+                    plan: (t.plan || []).map(String).slice(0, 6)
+                };
+                if (!own.fr) throw new Error('The AI reply could not be read. Please try again.');
+                ownTasks = [own, ...ownTasks].slice(0, 10);
+                store.set('writing_own', ownTasks);
+                $('own-topic').value = '';
+                openTask(own.id, true);
+            } catch (err) {
+                $('own-error').textContent = err.message;
+                $('own-error').classList.remove('hidden');
+            } finally {
+                $('own-btn').disabled = false; $('own-btn').textContent = 'Create task';
             }
         }
 
-        loadWritingTopicsFromDatabase();
+        // ---------- Wiring ----------
+        const accentBar = document.querySelector('[aria-label="French letters"]');
+        accentBar.insertAdjacentHTML('beforeend', ACCENTS.map(c => `<button type="button" data-insert="${c}" class="min-w-[36px] min-h-[36px] px-1.5 bg-white border border-slate-200 hover:bg-indigo-50 hover:text-indigo-700 text-sm font-semibold rounded-lg">${c}</button>`).join(''));
+        document.addEventListener('mousedown', (e) => { if (e.target.closest('[data-insert]')) e.preventDefault(); });   // keep the cursor in the text
+        document.addEventListener('click', (e) => {
+            const ins = e.target.closest('[data-insert]');
+            if (ins && task) { insertText(ins.dataset.insert); return; }
+            const a = e.target.closest('[data-task]');
+            if (a) { e.preventDefault(); openTask(a.dataset.task, true); return; }
+            const lv = e.target.closest('#levels [data-level]');
+            if (lv) { store.set('writing_level', lv.dataset.level); renderList(); }
+        });
+        $('text').addEventListener('input', () => { updateCount(); clearTimeout(saveTimer); saveTimer = setTimeout(saveDraft, 400); });
+        $('back').addEventListener('click', () => showList(true));
+        $('say-task').addEventListener('click', () => speakFrench(task.fr));
+        $('toggle-en').addEventListener('click', () => {
+            const hidden = $('task-en').classList.toggle('hidden');
+            $('toggle-en').textContent = hidden ? 'English' : 'Hide English';
+        });
+        $('btn-model').addEventListener('click', toggleModel);
+        $('btn-check').addEventListener('click', checkWriting);
+        $('btn-clear').addEventListener('click', () => {
+            if ($('text').value.trim() && !confirm('Clear your text?')) return;
+            $('text').value = ''; updateCount(); saveDraft();
+        });
+        $('own-form').addEventListener('submit', createOwnTask);
+
+        function route() {
+            const id = new URLSearchParams(location.search).get('task');
+            if (id && findTask(id)) openTask(id, false); else showList(false);
+        }
+        window.addEventListener('popstate', route);
+        route();
     </script>
 </body>
-</html>
+</html>
