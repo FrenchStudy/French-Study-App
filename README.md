@@ -10,12 +10,12 @@ A browser-based French learning suite backed by Supabase (schema `French-schema`
 | `login.html` | Sign in, create account, forgot password, Google |
 | `welcome.html` | First-time setup: goal, level or a 12-question placement test |
 | `reset.html` | Choose a new password from the reset email |
-| `lesson.html` | Grammar: one course of 97 lessons (A1–C2), the 78 grammar lessons plus the verb lessons, and a Verb tables tab (296 verbs, no AI) |
+| `lesson.html` | Grammar: one course of 97 lessons (A1–C2), the 78 grammar lessons plus the verb lessons |
 | `vocab.html` | Vocabulary by topic (44 themes plus 4 basics): Learn (hands-on lesson and words), Practise (flashcards), Test (quiz); Review of due words; the 5,000 most common words in sets of 50 |
-| `conjugations.html` | Old address: forwards to Grammar (verb tables or the matching lesson) |
+| `conjugations.html` | Conjugations: verb tables for 296 verbs in 12 tenses, and Practice (fill in the six forms); no AI |
 | `reading.html` | Reading practice (`reading_topics`) |
 | `listening.html` | Listening practice (`listening_topics`) |
-| `writing.html` | 27 built-in writing tasks (A1–C1) with checklist, word bank and model answer or plan; AI corrections shown inline; tasks from your own topic (AI) |
+| `writing.html` | Writing: a new AI question from a subject and format, your own posted question, or 27 ready-made tasks (A1–C1); checklist, word bank, model answer or AI sample reply; AI corrections shown inside your text. `writing-classic.html` is the previous page, kept for comparison |
 | `speaking.html` | Speaking practice and AI roleplay |
 | `translator.html` | Translator and analyzer |
 | `admin.html` | Save the AI API key, model and URL for this browser |

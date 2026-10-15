@@ -26,37 +26,60 @@
             <div id="list-view" class="space-y-4">
                 <div>
                     <h1 class="text-2xl font-black text-slate-900">Writing</h1>
-                    <p class="text-sm text-slate-500 mt-1">Short writing tasks for your level. Each one has a word bank and a model answer; when you're done, get your text corrected.
+                    <p class="text-sm text-slate-500 mt-1">Pick a subject and get a new question for your level, post your own question, or use a ready-made task. Then get your text corrected.
                         <a href="writing-classic.html" class="ml-1 font-semibold text-indigo-700 hover:underline">Open the old version</a></p>
                 </div>
-                <div class="flex flex-col md:flex-row md:items-center gap-3">
-                    <div id="levels" class="flex gap-1 p-1 bg-slate-200/70 rounded-xl overflow-x-auto" role="tablist" aria-label="Level"></div>
-                </div>
-                <div id="task-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+                <div id="levels" class="flex w-max max-w-full gap-1 p-1 bg-slate-200/70 rounded-xl overflow-x-auto" role="tablist" aria-label="Level"></div>
 
-                <!-- Your own topic -->
-                <section class="bg-white border border-slate-200 rounded-2xl p-4 space-y-3">
-                    <div class="flex items-start gap-3">
-                        <span class="shrink-0 w-10 h-10 rounded-xl bg-violet-50 text-violet-700 flex items-center justify-center text-xl" aria-hidden="true">💡</span>
-                        <div class="min-w-0">
-                            <h2 class="font-bold text-slate-900">Your own topic</h2>
-                            <p class="text-sm text-slate-500">Type any topic and get a task for your level, with a word bank and a plan. Uses AI.</p>
+                <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] gap-3">
+                    <!-- A new question from the AI -->
+                    <section class="bg-white border border-slate-200 rounded-2xl p-4 space-y-3">
+                        <h2 class="font-black text-slate-900">✨ A new question</h2>
+                        <div>
+                            <div class="text-sm font-semibold text-slate-700 mb-1.5">Subject</div>
+                            <div id="subjects" class="flex flex-wrap gap-1.5"></div>
+                            <input id="subject-other" type="text" maxlength="80" placeholder="…or type any subject" class="mt-2 w-full text-base md:text-sm px-3 py-2 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
                         </div>
-                    </div>
-                    <form id="own-form" class="flex flex-col sm:flex-row gap-2">
-                        <input id="own-topic" type="text" maxlength="120" placeholder="e.g. my favourite sport, a job interview, climate change" class="flex-1 text-base md:text-sm px-3 py-2.5 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                        <button id="own-btn" type="submit" class="min-h-[44px] px-4 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl">Create task</button>
-                    </form>
-                    <p id="own-error" class="hidden text-sm text-rose-700"></p>
+                        <div>
+                            <div class="text-sm font-semibold text-slate-700 mb-1.5">Format</div>
+                            <div id="formats" class="flex flex-wrap gap-1.5"></div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <button id="gen-btn" type="button" class="whitespace-nowrap min-h-[48px] px-5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-bold rounded-xl">Write me a question</button>
+                            <span class="hidden sm:inline text-xs text-slate-400">A different question every time. Uses AI.</span>
+                        </div>
+                        <p id="gen-error" class="hidden text-sm text-rose-700"></p>
+                    </section>
+
+                    <!-- Post your own question -->
+                    <section class="bg-white border border-slate-200 rounded-2xl p-4 space-y-3 flex flex-col">
+                        <h2 class="font-black text-slate-900">📝 Your own question</h2>
+                        <p class="text-sm text-slate-500">Paste a question from a book, an exam or your teacher, in French or English.</p>
+                        <textarea id="post-text" rows="4" maxlength="1200" placeholder="e.g. Vous avez passé un week-end chez des amis. Écrivez-leur pour les remercier…" class="flex-1 w-full text-base md:text-sm p-3 bg-white border border-slate-200 rounded-xl resize-y focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
+                        <button id="post-btn" type="button" class="self-start min-h-[44px] px-4 bg-slate-900 hover:bg-slate-800 disabled:opacity-50 text-white font-bold rounded-xl">Use my question</button>
+                        <p id="post-error" class="hidden text-sm text-rose-700"></p>
+                    </section>
+                </div>
+
+                <section id="mine-box" class="hidden space-y-2">
+                    <h2 class="text-sm font-bold uppercase tracking-wide text-slate-500">Your questions</h2>
+                    <div id="mine-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+                </section>
+                <section class="space-y-2">
+                    <h2 class="text-sm font-bold uppercase tracking-wide text-slate-500">Ready-made tasks</h2>
+                    <div id="task-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
                 </section>
             </div>
 
             <!-- ===== ONE TASK ===== -->
             <div id="task-view" class="hidden space-y-4">
                 <button id="back" type="button" class="min-h-[44px] px-1 text-sm font-semibold text-slate-600 hover:text-indigo-600">← All tasks</button>
-                <div>
-                    <span id="crumb" class="text-xs font-bold px-2 py-1 rounded-full bg-slate-100 text-slate-600"></span>
-                    <h1 id="task-title" class="text-2xl lg:text-3xl font-black text-slate-900 leading-tight mt-2"></h1>
+                <div class="flex flex-col sm:flex-row sm:items-end gap-3">
+                    <div class="min-w-0 flex-1">
+                        <span id="crumb" class="text-xs font-bold px-2 py-1 rounded-full bg-slate-100 text-slate-600"></span>
+                        <h1 id="task-title" class="text-2xl lg:text-3xl font-black text-slate-900 leading-tight mt-2"></h1>
+                    </div>
+                    <button id="btn-another" type="button" class="hidden shrink-0 self-start sm:self-end min-h-[44px] px-4 bg-white border border-slate-200 hover:border-indigo-300 disabled:opacity-50 font-semibold rounded-xl">🔀 New question</button>
                 </div>
 
                 <div class="flex flex-col lg:grid lg:grid-cols-[minmax(0,1fr)_22rem] gap-4 lg:gap-6">
@@ -73,7 +96,7 @@
                             <p id="task-fr" class="text-base text-slate-900 leading-relaxed"></p>
                             <p id="task-en" class="hidden text-sm text-slate-500 leading-relaxed border-t border-slate-100 pt-2"></p>
                         </section>
-                        <section class="bg-white border border-slate-200 rounded-2xl p-4 space-y-2">
+                        <section id="include-box" class="bg-white border border-slate-200 rounded-2xl p-4 space-y-2">
                             <h2 class="text-sm font-bold uppercase tracking-wide text-slate-500">Include</h2>
                             <ul id="checklist" class="space-y-1.5 text-sm text-slate-700"></ul>
                         </section>
@@ -108,6 +131,7 @@
                         <div class="flex flex-wrap items-center gap-2">
                             <button id="btn-check" type="button" class="min-h-[48px] px-5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-bold rounded-xl">✨ Check my writing</button>
                             <button id="btn-model" type="button" class="min-h-[48px] px-4 bg-white border border-slate-200 hover:border-indigo-300 text-slate-800 font-semibold rounded-xl"></button>
+                            <button id="btn-sample" type="button" class="min-h-[48px] px-4 bg-white border border-slate-200 hover:border-indigo-300 disabled:opacity-50 text-slate-800 font-semibold rounded-xl">✨ AI sample reply</button>
                             <button id="btn-clear" type="button" class="ml-auto min-h-[44px] px-2 text-sm font-semibold text-slate-500 hover:text-rose-600">Clear</button>
                         </div>
 
@@ -134,7 +158,17 @@
         };
         let drafts = store.get('writing_drafts', {});     // task id -> text
         let results = store.get('writing_results', {});   // task id -> { score, at, text, feedback }
-        let ownTasks = store.get('writing_own', []);      // tasks made from your own topic
+        let ownTasks = store.get('writing_own', []);      // AI questions and your own questions
+        let samples = store.get('writing_samples', {});   // task id -> { fr, en } sample reply written by the AI
+        const WORDS = { A1: [40, 60], A2: [60, 90], B1: [100, 140], B2: [160, 220], C1: [220, 280] };
+        const SUBJECTS = ['Daily life', 'Family and friends', 'Food', 'Travel', 'Home', 'Work', 'Studies', 'Health and sport',
+            'Free time', 'Shopping', 'Technology', 'Environment', 'Culture and media', 'Society'];
+        const FORMATS = [['message', 'Message to a friend'], ['email', 'Formal email or letter'], ['story', 'Story'],
+            ['article', 'Article or blog'], ['opinion', 'Opinion'], ['essay', 'Essay']];
+        const DEFAULT_FORMAT = { A1: 'message', A2: 'message', B1: 'opinion', B2: 'essay', C1: 'essay' };
+        let dbSubjects = [];                              // extra subjects from the reading_topics table, when it exists
+        let pick = store.get('writing_pick', { subject: 'Daily life', format: null });
+        const kindLabel = (t) => t.source === 'posted' ? 'Your question' : t.own ? 'AI question' : t.type;
         let task = null;
         const allTasks = () => [...window.WRITING_TASKS, ...ownTasks];
         const findTask = (id) => allTasks().find(t => t.id === id);
@@ -156,19 +190,34 @@
                     ${lv}<span class="ml-1.5 text-xs font-semibold ${on ? LEVEL_STYLE[lv][0] : 'text-slate-400'}">${n}/${list.length}</span></button>`;
             }).join('');
             const st = LEVEL_STYLE[level];
-            $('task-grid').innerHTML = allTasks().filter(t => t.level === level).map(t => {
+            const card = (t) => {
                 const r = results[t.id];
                 const status = r ? `<span class="shrink-0 text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">✓ ${r.score}/20</span>`
                     : drafts[t.id] ? '<span class="shrink-0 text-xs font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full">Draft</span>' : '';
                 return `<a href="writing.html?task=${encodeURIComponent(t.id)}" data-task="${escapeHtml(t.id)}" class="group flex flex-col gap-1.5 bg-white border border-slate-200 hover:border-indigo-400 hover:shadow-md transition rounded-2xl p-4">
                     <span class="flex items-center justify-between gap-2">
-                        <span class="text-[11px] font-bold uppercase tracking-wide ${st[0]} ${st[1]} px-2 py-0.5 rounded-full">${escapeHtml(t.own ? 'Your topic' : t.type)}</span>${status}
+                        <span class="text-[11px] font-bold uppercase tracking-wide ${t.own ? 'text-violet-700 bg-violet-50' : st[0] + ' ' + st[1]} px-2 py-0.5 rounded-full">${escapeHtml(kindLabel(t))}</span>${status}
                     </span>
                     <span class="font-bold text-slate-900 leading-snug group-hover:text-indigo-700">${escapeHtml(t.title)}</span>
-                    <span class="text-sm text-slate-500 leading-snug line-clamp-2">${escapeHtml(t.en)}</span>
-                    <span class="text-xs font-semibold text-slate-400 mt-auto pt-1">${t.words[0]}–${t.words[1]} words</span>
+                    <span class="text-sm text-slate-500 leading-snug line-clamp-2">${escapeHtml(t.en || t.fr)}</span>
+                    <span class="text-xs font-semibold text-slate-400 mt-auto pt-1">${t.subject ? escapeHtml(t.subject) + ' · ' : ''}${t.words[0]}–${t.words[1]} words</span>
                 </a>`;
-            }).join('');
+            };
+            const mine = ownTasks.filter(t => t.level === level);
+            $('mine-box').classList.toggle('hidden', !mine.length);
+            $('mine-grid').innerHTML = mine.map(card).join('');
+            $('task-grid').innerHTML = window.WRITING_TASKS.filter(t => t.level === level).map(card).join('');
+            renderPicker();
+        }
+
+        // Subject and format chips
+        function renderPicker() {
+            const level = currentLevel();
+            const fmt = pick.format || DEFAULT_FORMAT[level];
+            const subjects = [...SUBJECTS, ...dbSubjects.filter(s => !SUBJECTS.includes(s))];
+            const chip = (on) => `min-h-[36px] px-3 rounded-full text-sm font-semibold border transition ${on ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-white border-slate-200 text-slate-700 hover:border-indigo-300'}`;
+            $('subjects').innerHTML = subjects.map(s => `<button type="button" data-subject="${escapeHtml(s)}" class="${chip(s === pick.subject)}">${escapeHtml(s)}</button>`).join('');
+            $('formats').innerHTML = FORMATS.map(([k, label]) => `<button type="button" data-format="${k}" class="${chip(k === fmt)}">${escapeHtml(label)}</button>`).join('');
         }
 
         // ---------- One task ----------
@@ -182,7 +231,7 @@
             $('task-view').classList.remove('hidden');
             const st = LEVEL_STYLE[t.level];
             $('crumb').className = `text-xs font-bold px-2 py-1 rounded-full ${st[1]} ${st[0]}`;
-            $('crumb').textContent = `Writing · ${t.level} · ${t.own ? 'Your topic' : t.type}`;
+            $('crumb').textContent = `Writing · ${t.level} · ${kindLabel(t)}${t.subject ? ' · ' + t.subject : ''}`;
             $('task-title').textContent = t.title;
             document.title = `${t.title} - Writing`;
             $('task-fr').textContent = t.fr;
@@ -193,6 +242,10 @@
             $('bank').innerHTML = (t.bank || []).map(([fr, en]) => `<button type="button" data-insert="${escapeHtml(fr)}" class="w-full text-left px-3 py-2 rounded-xl bg-slate-50 hover:bg-indigo-50 border border-slate-100">
                 <span class="block text-sm font-semibold text-slate-900">${escapeHtml(fr)}</span><span class="block text-xs text-slate-500">${escapeHtml(en)}</span></button>`).join('');
             $('bank-box').open = window.innerWidth >= 1024;
+            $('include-box').classList.toggle('hidden', !t.include.length);
+            $('bank-box').classList.toggle('hidden', !(t.bank || []).length);
+            $('btn-another').classList.toggle('hidden', !(t.own && t.source !== 'posted'));
+            $('btn-model').classList.toggle('hidden', !t.model && !(t.plan || []).length);
             $('text').value = drafts[t.id] || (results[t.id] && results[t.id].text) || '';
             $('saved').textContent = drafts[t.id] ? 'Draft saved on this device' : '';
             $('btn-model').textContent = t.model ? '📖 Model answer' : '🗺️ See a plan';
@@ -200,6 +253,7 @@
             updateCount();
             const r = results[t.id];
             if (r && r.feedback) renderFeedback(r.feedback, r.text); else $('feedback').classList.add('hidden');
+            if (t.note && !results[t.id]) showError(`Your question is saved. ${t.note} Without AI there is no word bank or checklist for it.`);
             $('scroller').scrollTop = 0;
         }
         function showList(push) {
@@ -247,7 +301,8 @@
         // ---------- Model answer / plan ----------
         function toggleModel() {
             const box = $('model-box');
-            if (!box.classList.contains('hidden')) { box.classList.add('hidden'); return; }
+            if (!box.classList.contains('hidden') && box.dataset.kind === 'model') { box.classList.add('hidden'); return; }
+            box.dataset.kind = 'model';
             const tooEarly = countWords($('text').value) < task.words[0] / 2;
             box.innerHTML = task.model ? `
                 <div class="flex items-center justify-between gap-2">
@@ -262,6 +317,47 @@
             box.classList.remove('hidden');
             const say = $('say-model');
             if (say) say.onclick = () => speakFrench(task.model);
+        }
+
+        // A sample reply written by the AI, for any task (kept, so it costs one AI use per task)
+        async function showSample(fresh) {
+            const box = $('model-box');
+            if (!fresh && !box.classList.contains('hidden') && box.dataset.kind === 'sample') { box.classList.add('hidden'); return; }
+            box.dataset.kind = 'sample';
+            box.classList.remove('hidden');
+            let s = !fresh && samples[task.id];
+            if (!s) {
+                box.innerHTML = '<p class="text-sm text-amber-800 animate-pulse">Writing a sample reply…</p>';
+                $('btn-sample').disabled = true;
+                try {
+                    const r = await askAI([
+                        { role: 'system', content: `You write model answers to French writing tasks for CEFR level ${task.level} learners. Write a natural, correct reply of ${task.words[0]}-${task.words[1]} words that a strong ${task.level} student could write: use structures and vocabulary of that level, and cover every point of the task. Reply with JSON only: {"fr": "the reply in French (use \\n between paragraphs)", "en": "an English translation"}` },
+                        { role: 'user', content: `Task: ${task.fr}${task.include.length ? '\nInclude: ' + task.include.join('; ') : ''}` }
+                    ], { json: true, temperature: 0.7 });
+                    if (!r.fr) throw new Error('The AI reply could not be read. Please try again.');
+                    s = { fr: String(r.fr), en: String(r.en || '') };
+                    samples[task.id] = s; store.set('writing_samples', samples);
+                } catch (err) {
+                    box.innerHTML = `<p class="text-sm text-rose-700">${escapeHtml(err.message)}</p>`;
+                    return;
+                } finally { $('btn-sample').disabled = false; }
+            }
+            const tooEarly = countWords($('text').value) < task.words[0] / 2;
+            box.innerHTML = `
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                    <h2 class="text-sm font-bold uppercase tracking-wide text-amber-900">✨ Sample reply</h2>
+                    <div class="flex gap-1.5">
+                        <button type="button" id="say-sample" class="min-h-[36px] px-2.5 text-sm font-semibold text-amber-900 bg-white border border-amber-200 rounded-lg">🔊 Listen</button>
+                        ${s.en ? '<button type="button" id="sample-en" class="min-h-[36px] px-2.5 text-sm font-semibold text-amber-900 bg-white border border-amber-200 rounded-lg">English</button>' : ''}
+                        <button type="button" id="sample-new" class="min-h-[36px] px-2.5 text-sm font-semibold text-amber-900 bg-white border border-amber-200 rounded-lg">Another one</button>
+                    </div>
+                </div>
+                ${tooEarly ? '<p class="text-sm text-amber-800">Tip: try writing your own text first, then compare.</p>' : ''}
+                <p class="text-base text-slate-900 leading-relaxed whitespace-pre-line">${escapeHtml(s.fr)}</p>
+                ${s.en ? `<p id="sample-en-text" class="hidden text-sm text-slate-600 leading-relaxed whitespace-pre-line border-t border-amber-200 pt-2">${escapeHtml(s.en)}</p>` : ''}`;
+            $('say-sample').onclick = () => speakFrench(s.fr);
+            if ($('sample-en')) $('sample-en').onclick = () => { const h = $('sample-en-text').classList.toggle('hidden'); $('sample-en').textContent = h ? 'English' : 'Hide English'; };
+            $('sample-new').onclick = () => showSample(true);
         }
 
         // ---------- Feedback (AI) ----------
@@ -301,6 +397,7 @@ Only list real mistakes, at most 12, in the order they appear. "wrong" must be c
                 btn.disabled = false; btn.textContent = '✨ Check my writing';
             }
         }
+        function showErrorBox(msg) { showError(msg); }
         function showError(msg) {
             $('feedback').classList.remove('hidden');
             $('feedback').innerHTML = `<div class="bg-rose-50 border border-rose-200 text-rose-800 rounded-2xl p-4 text-sm">${escapeHtml(msg)}</div>`;
@@ -378,43 +475,79 @@ Only list real mistakes, at most 12, in the order they appear. "wrong" must be c
             $('try-again').onclick = () => { $('text').focus(); $('text').scrollIntoView({ behavior: 'smooth', block: 'center' }); };
         }
 
-        // ---------- Your own topic (AI) ----------
-        async function createOwnTask(e) {
-            e.preventDefault();
-            const topic = $('own-topic').value.trim();
-            if (!topic) return;
-            const level = currentLevel();
-            $('own-error').classList.add('hidden');
-            $('own-btn').disabled = true; $('own-btn').textContent = 'Creating…';
-            try {
-                const t = await askAI([
-                    { role: 'system', content: `You write short French writing tasks for CEFR level ${level} learners. Reply with JSON only:
-{"title": "short English title", "type": "Message|Email|Story|Description|Opinion|Essay|Letter|Article",
- "fr": "the task instruction in simple French for ${level}", "en": "the same instruction in English",
+        // ---------- New questions (AI) and your own questions ----------
+        const cleanTask = (t) => ({
+            include: (t.include || []).map(String).filter(Boolean).slice(0, 5),
+            bank: (t.bank || []).filter(x => Array.isArray(x) && x.length >= 2).map(([a, b]) => [String(a), String(b)]).slice(0, 10),
+            plan: (t.plan || []).map(String).filter(Boolean).slice(0, 6)
+        });
+        function saveOwn(t) {
+            ownTasks = [t, ...ownTasks.filter(x => x.id !== t.id)].slice(0, 40);
+            store.set('writing_own', ownTasks);
+        }
+        async function generateQuestion(subject, format, level) {
+            const fmtLabel = (FORMATS.find(([k]) => k === format) || [, format])[1];
+            const recent = ownTasks.filter(x => x.subject === subject).slice(0, 6).map(x => x.title);
+            const t = await askAI([
+                { role: 'system', content: `You write French writing tasks in the style of the DELF and TCF exams, for CEFR level ${level}. Invent a new, concrete situation each time (who you are writing to, why, what happened). Reply with JSON only:
+{"title": "short English title", "fr": "the task instruction in French, at ${level} level, 2-4 sentences", "en": "the same instruction in English",
  "include": ["3 or 4 short English checklist items"],
- "bank": [["useful French phrase", "English meaning"], ... 8 items suited to ${level}],
+ "bank": [["useful French phrase", "English meaning"], ... 8 items suited to ${level} and this task],
  "plan": ["4 short English steps"]}` },
-                    { role: 'user', content: `Topic: ${topic}` }
-                ], { json: true, temperature: 0.5 });
-                const WORDS = { A1: [40, 60], A2: [60, 90], B1: [100, 140], B2: [160, 220], C1: [220, 280] };
-                const own = {
-                    id: 'own-' + Date.now().toString(36), own: true, level, type: String(t.type || 'Task'), title: String(t.title || topic),
-                    fr: String(t.fr || ''), en: String(t.en || ''), words: WORDS[level],
-                    include: (t.include || []).map(String).slice(0, 5),
-                    bank: (t.bank || []).filter(x => Array.isArray(x) && x.length >= 2).map(([a, b]) => [String(a), String(b)]).slice(0, 10),
-                    plan: (t.plan || []).map(String).slice(0, 6)
-                };
-                if (!own.fr) throw new Error('The AI reply could not be read. Please try again.');
-                ownTasks = [own, ...ownTasks].slice(0, 10);
-                store.set('writing_own', ownTasks);
-                $('own-topic').value = '';
-                openTask(own.id, true);
+                { role: 'user', content: `Subject: ${subject}\nFormat: ${fmtLabel}\nLength: ${WORDS[level][0]}-${WORDS[level][1]} words${recent.length ? '\nMake it different from these earlier questions: ' + recent.join('; ') : ''}` }
+            ], { json: true, temperature: 0.9 });
+            if (!t.fr) throw new Error('The AI reply could not be read. Please try again.');
+            const q = { id: 'ai-' + Date.now().toString(36), own: true, source: 'ai', level, subject, format, type: fmtLabel,
+                title: String(t.title || subject), fr: String(t.fr), en: String(t.en || ''), words: WORDS[level], ...cleanTask(t) };
+            saveOwn(q);
+            return q;
+        }
+        async function onGenerate(btn, showError, subject, format, level) {
+            showError('');
+            const label = btn.textContent;
+            btn.disabled = true; btn.textContent = 'Writing a question…';
+            try {
+                const q = await generateQuestion(subject, format, level);
+                openTask(q.id, true);
             } catch (err) {
-                $('own-error').textContent = err.message;
-                $('own-error').classList.remove('hidden');
-            } finally {
-                $('own-btn').disabled = false; $('own-btn').textContent = 'Create task';
+                showError(err.message + ' Meanwhile, the ready-made tasks work without AI.');
+            } finally { btn.disabled = false; btn.textContent = label; }
+        }
+        async function postQuestion() {
+            const text = $('post-text').value.trim();
+            if (text.length < 10) { $('post-error').textContent = 'Type or paste the question first.'; $('post-error').classList.remove('hidden'); return; }
+            const level = currentLevel();
+            $('post-error').classList.add('hidden');
+            $('post-btn').disabled = true; $('post-btn').textContent = 'Reading your question…';
+            let q = { id: 'my-' + Date.now().toString(36), own: true, source: 'posted', level, type: 'Your question',
+                title: text.split(/[.?!\n]/)[0].slice(0, 60) || 'My question', fr: text, en: '', words: WORDS[level], include: [], bank: [], plan: [] };
+            try {
+                // Keep the student's question; the AI adds a translation, a checklist, a word bank and a sensible length
+                const t = await askAI([
+                    { role: 'system', content: `A ${level} learner of French pasted a writing question. Keep their question; do not change what it asks. Reply with JSON only:
+{"title": "short English title", "fr": "the question in French (unchanged if it is already French, otherwise translated)", "en": "the question in English",
+ "words": [min, max] a sensible length for ${level}, "include": ["3 or 4 short English checklist items"],
+ "bank": [["useful French phrase", "English meaning"], ... 8 items], "plan": ["4 short English steps"]}` },
+                    { role: 'user', content: text }
+                ], { json: true, temperature: 0.3 });
+                const w = Array.isArray(t.words) && t.words.length === 2 && t.words.every(n => Number(n) > 0) ? t.words.map(Number) : WORDS[level];
+                q = { ...q, title: String(t.title || q.title), fr: String(t.fr || text), en: String(t.en || ''), words: w, ...cleanTask(t) };
+            } catch (err) {
+                q.note = err.message;   // without AI the question still works, just without the extras
             }
+            saveOwn(q);
+            $('post-text').value = '';
+            $('post-btn').disabled = false; $('post-btn').textContent = 'Use my question';
+            openTask(q.id, true);
+        }
+        // Subjects from the reading_topics table (the old Writing page used them), when it exists
+        async function loadDbSubjects() {
+            try {
+                const { data, error } = await db.from('reading_topics').select('title, category, level').order('id', { ascending: true });
+                if (error || !data) return;
+                dbSubjects = [...new Set(data.map(r => String(r.title || r.category || '').trim()).filter(Boolean))].slice(0, 16);
+                if (!task) renderPicker();
+            } catch (err) { /* the built-in subjects are enough */ }
         }
 
         // ---------- Wiring ----------
@@ -427,7 +560,11 @@ Only list real mistakes, at most 12, in the order they appear. "wrong" must be c
             const a = e.target.closest('[data-task]');
             if (a) { e.preventDefault(); openTask(a.dataset.task, true); return; }
             const lv = e.target.closest('#levels [data-level]');
-            if (lv) { store.set('writing_level', lv.dataset.level); renderList(); }
+            if (lv) { store.set('writing_level', lv.dataset.level); renderList(); return; }
+            const sj = e.target.closest('[data-subject]');
+            if (sj) { pick.subject = sj.dataset.subject; $('subject-other').value = ''; store.set('writing_pick', pick); renderPicker(); return; }
+            const fm = e.target.closest('[data-format]');
+            if (fm) { pick.format = fm.dataset.format; store.set('writing_pick', pick); renderPicker(); }
         });
         $('text').addEventListener('input', () => { updateCount(); clearTimeout(saveTimer); saveTimer = setTimeout(saveDraft, 400); });
         $('back').addEventListener('click', () => showList(true));
@@ -442,7 +579,20 @@ Only list real mistakes, at most 12, in the order they appear. "wrong" must be c
             if ($('text').value.trim() && !confirm('Clear your text?')) return;
             $('text').value = ''; updateCount(); saveDraft();
         });
-        $('own-form').addEventListener('submit', createOwnTask);
+        $('gen-btn').addEventListener('click', () => {
+            const typed = $('subject-other').value.trim();
+            const level = currentLevel();
+            const showError = (m) => { $('gen-error').textContent = m; $('gen-error').classList.toggle('hidden', !m); };
+            onGenerate($('gen-btn'), showError, typed || pick.subject, pick.format || DEFAULT_FORMAT[level], level);
+        });
+        $('subject-other').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('gen-btn').click(); });
+        $('post-btn').addEventListener('click', postQuestion);
+        $('btn-sample').addEventListener('click', () => showSample(false));
+        $('btn-another').addEventListener('click', () => {
+            const showError = (m) => { if (m) showErrorBox(m); };
+            onGenerate($('btn-another'), showError, task.subject || task.title, task.format || DEFAULT_FORMAT[task.level], task.level);
+        });
+        loadDbSubjects();
 
         function route() {
             const id = new URLSearchParams(location.search).get('task');

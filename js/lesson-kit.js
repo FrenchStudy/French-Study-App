@@ -84,7 +84,7 @@ const LessonKit = (function () {
         conjugation: (n) => `lesson.html?g=${encodeURIComponent(CONJ_HOME[n] || 'v' + n)}`,
         interactive: (id) => `vocab.html?lesson=${encodeURIComponent(id)}`,
         theme: (n) => `vocab.html?topic=theme:${encodeURIComponent(n)}`,
-        verb: (v) => `lesson.html?tab=verbs&verb=${encodeURIComponent(v)}`
+        verb: (v) => `conjugations.html?verb=${encodeURIComponent(v)}`
     };
 
     const SECTIONS = {
@@ -213,7 +213,7 @@ const LessonKit = (function () {
         const rows = [];
         if (lessons.length || out.verbTables) rows.push(`<div><span class="font-semibold text-slate-700">Related lessons:</span> ${[
             ...lessons.map(x => link(URLS.grammar(x), `${courseGet(x).n}. ${courseGet(x).title}`)),
-            ...(out.verbTables ? [link('lesson.html?tab=verbs', 'Verb tables')] : [])].join(' · ')}</div>`);
+            ...(out.verbTables ? [link('conjugations.html', 'Verb tables')] : [])].join(' · ')}</div>`);
         if (themes.length) rows.push(`<div><span class="font-semibold text-slate-700">Vocab topics:</span> ${themes.map(n => link(URLS.theme(n), themeTitle(n))).join(' · ')}</div>`);
         const notes = [...new Set(out.notes)];
         if (notes.length) rows.push(`<p class="text-slate-500">${notes.map(escapeHtml).join(' ')}</p>`);
