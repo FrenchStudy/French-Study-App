@@ -147,7 +147,7 @@ function renderAppHeader() {
     if (!document.getElementById('app-header-style')) {
         const st = document.createElement('style');
         st.id = 'app-header-style';
-        st.textContent = '#app-header nav::-webkit-scrollbar{display:none}@media (max-width:1023px){#app-header nav{-webkit-mask-image:linear-gradient(to right,#000 82%,transparent);mask-image:linear-gradient(to right,#000 82%,transparent)}}';
+        st.textContent = '[role=tablist]{scrollbar-width:none}[role=tablist]::-webkit-scrollbar{display:none}#app-header nav::-webkit-scrollbar{display:none}@media (max-width:1023px){#app-header nav{-webkit-mask-image:linear-gradient(to right,#000 82%,transparent);mask-image:linear-gradient(to right,#000 82%,transparent)}}';
         document.head.appendChild(st);
     }
     const nav = header.querySelector('nav');
