@@ -333,7 +333,7 @@
                     const r = await askAI([
                         { role: 'system', content: `You write model answers to French writing tasks for CEFR level ${task.level} learners. Write a natural, correct reply of ${task.words[0]}-${task.words[1]} words that a strong ${task.level} student could write: use structures and vocabulary of that level, and cover every point of the task. Reply with JSON only: {"fr": "the reply in French (use \\n between paragraphs)", "en": "an English translation"}` },
                         { role: 'user', content: `Task: ${task.fr}${task.include.length ? '\nInclude: ' + task.include.join('; ') : ''}` }
-                    ], { json: true, temperature: 0.7 });
+                    ], { json: true, temperature: 0.7, feature: 'writing-sample' });
                     if (!r.fr) throw new Error('The AI reply could not be read. Please try again.');
                     s = { fr: String(r.fr), en: String(r.en || '') };
                     samples[task.id] = s; store.set('writing_samples', samples);
@@ -380,7 +380,7 @@ Reply with JSON only:
  "corrected": "the whole text corrected, keeping the student's ideas and level"}
 Only list real mistakes, at most 12, in the order they appear. "wrong" must be copied exactly from the text, as short as possible (a few words).` },
                     { role: 'user', content: `Task: ${task.fr}\nChecklist: ${JSON.stringify(task.include)}\nTarget length: ${task.words[0]}-${task.words[1]} words.\n\nStudent's text:\n${text}` }
-                ], { json: true, temperature: 0.2 });
+                ], { json: true, temperature: 0.2, feature: 'writing-check' });
                 const score = Math.max(0, Math.min(20, Math.round(Number(fb.score))));
                 if (!Number.isFinite(score)) throw new Error('The AI reply could not be read. Please try again.');
                 fb.score = score;
@@ -495,7 +495,7 @@ Only list real mistakes, at most 12, in the order they appear. "wrong" must be c
  "bank": [["useful French phrase", "English meaning"], ... 8 items suited to ${level} and this task],
  "plan": ["4 short English steps"]}` },
                 { role: 'user', content: `Subject: ${subject}\nFormat: ${fmtLabel}\nLength: ${WORDS[level][0]}-${WORDS[level][1]} words${recent.length ? '\nMake it different from these earlier questions: ' + recent.join('; ') : ''}` }
-            ], { json: true, temperature: 0.9 });
+            ], { json: true, temperature: 0.9, feature: 'writing-question' });
             if (!t.fr) throw new Error('The AI reply could not be read. Please try again.');
             const q = { id: 'ai-' + Date.now().toString(36), own: true, source: 'ai', level, subject, format, type: fmtLabel,
                 title: String(t.title || subject), fr: String(t.fr), en: String(t.en || ''), words: WORDS[level], ...cleanTask(t) };
@@ -529,7 +529,7 @@ Only list real mistakes, at most 12, in the order they appear. "wrong" must be c
  "words": [min, max] a sensible length for ${level}, "include": ["3 or 4 short English checklist items"],
  "bank": [["useful French phrase", "English meaning"], ... 8 items], "plan": ["4 short English steps"]}` },
                     { role: 'user', content: text }
-                ], { json: true, temperature: 0.3 });
+                ], { json: true, temperature: 0.3, feature: 'writing-own' });
                 const w = Array.isArray(t.words) && t.words.length === 2 && t.words.every(n => Number(n) > 0) ? t.words.map(Number) : WORDS[level];
                 q = { ...q, title: String(t.title || q.title), fr: String(t.fr || text), en: String(t.en || ''), words: w, ...cleanTask(t) };
             } catch (err) {

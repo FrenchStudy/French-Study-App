@@ -27,6 +27,65 @@ const CONFIG = {
     }
 };
 
+// ---------- AI through the server ----------
+// Every AI request goes to the "ai" Edge Function, which holds the Groq key and counts each
+// student's free uses (supabase/functions/ai). Until that function is deployed, the key saved
+// on the Admin page in this browser is used directly, as before.
+const AI_FUNCTION_URL = SUPABASE_URL + '/functions/v1/ai';
+const AIServer = {
+    missing: false,   // true once we know the function is not deployed yet
+    // Returns { ok, status, data } from the server, or { notDeployed: true }
+    async request(body) {
+        if (this.missing) return { notDeployed: true };
+        let session = null;
+        try { ({ data: { session } } = await window.mySupabase.auth.getSession()); } catch (e) {}
+        if (!session) {
+            if (CONFIG.getApiKey()) return { notDeployed: true };   // not signed in, but this browser has the Admin key
+            return { status: 401, data: { error: 'Please sign in to use the AI features.', code: 'signin' } };
+        }
+        let res;
+        try {
+            res = await (AIServer._fetch || fetch)(AI_FUNCTION_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session.access_token, 'apikey': SUPABASE_ANON_KEY },
+                body: JSON.stringify(body)
+            });
+        } catch (err) {
+            // A function that does not exist yet often fails like this (no CORS headers)
+            if (CONFIG.getApiKey()) { this.missing = true; return { notDeployed: true }; }
+            return { status: 0, data: { error: 'Could not reach the AI service. Check your connection and try again in a moment.' } };
+        }
+        if (res.status === 404) { this.missing = true; return { notDeployed: true }; }
+        let data = {};
+        try { data = await res.json(); } catch (e) {}
+        if (data && data.quota) LocalStore.set('ai_quota', { ...data.quota, at: Date.now() });
+        return { ok: res.ok, status: res.status, data };
+    },
+    // Free uses left, or null when unknown (not signed in, function not deployed)
+    async quota() {
+        const r = await this.request({ quota: true });
+        return r.ok && r.data.quota ? r.data.quota : null;
+    }
+};
+// Older pages (Reading, Listening, Translator, the classic pages) call Groq directly with the key
+// from the Admin page. When this browser has no key they send "Bearer server": route those to the
+// Edge Function and answer in the same shape.
+(function () {
+    const nativeFetch = window.fetch.bind(window);
+    AIServer._fetch = nativeFetch;
+    window.fetch = async function (input, init) {
+        const auth = init && init.headers && (init.headers.Authorization || init.headers.authorization);
+        if (auth !== 'Bearer server') return nativeFetch(input, init);
+        let body = {};
+        try { body = JSON.parse(init.body); } catch (e) {}
+        const page = (location.pathname.split('/').pop() || 'page').replace('.html', '');
+        const r = await AIServer.request({ messages: body.messages, temperature: body.temperature, json: !!body.response_format, feature: page });
+        if (r.notDeployed) return new Response(JSON.stringify({ error: { message: 'AI is not set up yet: add the Groq API key on the Admin page, or deploy the AI function.' } }), { status: 503 });
+        const ok = r.ok && r.data && r.data.choices;
+        return new Response(JSON.stringify(ok ? { choices: r.data.choices } : { error: { message: (r.data && r.data.error) || 'AI error' } }), { status: ok ? 200 : (r.status || 500) });
+    };
+})();
+
 // Logout: signs the user out of Supabase, then returns to the login page.
 async function logout() {
     try { sessionStorage.removeItem('fs_role'); localStorage.removeItem('fs_profile'); } catch (e) {}

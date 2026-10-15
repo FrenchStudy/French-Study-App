@@ -22,6 +22,13 @@
                 <p id="workspace-subtitle" class="text-xs text-slate-500 mt-1">Configurez les paramètres globaux de l'IA pour toute la suite d'apprentissage.</p>
             </div>
 
+            <!-- SECTION: AI on the server -->
+            <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-2">
+                <h2 class="text-sm font-bold text-slate-900">✨ AI for students</h2>
+                <p id="ai-server-status" class="text-sm text-slate-600">Checking the AI function…</p>
+                <p class="text-xs text-slate-500">Setup steps: <code>supabase/ai/README.md</code> in the code. Students get 5 free AI activities, then need premium. Admins have no limits.</p>
+            </div>
+
             <!-- SECTION: Global AI Model Configuration -->
             <div id="global-ai-settings-card" class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4">
                 <div class="flex items-center space-x-2 border-b border-slate-100 pb-3">
@@ -38,6 +45,7 @@
                         <input type="text" id="global-model-input" autocomplete="off" spellcheck="false" data-lpignore="true" data-1p-ignore value="openai/gpt-oss-120b" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
                     </div>
                 </div>
+                <p class="text-xs text-slate-500">This key is only used in <b>this browser</b>, and only while the AI function above is not deployed. Students never see it.</p>
                 <div>
                     <button onclick="saveGlobalAISettings()" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-4 py-2 rounded-xl transition shadow-sm">💾 Sauvegarder les paramètres globaux</button>
                 </div>
@@ -48,6 +56,14 @@
 
     <!-- Script Integration -->
     <script>
+        // Is the "ai" Edge Function deployed and working?
+        (async () => {
+            const el = document.getElementById('ai-server-status');
+            const q = await AIServer.quota();
+            if (q) el.innerHTML = `✅ <b>The AI function is working.</b> Students use the server key; ${q.admin ? 'you are an admin, so you have no limits.' : q.premium ? 'this account is premium.' : `this account has ${q.left} of ${q.free} free uses left.`}`;
+            else if (AIServer.missing) el.innerHTML = '⏳ <b>The AI function is not deployed yet.</b> Until it is, AI only works in browsers that have the key below.';
+            else el.textContent = 'Could not check the AI function. Make sure you are signed in.';
+        })();
 
         function loadAdminSettings() {
             document.getElementById('global-api-key-input').value = localStorage.getItem('ai_api_key') || "";
