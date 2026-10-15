@@ -159,10 +159,12 @@ window.LIB = (function () {
     async function loadTopics(skill) {
         let rows = [];
         try {
-            const { data, error } = await db.from(skill + '_topics').select('id, title, level, category').order('id', { ascending: true });
+            const run = (cols) => db.from(skill + '_topics').select(cols).order('id', { ascending: true });
+            let { data, error } = await run('id, title, level, category, description');
+            if (error) ({ data, error } = await run('id, title, level, category'));
             if (!error && data) rows = data;
         } catch (e) { /* no topic table: the built-in texts are the topics */ }
-        const fromDb = rows.filter(r => r && r.title).map(r => ({ key: skill + ':' + r.id, title: String(r.title).trim(), level: String(r.level || '').toUpperCase().trim(), category: String(r.category || '').trim(), skill }));
+        const fromDb = rows.filter(r => r && r.title).map(r => ({ key: skill + ':' + r.id, title: String(r.title).trim(), level: String(r.level || '').toUpperCase().trim(), category: String(r.category || '').trim(), description: String(r.description || '').trim(), skill }));
         const builtIn = BUILT_IN.map(t => ({ key: 'b:' + t.id, title: t.title, level: t.level, category: t.subject, builtIn: t.id }));
         store.set('lib_topics_' + skill, fromDb);
         return [...fromDb, ...builtIn];
