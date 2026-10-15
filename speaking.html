@@ -1,890 +1,934 @@
 <!DOCTYPE html>
-<html lang="fr" class="h-full">
+<html lang="en" class="h-full">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Atelier de Français - Speaking & Oral Expression Suite</title>
+    <title>Speaking - French Study App</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="config.js"></script>
+    <script src="js/ai.js"></script>
+    <script src="js/conjugate.js"></script>
+    <script src="js/cheatsheet-data.js"></script>
+    <script src="js/scenes.js"></script>
+    <style>
+        .fix-del { text-decoration: line-through; text-decoration-thickness: 2px; }
+        @keyframes pulse-ring { 0% { box-shadow: 0 0 0 0 rgba(244,63,94,.45); } 100% { box-shadow: 0 0 0 14px rgba(244,63,94,0); } }
+        .mic-on { animation: pulse-ring 1.2s infinite; }
+    </style>
 </head>
-<body class="h-full bg-slate-100 flex flex-col overflow-hidden font-sans">
+<body class="h-full bg-slate-100 flex flex-col overflow-hidden font-sans text-slate-800">
 
     <header id="app-header" class="bg-white border-b border-slate-200 sticky top-0 z-50 shrink-0 h-14"></header>
 
-    <!-- Main Workspace Layout -->
-    <div class="flex-1 flex overflow-hidden relative">
-        
-        <!-- LEFT: Speaking Topics Sidebar (Custom Topic + Format Selector + Supabase Reading Topics) -->
-        <aside class="w-80 bg-white border-r border-slate-200 flex flex-col shrink-0">
-            <div class="p-4 border-b border-slate-100 space-y-3">
+    <main id="scroller" class="flex-1 overflow-y-auto">
+        <div class="max-w-6xl mx-auto px-4 py-5 space-y-4">
+
+            <!-- ===== CHOOSE ===== -->
+            <div id="home-view" class="space-y-4">
                 <div>
-                    <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Modules d'Expression Orale</h2>
-                    <p class="text-[11px] text-slate-500">Choisissez un format et un sujet.</p>
+                    <h1 class="text-2xl font-black text-slate-900">Speaking</h1>
+                    <p class="text-sm text-slate-500 mt-1">Talk with a character, repeat after native audio, or practise an exam task.
+                        <a href="speaking-classic.html" class="ml-1 font-semibold text-indigo-700 hover:underline">Open the old version</a></p>
                 </div>
-                
-                <!-- Oral Exam Format Selector -->
+                <nav class="flex gap-1 sm:gap-6 border-b border-slate-200 text-sm font-semibold overflow-x-auto" role="tablist" aria-label="Speaking">
+                    <button data-mode="conversation" role="tab" class="mode-tab shrink-0 min-h-[44px] px-2 sm:px-0 border-b-2 -mb-px">💬 Conversation</button>
+                    <button data-mode="shadowing" role="tab" class="mode-tab shrink-0 min-h-[44px] px-2 sm:px-0 border-b-2 -mb-px">🔁 Shadowing</button>
+                    <button data-mode="exam" role="tab" class="mode-tab shrink-0 min-h-[44px] px-2 sm:px-0 border-b-2 -mb-px">🎤 Exam task</button>
+                </nav>
+                <p id="mic-note" class="hidden text-sm text-amber-900 bg-amber-50 border border-amber-200 rounded-xl p-3">Your browser can't turn speech into text, so you can type instead of speaking. For the full experience, use Chrome or Edge.</p>
+
+                <!-- Conversation -->
+                <section id="mode-conversation" class="space-y-3">
+                    <p class="text-sm text-slate-600">Chat with a French character in an everyday situation. Speak or type; ask "What can I say?" if you're stuck. At the end you get corrections and new words.</p>
+                    <div id="scene-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+                    <section class="bg-white border border-slate-200 rounded-2xl p-4 space-y-2">
+                        <h2 class="font-black text-slate-900">🎭 Your own scene</h2>
+                        <p class="text-sm text-slate-500">Describe any situation and the AI plays the other person.</p>
+                        <div class="flex flex-col sm:flex-row gap-2">
+                            <input id="own-scene" type="text" maxlength="160" placeholder="e.g. returning a broken phone to a shop" class="flex-1 text-base md:text-sm px-3 py-2.5 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            <button id="own-scene-btn" type="button" class="min-h-[44px] px-4 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl">Start the scene</button>
+                        </div>
+                    </section>
+                </section>
+
+                <!-- Shadowing -->
+                <section id="mode-shadowing" class="hidden space-y-3">
+                    <p class="text-sm text-slate-600">Listen to a sentence, say it straight after, and see which words were understood. No AI needed: practise as much as you like.</p>
+                    <div id="track-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+                </section>
+
+                <!-- Exam task -->
+                <section id="mode-exam" class="hidden space-y-3">
+                    <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] gap-3">
+                        <section class="bg-white border border-slate-200 rounded-2xl p-4 space-y-3">
+                            <h2 class="font-black text-slate-900">✨ A new speaking task</h2>
+                            <div>
+                                <div class="text-sm font-semibold text-slate-700 mb-1.5">Subject</div>
+                                <div id="subjects" class="flex flex-wrap gap-1.5"></div>
+                                <input id="subject-other" type="text" maxlength="80" placeholder="…or type any subject" class="mt-2 w-full text-base md:text-sm px-3 py-2 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            </div>
+                            <div>
+                                <div class="text-sm font-semibold text-slate-700 mb-1.5">Type of task</div>
+                                <div id="kinds" class="flex flex-wrap gap-1.5"></div>
+                            </div>
+                            <button id="gen-btn" type="button" class="whitespace-nowrap min-h-[48px] px-5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-bold rounded-xl">Give me a task</button>
+                            <p id="gen-error" class="hidden text-sm text-rose-700"></p>
+                        </section>
+                        <section class="bg-white border border-slate-200 rounded-2xl p-4 space-y-3 flex flex-col">
+                            <h2 class="font-black text-slate-900">📝 Your own question</h2>
+                            <p class="text-sm text-slate-500">Paste a speaking question from a book, an exam or your teacher.</p>
+                            <textarea id="post-text" rows="4" maxlength="1200" placeholder="e.g. Parlez de votre ville et de ce que vous aimez y faire." class="flex-1 w-full text-base md:text-sm p-3 bg-white border border-slate-200 rounded-xl resize-y focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
+                            <button id="post-btn" type="button" class="self-start min-h-[44px] px-4 bg-slate-900 hover:bg-slate-800 disabled:opacity-50 text-white font-bold rounded-xl">Use my question</button>
+                            <p id="post-error" class="hidden text-sm text-rose-700"></p>
+                        </section>
+                    </div>
+                    <section id="exam-mine-box" class="hidden space-y-2">
+                        <h2 class="text-sm font-bold uppercase tracking-wide text-slate-500">Your tasks</h2>
+                        <div id="exam-mine" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+                    </section>
+                </section>
+            </div>
+
+            <!-- ===== CONVERSATION ===== -->
+            <div id="scene-view" class="hidden space-y-4 max-w-3xl">
+                <div class="flex items-center justify-between gap-2">
+                    <button type="button" data-back class="min-h-[44px] px-1 text-sm font-semibold text-slate-600 hover:text-indigo-600">← All scenes</button>
+                    <label class="flex items-center gap-2 text-sm text-slate-600 cursor-pointer"><input id="auto-speak" type="checkbox" class="w-4 h-4 accent-indigo-600"> 🔊 Read replies aloud</label>
+                </div>
+                <div class="bg-white border border-slate-200 rounded-2xl p-4 flex gap-3">
+                    <span id="scene-emoji" class="shrink-0 w-12 h-12 rounded-2xl bg-indigo-50 flex items-center justify-center text-2xl"></span>
+                    <div class="min-w-0">
+                        <div id="scene-crumb" class="text-xs font-bold uppercase tracking-wide text-indigo-700"></div>
+                        <h1 id="scene-title" class="text-xl font-black text-slate-900 leading-tight"></h1>
+                        <p id="scene-goal" class="text-sm text-slate-600"></p>
+                    </div>
+                </div>
+                <div id="messages" class="space-y-3" aria-live="polite"></div>
+                <div id="scene-error" class="hidden text-sm text-rose-700 bg-rose-50 rounded-xl p-3"></div>
+                <div id="input-area" class="sticky bottom-0 bg-slate-100 pt-1 pb-3 space-y-2">
+                    <div id="suggestions" class="hidden bg-white border border-indigo-100 rounded-2xl p-3 space-y-1.5"></div>
+                    <form id="msg-form" class="flex items-center gap-2">
+                        <button id="msg-mic" type="button" class="shrink-0 w-12 h-12 rounded-full bg-white border border-slate-200 hover:border-indigo-300 text-xl" aria-label="Speak">🎙️</button>
+                        <input id="msg-input" type="text" lang="fr" autocomplete="off" placeholder="Speak or type in French…" class="flex-1 min-w-0 text-base px-4 py-3 bg-white border border-slate-200 rounded-full focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <button id="msg-send" type="submit" class="shrink-0 w-12 h-12 rounded-full bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white text-xl font-black" aria-label="Send">➤</button>
+                    </form>
+                    <div class="flex flex-wrap gap-2">
+                        <button id="btn-hints" type="button" class="min-h-[40px] px-3 text-sm font-semibold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 rounded-xl">💡 What can I say?</button>
+                        <button id="btn-finish" type="button" class="min-h-[40px] px-3 text-sm font-semibold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 disabled:opacity-50 rounded-xl">✓ Finish and get feedback</button>
+                    </div>
+                </div>
+                <div id="report" class="hidden"></div>
+            </div>
+
+            <!-- ===== SHADOWING ===== -->
+            <div id="shadow-view" class="hidden space-y-4 max-w-3xl">
+                <div class="flex items-center justify-between gap-2">
+                    <button type="button" data-back class="min-h-[44px] px-1 text-sm font-semibold text-slate-600 hover:text-indigo-600">← All tracks</button>
+                    <span id="shadow-count" class="text-sm font-semibold text-slate-500"></span>
+                </div>
                 <div>
-                    <label class="block text-[11px] font-bold text-slate-700 mb-1">Partie de l'Examen :</label>
-                    <select id="speaking-format-select" onchange="if(activeSubjectObj) generateSpeakingPrompt(activeSubjectObj)" class="w-full text-xs px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                        <option value="Partie 1 : Entretien dirigé (Présentation & Échange)">Partie 1 : Entretien dirigé (Q&A)</option>
-                        <option value="Partie 2 : Exercice en interaction (Jeu de rôle)">Partie 2 : Jeu de rôle (Simulation)</option>
-                        <option value="Partie 3 : Expression d'un point de vue (Monologue)">Partie 3 : Monologue argumenté</option>
-                    </select>
+                    <h1 id="shadow-title" class="text-xl font-black text-slate-900"></h1>
+                    <p id="shadow-hint" class="text-sm text-slate-500"></p>
                 </div>
-
-                <!-- Custom Topic Input in Left Pane -->
-                <div class="p-3 bg-indigo-50/60 border border-indigo-100 rounded-xl space-y-2">
-                    <div class="text-[11px] font-bold text-indigo-900 uppercase tracking-wide">🎯 Sujet Personnalisé</div>
-                    <div class="flex space-x-1.5">
-                        <input type="text" id="custom-topic-input" placeholder="Ex: Voyager seul..." class="flex-1 text-xs px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                        <button onclick="generateCustomSpeakingPrompt()" class="bg-indigo-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-indigo-700 transition">OK</button>
+                <div class="h-1.5 bg-slate-200 rounded-full overflow-hidden"><div id="shadow-bar" class="h-full bg-indigo-500 rounded-full transition-all" style="width:0%"></div></div>
+                <section class="bg-white border border-slate-200 rounded-2xl p-5 sm:p-6 space-y-4 text-center">
+                    <p id="shadow-fr" lang="fr" class="text-2xl sm:text-3xl font-black text-slate-900 leading-snug"></p>
+                    <p id="shadow-en" class="text-base text-slate-500"></p>
+                    <p id="shadow-note" class="text-sm text-indigo-700"></p>
+                    <div class="flex flex-wrap justify-center gap-2 pt-1">
+                        <button id="sh-listen" type="button" class="min-h-[48px] px-4 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold rounded-xl">🔊 Listen</button>
+                        <button id="sh-slow" type="button" class="min-h-[48px] px-4 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold rounded-xl">🐢 Slowly</button>
+                        <button id="sh-say" type="button" class="min-h-[48px] px-5 bg-rose-500 hover:bg-rose-600 text-white font-bold rounded-xl">🎙️ Say it</button>
                     </div>
+                    <div id="shadow-result" class="min-h-[2rem]"></div>
+                </section>
+                <div class="grid grid-cols-2 gap-2">
+                    <button id="sh-prev" type="button" class="min-h-[48px] px-4 bg-white border border-slate-200 hover:border-indigo-300 font-semibold rounded-xl disabled:opacity-40">← Previous</button>
+                    <button id="sh-next" type="button" class="min-h-[48px] px-4 bg-white border border-slate-200 hover:border-indigo-300 font-semibold rounded-xl disabled:opacity-40">Next →</button>
                 </div>
             </div>
 
-            <!-- Topics Container Loaded From Supabase -->
-            <div id="speaking-topics-container" class="flex-1 overflow-y-auto p-3 space-y-2">
-                <p class="text-xs text-slate-400 p-2">Chargement des sujets d'oral...</p>
-            </div>
-        </aside>
-
-        <!-- RIGHT: Oral Exam Simulator & Voice Recording Grid -->
-        <main class="flex-1 flex overflow-hidden">
-            
-            <!-- Content Pane -->
-            <div class="flex-1 overflow-y-auto p-6 space-y-6 relative flex flex-col">
-                <div class="flex items-center justify-between shrink-0">
-                    <div>
-                        <span id="speaking-badge" class="text-[10px] font-bold uppercase tracking-wider bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded">Épreuve d'Oral</span>
-                        <h2 id="speaking-prompt-title" class="text-xl font-extrabold text-slate-900 tracking-tight mt-1">Sélectionnez un sujet à gauche</h2>
+            <!-- ===== EXAM TASK ===== -->
+            <div id="exam-view" class="hidden space-y-4">
+                <button type="button" data-back class="min-h-[44px] px-1 text-sm font-semibold text-slate-600 hover:text-indigo-600">← All tasks</button>
+                <div class="flex flex-col sm:flex-row sm:items-end gap-3">
+                    <div class="min-w-0 flex-1">
+                        <span id="exam-crumb" class="text-xs font-bold px-2 py-1 rounded-full bg-indigo-50 text-indigo-700"></span>
+                        <h1 id="exam-title" class="text-2xl lg:text-3xl font-black text-slate-900 leading-tight mt-2"></h1>
                     </div>
-                    <div class="flex items-center space-x-2">
-                        <button onclick="evaluateSpokenResponse()" class="text-xs bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl font-bold transition shadow-sm">✨ Évaluer l'Oral</button>
-                    </div>
+                    <button id="exam-another" type="button" class="hidden shrink-0 self-start sm:self-end min-h-[44px] px-4 bg-white border border-slate-200 hover:border-indigo-300 disabled:opacity-50 font-semibold rounded-xl">🔀 New task</button>
                 </div>
-
-                <!-- Exam Prompt Card -->
-                <div class="bg-indigo-50/50 border border-indigo-100 p-4 rounded-2xl text-xs text-slate-700 shrink-0 space-y-2">
-                    <div class="flex items-center justify-between">
-                        <strong class="text-indigo-950 font-bold uppercase tracking-wide">Consigne Orale :</strong>
-                        <div class="flex items-center space-x-2">
-                            <button onclick="speakExamPrompt()" class="text-[10px] bg-white border border-indigo-200 text-indigo-700 px-2.5 py-1 rounded-lg font-medium hover:bg-indigo-50 transition">🔊 Écouter</button>
-                            <button onclick="togglePromptTranslation()" id="translate-prompt-btn" class="text-[10px] bg-white border border-indigo-200 text-indigo-700 px-2.5 py-1 rounded-lg font-medium hover:bg-indigo-50 transition">🌐 Traduction (EN)</button>
+                <div class="flex flex-col lg:grid lg:grid-cols-[minmax(0,1fr)_22rem] gap-4 lg:gap-6">
+                    <aside class="space-y-3 lg:order-2 lg:sticky lg:top-4 lg:self-start">
+                        <section class="bg-white border border-slate-200 rounded-2xl p-4 space-y-2">
+                            <div class="flex items-center justify-between gap-2">
+                                <h2 class="text-sm font-bold uppercase tracking-wide text-slate-500">Your task</h2>
+                                <div class="flex gap-1.5">
+                                    <button id="exam-say" type="button" class="min-h-[36px] px-2.5 text-sm font-semibold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 rounded-lg" aria-label="Listen to the task">🔊</button>
+                                    <button id="exam-en-btn" type="button" class="min-h-[36px] px-2.5 text-sm font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg">English</button>
+                                </div>
+                            </div>
+                            <p id="exam-fr" lang="fr" class="text-base text-slate-900 leading-relaxed"></p>
+                            <p id="exam-en" class="hidden text-sm text-slate-500 leading-relaxed border-t border-slate-100 pt-2"></p>
+                        </section>
+                        <section id="exam-include-box" class="bg-white border border-slate-200 rounded-2xl p-4 space-y-2">
+                            <h2 class="text-sm font-bold uppercase tracking-wide text-slate-500">Talk about</h2>
+                            <ul id="exam-include" class="space-y-1.5 text-sm text-slate-700"></ul>
+                        </section>
+                        <section id="exam-bank-box" class="bg-white border border-slate-200 rounded-2xl p-4 space-y-2">
+                            <h2 class="text-sm font-bold uppercase tracking-wide text-slate-500">Useful phrases</h2>
+                            <div id="exam-bank" class="space-y-1.5"></div>
+                        </section>
+                    </aside>
+                    <div class="space-y-4 lg:order-1 min-w-0">
+                        <section class="bg-white border border-slate-200 rounded-2xl p-4 space-y-3">
+                            <div class="flex items-center gap-4">
+                                <button id="exam-mic" type="button" class="shrink-0 w-16 h-16 rounded-full bg-rose-500 hover:bg-rose-600 text-white text-2xl" aria-label="Start speaking">🎙️</button>
+                                <div class="min-w-0 flex-1">
+                                    <div id="exam-mic-label" class="font-bold text-slate-900">Tap to start speaking</div>
+                                    <div class="text-sm text-slate-500"><b id="exam-timer" class="text-slate-900">0:00</b> <span id="exam-target"></span></div>
+                                    <div class="mt-1 h-1.5 bg-slate-100 rounded-full overflow-hidden"><div id="exam-bar" class="h-full bg-indigo-400 rounded-full transition-all" style="width:0%"></div></div>
+                                </div>
+                            </div>
+                            <textarea id="exam-text" rows="7" lang="fr" spellcheck="false" placeholder="What you say appears here. You can also type or fix words." class="block w-full p-3 text-base leading-relaxed text-slate-900 bg-slate-50 border border-slate-200 rounded-xl resize-y focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
+                            <p id="exam-interim" class="text-sm text-slate-400 italic min-h-[1.25rem]"></p>
+                        </section>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <button id="exam-check" type="button" class="min-h-[48px] px-5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-bold rounded-xl">✨ Get feedback</button>
+                            <button id="exam-sample" type="button" class="min-h-[48px] px-4 bg-white border border-slate-200 hover:border-indigo-300 disabled:opacity-50 text-slate-800 font-semibold rounded-xl">✨ Sample answer</button>
+                            <button id="exam-clear" type="button" class="ml-auto min-h-[44px] px-2 text-sm font-semibold text-slate-500 hover:text-rose-600">Clear</button>
                         </div>
+                        <section id="exam-sample-box" class="hidden bg-amber-50 border border-amber-200 rounded-2xl p-4 space-y-2"></section>
+                        <section id="exam-feedback" class="hidden space-y-3"></section>
                     </div>
-                    <p id="speaking-prompt-desc">Choisissez un thème dans la barre latérale pour lancer l'épreuve d'expression orale...</p>
-                </div>
-
-                <!-- Hidden Prompt Translation Pane -->
-                <div id="prompt-translation-pane" class="hidden bg-emerald-50/60 border border-emerald-200 rounded-2xl p-4 space-y-1 shadow-sm text-xs leading-relaxed text-emerald-950 shrink-0">
-                    <h4 class="font-bold text-emerald-900 uppercase tracking-wide">English Translation of Prompt:</h4>
-                    <div id="prompt-translation-body">Chargement de la traduction...</div>
-                </div>
-
-                <!-- Utility Options Bar (Copy, Save, Suggestions, Sample Answer) -->
-                <div class="bg-white border border-slate-200 p-2.5 rounded-xl flex items-center justify-between shrink-0 shadow-sm text-xs flex-wrap gap-2">
-                    <div class="flex items-center space-x-2">
-                        <button onclick="copySpokenText()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg font-medium transition">📋 Copier</button>
-                        <button onclick="saveSpeakingProgress()" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 px-3 py-1.5 rounded-lg font-bold transition">💾 Sauvegarder</button>
-                    </div>
-                    <div class="flex items-center space-x-2">
-                        <button onclick="getSpeakingSuggestions()" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 px-3 py-1.5 rounded-lg font-bold transition">💡 Suggestions</button>
-                        <button onclick="getSpeakingSampleAnswer()" class="bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 px-3 py-1.5 rounded-lg font-bold transition">📖 Exemple type</button>
-                    </div>
-                </div>
-
-                <!-- Voice Recording & Transcript Workspace -->
-                <div class="flex-1 flex flex-col relative space-y-3">
-                    <div class="bg-white border border-slate-200 p-4 rounded-2xl flex items-center justify-between shadow-sm shrink-0">
-                        <div class="flex items-center space-x-3">
-                            <button onclick="toggleSpeechRecognition()" id="mic-record-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs px-4 py-2.5 rounded-xl font-bold transition flex items-center space-x-2 shadow-sm">
-                                <span>🎙️</span>
-                                <span id="mic-btn-text">Démarrer / Pause</span>
-                            </button>
-                            <span id="mic-status" class="text-xs text-slate-400 font-medium">Microphone en attente...</span>
-                        </div>
-                        <button onclick="clearSpokenTranscript()" class="text-rose-500 hover:text-rose-700 text-xs font-bold transition">Effacer la transcription</button>
-                    </div>
-
-                    <!-- Transcript Box -->
-                    <textarea id="spoken-transcript" placeholder="Votre transcription vocale apparaîtra ici au fur et à mesure que vous parlez en français (ou vous pouvez taper directement)..." class="flex-1 w-full p-4 bg-white border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm leading-relaxed text-slate-800 resize-none shadow-sm"></textarea>
-                </div>
-
-                <!-- AI Speaking Evaluation Report Box -->
-                <div id="speaking-eval-pane" class="hidden bg-emerald-50/60 border border-emerald-200 rounded-2xl p-6 space-y-3 shadow-sm text-xs leading-relaxed text-slate-800 shrink-0">
-                    <h3 class="font-bold text-emerald-900 uppercase tracking-wide border-b border-emerald-200 pb-2 flex items-center justify-between">
-                        <span>Rapport d'Évaluation Orale (Prononciation & Fluence)</span>
-                        <span id="speaking-eval-score" class="text-emerald-700 bg-emerald-100 px-2.5 py-0.5 rounded font-extrabold">Score : --/20</span>
-                    </h3>
-                    <div id="speaking-eval-body" class="space-y-2 text-emerald-950">L'analyse s'affichera ici...</div>
                 </div>
             </div>
+        </div>
+    </main>
 
-            <!-- AI Oral Examiner Sidebar -->
-            <section class="w-96 bg-white border-l border-slate-200 flex flex-col shrink-0">
-                <div class="p-4 border-b border-slate-100 flex items-center justify-between">
-                    <span class="text-xs font-bold uppercase tracking-wider text-slate-600">🤖 Examinateur Oral IA</span>
-                    <span class="text-[10px] bg-emerald-50 text-emerald-600 font-semibold px-2 py-0.5 rounded">En ligne</span>
-                </div>
-                
-                <div id="ai-chat-box" class="flex-1 p-4 overflow-y-auto space-y-3">
-                    <div class="bg-slate-50 border border-slate-100 p-3 rounded-xl text-xs text-slate-700 space-y-2">
-                        <p>Bonjour ! Je suis votre examinateur. Discutez avec moi de votre sujet ou posez-moi des questions pour préparer votre intervention orale.</p>
-                    </div>
-                </div>
-
-                <!-- Suggestion Chips -->
-                <div class="p-3 bg-slate-50 border-t border-slate-100 flex flex-wrap gap-1.5">
-                    <button onclick="sendPresetPrompt('Posez-moi une question de relance sur ce sujet.')" class="text-[10px] bg-white border border-slate-200 text-slate-700 px-2.5 py-1 rounded-lg hover:bg-indigo-50 hover:text-indigo-600 transition font-medium">❓ Question de relance</button>
-                    <button onclick="sendPresetPrompt('Donnez-moi des expressions pour structurer mon argumentation.')" class="text-[10px] bg-white border border-slate-200 text-slate-700 px-2.5 py-1 rounded-lg hover:bg-indigo-50 hover:text-indigo-600 transition font-medium">💬 Mots de liaison</button>
-                </div>
-
-                <!-- Chat Input Bar with Microphone -->
-                <div class="p-3 border-t border-slate-100">
-                    <div class="flex items-center space-x-2">
-                        <input type="text" id="ai-input" placeholder="Posez une question..." class="flex-1 text-xs px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                        <button onclick="toggleChatVoiceInput()" id="ai-mic-btn" title="Parler au lieu d'écrire" class="bg-slate-100 text-slate-700 hover:bg-slate-200 p-2 rounded-xl text-xs transition">🎙️</button>
-                        <button onclick="sendAIChat()" class="bg-indigo-600 text-white p-2.5 rounded-xl text-xs font-bold hover:bg-indigo-700 transition">➔</button>
-                    </div>
-                </div>
-            </section>
-
-        </main>
-    </div>
-
-    <!-- Script Integration -->
     <script>
         const db = window.mySupabase;
-
-        let allReadingTopics = [];
-        let activeSubjectObj = null;
-        let generatedPromptData = null;
-        let isPromptTranslated = false;
-
-        // silent = true: save in the background (no pop-ups, no redirect)
-        async function saveProgressToDatabase(moduleType, moduleId, score = null, silent = false) {
-            const { data: { user }, error: userError } = await db.auth.getUser();
-            
-            if (userError || !user) {
-                if (silent) return;
-                alert("Veuillez vous connecter pour sauvegarder votre progression.");
-                window.location.href = 'login.html';
-                return;
-            }
-
-            const { error } = await db
-                .from('user_progress')
-                .upsert({
-                    user_id: user.id,
-                    module_type: moduleType, 
-                    module_id: moduleId.toString(),
-                    completed: true,
-                    score: score, 
-                    updated_at: new Date()
-                }, { onConflict: 'user_id, module_type, module_id' });
-
-            if (error) {
-                console.error("Erreur de sauvegarde :", error.message);
-                if (!silent) alert("Erreur lors de la synchronisation de la progression.");
-            } else if (!silent) {
-                alert("💾 Progression et habitudes enregistrées avec succès !");
-            }
-        }
-
-        async function loadSpeakingTopicsFromDatabase() {
-            const container = document.getElementById('speaking-topics-container');
-            container.innerHTML = `<p class="text-xs text-slate-400 p-2">Chargement des sujets depuis Supabase...</p>`;
-
-            const { data: topics, error } = await db.from('reading_topics').select('*').order('id', { ascending: true });
-
-            if (error || !topics || topics.length === 0) {
-                container.innerHTML = `<p class="text-xs text-rose-500 p-2">Aucun sujet trouvé dans la base.</p>`;
-                return;
-            }
-
-            allReadingTopics = topics;
-            renderSpeakingTopicsList(allReadingTopics);
-            if (topics.length > 0) {
-                generateSpeakingPrompt(topics[0]);
-            }
-        }
-
-        function renderSpeakingTopicsList(topics) {
-            const container = document.getElementById('speaking-topics-container');
-            container.innerHTML = '';
-
-            topics.forEach((t) => {
-                const item = document.createElement('button');
-                item.className = 'w-full text-left p-3 rounded-xl text-xs font-medium transition bg-slate-50 border border-slate-100 text-slate-700 hover:bg-indigo-50 flex items-center space-x-2.5';
-                item.innerHTML = `
-                    <span class="text-base">🗣️</span>
-                    <div class="flex-1">
-                        <div class="font-bold text-slate-900">${t.category}</div>
-                        <div class="text-[10px] text-slate-400 truncate">${t.title} • Niveau ${t.level}</div>
-                    </div>
-                `;
-                item.onclick = () => generateSpeakingPrompt(t);
-                container.appendChild(item);
-            });
-        }
-
-        async function generateSpeakingPrompt(subjectObj) {
-            activeSubjectObj = subjectObj;
-            const chosenFormat = document.getElementById('speaking-format-select').value;
-
-            document.getElementById('speaking-badge').innerText = `${chosenFormat} - Niveau ${subjectObj.level}`;
-            document.getElementById('speaking-prompt-title').innerText = subjectObj.title;
-            
-            const descEl = document.getElementById('speaking-prompt-desc');
-            descEl.innerText = "🤖 L'IA génère un scénario oral concis et structuré...";
-            document.getElementById('spoken-transcript').value = "";
-            document.getElementById('speaking-eval-pane').classList.add('hidden');
-            document.getElementById('prompt-translation-pane').classList.add('hidden');
-            isPromptTranslated = false;
-            document.getElementById('translate-prompt-btn').innerText = "🌐 Traduction (EN)";
-
-            const apiUrl = localStorage.getItem('ai_api_url') || "https://api.groq.com/openai/v1/chat/completions";
-            const apiKey = localStorage.getItem('ai_api_key') || "";
-            const modelName = localStorage.getItem('ai_model_name') || "openai/gpt-oss-120b";
-
-            if (!apiKey) {
-                descEl.innerText = "Erreur : Clé API manquante dans l'administration.";
-                return;
-            }
-
-            try {
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${apiKey}`
-                    },
-                    body: JSON.stringify({
-                        model: modelName,
-                        messages: [
-                            {
-                                role: "system",
-                                content: "You are an official TCF/DELF speaking exam simulator. Generate a concise, clean oral exam prompt in French consisting of a short 2-sentence scenario description and a clear objective. Avoid long blocks of text. Format strictly as valid JSON with key: 'instruction'."
-                            },
-                            {
-                                role: "user",
-                                content: `Generate a short speaking exam brief for level ${subjectObj.level}, theme: "${subjectObj.title}", format: "${chosenFormat}".`
-                            }
-                        ],
-                        temperature: 0.7
-                    })
-                });
-
-                const data = await response.json();
-                let rawContent = data.choices?.[0]?.message?.content || "";
-                rawContent = rawContent.replace(/```json/g, '').replace(/```/g, '').trim();
-                generatedPromptData = JSON.parse(rawContent);
-
-                descEl.innerText = generatedPromptData.instruction;
-            } catch (err) {
-                descEl.innerText = subjectObj.description;
-            }
-        }
-
-        async function generateCustomSpeakingPrompt() {
-            const inputEl = document.getElementById('custom-topic-input');
-            const customTitle = inputEl ? inputEl.value.trim() : "";
-            
-            if (!customTitle) {
-                alert("Veuillez saisir un sujet personnalisé.");
-                return;
-            }
-
-            const chosenFormat = document.getElementById('speaking-format-select').value;
-            
-            activeSubjectObj = {
-                id: 'custom_' + Date.now(),
-                title: customTitle,
-                category: 'Sujet Personnalisé',
-                level: 'B2'
-            };
-
-            document.getElementById('speaking-badge').innerText = `${chosenFormat} - Sujet Libre`;
-            document.getElementById('speaking-prompt-title').innerText = customTitle;
-            
-            const descEl = document.getElementById('speaking-prompt-desc');
-            descEl.innerText = "🤖 L'IA convertit votre sujet personnalisé en consigne orale officielle...";
-            document.getElementById('spoken-transcript').value = "";
-            document.getElementById('speaking-eval-pane').classList.add('hidden');
-            document.getElementById('prompt-translation-pane').classList.add('hidden');
-            isPromptTranslated = false;
-            document.getElementById('translate-prompt-btn').innerText = "🌐 Traduction (EN)";
-
-            const apiUrl = localStorage.getItem('ai_api_url') || "https://api.groq.com/openai/v1/chat/completions";
-            const apiKey = localStorage.getItem('ai_api_key') || "";
-            const modelName = localStorage.getItem('ai_model_name') || "openai/gpt-oss-120b";
-
-            if (!apiKey) {
-                descEl.innerText = "Erreur : Clé API manquante dans l'administration.";
-                return;
-            }
-
-            try {
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${apiKey}`
-                    },
-                    body: JSON.stringify({
-                        model: modelName,
-                        messages: [
-                            {
-                                role: "system",
-                                content: "You are an official TCF/DELF speaking exam simulator. Given a custom user theme and format, generate a concise oral exam prompt instruction entirely in French. Format strictly as valid JSON with key: 'instruction'."
-                            },
-                            {
-                                role: "user",
-                                content: `Generate a speaking prompt for custom theme: "${customTitle}", format: "${chosenFormat}".`
-                            }
-                        ],
-                        temperature: 0.7
-                    })
-                });
-
-                const data = await response.json();
-                let rawContent = data.choices?.[0]?.message?.content || "";
-                rawContent = rawContent.replace(/```json/g, '').replace(/```/g, '').trim();
-                generatedPromptData = JSON.parse(rawContent);
-
-                descEl.innerText = generatedPromptData.instruction;
-                inputEl.value = "";
-            } catch (err) {
-                descEl.innerText = `Exprimez-vous ou discutez sur le thème personnalisé : "${customTitle}".`;
-            }
-        }
-
-        function speakExamPrompt() {
-            const promptText = document.getElementById('speaking-prompt-desc')?.innerText || '';
-            if (!promptText || promptText.includes("🤖") || !('speechSynthesis' in window)) return;
-            window.speechSynthesis.cancel();
-            const utterance = new SpeechSynthesisUtterance(promptText);
-            utterance.lang = 'fr-FR';
-            window.speechSynthesis.speak(utterance);
-        }
-
-        function copySpokenText() {
-            const text = document.getElementById('spoken-transcript').value;
-            if (!text) { alert("Aucun texte à copier."); return; }
-            navigator.clipboard.writeText(text);
-            alert("📋 Transcription copiée dans le presse-papier !");
-        }
-
-        async function saveSpeakingProgress() {
-            const text = document.getElementById('spoken-transcript').value;
-            if (!text) { alert("Veuillez d'abord enregistrer ou rédiger votre intervention orale."); return; }
-            localStorage.setItem(`speaking_draft_${activeSubjectObj?.id || 'save'}`, text);
-            
-            if (activeSubjectObj) {
-                await saveProgressToDatabase('speaking', activeSubjectObj.id);
-            } else {
-                alert("💾 Progression orale sauvegardée !");
-            }
-        }
-
-        async function getSpeakingSuggestions() {
-            if (!generatedPromptData) { alert("Veuillez d'abord sélectionner un sujet."); return; }
-            const chatBox = document.getElementById('ai-chat-box');
-            const promptText = `Donnez-moi des astuces de prononciation, de vocabulaire et une structure d'argumentation pour réussir cette épreuve orale : "${generatedPromptData.instruction}"`;
-            
-            const userMsg = document.createElement('div');
-            userMsg.className = 'bg-indigo-50 border border-indigo-100 p-3 rounded-xl text-xs text-indigo-900 ml-4 shadow-sm';
-            userMsg.innerText = "💡 Donnez-moi des suggestions pour réussir cet oral.";
-            chatBox.appendChild(userMsg);
-            chatBox.scrollTop = chatBox.scrollHeight;
-
-            const apiUrl = localStorage.getItem('ai_api_url') || "https://api.groq.com/openai/v1/chat/completions";
-            const apiKey = localStorage.getItem('ai_api_key') || "";
-            const modelName = localStorage.getItem('ai_model_name') || "openai/gpt-oss-120b";
-
-            try {
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
-                    body: JSON.stringify({
-                        model: modelName,
-                        messages: [
-                            { role: "system", content: "You are an expert French oral coach." },
-                            { role: "user", content: promptText }
-                        ],
-                        temperature: 0.7
-                    })
-                });
-                const data = await response.json();
-                let aiReply = data.choices?.[0]?.message?.content || "Conseils non disponibles.";
-                
-                const aiMsg = document.createElement('div');
-                aiMsg.className = 'ai-message-card bg-slate-50 border border-slate-200 p-3.5 rounded-2xl text-xs text-slate-700 mr-4 shadow-sm space-y-2 relative';
-                aiMsg.setAttribute('data-reply-text', aiReply);
-                aiMsg.innerHTML = `
-                    <div class="flex items-center justify-between border-b border-slate-200/60 pb-1.5 mb-1.5">
-                        <span class="font-bold text-indigo-600 flex items-center space-x-1">
-                            <span>🤖</span> <span>Coach IA</span>
-                        </span>
-                        <div class="flex items-center space-x-1.5">
-                            <button onclick="playTextAudio(this)" class="text-[10px] bg-white border border-slate-200 px-2 py-0.5 rounded font-medium text-slate-600 hover:bg-slate-100 transition">🔊 Écouter</button>
-                            <button onclick="translateAIResponse(this)" class="text-[10px] bg-white border border-slate-200 px-2 py-0.5 rounded font-medium text-slate-600 hover:bg-slate-100 transition">🌐 Traduire (EN)</button>
-                        </div>
-                    </div>
-                    <div class="space-y-1.5 leading-relaxed">
-                        ${aiReply.replace(/\n/g, '<br>')}
-                    </div>
-                    <div class="ai-translation-box hidden mt-2 pt-2 border-t border-slate-200/60 text-slate-500 italic bg-slate-100/60 p-2 rounded-lg"></div>
-                `;
-                chatBox.appendChild(aiMsg);
-                chatBox.scrollTop = chatBox.scrollHeight;
-            } catch (err) {
-                console.error(err);
-            }
-        }
-
-        async function getSpeakingSampleAnswer() {
-            if (!generatedPromptData) { alert("Veuillez d'abord sélectionner un sujet."); return; }
-            const chatBox = document.getElementById('ai-chat-box');
-            const promptText = `Rédige un exemple de monologue ou de dialogue type (niveau B2) pour réussir cette épreuve orale : "${generatedPromptData.instruction}"`;
-            
-            const userMsg = document.createElement('div');
-            userMsg.className = 'bg-amber-50 border border-amber-200 p-3 rounded-xl text-xs text-amber-900 ml-4 shadow-sm';
-            userMsg.innerText = "📖 Montrez-moi un exemple de réponse orale type.";
-            chatBox.appendChild(userMsg);
-            chatBox.scrollTop = chatBox.scrollHeight;
-
-            const apiUrl = localStorage.getItem('ai_api_url') || "https://api.groq.com/openai/v1/chat/completions";
-            const apiKey = localStorage.getItem('ai_api_key') || "";
-            const modelName = localStorage.getItem('ai_model_name') || "openai/gpt-oss-120b";
-
-            try {
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
-                    body: JSON.stringify({
-                        model: modelName,
-                        messages: [
-                            { role: "system", content: "You are an expert French oral exam model speaker. Provide an exemplary student spoken script in French." },
-                            { role: "user", content: promptText }
-                        ],
-                        temperature: 0.7
-                    })
-                });
-                const data = await response.json();
-                let aiReply = data.choices?.[0]?.message?.content || "Exemple non disponible.";
-                
-                const aiMsg = document.createElement('div');
-                aiMsg.className = 'ai-message-card bg-amber-50/60 border border-amber-200 p-3.5 rounded-2xl text-xs text-slate-800 mr-4 shadow-sm space-y-2 relative';
-                aiMsg.setAttribute('data-reply-text', aiReply);
-                aiMsg.innerHTML = `
-                    <div class="flex items-center justify-between border-b border-amber-200 pb-1.5 mb-1.5">
-                        <span class="font-bold text-amber-900 flex items-center space-x-1">
-                            <span>📖</span> <span>Exemple de Réponse Orale Type</span>
-                        </span>
-                        <div class="flex items-center space-x-1.5">
-                            <button onclick="playTextAudio(this)" class="text-[10px] bg-white border border-amber-300 px-2 py-0.5 rounded font-medium text-slate-700 hover:bg-slate-100 transition">🔊 Écouter</button>
-                            <button onclick="translateAIResponse(this)" class="text-[10px] bg-white border border-amber-300 px-2 py-0.5 rounded font-medium text-slate-700 hover:bg-slate-100 transition">🌐 Traduire (EN)</button>
-                        </div>
-                    </div>
-                    <div class="space-y-1.5 leading-relaxed font-serif">
-                        ${aiReply.replace(/\n/g, '<br>')}
-                    </div>
-                    <div class="ai-translation-box hidden mt-2 pt-2 border-t border-amber-200 text-slate-600 italic bg-white/80 p-2 rounded-lg"></div>
-                `;
-                chatBox.appendChild(aiMsg);
-                chatBox.scrollTop = chatBox.scrollHeight;
-            } catch (err) {
-                console.error(err);
-            }
-        }
-
-        async function togglePromptTranslation() {
-            const pane = document.getElementById('prompt-translation-pane');
-            const btn = document.getElementById('translate-prompt-btn');
-            const body = document.getElementById('prompt-translation-body');
-
-            if (!generatedPromptData) { alert("Aucune consigne active."); return; }
-
-            if (isPromptTranslated) {
-                pane.classList.add('hidden');
-                btn.innerText = "🌐 Traduction (EN)";
-                isPromptTranslated = false;
-                return;
-            }
-
-            pane.classList.remove('hidden');
-            btn.innerText = "🌐 Masquer Traduction";
-            isPromptTranslated = true;
-            body.innerText = "Traduction en cours...";
-
-            const apiUrl = localStorage.getItem('ai_api_url') || "https://api.groq.com/openai/v1/chat/completions";
-            const apiKey = localStorage.getItem('ai_api_key') || "";
-            const modelName = localStorage.getItem('ai_model_name') || "openai/gpt-oss-120b";
-
-            try {
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
-                    body: JSON.stringify({
-                        model: modelName,
-                        messages: [
-                            { role: "system", content: "Translate the following French speaking exam instruction into clear English." },
-                            { role: "user", content: generatedPromptData.instruction }
-                        ],
-                        temperature: 0.3
-                    })
-                });
-                const data = await response.json();
-                let translation = data.choices?.[0]?.message?.content || "Traduction non disponible.";
-                body.innerHTML = translation.replace(/\n/g, '<br>');
-            } catch (err) {
-                body.innerText = "Erreur de traduction.";
-            }
-        }
-
-        async function translateAIResponse(buttonElement) {
-            const container = buttonElement.closest('.ai-message-card');
-            const textContent = container.getAttribute('data-reply-text');
-            const translationContainer = container.querySelector('.ai-translation-box');
-
-            if (!translationContainer) return;
-
-            if (!translationContainer.classList.contains('hidden')) {
-                translationContainer.classList.add('hidden');
-                buttonElement.innerText = '🌐 Traduire (EN)';
-                return;
-            }
-
-            buttonElement.innerText = '⏳ Traduction...';
-
-            const apiUrl = localStorage.getItem('ai_api_url') || "https://api.groq.com/openai/v1/chat/completions";
-            const apiKey = localStorage.getItem('ai_api_key') || "";
-            const modelName = localStorage.getItem('ai_model_name') || "openai/gpt-oss-120b";
-
-            try {
-                const apiResponse = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${apiKey}`
-                    },
-                    body: JSON.stringify({
-                        model: modelName,
-                        messages: [
-                            {
-                                role: "system",
-                                content: "You are a professional translator. Translate the following French text into clear, natural English. Provide only the translation without extra conversational filler."
-                            },
-                            { role: "user", content: textContent }
-                        ],
-                        temperature: 0.3
-                    })
-                });
-
-                const data = await apiResponse.json();
-                if (data.error) throw new Error(data.error.message || 'Erreur API');
-
-                let translationText = data.choices?.[0]?.message?.content || "Translation not available.";
-                
-                translationContainer.innerHTML = `<strong class="text-slate-600 block mb-1">English Translation:</strong> ${translationText}`;
-                translationContainer.classList.remove('hidden');
-                buttonElement.innerText = '🌐 Masquer';
-
-            } catch (err) {
-                console.error("Translation error:", err);
-                translationContainer.innerHTML = `<span class="text-rose-600">Erreur de traduction : ${err.message}</span>`;
-                translationContainer.classList.remove('hidden');
-                buttonElement.innerText = '🌐 Traduire (EN)';
-            }
-        }
-
-        function playTextAudio(buttonElement) {
-            const container = buttonElement.closest('.ai-message-card');
-            const textContent = container ? container.getAttribute('data-reply-text') : "";
-            if (!textContent || !('speechSynthesis' in window)) return;
-            window.speechSynthesis.cancel();
-            const utterance = new SpeechSynthesisUtterance(textContent);
-            utterance.lang = 'fr-FR';
-            window.speechSynthesis.speak(utterance);
-        }
-
-        // --- SPEECH RECOGNITION (Microphone Start, Pause, Resume) ---
-        let speechRecognition = null;
-        let isRecording = false;
-        let isPaused = false;
-
-        function toggleSpeechRecognition() {
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            if (!SpeechRecognition) {
-                alert("La reconnaissance vocale nécessite Google Chrome.");
-                return;
-            }
-
-            const micBtn = document.getElementById('mic-record-btn');
-            const micBtnText = document.getElementById('mic-btn-text');
-            const micStatus = document.getElementById('mic-status');
-            const transcriptField = document.getElementById('spoken-transcript');
-
-            if (!isRecording) {
-                // Start fresh recording session
-                speechRecognition = new SpeechRecognition();
-                speechRecognition.lang = 'fr-FR';
-                speechRecognition.interimResults = true;
-                speechRecognition.continuous = true;
-
-                speechRecognition.onstart = () => {
-                    isRecording = true;
-                    isPaused = false;
-                    micBtn.className = "bg-rose-600 hover:bg-rose-700 text-white text-xs px-4 py-2.5 rounded-xl font-bold transition flex items-center space-x-2 shadow-sm animate-pulse";
-                    micBtnText.innerText = "Pause / Arrêter";
-                    micStatus.innerText = "🔴 Enregistrement en cours (parlez en français)...";
-                };
-
-                speechRecognition.onresult = (event) => {
-                    if (isPaused) return;
-                    let finalTranscript = '';
-                    for (let i = event.resultIndex; i < event.results.length; ++i) {
-                        if (event.results[i].isFinal) {
-                            finalTranscript += event.results[i][0].transcript + ' ';
-                        }
-                    }
-                    if (finalTranscript) {
-                        transcriptField.value += finalTranscript;
-                    }
-                };
-
-                speechRecognition.onerror = () => stopMicUI();
-                speechRecognition.onend = () => {
-                    if (isRecording && !isPaused) {
-                        // Auto-restart if it cuts out unexpectedly while active
-                        try { speechRecognition.start(); } catch(e){}
-                    } else {
-                        stopMicUI();
-                    }
-                };
-
-                speechRecognition.start();
-            } else if (!isPaused) {
-                // Pause recording
-                isPaused = true;
-                if (speechRecognition) speechRecognition.stop();
-                micBtn.className = "bg-amber-600 hover:bg-amber-700 text-white text-xs px-4 py-2.5 rounded-xl font-bold transition flex items-center space-x-2 shadow-sm";
-                micBtnText.innerText = "Reprendre";
-                micStatus.innerText = "⏸️ Enregistrement en pause. Cliquez pour reprendre ou relancer.";
-            } else {
-                // Resume recording
-                isPaused = false;
-                try {
-                    speechRecognition.start();
-                    micBtn.className = "bg-rose-600 hover:bg-rose-700 text-white text-xs px-4 py-2.5 rounded-xl font-bold transition flex items-center space-x-2 shadow-sm animate-pulse";
-                    micBtnText.innerText = "Pause / Arrêter";
-                    micStatus.innerText = "🔴 Enregistrement en cours...";
-                } catch(e) {
-                    stopMicUI();
-                }
-            }
-        }
-
-        function stopMicUI() {
-            isRecording = false;
-            isPaused = false;
-            const micBtn = document.getElementById('mic-record-btn');
-            const micBtnText = document.getElementById('mic-btn-text');
-            const micStatus = document.getElementById('mic-status');
-            if (micBtn) {
-                micBtn.className = "bg-indigo-600 hover:bg-indigo-700 text-white text-xs px-4 py-2.5 rounded-xl font-bold transition flex items-center space-x-2 shadow-sm";
-                micBtnText.innerText = "Démarrer / Pause";
-            }
-            if (micStatus) micStatus.innerText = "Enregistrement arrêté.";
-        }
-
-        function clearSpokenTranscript() {
-            document.getElementById('spoken-transcript').value = "";
-        }
-
-        async function evaluateSpokenResponse() {
-            const text = document.getElementById('spoken-transcript').value.trim();
-            const pane = document.getElementById('speaking-eval-pane');
-            const body = document.getElementById('speaking-eval-body');
-            const scoreBadge = document.getElementById('speaking-eval-score');
-            const chosenFormat = document.getElementById('speaking-format-select').value;
-
-            if (!text) {
-                alert("Veuillez d'abord enregistrer ou saisir votre intervention orale.");
-                return;
-            }
-
-            pane.classList.remove('hidden');
-            body.innerText = "Analyse de votre expression orale par l'examinateur IA...";
-            scoreBadge.innerText = "Score : --/20";
-
-            const apiUrl = localStorage.getItem('ai_api_url') || "https://api.groq.com/openai/v1/chat/completions";
-            const apiKey = localStorage.getItem('ai_api_key') || "";
-            const modelName = localStorage.getItem('ai_model_name') || "openai/gpt-oss-120b";
-
-            try {
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${apiKey}`
-                    },
-                    body: JSON.stringify({
-                        model: modelName,
-                        messages: [
-                            {
-                                role: "system",
-                                content: "You are a strict official TCF/DELF speaking examiner. Evaluate the student's transcribed spoken French based on fluency, pronunciation expectations, grammar, and vocabulary structure. Format response strictly as JSON with keys: 'score' (number out of 20), 'feedback' (detailed constructive feedback in French), and 'improved_transcript' (refined spoken version). Do not include markdown codeblocks like ```json, just output raw valid JSON."
-                            },
-                            {
-                                role: "user",
-                                content: `Evaluate this spoken transcript (Format: ${chosenFormat}, Theme: "${activeSubjectObj?.title}"): "${text}"`
-                            }
-                        ],
-                        temperature: 0.3
-                    })
-                });
-
-                const data = await response.json();
-                let rawContent = data.choices?.[0]?.message?.content || "";
-                rawContent = rawContent.replace(/```json/g, '').replace(/```/g, '').trim();
-                const evalJson = JSON.parse(rawContent);
-
-                const score = Number(evalJson.score);
-                if (!Number.isFinite(score) || score < 0 || score > 20) {
-                    scoreBadge.innerText = "Score : --/20";
-                    body.innerText = "Impossible de noter cette réponse pour le moment. Veuillez réessayer.";
-                    return;
-                }
-                scoreBadge.innerText = `Score : ${score}/20`;
-                if (activeSubjectObj) saveProgressToDatabase('speaking', activeSubjectObj.id, score, true);
-                body.innerHTML = `
-                    <div class="space-y-2">
-                        <div><strong>Évaluation de l'examinateur :</strong><br>${evalJson.feedback || ''}</div>
-                        <div class="border-t border-emerald-200 pt-2"><strong>Version orale améliorée :</strong><br><span class="text-emerald-950 italic">${evalJson.improved_transcript || text}</span></div>
-                    </div>
-                `;
-            } catch (err) {
-                body.innerText = "Erreur lors de l'évaluation de l'oral.";
-            }
-        }
-
-        // --- INTERACTIVE CHAT MICROPHONE ---
-        let chatSpeechRecognition = null;
-        let isChatListening = false;
-
-        window.toggleChatVoiceInput = function() {
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            if (!SpeechRecognition) { alert("La reconnaissance vocale nécessite Google Chrome."); return; }
-
-            const micBtn = document.getElementById('ai-mic-btn');
-            const inputField = document.getElementById('ai-input');
-
-            if (!isChatListening) {
-                chatSpeechRecognition = new SpeechRecognition();
-                chatSpeechRecognition.lang = 'fr-FR';
-                chatSpeechRecognition.interimResults = false;
-
-                chatSpeechRecognition.onstart = () => {
-                    isChatListening = true;
-                    if (micBtn) { micBtn.innerHTML = "⏹️"; micBtn.className = "bg-rose-600 text-white p-2 rounded-xl text-xs transition shadow-sm animate-pulse"; }
-                    if (inputField) inputField.placeholder = "Écoute en cours...";
-                };
-                chatSpeechRecognition.onresult = (event) => {
-                    if (inputField) inputField.value = event.results[0][0].transcript;
-                };
-                chatSpeechRecognition.onerror = () => stopChatMicUI();
-                chatSpeechRecognition.onend = () => stopChatMicUI();
-                chatSpeechRecognition.start();
-            } else {
-                if (chatSpeechRecognition) chatSpeechRecognition.stop();
-                stopChatMicUI();
-            }
+        const $ = (id) => document.getElementById(id);
+        const SCENES = window.SCENES || [];
+        const CS = window.CHEATSHEET;
+        const C = window.Conjugator;
+        const LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1'];
+        const store = {
+            get(k, d) { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch (e) { return d; } },
+            set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
         };
+        const myLevel = () => { const lv = (LocalStore.get('fs_profile', {}) || {}).level; return LEVELS.includes(lv) ? lv : lv === 'C2' ? 'C1' : 'A1'; };
+        const plain = (s) => String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+        const record = () => { if (typeof Activity !== 'undefined') Activity.record(); };
+        const errorBox = (m) => `<div class="bg-rose-50 border border-rose-200 text-rose-800 rounded-2xl p-4 text-sm">${escapeHtml(m)}</div>`;
 
-        function stopChatMicUI() {
-            isChatListening = false;
-            const micBtn = document.getElementById('ai-mic-btn');
-            const inputField = document.getElementById('ai-input');
-            if (micBtn) { micBtn.innerHTML = "🎙️"; micBtn.className = "bg-slate-100 text-slate-700 hover:bg-slate-200 p-2 rounded-xl text-xs transition"; }
-            if (inputField) inputField.placeholder = "Posez une question...";
+        // ---------- Speech to text (Chrome, Edge, Safari) ----------
+        const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+        let recognizer = null;
+        function stopListening() { if (recognizer) { try { recognizer.stop(); } catch (e) {} } }
+        // listen({ continuous, onText(finalText, interimText), onEnd })
+        function listen(opts) {
+            if (!SR) { $('mic-note').classList.remove('hidden'); return false; }
+            stopListening();
+            const r = new SR();
+            r.lang = 'fr-FR';
+            r.interimResults = true;
+            r.continuous = !!opts.continuous;
+            r.onresult = (e) => {
+                let fin = '', interim = '';
+                for (let i = e.resultIndex; i < e.results.length; i++) {
+                    const t = e.results[i][0].transcript;
+                    if (e.results[i].isFinal) fin += t; else interim += t;
+                }
+                opts.onText(fin.trim(), interim.trim());
+            };
+            r.onerror = (e) => { if (e.error === 'not-allowed') alert('Please allow the microphone for this site to speak.'); };
+            r.onend = () => { if (recognizer === r) recognizer = null; opts.onEnd && opts.onEnd(); };
+            recognizer = r;
+            try { r.start(); } catch (e) { recognizer = null; return false; }
+            return true;
         }
 
-        function sendPresetPrompt(promptText) {
-            const input = document.getElementById('ai-input');
-            if (input) { input.value = promptText; sendAIChat(); }
+        // ---------- Views and modes ----------
+        const VIEWS = ['home-view', 'scene-view', 'shadow-view', 'exam-view'];
+        function showView(id) {
+            stopListening();
+            window.speechSynthesis && window.speechSynthesis.cancel();
+            VIEWS.forEach(v => $(v).classList.toggle('hidden', v !== id));
+            $('scroller').scrollTop = 0;
+        }
+        let mode = store.get('speak_mode', 'conversation');
+        function setMode(m, push) {
+            mode = ['conversation', 'shadowing', 'exam'].includes(m) ? m : 'conversation';
+            store.set('speak_mode', mode);
+            document.querySelectorAll('.mode-tab').forEach(b => {
+                const on = b.dataset.mode === mode;
+                b.classList.toggle('border-indigo-600', on); b.classList.toggle('text-indigo-700', on);
+                b.classList.toggle('border-transparent', !on); b.classList.toggle('text-slate-500', !on); b.classList.toggle('hover:text-slate-800', !on);
+                b.setAttribute('aria-selected', on);
+            });
+            ['conversation', 'shadowing', 'exam'].forEach(x => $('mode-' + x).classList.toggle('hidden', x !== mode));
+            if (mode === 'conversation') renderScenes();
+            if (mode === 'shadowing') renderTracks();
+            if (mode === 'exam') renderExamHome();
+            if (push) history.pushState({}, '', 'speaking.html?mode=' + mode);
+        }
+        function showHome(push) {
+            showView('home-view');
+            document.title = 'Speaking - French Study App';
+            setMode(mode, push);
         }
 
-        async function sendAIChat() {
-            const input = document.getElementById('ai-input');
-            const chatBox = document.getElementById('ai-chat-box');
-            if (!input || !input.value.trim() || !chatBox) return;
-
-            const userText = input.value.trim();
-            const userMsg = document.createElement('div');
-            userMsg.className = 'bg-indigo-50 border border-indigo-100 p-3 rounded-xl text-xs text-indigo-900 ml-4 shadow-sm';
-            userMsg.innerText = userText;
-            chatBox.appendChild(userMsg);
-            input.value = '';
-            chatBox.scrollTop = chatBox.scrollHeight;
-
-            const typingMsg = document.createElement('div');
-            typingMsg.id = 'ai-typing';
-            typingMsg.className = 'bg-slate-50 border border-slate-100 p-3 rounded-xl text-xs text-slate-500 mr-4 italic';
-            typingMsg.innerText = '🤖 L\'examinateur prépare sa réponse...';
-            chatBox.appendChild(typingMsg);
-            chatBox.scrollTop = chatBox.scrollHeight;
-
-            const apiUrl = localStorage.getItem('ai_api_url') || "https://api.groq.com/openai/v1/chat/completions";
-            const apiKey = localStorage.getItem('ai_api_key') || "";
-            const modelName = localStorage.getItem('ai_model_name') || "openai/gpt-oss-120b";
-
-            try {
-                const apiResponse = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
-                    body: JSON.stringify({
-                        model: modelName,
-                        messages: [
-                            { role: "system", content: `You are an expert TCF oral examiner. The student is practicing speaking about: "${activeSubjectObj?.title}".` },
-                            { role: "user", content: userText }
-                        ],
-                        temperature: 0.7
-                    })
-                });
-
-                const data = await apiResponse.json();
-                document.getElementById('ai-typing')?.remove();
-
-                let aiReply = data.choices?.[0]?.message?.content || "Réponse non disponible.";
-                const aiMsg = document.createElement('div');
-                aiMsg.className = 'ai-message-card bg-slate-50 border border-slate-200 p-3.5 rounded-2xl text-xs text-slate-700 mr-4 shadow-sm space-y-2 relative';
-                aiMsg.setAttribute('data-reply-text', aiReply);
-                aiMsg.innerHTML = `
-                    <div class="flex items-center justify-between border-b border-slate-200/60 pb-1.5 mb-1.5">
-                        <span class="font-bold text-indigo-600 flex items-center space-x-1">
-                            <span>🤖</span> <span>Examinateur</span>
+        // =====================================================================
+        // CONVERSATION: role-play with AI characters
+        // =====================================================================
+        const MAX_TURNS = 12;
+        let scene = null, chat = [], busy = false, finished = false;
+        let scenesDone = store.get('speak_scenes', {});   // scene id -> date practised
+        function renderScenes() {
+            const lv = myLevel();
+            $('scene-grid').innerHTML = SCENES.map(s => {
+                const done = scenesDone[s.id];
+                const suits = s.level.split('–').includes(lv);
+                return `<a href="speaking.html?scene=${s.id}" data-scene="${s.id}" class="group flex gap-3 bg-white border ${suits ? 'border-indigo-300' : 'border-slate-200'} hover:border-indigo-400 hover:shadow-md transition rounded-2xl p-4">
+                    <span class="shrink-0 w-12 h-12 rounded-2xl bg-indigo-50 flex items-center justify-center text-2xl">${s.emoji}</span>
+                    <span class="min-w-0 flex-1">
+                        <span class="flex items-start justify-between gap-2">
+                            <span class="font-bold text-slate-900 leading-snug group-hover:text-indigo-700">${escapeHtml(s.scene)}</span>
+                            ${done ? '<span class="shrink-0 text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">✓ Done</span>' : ''}
                         </span>
-                        <div class="flex items-center space-x-1.5">
-                            <button onclick="playTextAudio(this)" class="text-[10px] bg-white border border-slate-200 px-2 py-0.5 rounded font-medium text-slate-600 hover:bg-slate-100 transition">🔊 Écouter</button>
-                            <button onclick="translateAIResponse(this)" class="text-[10px] bg-white border border-slate-200 px-2 py-0.5 rounded font-medium text-slate-600 hover:bg-slate-100 transition">🌐 Traduire (EN)</button>
-                        </div>
-                    </div>
-                    <div class="space-y-1.5 leading-relaxed">
-                        ${aiReply.replace(/\n/g, '<br>')}
-                    </div>
-                    <div class="ai-translation-box hidden mt-2 pt-2 border-t border-slate-200/60 text-slate-500 italic bg-slate-100/60 p-2 rounded-lg"></div>
-                `;
-                chatBox.appendChild(aiMsg);
-                chatBox.scrollTop = chatBox.scrollHeight;
-            } catch (err) {
-                document.getElementById('ai-typing')?.remove();
+                        <span class="block text-sm text-slate-500">${escapeHtml(s.name)}, ${escapeHtml(s.role)}</span>
+                        <span class="inline-block mt-1.5 text-[11px] font-bold uppercase tracking-wide ${suits ? 'text-indigo-700 bg-indigo-50' : 'text-slate-500 bg-slate-100'} px-2 py-0.5 rounded-full">${escapeHtml(s.level)}${suits ? ' · your level' : ''}</span>
+                    </span></a>`;
+            }).join('');
+        }
+        const LEVEL_RULES = {
+            A1: 'Use very short sentences (at most 12 words), the present tense and very common words.',
+            A2: 'Use short sentences; the passé composé and futur proche are fine.',
+            B1: 'Use natural everyday French at a moderate pace, including past tenses.',
+            B2: 'Use natural, fluent French; some idioms are fine.',
+            C1: 'Use rich, natural French, as with a fluent speaker.'
+        };
+        function sceneLevel() { return String(scene.level).split('–')[0]; }
+        function systemPrompt() {
+            return `You are ${scene.persona}
+You are role-playing this scene with a learner of French (CEFR ${scene.level}): ${scene.scene}.
+The learner's goal: ${scene.goal}
+Rules:
+- Stay in character and reply only in French. ${LEVEL_RULES[sceneLevel()] || LEVEL_RULES.A1}
+- Reply in 1 or 2 sentences, then keep the scene moving with one simple question or prompt.
+- Do not correct the learner's mistakes during the scene; just answer naturally (you may echo the correct form).
+- If the learner writes in English or seems stuck, answer in simple French.
+- When the learner's goal is reached, wrap the scene up kindly.
+Return a JSON object: {"reply": "your French reply", "english": "English translation of your reply", "hints": ["2 or 3 short French sentences the learner could say next"]}`;
+        }
+        function startScene(s, push) {
+            scene = s; chat = []; busy = false; finished = false; lastHints = [];
+            if (push) history.pushState({}, '', s.own ? 'speaking.html?mode=conversation' : `speaking.html?scene=${s.id}`);
+            showView('scene-view');
+            document.title = `${s.scene} - Speaking`;
+            $('scene-emoji').textContent = s.emoji;
+            $('scene-crumb').textContent = `Conversation · ${s.level} · ${s.name}${s.role ? ', ' + s.role : ''}`;
+            $('scene-title').textContent = s.scene;
+            $('scene-goal').textContent = 'Your goal: ' + s.goal;
+            $('auto-speak').checked = store.get('speak_auto', false);
+            $('report').classList.add('hidden');
+            $('input-area').classList.remove('hidden');
+            $('btn-finish').disabled = false;
+            $('suggestions').classList.add('hidden');
+            $('scene-error').classList.add('hidden');
+            if (s.opener) {
+                chat.push({ role: 'assistant', text: s.opener[0], english: s.opener[1] });
+                renderMessages();
+                if ($('auto-speak').checked) speakFrench(s.opener[0]);
+            } else {
+                renderMessages();
+                askCharacter(true);   // your own scene: the character speaks first
             }
         }
+        function renderMessages() {
+            $('messages').innerHTML = chat.map((m, i) => m.role === 'user' ? `
+                <div class="flex justify-end"><div class="max-w-[85%] bg-indigo-600 text-white rounded-2xl rounded-br-md px-4 py-2.5 text-base">${escapeHtml(m.text)}</div></div>` : `
+                <div class="flex gap-2 items-end">
+                    <span class="shrink-0 w-8 h-8 rounded-full bg-white border border-slate-200 flex items-center justify-center">${scene.emoji}</span>
+                    <div class="max-w-[85%] bg-white border border-slate-200 rounded-2xl rounded-bl-md px-4 py-2.5 space-y-1">
+                        <p lang="fr" class="text-base text-slate-900">${escapeHtml(m.text)}</p>
+                        <p data-en="${i}" class="hidden text-sm text-slate-500">${escapeHtml(m.english || '')}</p>
+                        <div class="flex gap-3 text-sm">
+                            <button type="button" data-say-msg="${i}" class="text-indigo-600 font-semibold">🔊 Listen</button>
+                            ${m.english ? `<button type="button" data-show-en="${i}" class="text-slate-500 font-semibold">English</button>` : ''}
+                        </div>
+                    </div>
+                </div>`).join('') + (busy ? `<div class="flex gap-2 items-end"><span class="shrink-0 w-8 h-8 rounded-full bg-white border border-slate-200 flex items-center justify-center">${scene.emoji}</span><div class="bg-white border border-slate-200 rounded-2xl px-4 py-3 text-slate-400 animate-pulse">…</div></div>` : '');
+            $('msg-send').disabled = busy || finished;
+            const sc = $('scroller'); sc.scrollTop = sc.scrollHeight;
+        }
+        let lastHints = [];
+        async function askCharacter(first) {
+            busy = true; renderMessages();
+            const messages = [{ role: 'system', content: systemPrompt() }].concat(chat.map(m => ({ role: m.role, content: m.text })));
+            if (first) messages.push({ role: 'user', content: '(Start the scene: say your first line to the learner.)' });
+            try {
+                const out = await askAI(messages, { json: true, temperature: 0.7 });
+                const reply = String(out.reply || '').trim();
+                if (!reply) throw new Error('The AI reply was empty. Please try again.');
+                chat.push({ role: 'assistant', text: reply, english: String(out.english || '') });
+                lastHints = (Array.isArray(out.hints) ? out.hints : []).map(String).filter(Boolean).slice(0, 3);
+                busy = false; renderMessages();
+                if ($('auto-speak').checked) speakFrench(reply);
+                if (chat.filter(m => m.role === 'user').length >= MAX_TURNS) sceneError('That is the end of this scene. Tap "Finish and get feedback" for your report.');
+                return true;
+            } catch (err) {
+                busy = false; renderMessages(); sceneError(err.message);
+                return false;
+            }
+        }
+        function sceneError(m) { $('scene-error').textContent = m; $('scene-error').classList.toggle('hidden', !m); }
+        async function sendMessage(text) {
+            text = String(text || '').trim();
+            if (!text || busy || finished) return;
+            sceneError('');
+            chat.push({ role: 'user', text });
+            $('msg-input').value = '';
+            $('suggestions').classList.add('hidden');
+            if (!(await askCharacter(false))) { chat.pop(); $('msg-input').value = text; renderMessages(); }
+        }
+        function showHints() {
+            const box = $('suggestions');
+            if (!box.classList.contains('hidden')) { box.classList.add('hidden'); return; }
+            const fromScene = (scene.phrases || []).map(p => ({ fr: p[0], en: p[1] }));
+            const list = [...lastHints.map(h => ({ fr: h, en: '' })), ...fromScene].slice(0, 7);
+            box.innerHTML = list.length ? `<div class="text-xs font-bold uppercase tracking-wide text-indigo-700">Tap to use · 🔊 to hear</div>` + list.map(p => `
+                <div class="flex items-center gap-2">
+                    <button type="button" data-use="${escapeHtml(p.fr)}" class="flex-1 text-left px-3 py-2 rounded-xl bg-slate-50 hover:bg-indigo-50 border border-slate-100">
+                        <span class="block text-sm font-semibold text-slate-900">${escapeHtml(p.fr)}</span>${p.en ? `<span class="block text-xs text-slate-500">${escapeHtml(p.en)}</span>` : ''}</button>
+                    <button type="button" data-say="${escapeHtml(p.fr)}" class="shrink-0 w-10 h-10 rounded-xl bg-indigo-50 text-indigo-700" aria-label="Listen">🔊</button>
+                </div>`).join('') : '<p class="text-sm text-slate-500">Say what you would say in real life, even in simple words.</p>';
+            box.classList.remove('hidden');
+        }
+        async function finishScene() {
+            const lines = chat.filter(m => m.role === 'user').map(m => m.text);
+            if (!lines.length) { sceneError('Say at least one thing to get feedback.'); return; }
+            if (busy) return;
+            busy = true; $('btn-finish').disabled = true;
+            $('report').classList.remove('hidden');
+            $('report').innerHTML = '<div class="bg-white border border-slate-200 rounded-2xl p-4 text-sm text-indigo-600 animate-pulse">Preparing your report…</div>';
+            const transcript = chat.map(m => `${m.role === 'user' ? 'Learner' : scene.name}: ${m.text}`).join('\n');
+            try {
+                const r = await askAI([
+                    { role: 'system', content: `You are a warm, encouraging French teacher. A learner at CEFR ${scene.level} just did a role-play (${scene.scene}). Review ONLY the learner's lines. Their lines may come from speech recognition, so ignore missing punctuation and capitals. Return a JSON object:
+{"summary": "one encouraging sentence in English", "went_well": ["up to 3 short points in English"],
+ "corrections": [{"you_said": "learner's words", "better": "correct natural French", "why": "short English explanation"}],
+ "new_words": [{"fr": "useful French word or phrase from this scene", "en": "English"}]}
+Give at most 4 corrections, only for real mistakes (an empty list if there are none), and at most 5 new words.` },
+                    { role: 'user', content: transcript }
+                ], { json: true, temperature: 0.3 });
+                finished = true;
+                if (scene.id) { scenesDone[scene.id] = new Date().toISOString().slice(0, 10); store.set('speak_scenes', scenesDone); }
+                record();
+                saveProgress('speaking-scene', scene.id || 'own', null);
+                renderReport(r);
+                $('input-area').classList.add('hidden');
+            } catch (err) {
+                $('report').innerHTML = errorBox(err.message);
+                $('btn-finish').disabled = false;
+            }
+            busy = false; renderMessages();
+        }
+        function renderReport(r) {
+            const list = (a) => Array.isArray(a) ? a : [];
+            const corr = list(r.corrections).slice(0, 4), words = list(r.new_words).slice(0, 5);
+            $('report').innerHTML = `
+                <section class="bg-white border border-emerald-200 rounded-2xl p-4 space-y-4">
+                    <h2 class="text-lg font-black text-emerald-800">Your report</h2>
+                    <p class="text-base text-slate-800">${escapeHtml(r.summary || 'Well done for finishing the scene!')}</p>
+                    ${list(r.went_well).length ? `<ul class="text-sm text-emerald-800 space-y-0.5">${list(r.went_well).slice(0, 3).map(w => `<li>✓ ${escapeHtml(w)}</li>`).join('')}</ul>` : ''}
+                    <div><div class="text-sm font-bold uppercase tracking-wide text-slate-500 mb-1">Corrections</div>
+                        ${corr.length ? corr.map(c => `<div class="border-t border-slate-100 py-2">
+                            <div class="text-base"><span class="fix-del text-rose-700">${escapeHtml(c.you_said)}</span> → <span class="font-semibold text-emerald-700">${escapeHtml(c.better)}</span>
+                            <button type="button" data-say="${escapeHtml(c.better)}" class="ml-1 text-indigo-600 text-sm" aria-label="Listen">🔊</button></div>
+                            <div class="text-sm text-slate-600">${escapeHtml(c.why)}</div></div>`).join('') : '<p class="text-base text-slate-600">No mistakes to fix this time. Bravo !</p>'}
+                    </div>
+                    ${words.length ? `<div><div class="text-sm font-bold uppercase tracking-wide text-slate-500 mb-1">New words</div>
+                        <div class="flex flex-wrap gap-2">${words.map(w => `<button type="button" data-say="${escapeHtml(w.fr)}" class="text-left bg-indigo-50 hover:bg-indigo-100 rounded-xl px-3 py-2">
+                            <span class="block text-sm font-semibold text-indigo-900">🔊 ${escapeHtml(w.fr)}</span><span class="block text-xs text-indigo-700">${escapeHtml(w.en)}</span></button>`).join('')}</div></div>` : ''}
+                    <div class="flex flex-wrap gap-2 pt-1">
+                        <button type="button" id="btn-again" class="min-h-[44px] px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl">Try this scene again</button>
+                        ${scene.id ? '<button type="button" id="btn-rehearse" class="min-h-[44px] px-4 bg-white border border-slate-200 hover:border-indigo-300 font-bold rounded-xl">🔁 Rehearse the lines</button>' : ''}
+                    </div>
+                </section>`;
+            $('btn-again').onclick = () => startScene(scene, false);
+            if ($('btn-rehearse')) $('btn-rehearse').onclick = () => openTrack('scenes', TRACKS.find(t => t.id === 'scenes').items.findIndex(x => x.scene === scene.id), true);
+        }
 
-        loadSpeakingTopicsFromDatabase();
+        // =====================================================================
+        // SHADOWING: listen, repeat, check (no AI)
+        // =====================================================================
+        const itemsFromBlocks = (ids) => ids.flatMap(id => ((CS && CS.blocks[id]) ? CS.blocks[id].sections : [])
+            .flatMap(s => s.items.filter(it => !/^not:/i.test(it[1] || '')).map(it => ({ fr: it[0], en: it[2] || '', note: it[1] ? 'Say: ' + it[1] : '' }))));
+        const verbChant = (inf, tense) => {
+            const v = C.find(inf);
+            const forms = C.forms(v, tense).map(r => /'$/.test(r.cp) ? r.cp + r.cf : r.cp.split(' / ')[0] + ' ' + r.cf);
+            const t = C.tenses.find(x => x.key === tense);
+            return { fr: forms.join(', ').replace(/\(e\)|\(s\)/g, ''), en: `${inf}${v.gloss ? ' (' + v.gloss + ')' : ''}, ${t.name}`, note: 'Say all six forms in one breath.' };
+        };
+        const TRACKS = [
+            { id: 'sounds', emoji: '👂', level: 'A1', name: 'Sounds of French', hint: 'Tune your ear: u and ou, the nasal vowels, and the French r.', items: [
+                { fr: 'tu, tout', en: 'you, all', note: 'u: round your lips and say "ee". ou: like "oo".' },
+                { fr: 'la rue, la roue', en: 'the street, the wheel', note: 'Same u and ou contrast.' },
+                { fr: 'dessus, dessous', en: 'on top, underneath', note: 'u and ou at the end of the word.' },
+                { fr: 'Tu as vu ?', en: 'Did you see?', note: 'Two u sounds.' },
+                { fr: 'le vin, le vent, ils vont', en: 'wine, wind, they go', note: 'Three nasal vowels: in, en, on. Do not say the n.' },
+                { fr: 'bon, le banc, le bain', en: 'good, bench, bath', note: 'on, an, ain.' },
+                { fr: 'un bon vin blanc', en: 'a good white wine', note: 'Four nasal sounds in a row.' },
+                { fr: 'Paris, rouge, la rue', en: 'Paris, red, the street', note: 'The r is made at the back of the throat.' },
+                { fr: 'Je prends le train.', en: 'I take the train.', note: 'r after a consonant.' },
+                { fr: 'Nous voulons du pain.', en: 'We want some bread.', note: 'ou, on, u and ain together.' }] },
+            { id: 'liaison', emoji: '🔗', level: 'A1', name: 'Silent letters and liaison', hint: 'Most final consonants are silent; some link to the next vowel.', items: [
+                { fr: 'Ils parlent.', en: 'They speak.', note: 'The -ent of the verb is silent.' },
+                { fr: 'les amis', en: 'the friends', note: 'Liaison: the s sounds like z, "lé-za-mi".' },
+                { fr: 'Vous avez un chat.', en: 'You have a cat.', note: 'vous‿avez: z sound.' },
+                { fr: 'les enfants', en: 'the children', note: 'z liaison, and the final t is silent.' },
+                { fr: 'Ils ont un chien.', en: 'They have a dog.', note: 'ils‿ont: z sound. Compare: ils sont (s sound).' },
+                { fr: "C'est un ami.", en: "He's a friend.", note: "c'est‿un: t sound." },
+                { fr: 'Nous allons à Paris.', en: 'We are going to Paris.', note: 'nous‿allons: z sound. The s of Paris is silent.' },
+                { fr: 'Il est petit.', en: 'He is small.', note: 'The final t of petit is silent.' },
+                { fr: 'beaucoup, trop tard', en: 'a lot, too late', note: 'Final p and d are silent.' },
+                { fr: 'un grand homme', en: 'a great man', note: 'grand‿homme: the d links as a t sound.' }] },
+            { id: 'survival', emoji: '🆘', level: 'A1', name: 'Survival phrases', hint: 'Greetings, question words and phrases to get help.', items: itemsFromBlocks([1, 2, 25]) },
+            { id: 'numbers', emoji: '🔢', level: 'A1', name: 'Numbers, time and prices', hint: 'Hear and say numbers and times quickly.', items: itemsFromBlocks([4, 6]) },
+            { id: 'verbs', emoji: '⚡', level: 'A1–A2', name: 'Verb chants', hint: 'Chant the key verbs until they come out without thinking.', items: C ? [
+                ...['être', 'avoir', 'aller', 'faire', 'pouvoir', 'vouloir', 'devoir', 'savoir', 'venir', 'prendre', 'parler', 'finir'].map(v => verbChant(v, 'pres')),
+                ...['parler', 'manger', 'aller', 'venir', 'faire', 'avoir', 'être'].map(v => verbChant(v, 'pc')),
+                ...['être', 'avoir', 'parler'].map(v => verbChant(v, 'impf'))] : [] },
+            { id: 'scenes', emoji: '🎭', level: 'A1–B2', name: 'Lines from the conversations', hint: 'Rehearse what you can say in each conversation scene.',
+                items: SCENES.flatMap(s => s.phrases.map(p => ({ fr: p[0], en: p[1], note: `${s.emoji} ${s.scene}`, scene: s.id }))) },
+            { id: 'grammar', emoji: '📚', level: 'A1–C2', name: 'Grammar in sentences', hint: 'Example sentences from every grammar topic, A1 to C2.',
+                items: CS && CS.grammar ? Object.keys(CS.grammar).flatMap(k => (CS.grammar[k].ex || []).map(e => ({ fr: e[0], en: e[1], note: `${CS.grammar[k].level} · ${CS.grammar[k].title}` }))) : [] }
+        ].filter(t => t.items.length);
+        let shadowPos = store.get('speak_shadow', {});    // track id -> { i, best }
+        let track = null, idx = 0;
+        function renderTracks() {
+            $('track-grid').innerHTML = TRACKS.map(t => {
+                const p = shadowPos[t.id] || { i: 0, best: 0 };
+                const pct = Math.round(Math.min(p.best, t.items.length) / t.items.length * 100);
+                return `<a href="speaking.html?track=${t.id}" data-track="${t.id}" class="group flex gap-3 bg-white border border-slate-200 hover:border-indigo-400 hover:shadow-md transition rounded-2xl p-4">
+                    <span class="shrink-0 w-12 h-12 rounded-2xl bg-rose-50 flex items-center justify-center text-2xl">${t.emoji}</span>
+                    <span class="min-w-0 flex-1">
+                        <span class="block font-bold text-slate-900 leading-snug group-hover:text-indigo-700">${escapeHtml(t.name)}</span>
+                        <span class="block text-sm text-slate-500 leading-snug">${escapeHtml(t.hint)}</span>
+                        <span class="mt-2 flex items-center gap-2"><span class="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden"><span class="block h-full bg-emerald-500" style="width:${pct}%"></span></span>
+                        <span class="text-xs text-slate-500">${Math.min(p.best, t.items.length)}/${t.items.length}</span></span>
+                    </span></a>`;
+            }).join('');
+        }
+        function openTrack(id, at, push) {
+            track = TRACKS.find(t => t.id === id) || TRACKS[0];
+            const p = shadowPos[track.id] || { i: 0, best: 0 };
+            idx = Math.max(0, Math.min(track.items.length - 1, at >= 0 ? at : p.i));
+            if (push) history.pushState({}, '', `speaking.html?track=${track.id}`);
+            showView('shadow-view');
+            document.title = `${track.name} - Speaking`;
+            $('shadow-title').textContent = `${track.emoji} ${track.name}`;
+            $('shadow-hint').textContent = track.hint;
+            renderPhrase();
+        }
+        function renderPhrase() {
+            const it = track.items[idx];
+            $('shadow-fr').textContent = it.fr;
+            $('shadow-en').textContent = it.en;
+            $('shadow-note').textContent = it.note || '';
+            $('shadow-count').textContent = `${idx + 1} / ${track.items.length}`;
+            $('shadow-bar').style.width = Math.round((idx + 1) / track.items.length * 100) + '%';
+            $('shadow-result').innerHTML = '';
+            $('sh-prev').disabled = idx === 0;
+            $('sh-next').disabled = idx === track.items.length - 1;
+            const p = shadowPos[track.id] || { i: 0, best: 0 };
+            shadowPos[track.id] = { i: idx, best: Math.max(p.best, idx) };
+            store.set('speak_shadow', shadowPos);
+        }
+        const wordsOf = (s) => plain(s).replace(/[’']/g, "' ").split(/[^a-z0-9']+/).map(w => w.replace(/'$/, '')).filter(Boolean);
+        function showHeard(heard) {
+            const said = new Set(wordsOf(heard));
+            const tokens = track.items[idx].fr.split(/\s+/).filter(Boolean);
+            let ok = 0, total = 0;
+            const chips = tokens.map(tok => {
+                const parts = wordsOf(tok);
+                if (!parts.length) return escapeHtml(tok);
+                total++;
+                const good = parts.every(p => said.has(p));
+                if (good) ok++;
+                return `<span class="inline-block px-1.5 py-0.5 rounded-lg ${good ? 'bg-emerald-50 text-emerald-800' : 'bg-rose-50 text-rose-700 underline decoration-wavy'}">${escapeHtml(tok)}</span>`;
+            }).join(' ');
+            const all = ok === total;
+            $('shadow-result').innerHTML = `
+                <div class="text-lg leading-loose">${chips}</div>
+                <p class="text-sm ${all ? 'text-emerald-700 font-bold' : 'text-slate-600'}">${all ? 'Parfait ! Every word was understood.' : `${ok} of ${total} words understood. Red words: listen again and repeat.`}</p>
+                <p class="text-xs text-slate-400">Heard: "${escapeHtml(heard)}"</p>`;
+            if (all) record();
+        }
+        function sayIt() {
+            const btn = $('sh-say');
+            if (recognizer) { stopListening(); return; }
+            let heard = '';
+            const started = listen({
+                continuous: false,
+                onText: (fin, interim) => { if (fin) heard += ' ' + fin; $('shadow-result').innerHTML = `<p class="text-base text-slate-400 italic">${escapeHtml((heard + ' ' + interim).trim() || 'Listening…')}</p>`; },
+                onEnd: () => { btn.classList.remove('mic-on'); btn.textContent = '🎙️ Say it'; if (heard.trim()) showHeard(heard.trim()); else $('shadow-result').innerHTML = '<p class="text-sm text-slate-500">Nothing heard. Tap Say it and speak after the beep of your browser.</p>'; }
+            });
+            if (started) { btn.classList.add('mic-on'); btn.textContent = '⏹ Stop'; $('shadow-result').innerHTML = '<p class="text-base text-slate-400 italic">Listening…</p>'; }
+        }
+
+        // =====================================================================
+        // EXAM TASK: speak on a topic, get a score and corrections
+        // =====================================================================
+        const SECONDS = { A1: [30, 60], A2: [60, 90], B1: [90, 150], B2: [120, 180], C1: [180, 240] };
+        const SUBJECTS = ['Yourself', 'Family and friends', 'Daily life', 'Food', 'Travel', 'Home', 'Work', 'Studies', 'Health and sport',
+            'Free time', 'Technology', 'Environment', 'Culture and media', 'Society'];
+        const KINDS = [['monologue', 'Talk about a topic'], ['interaction', 'Role-play: get information'], ['opinion', 'Give and defend your opinion']];
+        const DEFAULT_KIND = { A1: 'monologue', A2: 'interaction', B1: 'opinion', B2: 'opinion', C1: 'opinion' };
+        let examTasks = store.get('speak_tasks', []);
+        let examResults = store.get('speak_results', {});
+        let examSamples = store.get('speak_samples', {});
+        let pick = store.get('speak_pick', { subject: 'Yourself', kind: null });
+        let exam = null;
+        const fmtTime = (s) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+        function renderExamHome() {
+            const lv = myLevel();
+            const kind = pick.kind || DEFAULT_KIND[lv];
+            const chip = (on) => `min-h-[36px] px-3 rounded-full text-sm font-semibold border transition ${on ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-white border-slate-200 text-slate-700 hover:border-indigo-300'}`;
+            $('subjects').innerHTML = SUBJECTS.map(s => `<button type="button" data-subject="${escapeHtml(s)}" class="${chip(s === pick.subject)}">${escapeHtml(s)}</button>`).join('');
+            $('kinds').innerHTML = KINDS.map(([k, label]) => `<button type="button" data-kind="${k}" class="${chip(k === kind)}">${escapeHtml(label)}</button>`).join('');
+            $('exam-mine-box').classList.toggle('hidden', !examTasks.length);
+            $('exam-mine').innerHTML = examTasks.map(t => {
+                const r = examResults[t.id];
+                return `<a href="speaking.html?task=${encodeURIComponent(t.id)}" data-task="${escapeHtml(t.id)}" class="group flex flex-col gap-1.5 bg-white border border-slate-200 hover:border-indigo-400 hover:shadow-md transition rounded-2xl p-4">
+                    <span class="flex items-center justify-between gap-2"><span class="text-[11px] font-bold uppercase tracking-wide text-violet-700 bg-violet-50 px-2 py-0.5 rounded-full">${escapeHtml(t.level)} · ${escapeHtml(t.source === 'posted' ? 'Your question' : t.kindLabel)}</span>
+                    ${r ? `<span class="text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">✓ ${r.score}/20</span>` : ''}</span>
+                    <span class="font-bold text-slate-900 leading-snug group-hover:text-indigo-700">${escapeHtml(t.title)}</span>
+                    <span class="text-sm text-slate-500 line-clamp-2">${escapeHtml(t.en || t.fr)}</span></a>`;
+            }).join('');
+        }
+        const cleanLists = (t) => ({
+            include: (t.include || []).map(String).filter(Boolean).slice(0, 5),
+            bank: (t.bank || []).filter(x => Array.isArray(x) && x.length >= 2).map(([a, b]) => [String(a), String(b)]).slice(0, 10)
+        });
+        function saveTask(t) { examTasks = [t, ...examTasks.filter(x => x.id !== t.id)].slice(0, 30); store.set('speak_tasks', examTasks); }
+        async function generateTask(subject, kind, level) {
+            const kindLabel = (KINDS.find(([k]) => k === kind) || [, kind])[1];
+            const recent = examTasks.filter(x => x.subject === subject).slice(0, 6).map(x => x.title);
+            const t = await askAI([
+                { role: 'system', content: `You write French speaking tasks in the style of the DELF and TCF oral exams, for CEFR level ${level}. Task types: "Talk about a topic" (a short monologue), "Role-play: get information" (the learner must ask questions to get what they need; describe who they talk to), "Give and defend your opinion" (a short statement or question to react to). Invent a new, concrete situation each time. Reply with JSON only:
+{"title": "short English title", "fr": "the task in French, at ${level} level, 2-4 sentences", "en": "the same task in English",
+ "include": ["3 or 4 short English points to talk about"], "bank": [["useful French phrase", "English meaning"], ... 8 items suited to ${level}]}` },
+                { role: 'user', content: `Subject: ${subject}\nTask type: ${kindLabel}${recent.length ? '\nMake it different from: ' + recent.join('; ') : ''}` }
+            ], { json: true, temperature: 0.9 });
+            if (!t.fr) throw new Error('The AI reply could not be read. Please try again.');
+            const task = { id: 'sp-' + Date.now().toString(36), source: 'ai', level, subject, kind, kindLabel, title: String(t.title || subject), fr: String(t.fr), en: String(t.en || ''), ...cleanLists(t) };
+            saveTask(task);
+            return task;
+        }
+        async function onGenerate(btn, showError, subject, kind, level) {
+            showError('');
+            const label = btn.textContent;
+            btn.disabled = true; btn.textContent = 'Preparing a task…';
+            try { openExam((await generateTask(subject, kind, level)).id, true); }
+            catch (err) { showError(err.message + ' Meanwhile, Shadowing works without AI.'); }
+            finally { btn.disabled = false; btn.textContent = label; }
+        }
+        async function postQuestion() {
+            const text = $('post-text').value.trim();
+            if (text.length < 10) { $('post-error').textContent = 'Type or paste the question first.'; $('post-error').classList.remove('hidden'); return; }
+            const level = myLevel();
+            $('post-error').classList.add('hidden');
+            $('post-btn').disabled = true; $('post-btn').textContent = 'Reading your question…';
+            let task = { id: 'spq-' + Date.now().toString(36), source: 'posted', level, kindLabel: 'Your question', title: text.split(/[.?!\n]/)[0].slice(0, 60) || 'My question', fr: text, en: '', include: [], bank: [] };
+            try {
+                const t = await askAI([
+                    { role: 'system', content: `A ${level} learner of French pasted a speaking question. Keep their question; do not change what it asks. Reply with JSON only:
+{"title": "short English title", "fr": "the question in French (unchanged if already French, otherwise translated)", "en": "the question in English",
+ "include": ["3 or 4 short English points to talk about"], "bank": [["useful French phrase", "English meaning"], ... 8 items]}` },
+                    { role: 'user', content: text }
+                ], { json: true, temperature: 0.3 });
+                task = { ...task, title: String(t.title || task.title), fr: String(t.fr || text), en: String(t.en || ''), ...cleanLists(t) };
+            } catch (err) { task.note = err.message; }
+            saveTask(task);
+            $('post-text').value = '';
+            $('post-btn').disabled = false; $('post-btn').textContent = 'Use my question';
+            openExam(task.id, true);
+        }
+        let timer = null, seconds = 0;
+        function openExam(id, push) {
+            const t = examTasks.find(x => x.id === id);
+            if (!t) { showHome(false); return; }
+            exam = t;
+            if (push) history.pushState({}, '', `speaking.html?task=${encodeURIComponent(t.id)}`);
+            showView('exam-view');
+            document.title = `${t.title} - Speaking`;
+            $('exam-crumb').textContent = `Exam task · ${t.level} · ${t.source === 'posted' ? 'Your question' : t.kindLabel}${t.subject ? ' · ' + t.subject : ''}`;
+            $('exam-title').textContent = t.title;
+            $('exam-fr').textContent = t.fr;
+            $('exam-en').textContent = t.en;
+            $('exam-en').classList.add('hidden');
+            $('exam-en-btn').classList.toggle('hidden', !t.en);
+            $('exam-en-btn').textContent = 'English';
+            $('exam-include-box').classList.toggle('hidden', !t.include.length);
+            $('exam-include').innerHTML = t.include.map(x => `<li class="flex gap-2"><span class="text-indigo-500">•</span><span>${escapeHtml(x)}</span></li>`).join('');
+            $('exam-bank-box').classList.toggle('hidden', !t.bank.length);
+            $('exam-bank').innerHTML = t.bank.map(([fr, en]) => `<button type="button" data-say="${escapeHtml(fr)}" class="w-full text-left px-3 py-2 rounded-xl bg-slate-50 hover:bg-indigo-50 border border-slate-100">
+                <span class="block text-sm font-semibold text-slate-900">🔊 ${escapeHtml(fr)}</span><span class="block text-xs text-slate-500">${escapeHtml(en)}</span></button>`).join('');
+            $('exam-another').classList.toggle('hidden', t.source === 'posted');
+            const r = examResults[t.id];
+            $('exam-text').value = r ? r.text : '';
+            $('exam-interim').textContent = '';
+            $('exam-sample-box').classList.add('hidden');
+            seconds = 0; updateTimer();
+            const [min, max] = SECONDS[t.level] || SECONDS.A1;
+            $('exam-target').textContent = `· aim for ${fmtTime(min)}–${fmtTime(max)}`;
+            if (r && r.feedback) renderExamFeedback(r.feedback, r.text);
+            else if (t.note) { $('exam-feedback').innerHTML = errorBox(`Your question is saved. ${t.note} Without AI there are no talking points for it.`); $('exam-feedback').classList.remove('hidden'); }
+            else $('exam-feedback').classList.add('hidden');
+        }
+        function updateTimer() {
+            const [min, max] = SECONDS[exam.level] || SECONDS.A1;
+            $('exam-timer').textContent = fmtTime(seconds);
+            $('exam-bar').style.width = Math.min(100, Math.round(seconds / max * 100)) + '%';
+            $('exam-bar').className = 'h-full rounded-full transition-all ' + (seconds > max ? 'bg-amber-400' : seconds >= min ? 'bg-emerald-500' : 'bg-indigo-400');
+        }
+        function setMicUi(on) {
+            $('exam-mic').classList.toggle('mic-on', on);
+            $('exam-mic').textContent = on ? '⏹' : '🎙️';
+            $('exam-mic-label').textContent = on ? 'Listening… tap to stop' : (seconds ? 'Tap to continue speaking' : 'Tap to start speaking');
+        }
+        function toggleExamMic() {
+            if (recognizer) { stopListening(); return; }
+            const started = listen({
+                continuous: true,
+                onText: (fin, interim) => {
+                    if (fin) { const ta = $('exam-text'); ta.value = (ta.value.trim() + ' ' + fin).trim(); }
+                    $('exam-interim').textContent = interim;
+                },
+                onEnd: () => { clearInterval(timer); timer = null; setMicUi(false); $('exam-interim').textContent = ''; }
+            });
+            if (started) {
+                setMicUi(true);
+                clearInterval(timer);
+                timer = setInterval(() => { seconds++; updateTimer(); }, 1000);
+            }
+        }
+        const countWords = (s) => (String(s).trim().match(/[\p{L}\p{N}'’-]+/gu) || []).length;
+        async function checkExam() {
+            stopListening();
+            const text = $('exam-text').value.trim();
+            if (countWords(text) < 5) { $('exam-feedback').innerHTML = errorBox('Say (or type) a few sentences first.'); $('exam-feedback').classList.remove('hidden'); return; }
+            const btn = $('exam-check');
+            btn.disabled = true; btn.textContent = 'Listening to your answer…';
+            $('exam-feedback').classList.remove('hidden');
+            $('exam-feedback').innerHTML = '<div class="bg-white border border-slate-200 rounded-2xl p-4 text-sm text-indigo-600 animate-pulse">Reading what you said…</div>';
+            try {
+                const fb = await askAI([
+                    { role: 'system', content: `You are a kind, precise French oral examiner. The learner is at CEFR level ${exam.level}. Their answer was spoken and turned into text by speech recognition: ignore punctuation, capitals and obvious recognition slips; judge what they said.
+Reply with JSON only:
+{"score": number 0-20 for a ${exam.level} learner (task done, range, accuracy, coherence),
+ "summary": "two short sentences in simple English: overall impression and the main thing to work on",
+ "strengths": ["up to 3 short points in English"],
+ "corrections": [{"wrong": "the exact words copied from the text", "right": "the corrected French", "why": "one short explanation in simple English", "type": "grammar|agreement|conjugation|vocabulary|style"}],
+ "better": "the whole answer said the way a strong ${exam.level} speaker would say it, keeping the learner's ideas",
+ "next_time": "one tip in English to sound more natural next time"}
+Only list real mistakes, at most 10, in order. "wrong" must be copied exactly from the text, as short as possible.` },
+                    { role: 'user', content: `Task: ${exam.fr}\nSpeaking time: ${fmtTime(seconds)}\n\nWhat the learner said:\n${text}` }
+                ], { json: true, temperature: 0.2 });
+                const score = Math.max(0, Math.min(20, Math.round(Number(fb.score))));
+                if (!Number.isFinite(score)) throw new Error('The AI reply could not be read. Please try again.');
+                fb.score = score;
+                examResults[exam.id] = { score, text, feedback: fb, at: Date.now() };
+                store.set('speak_results', examResults);
+                record();
+                saveProgress('speaking', exam.id, score);
+                renderExamFeedback(fb, text);
+                $('exam-feedback').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            } catch (err) {
+                $('exam-feedback').innerHTML = errorBox(err.message);
+            } finally { btn.disabled = false; btn.textContent = '✨ Get feedback'; }
+        }
+        function markedText(text, corrections) {
+            let html = '', pos = 0;
+            corrections.forEach((c, i) => {
+                const wrong = String(c.wrong || ''), at = wrong ? text.indexOf(wrong, pos) : -1;
+                if (at < 0) return;
+                html += escapeHtml(text.slice(pos, at)) + `<span><span class="fix-del text-rose-700">${escapeHtml(wrong)}</span> <span class="font-semibold text-emerald-700 bg-emerald-50 rounded px-0.5">${escapeHtml(c.right || '')}</span><sup class="text-[10px] font-bold text-slate-400 ml-0.5">${i + 1}</sup></span>`;
+                pos = at + wrong.length;
+            });
+            return html + escapeHtml(text.slice(pos));
+        }
+        function renderExamFeedback(fb, text) {
+            const score = fb.score;
+            const tone = score >= 15 ? ['text-emerald-700', 'bg-emerald-50', 'border-emerald-200'] : score >= 10 ? ['text-amber-700', 'bg-amber-50', 'border-amber-200'] : ['text-rose-700', 'bg-rose-50', 'border-rose-200'];
+            const corr = Array.isArray(fb.corrections) ? fb.corrections.slice(0, 10) : [];
+            $('exam-feedback').innerHTML = `
+                <div class="bg-white border ${tone[2]} rounded-2xl p-4 flex items-start gap-4">
+                    <div class="shrink-0 w-16 h-16 rounded-2xl ${tone[1]} ${tone[0]} flex flex-col items-center justify-center"><span class="text-2xl font-black leading-none">${score}</span><span class="text-xs font-bold">/ 20</span></div>
+                    <div class="min-w-0 space-y-1">
+                        <h2 class="font-black text-slate-900">Your feedback</h2>
+                        <p class="text-sm text-slate-700">${escapeHtml(fb.summary || '')}</p>
+                        ${(fb.strengths || []).length ? `<ul class="text-sm text-emerald-800 space-y-0.5">${fb.strengths.map(s => `<li>✓ ${escapeHtml(s)}</li>`).join('')}</ul>` : ''}
+                        ${fb.next_time ? `<p class="text-sm text-indigo-800">💡 ${escapeHtml(fb.next_time)}</p>` : ''}
+                    </div>
+                </div>
+                <section class="bg-white border border-slate-200 rounded-2xl p-4 space-y-2">
+                    <h2 class="text-sm font-bold uppercase tracking-wide text-slate-500">What you said, corrected</h2>
+                    <div class="text-base leading-8 text-slate-900 whitespace-pre-wrap">${markedText(text, corr)}</div>
+                </section>
+                ${corr.length ? `<section class="bg-white border border-slate-200 rounded-2xl p-4 space-y-2">
+                    <h2 class="text-sm font-bold uppercase tracking-wide text-slate-500">${corr.length} correction${corr.length === 1 ? '' : 's'}</h2>
+                    <ol class="divide-y divide-slate-100">${corr.map((c, i) => `<li class="py-2.5 flex gap-3">
+                        <span class="shrink-0 w-6 h-6 rounded-full bg-slate-100 text-slate-600 text-xs font-bold flex items-center justify-center">${i + 1}</span>
+                        <span class="min-w-0"><span class="block text-base"><span class="fix-del text-rose-700">${escapeHtml(c.wrong || '')}</span> → <span class="font-semibold text-emerald-700">${escapeHtml(c.right || '')}</span>
+                        <button type="button" data-say="${escapeHtml(c.right || '')}" class="ml-1 text-indigo-600 text-sm" aria-label="Listen">🔊</button></span>
+                        <span class="block text-sm text-slate-600">${escapeHtml(c.why || '')}</span></span></li>`).join('')}</ol>
+                </section>` : '<p class="text-sm text-emerald-700 font-semibold">No mistakes found. Bravo !</p>'}
+                ${fb.better ? `<section class="bg-white border border-slate-200 rounded-2xl p-4 space-y-2">
+                    <div class="flex items-center justify-between gap-2"><h2 class="text-sm font-bold uppercase tracking-wide text-slate-500">Say it like this</h2>
+                    <button type="button" data-say="${escapeHtml(fb.better)}" class="min-h-[36px] px-2.5 text-sm font-semibold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 rounded-lg">🔊 Listen</button></div>
+                    <p lang="fr" class="text-base text-slate-900 leading-relaxed">${escapeHtml(fb.better)}</p>
+                </section>` : ''}
+                <button type="button" id="exam-retry" class="min-h-[44px] px-4 bg-white border border-slate-200 hover:border-indigo-300 font-semibold rounded-xl">🎙️ Try again</button>`;
+            $('exam-feedback').classList.remove('hidden');
+            $('exam-retry').onclick = () => { $('exam-text').value = ''; seconds = 0; updateTimer(); setMicUi(false); $('scroller').scrollTop = 0; };
+        }
+        async function showExamSample(fresh) {
+            const box = $('exam-sample-box');
+            if (!fresh && !box.classList.contains('hidden')) { box.classList.add('hidden'); return; }
+            box.classList.remove('hidden');
+            let s = !fresh && examSamples[exam.id];
+            if (!s) {
+                box.innerHTML = '<p class="text-sm text-amber-800 animate-pulse">Preparing a sample answer…</p>';
+                $('exam-sample').disabled = true;
+                try {
+                    const [min, max] = SECONDS[exam.level] || SECONDS.A1;
+                    const r = await askAI([
+                        { role: 'system', content: `You write model spoken answers to French speaking tasks for CEFR level ${exam.level} learners. Write what a strong ${exam.level} student could say in about ${fmtTime(min)}–${fmtTime(max)} (natural spoken French, level-appropriate structures, covering every point). Reply with JSON only: {"fr": "the answer in French", "en": "an English translation"}` },
+                        { role: 'user', content: `Task: ${exam.fr}${exam.include.length ? '\nPoints: ' + exam.include.join('; ') : ''}` }
+                    ], { json: true, temperature: 0.7 });
+                    if (!r.fr) throw new Error('The AI reply could not be read. Please try again.');
+                    s = { fr: String(r.fr), en: String(r.en || '') };
+                    examSamples[exam.id] = s; store.set('speak_samples', examSamples);
+                } catch (err) { box.innerHTML = `<p class="text-sm text-rose-700">${escapeHtml(err.message)}</p>`; return; }
+                finally { $('exam-sample').disabled = false; }
+            }
+            box.innerHTML = `
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                    <h2 class="text-sm font-bold uppercase tracking-wide text-amber-900">✨ Sample answer</h2>
+                    <div class="flex gap-1.5">
+                        <button type="button" id="sample-say" class="min-h-[36px] px-2.5 text-sm font-semibold text-amber-900 bg-white border border-amber-200 rounded-lg">🔊 Listen</button>
+                        ${s.en ? '<button type="button" id="sample-en" class="min-h-[36px] px-2.5 text-sm font-semibold text-amber-900 bg-white border border-amber-200 rounded-lg">English</button>' : ''}
+                        <button type="button" id="sample-new" class="min-h-[36px] px-2.5 text-sm font-semibold text-amber-900 bg-white border border-amber-200 rounded-lg">Another one</button>
+                    </div>
+                </div>
+                <p lang="fr" class="text-base text-slate-900 leading-relaxed whitespace-pre-line">${escapeHtml(s.fr)}</p>
+                ${s.en ? `<p id="sample-en-text" class="hidden text-sm text-slate-600 leading-relaxed whitespace-pre-line border-t border-amber-200 pt-2">${escapeHtml(s.en)}</p>` : ''}`;
+            $('sample-say').onclick = () => speakFrench(s.fr);
+            if ($('sample-en')) $('sample-en').onclick = () => { const h = $('sample-en-text').classList.toggle('hidden'); $('sample-en').textContent = h ? 'English' : 'Hide English'; };
+            $('sample-new').onclick = () => showExamSample(true);
+        }
+        async function saveProgress(type, id, score) {
+            try {
+                const { data: { user } } = await db.auth.getUser();
+                if (!user) return;
+                await db.from('user_progress').upsert({ user_id: user.id, module_type: type, module_id: String(id), completed: true, score, updated_at: new Date() },
+                    { onConflict: 'user_id, module_type, module_id' });
+            } catch (err) { console.warn('Progress saved on this device only.', err); }
+        }
+
+        // ---------- Wiring ----------
+        document.querySelectorAll('.mode-tab').forEach(b => b.addEventListener('click', () => setMode(b.dataset.mode, true)));
+        document.addEventListener('click', (e) => {
+            const say = e.target.closest('[data-say]');
+            if (say) { speakFrench(say.dataset.say); return; }
+            if (e.target.closest('[data-back]')) { showHome(true); return; }
+            const sc = e.target.closest('[data-scene]');
+            if (sc) { e.preventDefault(); startScene(SCENES.find(s => s.id === sc.dataset.scene), true); return; }
+            const tr = e.target.closest('[data-track]');
+            if (tr) { e.preventDefault(); openTrack(tr.dataset.track, -1, true); return; }
+            const tk = e.target.closest('[data-task]');
+            if (tk) { e.preventDefault(); openExam(tk.dataset.task, true); return; }
+            const sm = e.target.closest('[data-say-msg]');
+            if (sm) { speakFrench(chat[Number(sm.dataset.sayMsg)].text); return; }
+            const en = e.target.closest('[data-show-en]');
+            if (en) { const p = document.querySelector(`[data-en="${en.dataset.showEn}"]`); const h = p.classList.toggle('hidden'); en.textContent = h ? 'English' : 'Hide English'; return; }
+            const use = e.target.closest('[data-use]');
+            if (use) { $('msg-input').value = use.dataset.use; $('suggestions').classList.add('hidden'); $('msg-input').focus(); return; }
+            const sj = e.target.closest('[data-subject]');
+            if (sj) { pick.subject = sj.dataset.subject; $('subject-other').value = ''; store.set('speak_pick', pick); renderExamHome(); return; }
+            const kd = e.target.closest('[data-kind]');
+            if (kd) { pick.kind = kd.dataset.kind; store.set('speak_pick', pick); renderExamHome(); }
+        });
+        // Conversation
+        $('msg-form').addEventListener('submit', (e) => { e.preventDefault(); sendMessage($('msg-input').value); });
+        $('msg-mic').addEventListener('click', () => {
+            if (recognizer) { stopListening(); return; }
+            const base = $('msg-input').value.trim();
+            let said = '';
+            const started = listen({
+                continuous: false,
+                onText: (fin, interim) => { if (fin) said += ' ' + fin; $('msg-input').value = (base + ' ' + said + ' ' + interim).replace(/\s+/g, ' ').trim(); },
+                onEnd: () => { $('msg-mic').classList.remove('mic-on', 'bg-rose-500', 'text-white'); $('msg-mic').textContent = '🎙️'; $('msg-input').focus(); }
+            });
+            if (started) { $('msg-mic').classList.add('mic-on', 'bg-rose-500', 'text-white'); $('msg-mic').textContent = '⏹'; }
+        });
+        $('auto-speak').addEventListener('change', () => store.set('speak_auto', $('auto-speak').checked));
+        $('btn-hints').addEventListener('click', showHints);
+        $('btn-finish').addEventListener('click', finishScene);
+        $('own-scene-btn').addEventListener('click', () => {
+            const text = $('own-scene').value.trim();
+            if (!text) { $('own-scene').focus(); return; }
+            const lv = myLevel();
+            startScene({ own: true, id: null, name: 'Your partner', role: '', emoji: '🎭', level: lv, scene: text, goal: 'Handle the situation in French.',
+                persona: `a French person in this situation: "${text}". Choose a fitting first name and role, and play your part naturally. Uses "vous" unless the situation is between friends.`, opener: null, phrases: [] }, true);
+        });
+        $('own-scene').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('own-scene-btn').click(); });
+        // Shadowing
+        $('sh-listen').addEventListener('click', () => speakFrench(track.items[idx].fr));
+        $('sh-slow').addEventListener('click', () => speakFrench(track.items[idx].fr, 0.6));
+        $('sh-say').addEventListener('click', sayIt);
+        $('sh-prev').addEventListener('click', () => { if (idx > 0) { idx--; renderPhrase(); } });
+        $('sh-next').addEventListener('click', () => { if (idx < track.items.length - 1) { idx++; renderPhrase(); } });
+        // Exam task
+        $('gen-btn').addEventListener('click', () => {
+            const lv = myLevel();
+            const showError = (m) => { $('gen-error').textContent = m; $('gen-error').classList.toggle('hidden', !m); };
+            onGenerate($('gen-btn'), showError, $('subject-other').value.trim() || pick.subject, pick.kind || DEFAULT_KIND[lv], lv);
+        });
+        $('subject-other').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('gen-btn').click(); });
+        $('post-btn').addEventListener('click', postQuestion);
+        $('exam-another').addEventListener('click', () => {
+            const showError = (m) => { if (m) { $('exam-feedback').innerHTML = errorBox(m); $('exam-feedback').classList.remove('hidden'); } };
+            onGenerate($('exam-another'), showError, exam.subject || exam.title, exam.kind || DEFAULT_KIND[exam.level], exam.level);
+        });
+        $('exam-say').addEventListener('click', () => speakFrench(exam.fr));
+        $('exam-en-btn').addEventListener('click', () => { const h = $('exam-en').classList.toggle('hidden'); $('exam-en-btn').textContent = h ? 'English' : 'Hide English'; });
+        $('exam-mic').addEventListener('click', toggleExamMic);
+        $('exam-check').addEventListener('click', checkExam);
+        $('exam-sample').addEventListener('click', () => showExamSample(false));
+        $('exam-clear').addEventListener('click', () => {
+            if ($('exam-text').value.trim() && !confirm('Clear what you said?')) return;
+            stopListening(); $('exam-text').value = ''; seconds = 0; updateTimer(); setMicUi(false);
+        });
+        if (!SR) $('mic-note').classList.remove('hidden');
+
+        // ---------- Routing: ?mode=shadowing, ?scene=camille, ?track=liaison, ?task=sp-… ----------
+        function route() {
+            const p = new URLSearchParams(location.search);
+            const s = SCENES.find(x => x.id === p.get('scene'));
+            if (s) { mode = 'conversation'; startScene(s, false); return; }
+            if (p.get('track') && TRACKS.find(t => t.id === p.get('track'))) { mode = 'shadowing'; openTrack(p.get('track'), -1, false); return; }
+            if (p.get('task') && examTasks.find(t => t.id === p.get('task'))) { mode = 'exam'; openExam(p.get('task'), false); return; }
+            if (p.get('mode')) mode = p.get('mode');
+            showHome(false);
+        }
+        window.addEventListener('popstate', route);
+        route();
     </script>
 </body>
-</html>
+</html>

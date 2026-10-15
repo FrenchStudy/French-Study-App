@@ -130,7 +130,8 @@ function renderAppHeader() {
     const header = document.getElementById('app-header');
     if (!header) return;
     let page = location.pathname.split('/').pop() || 'index.html';
-    if (page === 'writing-classic.html') page = 'writing.html';   // old Writing page, kept for comparison
+    if (page === 'writing-classic.html') page = 'writing.html';   // old pages, kept for comparison
+    if (page === 'speaking-classic.html') page = 'speaking.html';
     const flag = '<span class="inline-flex overflow-hidden rounded-[3px] shadow-sm shrink-0" style="width:1.5rem;height:1rem" role="img" aria-label="French flag"><span class="flex-1" style="background:#0055a4"></span><span class="flex-1" style="background:#ffffff"></span><span class="flex-1" style="background:#ef4135"></span></span>';
     header.className = 'bg-white border-b border-slate-200 sticky top-0 z-50 shrink-0';
     header.innerHTML = `
