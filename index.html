@@ -31,40 +31,42 @@
                 </div>
             </section>
 
-            <!-- The 8 sections -->
-            <section aria-label="Sections">
-                <div id="sections" class="grid grid-cols-2 lg:grid-cols-4 gap-3">
-                    <a href="vocab.html" class="group flex flex-col items-start gap-2 sm:gap-3 bg-white border border-slate-200 hover:border-indigo-400 hover:shadow-md transition rounded-2xl p-3 sm:p-4">
-                        <span class="shrink-0 w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-emerald-50 flex items-center justify-center text-2xl">🗂️</span>
-                        <span class="min-w-0"><span class="block font-bold text-slate-900 group-hover:text-indigo-700">Vocab</span><span class="block text-xs sm:text-sm text-slate-500 leading-snug">Lessons, word lists, flashcards and quizzes</span></span>
+            <!-- The sections: the two courses, then the skills -->
+            <section aria-label="Sections" class="space-y-3">
+                <div id="courses" class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <a href="vocab.html" class="group flex items-center gap-4 bg-white border border-slate-200 hover:border-indigo-400 hover:shadow-md transition rounded-2xl p-4">
+                        <span class="shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-emerald-50 flex items-center justify-center text-2xl sm:text-3xl">🗂️</span>
+                        <span class="min-w-0 flex-1"><span class="block text-lg font-black text-slate-900 group-hover:text-indigo-700">Vocab</span><span class="block text-sm text-slate-500 leading-snug">44 topics from A1 to B2, plus the 5,000 most common words</span>
+                        <span class="hidden sm:block text-xs font-semibold text-slate-400 mt-1">Learn → Practise → Test</span></span>
+                        <span class="shrink-0 text-indigo-600 font-black text-xl group-hover:translate-x-0.5 transition" aria-hidden="true">→</span>
                     </a>
-                    <a href="lesson.html" class="group flex flex-col items-start gap-2 sm:gap-3 bg-white border border-slate-200 hover:border-indigo-400 hover:shadow-md transition rounded-2xl p-3 sm:p-4">
-                        <span class="shrink-0 w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-sky-50 flex items-center justify-center text-2xl">📚</span>
-                        <span class="min-w-0"><span class="block font-bold text-slate-900 group-hover:text-indigo-700">Grammar</span><span class="block text-xs sm:text-sm text-slate-500 leading-snug">78 lessons from A1 to C2</span></span>
+                    <a href="lesson.html" class="group flex items-center gap-4 bg-white border border-slate-200 hover:border-indigo-400 hover:shadow-md transition rounded-2xl p-4">
+                        <span class="shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-sky-50 flex items-center justify-center text-2xl sm:text-3xl">📚</span>
+                        <span class="min-w-0 flex-1"><span class="block text-lg font-black text-slate-900 group-hover:text-indigo-700">Grammar</span><span class="block text-sm text-slate-500 leading-snug">97 lessons from A1 to C2, with verb tenses and 296 verb tables</span>
+                        <span class="hidden sm:block text-xs font-semibold text-slate-400 mt-1">Rule → Examples → Practice</span></span>
+                        <span class="shrink-0 text-indigo-600 font-black text-xl group-hover:translate-x-0.5 transition" aria-hidden="true">→</span>
                     </a>
-                    <a href="conjugations.html" class="group flex flex-col items-start gap-2 sm:gap-3 bg-white border border-slate-200 hover:border-indigo-400 hover:shadow-md transition rounded-2xl p-3 sm:p-4">
-                        <span class="shrink-0 w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-amber-50 flex items-center justify-center text-2xl">⚡</span>
-                        <span class="min-w-0"><span class="block font-bold text-slate-900 group-hover:text-indigo-700">Conjugations</span><span class="block text-xs sm:text-sm text-slate-500 leading-snug">296 verb tables and 44 lessons</span></span>
-                    </a>
+                </div>
+                <div id="sections" class="grid grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3">
                     <a href="reading.html" class="group flex flex-col items-start gap-2 sm:gap-3 bg-white border border-slate-200 hover:border-indigo-400 hover:shadow-md transition rounded-2xl p-3 sm:p-4">
                         <span class="shrink-0 w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-violet-50 flex items-center justify-center text-2xl">📖</span>
-                        <span class="min-w-0"><span class="block font-bold text-slate-900 group-hover:text-indigo-700">Reading</span><span class="block text-xs sm:text-sm text-slate-500 leading-snug">Texts with tap-to-translate</span></span>
+                        <span class="min-w-0"><span class="block text-sm sm:text-base font-bold text-slate-900 group-hover:text-indigo-700">Reading</span><span class="hidden sm:block text-sm text-slate-500 leading-snug">Texts with tap-to-translate</span></span>
                     </a>
                     <a href="listening.html" class="group flex flex-col items-start gap-2 sm:gap-3 bg-white border border-slate-200 hover:border-indigo-400 hover:shadow-md transition rounded-2xl p-3 sm:p-4">
                         <span class="shrink-0 w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-pink-50 flex items-center justify-center text-2xl">🎧</span>
-                        <span class="min-w-0"><span class="block font-bold text-slate-900 group-hover:text-indigo-700">Listening</span><span class="block text-xs sm:text-sm text-slate-500 leading-snug">Audio with transcripts</span></span>
+                        <span class="min-w-0"><span class="block text-sm sm:text-base font-bold text-slate-900 group-hover:text-indigo-700">Listening</span><span class="hidden sm:block text-sm text-slate-500 leading-snug">Audio with transcripts</span></span>
                     </a>
                     <a href="writing.html" class="group flex flex-col items-start gap-2 sm:gap-3 bg-white border border-slate-200 hover:border-indigo-400 hover:shadow-md transition rounded-2xl p-3 sm:p-4">
                         <span class="shrink-0 w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-orange-50 flex items-center justify-center text-2xl">✍️</span>
-                        <span class="min-w-0"><span class="block font-bold text-slate-900 group-hover:text-indigo-700">Writing</span><span class="block text-xs sm:text-sm text-slate-500 leading-snug">Feedback on your texts</span></span>
+                        <span class="min-w-0"><span class="block text-sm sm:text-base font-bold text-slate-900 group-hover:text-indigo-700">Writing</span><span class="hidden sm:block text-sm text-slate-500 leading-snug">Feedback on your texts</span></span>
                     </a>
                     <a href="speaking.html" class="group flex flex-col items-start gap-2 sm:gap-3 bg-white border border-slate-200 hover:border-indigo-400 hover:shadow-md transition rounded-2xl p-3 sm:p-4">
                         <span class="shrink-0 w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-teal-50 flex items-center justify-center text-2xl">🗣️</span>
-                        <span class="min-w-0"><span class="block font-bold text-slate-900 group-hover:text-indigo-700">Speaking</span><span class="block text-xs sm:text-sm text-slate-500 leading-snug">Role-play and voice practice</span></span>
+                        <span class="min-w-0"><span class="block text-sm sm:text-base font-bold text-slate-900 group-hover:text-indigo-700">Speaking</span><span class="hidden sm:block text-sm text-slate-500 leading-snug">Role-play and voice practice</span></span>
                     </a>
                     <a href="translator.html" class="group flex flex-col items-start gap-2 sm:gap-3 bg-white border border-slate-200 hover:border-indigo-400 hover:shadow-md transition rounded-2xl p-3 sm:p-4">
                         <span class="shrink-0 w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-indigo-50 flex items-center justify-center text-2xl">💬</span>
-                        <span class="min-w-0"><span class="block font-bold text-slate-900 group-hover:text-indigo-700">Translator</span><span class="block text-xs sm:text-sm text-slate-500 leading-snug">With gender and preposition notes</span></span>
+                        <span class="min-w-0"><span class="block text-sm sm:text-base font-bold text-slate-900 group-hover:text-indigo-700">Translator</span><span class="hidden sm:block text-sm text-slate-500 leading-snug">With gender and preposition notes</span></span>
                     </a>
                 </div>
             </section>
@@ -87,20 +89,33 @@
         const LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
         const LEVEL_NAMES = { A1: 'Beginner', A2: 'Elementary', B1: 'Intermediate', B2: 'Upper intermediate', C1: 'Advanced', C2: 'Mastery' };
         const GOALS = { travel: 'travel', work: 'work or study', exam: 'pass an exam', fun: 'for fun' };
-        // First theme deck for each level, and a theme that fits each goal
-        const START_THEME = { A1: 1, A2: 18, B1: 31, B2: 40, C1: 44, C2: 44 };
+        // A theme that fits each goal
         const GOAL_THEME = { travel: 22, work: 27, fun: 26 };
 
-        // Next unfinished lesson, starting at the student's level
-        function nextLesson(levels, prefix, level) {
+        // Next unfinished Grammar lesson, starting at the student's level (verb lessons "vN" keep the key c:N)
+        function nextLesson(level) {
             const done = LocalStore.get('lessons_done', {});
+            const key = (id) => typeof id === 'string' ? 'c:' + id.slice(1) : 'g:' + id;
             const from = Math.max(0, LEVELS.indexOf(level));
-            for (const [code, items] of levels) {
+            for (const [code, items] of IX.course) {
                 if (LEVELS.indexOf(code) < from) continue;
-                const hit = items.find(([id]) => !done[`${prefix}:${id}`]);
+                const hit = items.find(([id]) => !done[key(id)]);
                 if (hit) return { id: hit[0], title: hit[1], level: code };
             }
             return null;
+        }
+
+        // Next Vocab topic: the one you were on, else the first unfinished topic at your level
+        function nextTopic(level) {
+            const stats = LocalStore.get('vocab_topic_stats', {});
+            const finished = (n) => { const s = stats['theme:' + n]; return s && s.total && s.known >= s.total; };
+            const last = String(LocalStore.get('vocab_last_topic', '') || '');
+            const lastN = Number(last.split(':')[1]);
+            if (last.startsWith('theme:') && IX.themes[lastN] && !finished(lastN)) return lastN;
+            const levels = [...new Set(Object.values(IX.themeLevels))];
+            const lv = levels.includes(level) ? level : levels[levels.length - 1];
+            const ids = Object.keys(IX.themes).map(Number);
+            return ids.find(n => IX.themeLevels[n] === lv && !finished(n)) || ids.find(n => !finished(n)) || null;
         }
 
         function taskCard({ href, emoji, label, title }) {
@@ -122,9 +137,9 @@
 
             // Progress on this device
             const vocab = LocalStore.get('vocab_progress', {});
-            const words = Object.values(vocab);
-            const known = words.filter(p => p && p.box >= 4).length;
-            const due = words.filter(p => p && p.box && p.due <= Date.now()).length;
+            const known = Object.values(vocab).filter(p => p && p.box >= 4).length;
+            const studied = Object.values(LocalStore.get('vocab_words', {}));
+            const due = studied.filter(w => vocab[w.key] && vocab[w.key].box && vocab[w.key].due <= Date.now()).length;
             const lessonsDone = Object.keys(LocalStore.get('lessons_done', {})).length;
             $('stat-streak').textContent = Activity.streak();
             $('stat-words').textContent = known;
@@ -132,28 +147,23 @@
             const todayCount = Activity.today();
             $('today-note').textContent = todayCount ? `${todayCount} done today, nice!` : 'About 15 minutes a day';
 
-            // 1. Flashcards: reviews first, otherwise new words for your level
-            const theme = START_THEME[level];
-            const cards = due > 0
-                ? { href: 'vocab.html', title: `Review ${due} word${due === 1 ? '' : 's'}`, detail: 'Words due today, before you forget them.' }
-                : { href: `vocab.html?deck=theme:${theme}`, title: `New words: ${IX.themes[theme]}`, detail: 'A deck of flashcards for your level.' };
-            const tasks = [taskCard({ ...cards, emoji: '🗂️', label: 'Flashcards', colour: 'border-emerald-200 hover:border-emerald-400' })];
-
-            // 2. Next grammar lesson
-            const g = nextLesson(IX.grammar, 'g', level);
+            const tasks = [];
+            // 1. Vocab: the next topic
+            const tp = nextTopic(level);
+            tasks.push(tp
+                ? taskCard({ href: `vocab.html?topic=theme:${tp}`, emoji: '🗂️', label: `Vocab · ${IX.themeLevels[tp] || ''}`, title: IX.themes[tp] })
+                : taskCard({ href: 'vocab.html', emoji: '🏆', label: 'Vocab', title: 'Every topic done!' }));
+            // 2. Grammar: the next lesson
+            const g = nextLesson(level);
             tasks.push(g
-                ? taskCard({ href: `lesson.html?g=${g.id}`, emoji: '📚', label: `Grammar · ${g.level}`, title: g.title, detail: 'Your next lesson on the path.', colour: 'border-sky-200 hover:border-sky-400' })
-                : taskCard({ href: 'lesson.html', emoji: '🏆', label: 'Grammar', title: 'All grammar lessons done!', detail: 'Revise any topic you like.', colour: 'border-sky-200 hover:border-sky-400' }));
-
-            // 3. Next conjugation lesson
-            const c = nextLesson(IX.conjugation, 'c', level);
-            tasks.push(c
-                ? taskCard({ href: `conjugations.html?lesson=${c.id}`, emoji: '⚡', label: `Conjugation · ${c.level}`, title: c.title, detail: 'Verbs that unlock new sentences.', colour: 'border-amber-200 hover:border-amber-400' })
-                : taskCard({ href: 'conjugations.html', emoji: '🏆', label: 'Conjugation', title: 'All conjugation lessons done!', detail: 'Look up any verb in the tables.', colour: 'border-amber-200 hover:border-amber-400' }));
-            // For your goal
+                ? taskCard({ href: `lesson.html?g=${g.id}`, emoji: '📚', label: `Grammar · ${g.level}`, title: g.title })
+                : taskCard({ href: 'lesson.html', emoji: '🏆', label: 'Grammar', title: 'Every lesson done!' }));
+            // 3. Words due for review
+            if (due > 0) tasks.push(taskCard({ href: 'vocab.html?topic=review&step=practise', emoji: '🔁', label: 'Review', title: `${due} word${due === 1 ? '' : 's'} due today` }));
+            // 4. For your goal
             const goal = profile.goal;
             if (goal === 'exam') tasks.push(taskCard({ href: 'writing.html', emoji: '📝', label: 'For your goal', title: 'Exam writing task' }));
-            else if (GOAL_THEME[goal]) tasks.push(taskCard({ href: `vocab.html?deck=theme:${GOAL_THEME[goal]}`, emoji: goal === 'travel' ? '✈️' : goal === 'work' ? '💼' : '🎉', label: 'For your goal', title: IX.themes[GOAL_THEME[goal]] }));
+            else if (GOAL_THEME[goal] && GOAL_THEME[goal] !== tp) tasks.push(taskCard({ href: `vocab.html?topic=theme:${GOAL_THEME[goal]}`, emoji: goal === 'travel' ? '✈️' : goal === 'work' ? '💼' : '🎉', label: 'For your goal', title: IX.themes[GOAL_THEME[goal]] }));
             $('tasks').innerHTML = tasks.join('');
 
             $('loading').classList.add('hidden');

@@ -10,9 +10,9 @@ A browser-based French learning suite backed by Supabase (schema `French-schema`
 | `login.html` | Sign in, create account, forgot password, Google |
 | `welcome.html` | First-time setup: goal, level or a 12-question placement test |
 | `reset.html` | Choose a new password from the reset email |
-| `lesson.html` | Grammar: 78 lessons (A1–C2) from the cheat sheet; topics 2, 3, 10 and 28 include their interactive practice |
-| `vocab.html` | Vocabulary tabs: Lessons (12 interactive), Word list, Flashcards and Quiz for 44 themes and 5,000 frequency words |
-| `conjugations.html` | Verb tables for 296 verbs (no AI) and 44 conjugation lessons (Lessons tab) |
+| `lesson.html` | Grammar: one course of 97 lessons (A1–C2), the 78 grammar lessons plus the verb lessons, and a Verb tables tab (296 verbs, no AI) |
+| `vocab.html` | Vocabulary by topic (44 themes plus 4 basics): Learn (hands-on lesson and words), Practise (flashcards), Test (quiz); Review of due words; the 5,000 most common words in sets of 50 |
+| `conjugations.html` | Old address: forwards to Grammar (verb tables or the matching lesson) |
 | `reading.html` | Reading practice (`reading_topics`) |
 | `listening.html` | Listening practice (`listening_topics`) |
 | `writing.html` | Writing with AI feedback |
@@ -32,12 +32,12 @@ talks to Supabase loads it right after the Supabase SDK.
 
 | File | Purpose |
 | --- | --- |
-| `lessons-index.js` | Lesson and theme titles only, for the Today screen |
+| `lessons-index.js` | Course order and topic titles/levels only, for Home (generated) |
 | `ai.js` | `askAI()` for every AI call, `escapeHtml()`, `speakFrench()` |
 | `conjugate.js` | Rule-based conjugation engine (296 verbs, 12 tenses) |
 | `cheatsheet-data.js` | Cheat sheet vocab themes (fallback for Vocab) |
 | `lessons-data.js` | Cheat sheet grammar and conjugation lessons |
-| `lesson-kit.js` | Shared lesson browser used by Grammar, Conjugations and Vocab |
+| `lesson-kit.js` | The Grammar course (which verb lessons merge into which grammar lesson, teaching order) and the hands-on lessons used by Vocab |
 
 `syllabus.html` now redirects to Grammar. Database changes live in `supabase/`; account setup steps are in `supabase/accounts/README.md`.
 

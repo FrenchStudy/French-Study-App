@@ -122,7 +122,7 @@ const Activity = {
 
 // One header for every page: <header id="app-header"></header>
 const APP_NAV = [
-    ['index.html', 'Home'], ['vocab.html', 'Vocab'], ['lesson.html', 'Grammar'], ['conjugations.html', 'Conjugations'],
+    ['index.html', 'Home'], ['vocab.html', 'Vocab'], ['lesson.html', 'Grammar'],
     ['reading.html', 'Reading'], ['listening.html', 'Listening'], ['writing.html', 'Writing'],
     ['speaking.html', 'Speaking'], ['translator.html', 'Translator']
 ];

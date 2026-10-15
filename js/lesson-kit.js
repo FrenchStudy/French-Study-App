@@ -1,9 +1,13 @@
-// js/lesson-kit.js - shared lesson browser used by Grammar (lesson.html),
-// Conjugations (Lessons tab) and Vocab (Lessons tab).
-// Needs: js/ai.js (escapeHtml, speakFrench), js/conjugate.js, and js/lessons-data.js for grammar/conjugation.
+// js/lesson-kit.js - the Grammar course (lesson.html) and the hands-on lessons used by Vocab topics.
+// Needs: js/ai.js (escapeHtml, speakFrench), js/conjugate.js, js/lessons-data.js,
+// and js/lessons-index.js (theme titles for "See also" links).
+//
+// The Grammar course is the 78 grammar lessons plus the 44 verb (conjugation) lessons:
+// a verb lesson that teaches the same thing as a grammar lesson is shown inside it ("Verb forms"),
+// the others are their own lessons (id "v6"), placed where they belong in each level.
 //
 // LessonKit.mount(rootElement, {
-//     section: 'grammar' | 'conjugation' | 'interactive',
+//     section: 'grammar',
 //     pagePath: 'lesson.html', param: 'g',   // deep link: lesson.html?g=33
 //     keepParams: { tab: 'lessons' },         // extra URL params to keep (optional)
 //     intro: '<p>…</p>',                     // HTML shown above the list (optional)
@@ -37,23 +41,54 @@ const LessonKit = (function () {
     ];
     const VOCAB_LESSONS = INTERACTIVE.filter(x => !x.embedIn);
 
+    // ---------- The Grammar course ----------
+    // Verb lessons merged into the grammar lesson that teaches the same thing
+    const MERGE = { 5: [4, 5], 13: [9], 14: [8], 15: [11, 12], 16: [13], 17: [15], 18: [7], 23: [14], 24: [16],
+        32: [19], 33: [18], 35: [21], 36: [24], 39: [23], 40: [22], 42: [20], 45: [31], 47: [27], 48: [26],
+        49: [28], 50: [30], 52: [32], 59: [29] };
+    // Teaching order per level: numbers are grammar lessons, "vN" are verb lessons of their own
+    const ORDER = [
+        [1, 2, 3, 4, 'v1', 'v2', 5, 'v3', 'v6', 6, 7, 8, 9, 10, 11, 12, 13, 14],
+        ['v10', 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 'v17', 25, 26, 27, 28, 29, 30, 31],
+        [32, 33, 34, 35, 'v25', 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46],
+        [47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 'v33'],
+        ['v34', 'v35', 61, 62, 63, 64, 65, 66, 67, 'v39', 68, 'v36', 'v37', 'v38', 69, 70, 'v40'],
+        [71, 'v43', 72, 73, 'v41', 74, 75, 76, 77, 'v42', 'v44', 78]
+    ];
+    const COURSE_LEVELS = ORDER.map((ids, i) => [(L.grammarLevels[i] || [`Level ${i + 1}`])[0], ids]);
+    const COURSE_IDS = ORDER.flat();
+    const isVerbId = (id) => typeof id === 'string' && /^v\d+$/.test(id);
+    // Where each old conjugation lesson now lives
+    const CONJ_HOME = {};
+    Object.entries(MERGE).forEach(([g, cs]) => cs.forEach(c => { CONJ_HOME[c] = Number(g); }));
+    COURSE_IDS.filter(isVerbId).forEach(id => { CONJ_HOME[Number(id.slice(1))] = id; });
+    const courseCache = {};
+    function courseGet(id) {
+        if (courseCache[id]) return courseCache[id];
+        let t = null;
+        if (isVerbId(id)) {
+            const c = L.conjugation[Number(id.slice(1))];
+            if (c) t = { ...c, verbs: true, forms: [] };
+        } else if (L.grammar[id]) {
+            const forms = (MERGE[id] || []).map(c => L.conjugation[c]).filter(Boolean);
+            t = { ...L.grammar[id], verbs: forms.length > 0, forms };
+        }
+        if (t) { t.n = COURSE_IDS.indexOf(id) + 1; courseCache[id] = t; }
+        return t;
+    }
+    const courseIdOf = (raw) => /^v\d+$/.test(String(raw)) ? String(raw) : Number(raw);
+
     // Where each kind of lesson lives
     const URLS = {
         grammar: (id) => `lesson.html?g=${encodeURIComponent(id)}`,
-        conjugation: (id) => `conjugations.html?lesson=${encodeURIComponent(id)}`,
+        conjugation: (n) => `lesson.html?g=${encodeURIComponent(CONJ_HOME[n] || 'v' + n)}`,
         interactive: (id) => `vocab.html?lesson=${encodeURIComponent(id)}`,
-        theme: (n) => `vocab.html?deck=theme:${encodeURIComponent(n)}`,
-        verb: (v) => `conjugations.html?verb=${encodeURIComponent(v)}`
+        theme: (n) => `vocab.html?topic=theme:${encodeURIComponent(n)}`,
+        verb: (v) => `lesson.html?tab=verbs&verb=${encodeURIComponent(v)}`
     };
 
     const SECTIONS = {
-        grammar: { name: 'Grammar', prefix: 'g', levels: () => L.grammarLevels, get: (id) => L.grammar[id] },
-        conjugation: { name: 'Conjugation', prefix: 'c', levels: () => L.conjugationLevels, get: (id) => L.conjugation[id] },
-        interactive: {
-            name: 'Vocabulary lessons', prefix: 'i',
-            levels: () => [['A1: Foundations', VOCAB_LESSONS.map(x => x.id)]],
-            get: (id) => INTERACTIVE.find(x => x.id === id)
-        }
+        grammar: { name: 'Grammar', prefix: 'g', levels: () => COURSE_LEVELS, get: courseGet }
     };
 
     // ---------- Helpers ----------
@@ -68,7 +103,8 @@ const LessonKit = (function () {
         set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
     };
     let done = store.get('lessons_done', {});
-    const doneKey = (section, id) => `${SECTIONS[section].prefix}:${id}`;
+    // Verb lessons keep their old progress key (c:6), so earlier ticks still count
+    const doneKey = (section, id) => isVerbId(id) ? `c:${id.slice(1)}` : `${SECTIONS[section].prefix}:${id}`;
     const isDone = (section, id) => !!done[doneKey(section, id)];
     async function setDone(section, id, value) {
         done = store.get('lessons_done', {});
@@ -79,7 +115,8 @@ const LessonKit = (function () {
             const { data: { user } } = await db.auth.getUser();
             if (!user) return;
             await db.from('user_progress').upsert({
-                user_id: user.id, module_type: 'lesson-' + section, module_id: String(id),
+                user_id: user.id, module_type: isVerbId(id) ? 'lesson-conjugation' : 'lesson-' + section,
+                module_id: isVerbId(id) ? id.slice(1) : String(id),
                 completed: value, updated_at: new Date()
             }, { onConflict: 'user_id, module_type, module_id' });
         } catch (err) {
@@ -139,14 +176,48 @@ const LessonKit = (function () {
         </figure>`;
     }
 
-    // "Vocab Blocks 9, 11 and 17" / "Grammar topic 4" / "Conjugaison sheet topics 4 and 5" -> links
-    function linkSeeAlso(text) {
-        let html = escapeHtml(text);
-        const linkNums = (str, makeHref) => str.replace(/\d+/g, n => `<a class="text-indigo-700 font-semibold underline" href="${makeHref(n)}">${n}</a>`);
-        html = html.replace(/(Vocab (?:sheet )?Blocks?|Block)((?:\s*(?:\d+|,|and))+)/g, (m, word, nums) => word + linkNums(nums, URLS.theme));
-        html = html.replace(/(Grammar topics?)((?:\s*(?:\d+|,|and))+)/g, (m, word, nums) => word + linkNums(nums, URLS.grammar));
-        html = html.replace(/(Conjugaison (?:sheet )?topics?)((?:\s*(?:\d+|,|and))+)/g, (m, word, nums) => word + linkNums(nums, URLS.conjugation));
-        return html;
+    // "See also" in the cheat sheet points at lessons by their old numbers ("Grammar topics 15 to 17",
+    // "Conjugaison sheet topic 21", "Vocab Blocks 9 and 11"). Turn it into links named after each lesson or topic,
+    // and keep the sentences that are plain notes ("Types 3 and mixed are at B2.").
+    const themeTitle = (n) => ((window.LESSON_INDEX || {}).themes || {})[n];
+    const link = (href, text) => `<a class="text-indigo-700 font-semibold hover:underline" href="${href}">${escapeHtml(text)}</a>`;
+    const REF = /(Grammar topics?|Conjugaison (?:sheet )?topics?|Vocab (?:sheet )?Blocks?|Blocks?|topics?)|(?<![A-Za-z\/\d])(\d+)(?:\s+to\s+(\d+))?(?![\d\/])/g;
+    function seeAlsoParts(text, fromVerbs, out) {
+        String(text || '').split(/;\s+|\.\s+(?=[A-Z])/).forEach(clause => {
+            let kind = null, found = false;
+            if (/verb finder/.test(clause)) { out.verbTables = true; found = true; }
+            if (/Vocab sheet/.test(clause)) found = true;
+            for (const m of clause.matchAll(REF)) {
+                if (m[1]) {
+                    kind = /^Grammar/.test(m[1]) ? 'g' : /^Conjugaison/.test(m[1]) ? 'c' : /Block/.test(m[1]) ? 'v' : (fromVerbs ? 'c' : 'g');
+                    continue;
+                }
+                if (!kind) continue;
+                found = true;
+                const a = Number(m[2]), z = m[3] ? Number(m[3]) : a;
+                for (let n = a; n <= z; n++) {
+                    if (kind === 'v') out.themes.push(n);
+                    else out.lessons.push(kind === 'c' ? CONJ_HOME[n] : n);
+                }
+            }
+            const note = clause.trim().replace(/\.$/, '');
+            if (!found && note) out.notes.push(note + '.');
+        });
+        return out;
+    }
+    function seeAlsoHtml(id, t) {
+        const out = seeAlsoParts(t.see, isVerbId(id), { lessons: [], themes: [], notes: [], verbTables: false });
+        (t.forms || []).forEach(f => seeAlsoParts(f.see, true, out));
+        const lessons = [...new Set(out.lessons)].filter(x => x !== undefined && x !== id && courseGet(x)).sort((a, b) => courseGet(a).n - courseGet(b).n);
+        const themes = [...new Set(out.themes)].filter(n => themeTitle(n));
+        const rows = [];
+        if (lessons.length || out.verbTables) rows.push(`<div><span class="font-semibold text-slate-700">Related lessons:</span> ${[
+            ...lessons.map(x => link(URLS.grammar(x), `${courseGet(x).n}. ${courseGet(x).title}`)),
+            ...(out.verbTables ? [link('lesson.html?tab=verbs', 'Verb tables')] : [])].join(' · ')}</div>`);
+        if (themes.length) rows.push(`<div><span class="font-semibold text-slate-700">Vocab topics:</span> ${themes.map(n => link(URLS.theme(n), themeTitle(n))).join(' · ')}</div>`);
+        const notes = [...new Set(out.notes)];
+        if (notes.length) rows.push(`<p class="text-slate-500">${notes.map(escapeHtml).join(' ')}</p>`);
+        return rows.length ? `<section class="lk-see text-sm text-slate-600 space-y-1.5 border-t border-slate-200 pt-4"><h2 class="text-sm font-bold uppercase tracking-wide text-slate-500">See also</h2>${rows.join('')}</section>` : '';
     }
 
     function examplesBlock(ex) {
@@ -177,9 +248,9 @@ const LessonKit = (function () {
                 'border-emerald-200')).join('');
     }
 
-    function topicBody(section, id, t) {
+    function lessonParts(t, ruleTitle) {
         const parts = [];
-        if (t.rule && t.rule.length) parts.push(card('The rule', t.rule.map(p => `<p class="text-base text-slate-800 leading-relaxed">${p}</p>`).join('')));
+        if (t.rule && t.rule.length) parts.push(card(ruleTitle, t.rule.map(p => `<p class="text-base text-slate-800 leading-relaxed">${p}</p>`).join('')));
         if (t.tables && t.tables.length) parts.push(card('Tables', t.tables.map(tb => tb.tense ? verbTable(tb) : dataTable(tb)).join('') +
             '<p class="text-xs text-slate-400">Tap any French word to hear it.</p>'));
         if (t.likes && t.likes.length) parts.push(card('Verbs that follow the same pattern', t.likes.map(g => `
@@ -187,18 +258,21 @@ const LessonKit = (function () {
             <div class="flex flex-wrap gap-1.5">${g.verbs.map(v => `<a href="${URLS.verb(v)}" class="text-sm px-2 py-1 bg-slate-100 hover:bg-indigo-100 rounded-lg text-slate-700">${escapeHtml(v)}</a>`).join('')}</div></div>`).join('')));
         if (t.ex && t.ex.length) parts.push(card('Examples', examplesBlock(t.ex)));
         if (t.watch) parts.push(card('⚠️ Watch out', `<div class="text-base text-amber-900 leading-relaxed">${t.watch}</div>`, 'bg-amber-50 border-amber-200'));
-        parts.push(embeddedPractice(section, id));
-        if (t.drill && t.drill.length) parts.push(card('Practice', drillBlock(t.drill)));
-        if (t.see) parts.push(`<p class="text-sm text-slate-600"><span class="font-semibold">See also:</span> ${linkSeeAlso(t.see)}</p>`);
-        return parts.join('');
+        return parts;
     }
 
-    function interactiveBody(t) {
-        const links = [];
-        if (t.theme) links.push(`<a href="${URLS.theme(t.theme)}" class="text-indigo-700 font-semibold underline">Flashcards for this theme</a>`);
-        (t.grammar || []).forEach(g => links.push(`<a href="${URLS.grammar(g)}" class="text-indigo-700 font-semibold underline">Grammar lesson ${g}${L.grammar[g] ? ': ' + escapeHtml(L.grammar[g].title) : ''}</a>`));
-        return `<div data-interactive="${t.id}" class="bg-white border border-slate-200 rounded-2xl p-4 text-base"><p class="text-sm text-indigo-600 animate-pulse">Loading the lesson…</p></div>
-            ${links.length ? `<p class="text-sm text-slate-600"><span class="font-semibold">Related:</span> ${links.join(' · ')}</p>` : ''}`;
+    function topicBody(section, id, t) {
+        const parts = lessonParts(t, 'The rule');
+        parts.push(embeddedPractice(section, id));
+        if (t.drill && t.drill.length) parts.push(card('Practice', drillBlock(t.drill)));
+        // The verb forms that go with this lesson
+        (t.forms || []).forEach(f => {
+            parts.push(`<h2 class="pt-4 text-xl font-black text-slate-900 flex items-center gap-2"><span class="text-xs font-bold uppercase tracking-wide text-violet-700 bg-violet-50 px-2 py-1 rounded-full">Verb forms</span>${escapeHtml(f.title)}</h2>`);
+            parts.push(...lessonParts(f, 'How to form it'));
+            if (f.drill && f.drill.length) parts.push(card('Practice the forms', drillBlock(f.drill)));
+        });
+        parts.push(seeAlsoHtml(id, t));
+        return parts.join('');
     }
 
     // Fill every [data-interactive] placeholder with its lesson page
@@ -399,7 +473,7 @@ const LessonKit = (function () {
         const q = (cls) => root.querySelector('.lk-' + cls);
         const levels = () => sec.levels();
         const ids = () => levels().flatMap(([, list]) => list);
-        const toId = (raw) => section === 'interactive' ? String(raw) : Number(raw);
+        const toId = courseIdOf;
         const levelEntry = (id) => levels().find(([, list]) => list.includes(id));
         const levelOf = (id) => { const lv = levelEntry(id); return lv ? levelCode(lv[0]) : ''; };
         const url = (id) => {
@@ -409,7 +483,7 @@ const LessonKit = (function () {
             return opts.pagePath + (s ? '?' + s : '');
         };
         const scrollTop = () => { const sc = root.closest('.overflow-y-auto'); if (sc) sc.scrollTop = 0; else window.scrollTo(0, 0); };
-        const nodeLabel = (id, t) => section === 'interactive' ? (t.emoji || '▶') : id;
+        const nodeLabel = (id, t) => (t && t.n) || id;
 
         // Default level: the one you saved, else the first with unfinished lessons
         function currentLevel() {
@@ -475,6 +549,7 @@ const LessonKit = (function () {
                     <span class="min-w-0 flex-1">
                         <span class="flex items-start justify-between gap-2"><span class="font-bold text-slate-900 leading-snug group-hover:text-indigo-700">${escapeHtml(t.title)}</span>${status}</span>
                         <span class="block text-sm text-slate-500 leading-snug mt-0.5 line-clamp-2">${escapeHtml(t.blurb || '')}</span>
+                        ${t.verbs ? `<span class="inline-block mt-2 text-[11px] font-bold uppercase tracking-wide text-violet-700 bg-violet-50 px-2 py-0.5 rounded-full">${t.forms.length ? '+ verb forms' : 'Verbs'}</span>` : ''}
                     </span>
                 </a>`;
             }).join('');
@@ -484,7 +559,7 @@ const LessonKit = (function () {
         function renderResults(words) {
             const html = levels().map(([levelName, list]) => {
                 const items = list.map(id => ({ id, t: sec.get(id) }))
-                    .filter(({ t }) => t && matches(t.title + ' ' + (t.blurb || ''), words));
+                    .filter(({ t }) => t && matches([t.title, t.blurb || '', ...(t.forms || []).map(f => f.title)].join(' '), words));
                 if (!items.length) return '';
                 return `<section class="space-y-2">
                     <h2 class="text-base font-black text-slate-900">${escapeHtml(levelName)}</h2>
@@ -538,10 +613,10 @@ const LessonKit = (function () {
             const st = styleOf(level);
             q('crumb').className = `lk-crumb text-xs font-bold px-2 py-1 rounded-full ${st.soft} ${st.text}`;
             q('crumb').textContent = `${sec.name} · ${level}`;
-            q('title').textContent = section === 'interactive' ? `${t.emoji ? t.emoji + ' ' : ''}${t.title}` : `${id}. ${t.title}`;
+            q('title').textContent = `${t.n}. ${t.title}`;
             q('blurb').textContent = t.blurb || '';
             document.title = `${t.title} - ${sec.name}`;
-            q('body').innerHTML = section === 'interactive' ? interactiveBody(t) : topicBody(section, id, t);
+            q('body').innerHTML = topicBody(section, id, t);
             markWideTables(q('body'));
             renderFooter();
             await loadInteractive(q('body'));
@@ -604,5 +679,5 @@ const LessonKit = (function () {
         return { open, showList, route, renderList, search: (text) => { q('search').value = text; renderList(); } };
     }
 
-    return { mount, INTERACTIVE, VOCAB_LESSONS, URLS, plain };
+    return { mount, INTERACTIVE, VOCAB_LESSONS, URLS, plain, loadInteractive, CONJ_HOME, COURSE_LEVELS, courseGet, isDone: (id) => { done = store.get('lessons_done', {}); return isDone('grammar', id); } };
 })();
