@@ -1,20 +1,435 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="h-full">
 <head>
     <meta charset="UTF-8">
-    <title>Grammar - French Study App</title>
-    <script>
-        // Conjugations is now part of Grammar: verb tables are its "Verb tables" tab,
-        // and the verb lessons are in the Grammar course.
-        (function () {
-            const p = new URLSearchParams(location.search);
-            let to = 'lesson.html?tab=verbs';
-            if (p.get('verb')) to = 'lesson.html?tab=verbs&verb=' + encodeURIComponent(p.get('verb'));
-            else if (p.get('lesson')) to = 'lesson.html?c=' + encodeURIComponent(p.get('lesson'));
-            else if (p.get('tab') === 'lessons') to = 'lesson.html';
-            location.replace(to);
-        })();
-    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conjugations - French Study App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
+    <script src="js/ai.js"></script>
+    <script src="js/conjugate.js"></script>
 </head>
-<body><p><a href="lesson.html">Go to Grammar</a></p></body>
+<body class="h-full bg-slate-100 flex flex-col overflow-hidden font-sans text-slate-800">
+
+    <header id="app-header" class="bg-white border-b border-slate-200 sticky top-0 z-50 shrink-0 h-14"></header>
+
+    <main id="scroller" class="flex-1 overflow-y-auto">
+        <div class="max-w-6xl mx-auto px-4 py-5 space-y-4">
+            <div>
+                <h1 class="text-2xl font-black text-slate-900">Conjugations</h1>
+                <p class="text-sm text-slate-500 mt-1">Tables for 296 verbs in 12 tenses, and practice. The verb tense lessons are in <a href="lesson.html" class="text-indigo-700 font-semibold hover:underline">Grammar</a>.</p>
+            </div>
+
+            <nav class="flex gap-1 sm:gap-6 border-b border-slate-200 text-sm font-semibold overflow-x-auto" role="tablist" aria-label="Conjugations">
+                <button data-tab="tables" role="tab" class="tab-btn shrink-0 min-h-[44px] px-2 sm:px-0 border-b-2 -mb-px">Verb tables</button>
+                <button data-tab="practice" role="tab" class="tab-btn shrink-0 min-h-[44px] px-2 sm:px-0 border-b-2 -mb-px">Practice</button>
+            </nav>
+
+            <!-- ===== VERB TABLES ===== -->
+            <section id="tab-tables">
+              <div class="md:grid md:grid-cols-[18rem_1fr] md:gap-5 space-y-4 md:space-y-0">
+                <aside class="space-y-3 md:sticky md:top-4 md:self-start">
+                    <input type="search" id="verb-search" placeholder="Verb (FR) or meaning (EN), Enter to conjugate"
+                           oninput="filterVerbList(this.value)" onkeydown="if(event.key==='Enter') conjugateTyped(this.value)"
+                           class="w-full text-base px-3 py-3 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <div class="flex gap-1.5 overflow-x-auto md:flex-wrap pb-1 text-sm">
+                        <button onclick="filterVerbs('all', this)" class="filter-pill shrink-0 min-h-[40px] px-3 rounded-lg font-medium bg-indigo-600 border border-indigo-600 text-white">All</button>
+                        <button onclick="filterVerbs('er', this)" class="filter-pill shrink-0 min-h-[40px] px-3 rounded-lg font-medium bg-white border border-slate-200 text-slate-700 hover:bg-slate-50">-er (1st group)</button>
+                        <button onclick="filterVerbs('ersp', this)" class="filter-pill shrink-0 min-h-[40px] px-3 rounded-lg font-medium bg-white border border-slate-200 text-slate-700 hover:bg-slate-50">-er spelling change</button>
+                        <button onclick="filterVerbs('ir', this)" class="filter-pill shrink-0 min-h-[40px] px-3 rounded-lg font-medium bg-white border border-slate-200 text-slate-700 hover:bg-slate-50">-ir (2nd group)</button>
+                        <button onclick="filterVerbs('re', this)" class="filter-pill shrink-0 min-h-[40px] px-3 rounded-lg font-medium bg-white border border-slate-200 text-slate-700 hover:bg-slate-50">-re regular</button>
+                        <button onclick="filterVerbs('irr', this)" class="filter-pill shrink-0 min-h-[40px] px-3 rounded-lg font-medium bg-white border border-slate-200 text-slate-700 hover:bg-slate-50">Irregular</button>
+                        <button onclick="filterVerbs('refl', this)" class="filter-pill shrink-0 min-h-[40px] px-3 rounded-lg font-medium bg-white border border-slate-200 text-slate-700 hover:bg-slate-50">Reflexive</button>
+                    </div>
+                    <div id="verb-list-container" class="space-y-1 max-h-56 md:max-h-[65vh] overflow-y-auto pr-1 bg-white border border-slate-200 rounded-xl p-2">
+                        <p class="text-sm text-slate-400 p-2">Loading verbs…</p>
+                    </div>
+                </aside>
+
+                <div id="verb-detail" class="space-y-4 min-w-0">
+                    <div class="flex items-start justify-between gap-3 flex-wrap">
+                        <div class="min-w-0">
+                            <h2 id="atelier-title" class="text-2xl font-black text-slate-900 break-words">Choose a verb</h2>
+                            <p id="atelier-category" class="text-sm text-slate-500 mt-0.5"></p>
+                        </div>
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <button id="practise-this" type="button" class="min-h-[44px] px-3 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold rounded-xl">✍️ Practise</button>
+                            <button onclick="playNativeAudio()" class="min-h-[44px] px-3 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold rounded-xl">🔊 Listen</button>
+                            <button onclick="adjustSpeed()" id="speed-btn" class="min-h-[44px] px-3 bg-white border border-slate-200 text-slate-700 text-sm font-semibold rounded-xl">⚡ 1x</button>
+                            <button onclick="exportLesson()" class="min-h-[44px] px-3 bg-white border border-slate-200 text-slate-700 text-sm font-semibold rounded-xl">📤 Export</button>
+                        </div>
+                    </div>
+
+                    <div class="bg-amber-50 border border-amber-200 rounded-2xl p-4">
+                        <div class="text-sm font-bold text-amber-900 mb-1">💡 About this verb</div>
+                        <div id="rule-text" class="text-base text-amber-900 leading-relaxed">Pick a verb to see its forms. Tap any row to hear it.</div>
+                    </div>
+
+                    <div id="tense-grid" class="grid grid-cols-1 lg:grid-cols-2 gap-4"></div>
+                </div>
+              </div>
+            </section>
+
+            <!-- ===== PRACTICE ===== -->
+            <section id="tab-practice" class="hidden space-y-4">
+                <div class="flex flex-col sm:flex-row sm:items-end gap-3">
+                    <label class="block flex-1 sm:max-w-xs">
+                        <span class="block text-sm font-semibold text-slate-700 mb-1">Tense</span>
+                        <select id="pr-tense" class="w-full text-base md:text-sm px-3 py-2.5 bg-white border border-slate-200 rounded-xl"></select>
+                    </label>
+                    <label class="block flex-1 sm:max-w-xs">
+                        <span class="block text-sm font-semibold text-slate-700 mb-1">Verbs</span>
+                        <select id="pr-pool" class="w-full text-base md:text-sm px-3 py-2.5 bg-white border border-slate-200 rounded-xl">
+                            <option value="common">The 50 most useful verbs</option>
+                            <option value="er">Regular -er verbs</option>
+                            <option value="ir">Regular -ir verbs</option>
+                            <option value="re">Regular -re verbs</option>
+                            <option value="irr">Irregular verbs</option>
+                            <option value="refl">Reflexive verbs</option>
+                            <option value="all">All 296 verbs</option>
+                        </select>
+                    </label>
+                    <button id="pr-new" type="button" class="min-h-[44px] px-4 bg-white border border-slate-200 hover:border-indigo-300 font-semibold rounded-xl">🔀 Another verb</button>
+                    <span id="pr-streak" class="sm:ml-auto text-sm text-slate-500"></span>
+                </div>
+
+                <form id="pr-card" class="bg-white border border-slate-200 rounded-2xl p-4 sm:p-5 space-y-4 max-w-2xl" autocomplete="off">
+                    <div class="flex items-start justify-between gap-3">
+                        <div class="min-w-0">
+                            <div id="pr-tense-name" class="text-xs font-bold uppercase tracking-wide text-indigo-700"></div>
+                            <h2 id="pr-verb" class="text-2xl font-black text-slate-900 break-words"></h2>
+                            <p id="pr-gloss" class="text-sm text-slate-500"></p>
+                        </div>
+                        <button id="pr-say" type="button" class="shrink-0 min-h-[40px] px-3 text-sm font-semibold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 rounded-xl" aria-label="Listen to the verb">🔊</button>
+                    </div>
+                    <div id="pr-rows" class="space-y-2"></div>
+                    <div class="flex flex-wrap items-center gap-2 pt-1">
+                        <button id="pr-check" type="submit" class="min-h-[48px] px-5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl">Check</button>
+                        <button id="pr-show" type="button" class="min-h-[44px] px-4 text-sm font-semibold text-slate-600 hover:text-slate-900">Show answers</button>
+                        <button id="pr-next" type="button" class="hidden min-h-[48px] px-5 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl">Next verb →</button>
+                        <span id="pr-score" class="ml-auto text-sm font-bold"></span>
+                    </div>
+                    <p class="text-xs text-slate-400">Accents count, but you'll be told if only an accent is missing. Tip: <b>(e)</b> and <b>(s)</b> mean you can write either form.</p>
+                </form>
+            </section>
+        </div>
+    </main>
+
+    <script>
+        const db = window.mySupabase;
+        const $ = (id) => document.getElementById(id);
+        let currentPlaybackSpeed = 1.0;
+        let currentFilter = 'all';
+        const PILL_OFF = 'filter-pill shrink-0 min-h-[40px] px-3 rounded-lg font-medium bg-white border border-slate-200 text-slate-700 hover:bg-slate-50';
+        const PILL_ON = 'filter-pill shrink-0 min-h-[40px] px-3 rounded-lg font-medium bg-indigo-600 border border-indigo-600 text-white';
+
+        // Accent-insensitive match: "etre" finds "être"
+        function plain(s) {
+            return String(s).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+        }
+
+        // ---- Conjugation engine (js/conjugate.js): no AI, no network ----
+        const C = window.Conjugator;
+        const SPELLING_KINDS = ['e_è', 'é_è', 'll', 'tt', 'yer', 'envoyer'];
+        const GROUP_LABELS = { er: 'regular -er', ersp: '-er, spelling change', ir: 'regular -ir', re: 'regular -re', irr: 'irregular', refl: 'reflexive' };
+        let activeVerb = null;
+
+        function verbGroup(v) {
+            if (v.refl) return 'refl';
+            if (v.kind === 'er' || v.kind === 'ir' || v.kind === 're') return v.kind;
+            if (SPELLING_KINDS.includes(v.kind)) return 'ersp';
+            return 'irr';
+        }
+
+
+        function filterVerbs(category, buttonElement) {
+            currentFilter = category;
+            document.querySelectorAll('.filter-pill').forEach(btn => {
+                btn.className = PILL_OFF;
+            });
+            buttonElement.className = PILL_ON;
+            populateVerbList(document.getElementById('verb-search').value);
+        }
+
+        function filterVerbList(query) {
+            populateVerbList(query);
+        }
+
+        // Accent-insensitive match: "etre" finds "être"
+        function plain(s) {
+            return String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').trim();
+        }
+
+        function populateVerbList(searchQuery = '') {
+            const container = document.getElementById('verb-list-container');
+            if (!container) return;
+            const q = plain(searchQuery);
+            const matches = C.verbs.filter(v =>
+                (currentFilter === 'all' || verbGroup(v) === currentFilter) &&
+                (!q || plain(v.disp).includes(q) || plain(v.gloss).includes(q))
+            );
+
+            container.innerHTML = '';
+            if (matches.length === 0) {
+                const typed = escapeHtml(searchQuery.trim());
+                container.innerHTML = typed
+                    ? `<p class="text-sm text-slate-500 p-2">No verb found. Press Enter to conjugate “${typed}”.</p>`
+                    : `<p class="text-sm text-slate-400 p-2">No verb found.</p>`;
+                return;
+            }
+
+            matches.forEach(v => {
+                const item = document.createElement('button');
+                item.type = 'button';
+                item.className = 'w-full text-left px-3 py-2 min-h-[48px] rounded-lg text-sm bg-slate-50 hover:bg-indigo-50 transition flex items-center justify-between border border-slate-100' + (activeVerb === v ? ' ring-2 ring-indigo-400' : '');
+                item.innerHTML = `
+                    <div class="flex flex-col pr-2 overflow-hidden">
+                        <span class="font-bold text-slate-900 truncate">${escapeHtml(v.disp)}</span>
+                        <span class="text-xs text-slate-500 truncate">${escapeHtml(v.gloss)}</span>
+                    </div>
+                    <span class="text-[10px] text-slate-400 uppercase shrink-0">${GROUP_LABELS[verbGroup(v)]}</span>
+                `;
+                item.addEventListener('click', () => { renderVerb(v); showTablesOnPhone(); });
+                container.appendChild(item);
+            });
+
+            if (!activeVerb) renderVerb(matches[0]);
+        }
+
+        // Conjugate a verb typed in the search box, even if it is not in the list
+        function conjugateTyped(text) {
+            const v = C.find(text);
+            if (v) {
+                renderVerb(v);
+                showTablesOnPhone();
+            } else if (text.trim()) {
+                document.getElementById('rule-text').innerText = `“${text.trim()}” is not recognised as an -er, -ir or -re infinitive.`;
+            }
+        }
+
+        function formatForm(row) {
+            // "j'" + "aime" has no space; "je" + "parle" does
+            return /'$/.test(row.cp) ? row.cp + row.cf : row.cp + ' ' + row.cf;
+        }
+
+        function renderVerb(v) {
+            if (!v) return;
+            activeVerb = v;
+
+            const title = document.getElementById('atelier-title');
+            title.dataset.activeVerb = v.disp;
+            title.innerText = v.gloss ? `${v.disp} (${v.gloss})` : v.disp;
+            document.getElementById('atelier-category').innerText =
+                `${GROUP_LABELS[verbGroup(v)]} · auxiliary: ${v.refl ? 'être' : v.aux}`;
+            document.querySelectorAll('#verb-list-container button').forEach(b => b.classList.remove('ring-2', 'ring-indigo-400'));
+
+            const grid = document.getElementById('tense-grid');
+            grid.innerHTML = C.tenses.map(t => {
+                const rows = C.forms(v, t.key);
+                if (!rows.length) return '';
+                const body = rows.map(r => `
+                    <tr class="hover:bg-indigo-50/50 cursor-pointer" data-say="${escapeHtml(r.say)}">
+                        <td class="px-3 py-2 text-slate-500 w-2/5">${escapeHtml(r.cp)}</td>
+                        <td class="px-3 py-2 font-bold text-slate-800 text-base">${C.highlight(v, t.key, r.i, r.cf)}</td>
+                    </tr>`).join('');
+                return `
+                    <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm flex flex-col">
+                        <div class="bg-slate-50 border-b border-slate-200 px-3 py-2 text-center">
+                            <div class="font-bold text-xs text-slate-700 uppercase tracking-wider">${escapeHtml(t.name)}</div>
+                            <div class="text-[10px] text-slate-400">${escapeHtml(t.en)}</div>
+                        </div>
+                        <table class="w-full text-sm text-left"><tbody class="divide-y divide-slate-100">${body}</tbody></table>
+                    </div>`;
+            }).join('');
+
+            document.getElementById('rule-text').innerText = C.notes(v).join(' ');
+        }
+
+        // Tap any row to hear it
+        document.addEventListener('click', (event) => {
+            const row = event.target.closest('#tense-grid tr[data-say]');
+            if (row) speakText(row.dataset.say);
+        });
+
+        window.speakText = function(text) {
+            if (!('speechSynthesis' in window)) return;
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'fr-FR';
+            utterance.rate = currentPlaybackSpeed;
+            window.speechSynthesis.speak(utterance);
+        };
+
+        function playNativeAudio() {
+            if (activeVerb) speakText(activeVerb.disp);
+        }
+
+        function adjustSpeed() {
+            const speeds = [1.0, 0.75, 0.5];
+            const idx = speeds.indexOf(currentPlaybackSpeed);
+            currentPlaybackSpeed = speeds[(idx + 1) % speeds.length];
+            const btn = document.getElementById('speed-btn');
+            if (btn) btn.innerText = `⚡ ${currentPlaybackSpeed}x`;
+        }
+
+        function exportLesson() {
+            if (!activeVerb) return;
+            const lines = [`# ${activeVerb.disp}${activeVerb.gloss ? ' (' + activeVerb.gloss + ')' : ''}`, ''];
+            C.tenses.forEach(t => {
+                const rows = C.forms(activeVerb, t.key);
+                if (!rows.length) return;
+                lines.push(`## ${t.name}`, '');
+                rows.forEach(r => lines.push(`- ${formatForm(r)}`));
+                lines.push('');
+            });
+            const blob = new Blob([lines.join('\n')], { type: 'text/markdown' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${activeVerb.inf}-conjugation.md`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+
+        // On phones the list sits above the tables: jump down to the tables after picking a verb
+        function showTablesOnPhone() {
+            if (window.innerWidth < 768) document.getElementById('verb-detail').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        // ---------- Practice: fill in the six forms ----------
+        const COMMON = ['être', 'avoir', 'aller', 'faire', 'dire', 'pouvoir', 'vouloir', 'savoir', 'venir', 'devoir', 'prendre', 'voir', 'mettre', 'parler',
+            'aimer', 'donner', 'trouver', 'penser', 'passer', 'demander', 'rester', 'arriver', 'partir', 'sortir', 'finir', 'choisir', 'attendre', 'vendre',
+            'répondre', 'entendre', 'connaître', 'croire', 'tenir', 'écrire', 'lire', 'boire', 'manger', 'commencer', 'acheter', 'appeler', 'payer', 'ouvrir',
+            'vivre', 'suivre', 'comprendre', 'recevoir', 'falloir', 'se lever', 's\'appeler', 'se coucher'];
+        const PR_KEY = 'conj_practice';
+        let pr = { verb: null, tense: 'pres', checked: false };
+        const prStats = () => LocalStore.get(PR_KEY, { right: 0, total: 0 });
+        // Compare without the optional (e)/(s) and with spaces tidied; report accent-only slips
+        const tidy = (s) => String(s).toLowerCase().replace(/[’]/g, "'").replace(/\s+/g, ' ').replace(/\s*'\s*/g, "'").trim();
+        const variants = (form) => {
+            const base = tidy(form);
+            const out = new Set([base.replace(/\(e\)|\(s\)/g, '')]);
+            out.add(base.replace(/\(e\)/g, 'e').replace(/\(s\)/g, 's'));
+            out.add(base.replace(/\(e\)/g, 'e').replace(/\(s\)/g, ''));
+            out.add(base.replace(/\(e\)/g, '').replace(/\(s\)/g, 's'));
+            return [...out];
+        };
+        function judge(typed, form) {
+            const t = tidy(typed);
+            if (!t) return 'empty';
+            if (variants(form).includes(t)) return 'right';
+            if (variants(form).map(plain).includes(plain(t))) return 'accent';
+            return 'wrong';
+        }
+        function poolVerbs() {
+            const kind = $('pr-pool').value;
+            if (kind === 'common') return COMMON.map(v => C.find(v)).filter(Boolean);
+            return C.verbs.filter(v => kind === 'all' || verbGroup(v) === kind);
+        }
+        function pickVerb() {
+            const list = poolVerbs().filter(v => C.forms(v, pr.tense).length && v !== pr.verb);
+            return list[Math.floor(Math.random() * list.length)] || pr.verb;
+        }
+        function renderPractice() {
+            const v = pr.verb, t = C.tenses.find(x => x.key === pr.tense);
+            const rows = C.forms(v, pr.tense);
+            pr.checked = false;
+            $('pr-tense-name').textContent = `${t.name} · ${t.en}`;
+            $('pr-verb').textContent = v.disp;
+            $('pr-gloss').textContent = [v.gloss, GROUP_LABELS[verbGroup(v)]].filter(Boolean).join(' · ');
+            $('pr-rows').innerHTML = rows.map((r, i) => `
+                <div class="flex items-center gap-3">
+                    <span class="w-28 sm:w-36 shrink-0 text-right text-base text-slate-500">${escapeHtml(r.cp)}</span>
+                    <input data-row="${i}" type="text" lang="fr" autocapitalize="off" spellcheck="false" class="pr-input flex-1 min-w-0 text-base px-3 py-2.5 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <span data-mark="${i}" class="w-6 shrink-0 text-center font-black"></span>
+                </div>
+                <p data-fix="${i}" class="hidden text-sm pl-[7.75rem] sm:pl-[9.75rem]"></p>`).join('');
+            $('pr-score').textContent = '';
+            $('pr-next').classList.add('hidden');
+            $('pr-check').classList.remove('hidden');
+            const s = prStats();
+            $('pr-streak').textContent = s.total ? `${s.right} of ${s.total} forms right so far` : '';
+            const first = $('pr-rows').querySelector('input');
+            if (first && window.innerWidth >= 768) first.focus();
+        }
+        function checkPractice(show) {
+            const rows = C.forms(pr.verb, pr.tense);
+            let right = 0;
+            rows.forEach((r, i) => {
+                const input = $('pr-rows').querySelector(`[data-row="${i}"]`);
+                const res = show ? 'shown' : judge(input.value, r.cf);
+                if (res === 'right') right++;
+                const mark = $('pr-rows').querySelector(`[data-mark="${i}"]`);
+                const fix = $('pr-rows').querySelector(`[data-fix="${i}"]`);
+                mark.textContent = res === 'right' ? '✓' : res === 'shown' ? '' : '✗';
+                mark.className = 'w-6 shrink-0 text-center font-black ' + (res === 'right' ? 'text-emerald-600' : res === 'accent' ? 'text-amber-500' : 'text-rose-500');
+                input.classList.toggle('border-emerald-400', res === 'right');
+                input.classList.toggle('bg-emerald-50', res === 'right');
+                input.classList.toggle('border-rose-300', res === 'wrong' || res === 'empty');
+                input.classList.toggle('border-amber-300', res === 'accent');
+                fix.classList.toggle('hidden', res === 'right');
+                fix.innerHTML = res === 'accent' ? `<span class="text-amber-700">Almost: check the accent →</span> <b class="text-slate-900">${escapeHtml(r.cf)}</b>`
+                    : `<b class="text-emerald-700">${escapeHtml(r.cf)}</b> <button type="button" data-say="${escapeHtml(r.say)}" class="ml-1 text-indigo-600" aria-label="Listen">🔊</button>`;
+                if (show) input.value = r.cf.replace(/\(e\)|\(s\)/g, '');
+            });
+            if (!show && !pr.checked) {
+                const s = prStats();
+                LocalStore.set(PR_KEY, { right: s.right + right, total: s.total + rows.length });
+                if (typeof Activity !== 'undefined') Activity.record();
+            }
+            pr.checked = true;
+            $('pr-score').textContent = show ? '' : `${right} / ${rows.length}`;
+            $('pr-score').className = 'ml-auto text-sm font-bold ' + (right === rows.length ? 'text-emerald-700' : 'text-slate-600');
+            $('pr-next').classList.remove('hidden');
+            $('pr-check').classList.add('hidden');
+            $('pr-next').focus();
+        }
+        function startPractice(verb) {
+            pr.verb = verb && C.forms(verb, pr.tense).length ? verb : pickVerb();
+            renderPractice();
+        }
+        $('pr-tense').innerHTML = C.tenses.map(t => `<option value="${t.key}">${escapeHtml(t.name)} (${escapeHtml(t.en)})</option>`).join('');
+        $('pr-tense').addEventListener('change', () => { pr.tense = $('pr-tense').value; LocalStore.set('conj_practice_tense', pr.tense); startPractice(pr.verb); });
+        $('pr-pool').addEventListener('change', () => startPractice(null));
+        $('pr-new').addEventListener('click', () => startPractice(null));
+        $('pr-next').addEventListener('click', () => startPractice(null));
+        $('pr-show').addEventListener('click', () => checkPractice(true));
+        $('pr-card').addEventListener('submit', (e) => { e.preventDefault(); if (pr.checked) startPractice(null); else checkPractice(false); });
+        $('pr-say').addEventListener('click', () => speakText(pr.verb.disp));
+        document.addEventListener('click', (e) => { const b = e.target.closest('#pr-rows [data-say]'); if (b) speakText(b.dataset.say); });
+
+        // ---------- Tabs ----------
+        function setTab(name, push) {
+            document.querySelectorAll('.tab-btn').forEach(b => {
+                const on = b.dataset.tab === name;
+                b.classList.toggle('border-indigo-600', on); b.classList.toggle('text-indigo-700', on);
+                b.classList.toggle('border-transparent', !on); b.classList.toggle('text-slate-500', !on); b.classList.toggle('hover:text-slate-800', !on);
+                b.setAttribute('aria-selected', on);
+            });
+            $('tab-tables').classList.toggle('hidden', name !== 'tables');
+            $('tab-practice').classList.toggle('hidden', name !== 'practice');
+            LocalStore.set('conj_tab', name);
+            if (name === 'practice' && !pr.verb) startPractice(activeVerb && COMMON.includes(activeVerb.disp) ? activeVerb : null);
+            if (push) history.pushState({}, '', name === 'practice' ? 'conjugations.html?tab=practice' : 'conjugations.html' + (activeVerb ? '?verb=' + encodeURIComponent(activeVerb.disp) : ''));
+        }
+        document.querySelectorAll('.tab-btn').forEach(b => b.addEventListener('click', () => setTab(b.dataset.tab, true)));
+        $('practise-this').addEventListener('click', () => { setTab('practice', true); startPractice(activeVerb); });
+
+        // ---------- Routing: ?verb=finir, ?tab=practice; old lesson links go to Grammar ----------
+        function route() {
+            const p = new URLSearchParams(location.search);
+            if (p.get('lesson')) return location.replace('lesson.html?c=' + encodeURIComponent(p.get('lesson')));
+            if (p.get('tab') === 'lessons') return location.replace('lesson.html');
+            if (p.get('verb')) { const v = C.find(p.get('verb')); if (v) { setTab('tables', false); renderVerb(v); populateVerbList($('verb-search').value); return; } }
+            setTab(p.get('tab') === 'practice' || (!p.get('verb') && !p.get('tab') && LocalStore.get('conj_tab', 'tables') === 'practice') ? 'practice' : 'tables', false);
+        }
+        pr.tense = LocalStore.get('conj_practice_tense', 'pres');
+        $('pr-tense').value = pr.tense;
+        window.addEventListener('popstate', route);
+        populateVerbList();
+        route();
+    </script>
+</body>
 </html>
