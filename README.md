@@ -15,7 +15,7 @@ A browser-based French learning suite backed by Supabase (schema `French-schema`
 | `conjugations.html` | Old address: forwards to Grammar (verb tables or the matching lesson) |
 | `reading.html` | Reading practice (`reading_topics`) |
 | `listening.html` | Listening practice (`listening_topics`) |
-| `writing.html` | Writing with AI feedback |
+| `writing.html` | 27 built-in writing tasks (A1–C1) with checklist, word bank and model answer or plan; AI corrections shown inline; tasks from your own topic (AI) |
 | `speaking.html` | Speaking practice and AI roleplay |
 | `translator.html` | Translator and analyzer |
 | `admin.html` | Save the AI API key, model and URL for this browser |
@@ -36,6 +36,7 @@ talks to Supabase loads it right after the Supabase SDK.
 | `ai.js` | `askAI()` for every AI call, `escapeHtml()`, `speakFrench()` |
 | `conjugate.js` | Rule-based conjugation engine (296 verbs, 12 tenses) |
 | `cheatsheet-data.js` | Cheat sheet vocab themes (fallback for Vocab) |
+| `writing-tasks.js` | The built-in writing tasks |
 | `lessons-data.js` | Cheat sheet grammar and conjugation lessons |
 | `lesson-kit.js` | The Grammar course (which verb lessons merge into which grammar lesson, teaching order) and the hands-on lessons used by Vocab |
 

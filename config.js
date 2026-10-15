@@ -150,7 +150,10 @@ function renderAppHeader() {
     }
     const nav = header.querySelector('nav');
     const active = nav.querySelector('[aria-current="page"]');
-    if (active && active.offsetLeft + active.offsetWidth > nav.clientWidth) nav.scrollLeft = active.offsetLeft - 16;
+    if (active) {
+        const left = active.getBoundingClientRect().left - nav.getBoundingClientRect().left;
+        if (left + active.offsetWidth > nav.clientWidth) nav.scrollLeft = left - 8;
+    }
 }
 
 // Wire every Logout button (id="logoutBtn" or data-logout) on page load,
