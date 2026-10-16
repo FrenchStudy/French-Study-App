@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="fr" class="h-full">
+<html lang="en" class="h-full">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Atelier de Français - Administration</title>
+    <title>Admin - Apprendre le Français</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#4f46e5">
     <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
@@ -15,101 +15,192 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.104.0"></script>
     <script>window.supabase || document.write('<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"><\/script>')</script>
     <script src="config.js"></script>
+    <style>
+        .bar { transition: opacity .12s; }
+        .bars:hover .bar { opacity: .55; }
+        .bars .bar:hover { opacity: 1; }
+        details > summary { list-style: none; } details > summary::-webkit-details-marker { display: none; }
+    </style>
 </head>
-<body class="h-full bg-slate-100 flex flex-col overflow-hidden font-sans">
+<body class="h-full bg-slate-100 flex flex-col overflow-hidden font-sans text-slate-800">
 
     <header id="app-header" class="bg-white border-b border-slate-200 sticky top-0 z-50 shrink-0 h-14"></header>
 
-    <!-- Admin Workspace -->
-    <div id="admin-workspace" class="flex-1 flex overflow-hidden">
-        <main class="flex-1 overflow-y-auto p-8 max-w-4xl mx-auto space-y-8 w-full">
-            
-            <!-- Page Title -->
-            <div>
-                <h1 id="workspace-title" class="text-2xl font-extrabold text-slate-900 tracking-tight">Panneau d'Administration</h1>
-                <p id="workspace-subtitle" class="text-xs text-slate-500 mt-1">Configurez les paramètres globaux de l'IA pour toute la suite d'apprentissage.</p>
+    <main class="flex-1 overflow-y-auto">
+        <div class="max-w-6xl mx-auto px-4 py-5 space-y-4">
+            <div class="flex flex-wrap items-end justify-between gap-3">
+                <div>
+                    <h1 class="text-2xl font-black text-slate-900">Admin</h1>
+                    <p class="text-sm text-slate-500 mt-1">Your app at a glance. <span id="updated"></span></p>
+                </div>
+                <button id="refresh" type="button" class="min-h-[40px] px-4 text-sm font-semibold bg-white border border-slate-200 hover:border-indigo-300 rounded-xl">↻ Refresh</button>
             </div>
 
-            <!-- SECTION: AI on the server -->
-            <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-2">
+            <!-- AI status -->
+            <section class="bg-white border border-slate-200 rounded-2xl p-4 space-y-1.5">
                 <h2 class="text-sm font-bold text-slate-900">✨ AI for students</h2>
                 <p id="ai-server-status" class="text-sm text-slate-600">Checking the AI function…</p>
-                <p class="text-xs text-slate-500">Setup steps: <code>supabase/ai/README.md</code> in the code. Students get 5 free AI activities, then need premium. Admins have no limits.</p>
+                <p class="text-xs text-slate-500">To change the AI key or model: Supabase → <b>Edge Functions → Secrets</b> (<code>GROQ_API_KEY</code>, <code>GROQ_MODEL</code>). Students get 5 free AI activities, then need premium; admins have no limit.</p>
+                <div id="old-key" class="hidden mt-2 flex flex-wrap items-center gap-2 text-sm bg-amber-50 border border-amber-200 text-amber-900 rounded-xl p-3">
+                    <span class="flex-1 min-w-[12rem]">An old Groq key is still saved in this browser. It is no longer used once the AI function works.</span>
+                    <button id="clear-key" type="button" class="min-h-[36px] px-3 font-bold bg-white border border-amber-300 hover:bg-amber-100 rounded-lg">🗑 Remove it</button>
+                </div>
+            </section>
+
+            <!-- Dashboard -->
+            <div id="dash-message" class="hidden bg-white border border-slate-200 rounded-2xl p-5 text-sm text-slate-700"></div>
+            <div id="dash" class="hidden space-y-4">
+                <div id="tiles" class="grid grid-cols-2 lg:grid-cols-6 gap-3"></div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    <section class="bg-white border border-slate-200 rounded-2xl p-4 space-y-3">
+                        <h2 class="text-sm font-bold text-slate-900">New students <span class="font-normal text-slate-500">· last 14 days</span></h2>
+                        <div id="chart-signups"></div>
+                    </section>
+                    <section class="bg-white border border-slate-200 rounded-2xl p-4 space-y-3">
+                        <h2 class="text-sm font-bold text-slate-900">AI activities <span class="font-normal text-slate-500">· last 14 days</span></h2>
+                        <div id="chart-ai"></div>
+                    </section>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                    <section class="bg-white border border-slate-200 rounded-2xl p-4 space-y-3">
+                        <h2 class="text-sm font-bold text-slate-900">Students by level</h2>
+                        <div id="by-level"></div>
+                    </section>
+                    <section class="bg-white border border-slate-200 rounded-2xl p-4 space-y-3">
+                        <h2 class="text-sm font-bold text-slate-900">Students by goal</h2>
+                        <div id="by-goal"></div>
+                    </section>
+                    <section class="bg-white border border-slate-200 rounded-2xl p-4 space-y-3">
+                        <h2 class="text-sm font-bold text-slate-900">What the AI is used for <span class="font-normal text-slate-500">· 30 days</span></h2>
+                        <div id="by-feature"></div>
+                    </section>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    <section class="bg-white border border-slate-200 rounded-2xl p-4 space-y-3">
+                        <h2 class="text-sm font-bold text-slate-900">Latest students</h2>
+                        <div id="latest" class="overflow-x-auto"></div>
+                    </section>
+                    <section class="bg-white border border-slate-200 rounded-2xl p-4 space-y-3">
+                        <h2 class="text-sm font-bold text-slate-900">Most AI use <span class="font-normal text-slate-500">· 30 days</span></h2>
+                        <div id="top-ai" class="overflow-x-auto"></div>
+                    </section>
+                </div>
+                <section class="bg-white border border-slate-200 rounded-2xl p-4">
+                    <h2 class="text-sm font-bold text-slate-900 mb-2">Learning</h2>
+                    <div id="learning" class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3"></div>
+                </section>
+                <p class="text-xs text-slate-400">To make someone premium or admin: Supabase → Table Editor → <b>profiles</b> → <code>is_premium</code> or <code>role</code>.</p>
             </div>
+        </div>
+    </main>
 
-            <!-- SECTION: Global AI Model Configuration -->
-            <div id="global-ai-settings-card" class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4">
-                <div class="flex items-center space-x-2 border-b border-slate-100 pb-3">
-                    <span class="text-indigo-600 font-bold text-base">⚙️</span>
-                    <h2 class="text-xs font-bold uppercase tracking-wider text-slate-800">Configuration Globale de l'IA (Groq / Modèle)</h2>
-                </div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-                    <div>
-                        <label class="block font-bold text-slate-700 mb-1">Clé API Globale :</label>
-                        <input type="text" id="global-api-key-input" placeholder="gsk_..." autocomplete="off" spellcheck="false" data-lpignore="true" data-1p-ignore style="-webkit-text-security: disc" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                    </div>
-                    <div>
-                        <label class="block font-bold text-slate-700 mb-1">Modèle d'IA Actif :</label>
-                        <input type="text" id="global-model-input" autocomplete="off" spellcheck="false" data-lpignore="true" data-1p-ignore value="openai/gpt-oss-120b" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                    </div>
-                </div>
-                <p class="text-xs text-slate-500">This key is only used in <b>this browser</b>, and only while the AI function above is not deployed. Students never see it.</p>
-                <div>
-                    <button onclick="saveGlobalAISettings()" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-4 py-2 rounded-xl transition shadow-sm">💾 Sauvegarder les paramètres globaux</button>
-                    <button id="clear-key-btn" onclick="clearAdminKey()" class="ml-2 bg-white border border-rose-200 hover:bg-rose-50 text-rose-700 text-xs font-bold px-4 py-2 rounded-xl transition">🗑 Remove the key from this browser</button>
-                </div>
-                <p id="key-state" class="text-xs"></p>
-            </div>
-
-        </main>
-    </div>
-
-    <!-- Script Integration -->
     <script>
-        // Is the "ai" Edge Function deployed and working?
-        (async () => {
-            const el = document.getElementById('ai-server-status');
+        const $ = (id) => document.getElementById(id);
+        const db = window.mySupabase;
+        const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+        const n = (x) => Number(x || 0).toLocaleString('en-GB');
+
+        // ---------- AI status ----------
+        async function aiStatus() {
+            const el = $('ai-server-status');
             const r = await AIServer.request({ quota: true });
-            const esc = (s) => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
             const q = r.ok && r.data && r.data.quota;
-            if (q) el.innerHTML = `✅ <b>The AI function is working</b> (<code>${esc(r.fn)}</code>). Students use the server key; ${q.admin ? 'you are an admin, so you have no limits.' : q.premium ? 'this account is premium.' : `this account has ${q.left} of ${q.free} free uses left.`}`;
-            else if (r.notDeployed) el.innerHTML = `⏳ <b>The AI function could not be reached.</b> Until it can, AI only works in browsers that have the key below.<br><span class="text-xs text-slate-500">${esc(AIServer.problem)}</span>`;
+            if (q) el.innerHTML = `✅ <b>The AI function is working</b> (<code>${esc(r.fn)}</code>). ${q.admin ? 'You are an admin, so you have no limits.' : q.premium ? 'This account is premium.' : `This account has ${q.left} of ${q.free} free uses left.`}`;
+            else if (r.notDeployed) el.innerHTML = `⏳ <b>The AI function could not be reached.</b> Students can't use AI until it can. Setup steps: <code>supabase/ai/README.md</code>.<br><span class="text-xs text-slate-500">${esc(AIServer.problem)}</span>`;
             else el.innerHTML = `⚠️ <b>The AI function answered with an error.</b><br><span class="text-xs text-slate-500">${esc(AIServer.problem || (r.data && r.data.error) || '')}</span>`;
-        })();
+        }
+        function oldKey() { let has = false; try { has = !!localStorage.getItem('ai_api_key'); } catch (e) {} $('old-key').classList.toggle('hidden', !has); }
+        $('clear-key').addEventListener('click', () => {
+            try { localStorage.removeItem('ai_api_key'); localStorage.removeItem('ai_model_name'); localStorage.removeItem('ai_api_url'); } catch (e) {}
+            oldKey();
+        });
 
-        function showKeyState() {
-            const has = !!localStorage.getItem('ai_api_key');
-            const el = document.getElementById('key-state');
-            el.className = 'text-xs ' + (has ? 'text-amber-700' : 'text-emerald-700');
-            el.textContent = has ? 'A Groq key is saved in this browser. Once the AI function shows ✅ above, you can remove it: it is no longer needed.'
-                : '✅ No Groq key is saved in this browser. The key is only on the server.';
-            document.getElementById('clear-key-btn').classList.toggle('hidden', !has);
+        // ---------- Small charts (one colour; hover a bar for its value; a table under each) ----------
+        const lastDays = (k) => Array.from({ length: k }, (_, i) => { const d = new Date(); d.setDate(d.getDate() - (k - 1 - i)); return d; });
+        const dayKey = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        const dayLabel = (d) => d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+        function columns(el, byDay, unit) {
+            const days = lastDays(14), vals = days.map(d => Number((byDay || {})[dayKey(d)] || 0));
+            const max = Math.max(1, ...vals), total = vals.reduce((a, b) => a + b, 0);
+            el.innerHTML = `<div class="flex items-baseline gap-2"><span class="text-2xl font-black text-slate-900">${n(total)}</span><span class="text-xs text-slate-500">${unit} in 14 days</span></div>
+                <div class="bars relative flex items-end gap-1 h-32 border-b border-slate-200" role="img" aria-label="${esc(unit)} per day, last 14 days">
+                    ${vals.map((v, i) => `<div class="bar group relative flex-1 h-full flex items-end" tabindex="0" aria-label="${dayLabel(days[i])}: ${v} ${esc(unit)}">
+                        <div class="w-full rounded-t ${v ? 'bg-indigo-600' : 'bg-slate-100'}" style="height:${v ? Math.max(4, v / max * 100) : 2}%"></div>
+                        <span class="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-1 hidden group-hover:block group-focus:block whitespace-nowrap text-xs font-semibold bg-slate-900 text-white rounded-md px-2 py-1 z-10">${dayLabel(days[i])}: ${v}</span>
+                    </div>`).join('')}
+                </div>
+                <div class="flex justify-between text-[11px] text-slate-400"><span>${dayLabel(days[0])}</span><span>${dayLabel(days[7])}</span><span>Today</span></div>
+                <details class="text-xs"><summary class="cursor-pointer text-slate-500 hover:text-indigo-700">Show as a table</summary>
+                    <table class="mt-2 w-full"><tbody>${days.map((d, i) => `<tr class="border-t border-slate-100"><td class="py-1 text-slate-500">${dayLabel(d)}</td><td class="py-1 text-right font-semibold">${vals[i]}</td></tr>`).join('')}</tbody></table></details>`;
         }
-        function clearAdminKey() {
-            if (!confirm('Remove the Groq key from this browser? Students are not affected; the server keeps its own key.')) return;
-            localStorage.removeItem('ai_api_key');
-            document.getElementById('global-api-key-input').value = '';
-            showKeyState();
+        function hbars(el, obj, order, labels) {
+            const keys = order ? [...order.filter(k => k in (obj || {})), ...Object.keys(obj || {}).filter(k => !order.includes(k))]
+                : Object.keys(obj || {}).sort((a, b) => obj[b] - obj[a]);
+            if (!keys.length) { el.innerHTML = '<p class="text-sm text-slate-400">Nothing yet.</p>'; return; }
+            const max = Math.max(1, ...keys.map(k => obj[k]));
+            el.innerHTML = `<ul class="space-y-2">${keys.map(k => `<li class="grid grid-cols-[6.5rem_1fr_2.5rem] items-center gap-2 text-sm" title="${esc((labels && labels[k]) || k)}: ${obj[k]}">
+                <span class="truncate text-slate-600">${esc((labels && labels[k]) || k)}</span>
+                <span class="h-3 bg-slate-100 rounded-full overflow-hidden"><span class="block h-full rounded-full ${k === 'Not set' ? 'bg-slate-300' : 'bg-indigo-600'}" style="width:${Math.max(3, obj[k] / max * 100)}%"></span></span>
+                <span class="text-right font-semibold text-slate-900">${n(obj[k])}</span></li>`).join('')}</ul>`;
         }
-        function loadAdminSettings() {
-            showKeyState();
-            document.getElementById('global-api-key-input').value = localStorage.getItem('ai_api_key') || "";
-            document.getElementById('global-model-input').value = localStorage.getItem('ai_model_name') || "openai/gpt-oss-120b";
-        }
+        const FEATURES = { 'writing-check': 'Writing checks', 'writing-question': 'Writing questions', 'writing-sample': 'Writing samples', 'writing-own': 'Own writing questions',
+            'speaking-chat': 'Conversations', 'speaking-task': 'Speaking tasks', 'speaking-check': 'Speaking checks', 'speaking-sample': 'Speaking samples', 'speaking-own': 'Own speaking questions',
+            'reading-text': 'Reading texts', 'reading-word': 'Word look-ups', 'reading-own': 'Pasted texts', 'listening-text': 'Listening texts', 'vocab-hook': 'Memory tricks', translator: 'Translator', 'reading-classic': 'Old Reading page', 'listening-classic': 'Old Listening page' };
+        const GOALS = { travel: 'Travel', work: 'Work', exam: 'Exam', fun: 'For fun' };
+        const SKILLS = { reading: 'Reading texts', listening: 'Listening', dictation: 'Dictations', writing: 'Writing tasks', speaking: 'Speaking tasks', 'speaking-scene': 'Conversations' };
 
-        function saveGlobalAISettings() {
-            const key = document.getElementById('global-api-key-input').value.trim();
-            const model = document.getElementById('global-model-input').value.trim();
-            
-            if (key) localStorage.setItem('ai_api_key', key);
-            showKeyState();
-            if (model) localStorage.setItem('ai_model_name', model);
-            
-            alert("✅ Paramètres globaux de l'IA enregistrés avec succès !");
+        function tile(label, value, sub, tone) {
+            return `<div class="bg-white border border-slate-200 rounded-2xl p-4">
+                <div class="text-xs font-semibold text-slate-500">${label}</div>
+                <div class="text-3xl font-black ${tone || 'text-slate-900'} mt-1">${value}</div>
+                ${sub ? `<div class="text-xs text-slate-500 mt-0.5">${sub}</div>` : ''}</div>`;
         }
-
-        // Initialize settings view on load
-        loadAdminSettings();
+        function render(d) {
+            const has = (k) => k in d;
+            $('tiles').innerHTML = [
+                tile('Students', n(d.students), `+${n(d.new_7d)} this week`),
+                tile('Active this week', has('active_7d') ? n(d.active_7d) : '–', has('active_today') ? `${n(d.active_today)} today` : 'needs user_progress'),
+                tile('Premium', n(d.premium), d.students ? `${Math.round(d.premium / d.students * 100)}% of students` : ''),
+                tile('AI this week', has('ai_7d') ? n(d.ai_7d) : '–', has('ai_today') ? `${n(d.ai_today)} today · ${n(d.ai_30d)} in 30 days` : ''),
+                tile('Used all free AI', has('at_free_limit') ? n(d.at_free_limit) : '–', 'possible subscribers', d.at_free_limit ? 'text-amber-600' : ''),
+                tile('Library texts', has('library_total') ? n(d.library_total) : '–', 'shared Reading/Listening')
+            ].join('');
+            columns($('chart-signups'), d.signups_by_day, 'new students');
+            columns($('chart-ai'), d.ai_by_day, 'AI activities');
+            hbars($('by-level'), d.by_level, ['A1', 'A2', 'B1', 'B2', 'C1', 'C2', 'Not set']);
+            hbars($('by-goal'), d.by_goal, ['travel', 'work', 'exam', 'fun', 'Not set'], GOALS);
+            hbars($('by-feature'), d.ai_by_feature, null, FEATURES);
+            const when = (t) => t ? new Date(t).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : '';
+            const table = (head, rows) => rows.length ? `<table class="w-full text-sm"><thead><tr class="text-left text-xs text-slate-500">${head.map(h => `<th class="py-1 pr-3 font-semibold">${h}</th>`).join('')}</tr></thead><tbody>${rows.join('')}</tbody></table>` : '<p class="text-sm text-slate-400">Nothing yet.</p>';
+            const who = (r) => `<span class="font-semibold text-slate-900">${esc(r.name || '—')}</span><span class="block text-xs text-slate-500">${esc(r.email || '')}</span>`;
+            const prem = (r) => r.premium ? ' <span class="text-[11px] font-bold text-violet-700 bg-violet-50 px-1.5 py-0.5 rounded-full">Premium</span>' : '';
+            $('latest').innerHTML = table(['Student', 'Level', 'Goal', 'Joined'], (d.latest || []).map(r => `<tr class="border-t border-slate-100"><td class="py-1.5 pr-3">${who(r)}</td><td class="pr-3">${esc(r.level || '—')}${prem(r)}</td><td class="pr-3">${esc(GOALS[r.goal] || r.goal || '—')}</td><td class="text-slate-500 whitespace-nowrap">${when(r.created_at)}</td></tr>`));
+            $('top-ai').innerHTML = table(['Student', 'AI uses'], (d.top_ai_users || []).map(r => `<tr class="border-t border-slate-100"><td class="py-1.5 pr-3">${who(r)}${prem(r)}</td><td class="font-semibold ${!r.premium && r.uses >= (d.free_uses || 5) ? 'text-amber-600' : ''}">${n(r.uses)}</td></tr>`));
+            const sk = d.skills_done || {};
+            $('learning').innerHTML = [tile('Lessons done', has('lessons_done') ? n(d.lessons_done) : '–'), ...Object.keys(SKILLS).map(k => tile(SKILLS[k], n(sk[k] || 0)))].join('');
+            $('updated').textContent = 'Updated ' + new Date(d.generated_at || Date.now()).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) + '.';
+        }
+        async function load() {
+            $('refresh').disabled = true;
+            try {
+                const { data, error } = await db.rpc('admin_dashboard');
+                if (error) {
+                    const msg = String(error.message || '');
+                    $('dash').classList.add('hidden'); $('dash-message').classList.remove('hidden');
+                    $('dash-message').innerHTML = /only admins/i.test(msg) ? '🔒 <b>Only admins can see the dashboard.</b> Your account needs <code>role = admin</code> in the profiles table.'
+                        : /could not find|does not exist|PGRST202/i.test(msg + (error.code || '')) ? '📊 <b>One step to turn on the dashboard:</b> in Supabase → <b>SQL Editor</b>, run <code>supabase/admin/01_dashboard.sql</code>, then press Refresh.'
+                        : '⚠️ The dashboard could not load: ' + esc(msg);
+                } else {
+                    $('dash-message').classList.add('hidden'); $('dash').classList.remove('hidden');
+                    render(data || {});
+                }
+            } catch (e) {
+                $('dash-message').classList.remove('hidden'); $('dash-message').textContent = 'The dashboard could not load. Check your connection and press Refresh.';
+            }
+            $('refresh').disabled = false;
+        }
+        $('refresh').addEventListener('click', load);
+        oldKey(); aiStatus(); load();
     </script>
 </body>
-</html>
+</html>

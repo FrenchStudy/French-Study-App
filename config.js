@@ -211,11 +211,11 @@ function renderAppHeader() {
     header.className = 'bg-white border-b border-slate-200 sticky top-0 z-50 shrink-0';
     header.innerHTML = `
         <div class="max-w-6xl mx-auto px-4 h-14 flex items-center gap-3">
-            <a href="index.html" class="shrink-0 flex items-center gap-2 font-black text-slate-900 mr-2">${flag}<span class="hidden xl:inline">Apprendre le Français</span></a>
+            <a href="index.html" class="shrink-0 flex items-center gap-2 font-black text-slate-900 mr-2">${flag}<span class="hidden 2xl:inline">Apprendre le Français</span></a>
             <nav class="flex-1 min-w-0 flex items-center gap-1 overflow-x-auto text-sm font-semibold" style="scrollbar-width:none" aria-label="Main">
                 ${APP_NAV.map(([href, label]) => `<a href="${href}" class="shrink-0 px-3 py-1.5 rounded-lg ${href === page ? 'bg-indigo-50 text-indigo-700' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'}"${href === page ? ' aria-current="page"' : ''}>${label}</a>`).join('')}
             </nav>
-            <a href="admin.html" class="shrink-0 text-sm font-semibold text-slate-600 hover:text-indigo-700 px-2 py-1.5 rounded-lg hover:bg-slate-100" style="display:none">Admin</a>
+            <a href="admin.html" class="shrink-0 text-sm font-semibold px-2 py-1.5 rounded-lg ${page === 'admin.html' ? 'bg-indigo-50 text-indigo-700' : 'text-slate-600 hover:text-indigo-700 hover:bg-slate-100'}"${page === 'admin.html' ? ' aria-current="page"' : ''} style="display:none">Admin</a>
             <button id="logoutBtn" type="button" class="shrink-0 text-sm font-semibold text-slate-600 hover:text-rose-600 px-2 py-1.5 rounded-lg hover:bg-slate-100">Log out</button>
         </div>`;
     // Small screens: the menu scrolls sideways, so fade its edge and show the current page
