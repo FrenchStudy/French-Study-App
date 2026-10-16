@@ -10,6 +10,7 @@
     <script src="js/ai.js"></script>
     <script src="js/conjugate.js"></script>
     <script src="js/library.js"></script>
+    <script src="js/ideas.js"></script>
     <script src="js/topics-page.js"></script>
     <style>
         .w { cursor: pointer; border-radius: 4px; transition: background-color .12s; }
@@ -371,9 +372,9 @@
         });
 
         const params = new URLSearchParams(location.search);
-        const startId = params.get('text'), startTopic = params.get('topic');
+        const startId = params.get('text'), startTopic = params.get('topic'), startTheme = params.get('theme');
         TopicsPage.init({
-            page: PAGE, title: 'Listening', intro: 'Pick a topic at your level: listen sentence by sentence, answer the questions, then check the transcript or try Dictation.', classic: 'listening-classic.html',
+            page: PAGE, title: 'Listening', intro: "Something new every time: start the recording picked for you, ask for any subject, or follow this week's theme.", ask: 'What do you want to listen to?', preview: false, classic: 'listening-classic.html',
             noun: 'recording', nounPl: 'recordings', icon: '🎧 ', subjectHint: 'e.g. Booking a hotel room', genLabel: 'Write me a recording', pasteLabel: 'Listen to my text',
             kinds: ['Dialogue', 'Phone call', 'Voicemail', 'Announcement', 'Radio news', 'Story', 'Interview'],
             meta: (t) => { const s = Math.round((String(t.fr).match(/[\p{L}]+/gu) || []).length / 2.2); return '≈ ' + (s >= 60 ? Math.round(s / 60) + ' min' : s + ' s'); },
@@ -395,11 +396,11 @@
                 const el = $('version-bar').querySelector('[data-version-error]');
                 if (el) { el.textContent = msg; el.classList.remove('hidden'); }
             },
-            startTopic
+            startTopic, startTheme
         });
         if (startId && LIB.find(startId)) openText(startId, false);
         else if (startId) { TopicsPage.render(); LIB.fetchOne(startId).then(t => { if (t) openText(t.id, false); }); }
-        else if (!startTopic) TopicsPage.render();
+        else if (!startTopic && !startTheme) TopicsPage.render();
     </script>
 </body>
 </html>

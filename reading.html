@@ -10,6 +10,7 @@
     <script src="js/ai.js"></script>
     <script src="js/conjugate.js"></script>
     <script src="js/library.js"></script>
+    <script src="js/ideas.js"></script>
     <script src="js/topics-page.js"></script>
     <style>
         .w { cursor: pointer; border-radius: 4px; transition: background-color .12s; }
@@ -201,9 +202,9 @@
         });
 
         const params = new URLSearchParams(location.search);
-        const startId = params.get('text'), startTopic = params.get('topic');
+        const startId = params.get('text'), startTopic = params.get('topic'), startTheme = params.get('theme');
         TopicsPage.init({
-            page: PAGE, title: 'Reading', intro: 'Pick a topic at your level, tap any word for its meaning, then answer the questions.', classic: 'reading-classic.html',
+            page: PAGE, title: 'Reading', intro: "Something new every time: start the text picked for you, ask for any subject, or follow this week's theme.", ask: 'What do you want to read about?', classic: 'reading-classic.html',
             noun: 'text', nounPl: 'texts', icon: '', subjectHint: 'e.g. A day at the beach', genLabel: 'Write me a text', pasteLabel: 'Read my text',
             kinds: ['Article', 'Story', 'Dialogue', 'Email or message', 'Blog', 'Advert or notice'],
             meta: (t) => { const n = (String(t.fr).match(/[\p{L}]+/gu) || []).length; return `${n} words · ${Math.max(1, Math.round(n / 120))} min`; },
@@ -225,11 +226,11 @@
                 const el = $('version-bar').querySelector('[data-version-error]');
                 if (el) { el.textContent = msg; el.classList.remove('hidden'); }
             },
-            startTopic
+            startTopic, startTheme
         });
         if (startId && LIB.find(startId)) openText(startId, false);
         else if (startId) { TopicsPage.render(); LIB.fetchOne(startId).then(t => { if (t) openText(t.id, false); }); }
-        else if (!startTopic) TopicsPage.render();
+        else if (!startTopic && !startTheme) TopicsPage.render();
     </script>
 </body>
 </html>

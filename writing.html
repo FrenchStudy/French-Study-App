@@ -9,6 +9,7 @@
     <script src="config.js"></script>
     <script src="js/ai.js"></script>
     <script src="js/writing-tasks.js"></script>
+    <script src="js/ideas.js"></script>
     <style>
         .fix-del { text-decoration: line-through; text-decoration-thickness: 2px; }
         details > summary { list-style: none; }
@@ -25,52 +26,40 @@
 
             <!-- ===== ALL TASKS ===== -->
             <div id="list-view" class="space-y-4">
-                <div>
-                    <h1 class="text-2xl font-black text-slate-900">Writing</h1>
-                    <p class="text-sm text-slate-500 mt-1">Pick a task at your level, write, and get your text corrected with a score and a sample reply.
-                        <a href="writing-classic.html" class="ml-1 font-semibold text-indigo-700 hover:underline">Open the old version</a></p>
+                <div class="flex flex-wrap items-end justify-between gap-3">
+                    <div>
+                        <h1 class="text-2xl font-black text-slate-900">Writing</h1>
+                        <p class="text-sm text-slate-500 mt-1">Something new every time: start the task picked for you, ask for any subject, or follow this week's theme. Then get your text corrected.
+                            <a href="writing-classic.html" class="ml-1 font-semibold text-indigo-700 hover:underline">Open the old version</a></p>
+                    </div>
+                    <div id="levels" class="flex w-max max-w-full gap-1 p-1 bg-slate-200/70 rounded-xl overflow-x-auto" role="tablist" aria-label="Level"></div>
                 </div>
-                <div id="levels" class="flex w-max max-w-full gap-1 p-1 bg-slate-200/70 rounded-xl overflow-x-auto" role="tablist" aria-label="Level"></div>
+                <div id="feed-top" class="grid grid-cols-1 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] gap-4"></div>
+
+                <section class="bg-white border border-slate-200 rounded-3xl p-4 sm:p-5 space-y-3">
+                    <h2 class="text-lg font-black text-slate-900">What do you want to write about?</h2>
+                    <form id="ask-form" class="flex flex-col sm:flex-row gap-2">
+                        <input id="subject-other" type="text" maxlength="80" class="flex-1 text-base px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white">
+                        <select id="own-format" aria-label="Format" class="text-sm px-3 py-3 bg-slate-50 border border-slate-200 rounded-xl"></select>
+                        <button id="gen-btn" type="submit" class="min-h-[48px] px-5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-bold rounded-xl whitespace-nowrap">Give me a question</button>
+                    </form>
+                    <div id="ideas" class="flex flex-wrap items-center gap-1.5"></div>
+                    <p class="text-xs text-slate-400">Uses one AI use. A different question every time.</p>
+                    <p id="gen-error" class="hidden text-sm text-rose-700"></p>
+                    <div>
+                        <button type="button" id="toggle-post" class="text-sm font-semibold text-slate-600 hover:text-indigo-700">📝 Or paste a question from a book, an exam or your teacher</button>
+                        <div id="post-box" class="hidden mt-2 space-y-2">
+                            <textarea id="post-text" rows="4" maxlength="1200" placeholder="e.g. Vous avez passé un week-end chez des amis. Écrivez-leur pour les remercier…" class="w-full text-base md:text-sm p-3 bg-white border border-slate-200 rounded-xl resize-y focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
+                            <button id="post-btn" type="button" class="min-h-[44px] px-4 bg-slate-900 hover:bg-slate-800 disabled:opacity-50 text-white font-bold rounded-xl">Use my question</button>
+                            <p id="post-error" class="hidden text-sm text-rose-700"></p>
+                        </div>
+                    </div>
+                </section>
 
                 <section class="space-y-2">
-                    <h2 id="tasks-heading" class="text-sm font-bold uppercase tracking-wide text-slate-500">Tasks</h2>
+                    <h2 id="tasks-heading" class="text-sm font-bold uppercase tracking-wide text-slate-500">Explore all tasks</h2>
                     <div id="task-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
                 </section>
-                <details id="make-own" class="bg-white border border-slate-200 rounded-2xl">
-                    <summary class="cursor-pointer list-none p-4 flex items-center justify-between gap-3">
-                        <span><span class="font-black text-slate-900">✨ Make your own</span>
-                        <span class="block sm:inline sm:ml-2 text-sm text-slate-500">A new question on any subject, or a question you paste.</span></span>
-                        <span class="chev text-slate-400 transition" aria-hidden="true">▾</span>
-                    </summary>
-                    <div class="px-4 pb-4 grid grid-cols-1 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] gap-4">
-                    <section class="space-y-3">
-                        <h2 class="font-bold text-slate-900">A new question</h2>
-                        <div>
-                            <div class="text-sm font-semibold text-slate-700 mb-1.5">Subject</div>
-                            <div id="subjects" class="flex flex-wrap gap-1.5"></div>
-                            <input id="subject-other" type="text" maxlength="80" placeholder="…or type any subject" class="mt-2 w-full text-base md:text-sm px-3 py-2 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                        </div>
-                        <div>
-                            <div class="text-sm font-semibold text-slate-700 mb-1.5">Format</div>
-                            <div id="formats" class="flex flex-wrap gap-1.5"></div>
-                        </div>
-                        <div class="flex items-center gap-3">
-                            <button id="gen-btn" type="button" class="whitespace-nowrap min-h-[48px] px-5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-bold rounded-xl">Write me a question</button>
-                            <span class="hidden sm:inline text-xs text-slate-400">A different question every time. Uses AI.</span>
-                        </div>
-                        <p id="gen-error" class="hidden text-sm text-rose-700"></p>
-                    </section>
-
-                    <!-- Post your own question -->
-                    <section class="space-y-3 flex flex-col">
-                        <h2 class="font-bold text-slate-900">Your own question</h2>
-                        <p class="text-sm text-slate-500">Paste a question from a book, an exam or your teacher, in French or English.</p>
-                        <textarea id="post-text" rows="4" maxlength="1200" placeholder="e.g. Vous avez passé un week-end chez des amis. Écrivez-leur pour les remercier…" class="flex-1 w-full text-base md:text-sm p-3 bg-white border border-slate-200 rounded-xl resize-y focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
-                        <button id="post-btn" type="button" class="self-start min-h-[44px] px-4 bg-slate-900 hover:bg-slate-800 disabled:opacity-50 text-white font-bold rounded-xl">Use my question</button>
-                        <p id="post-error" class="hidden text-sm text-rose-700"></p>
-                    </section>
-                    </div>
-                </details>
             </div>
 
             <!-- ===== ONE TASK ===== -->
@@ -163,12 +152,9 @@
         let ownTasks = store.get('writing_own', []);      // AI questions and your own questions
         let samples = store.get('writing_samples', {});   // task id -> { fr, en } sample reply written by the AI
         const WORDS = { A1: [40, 60], A2: [60, 90], B1: [100, 140], B2: [160, 220], C1: [220, 280] };
-        const SUBJECTS = ['Daily life', 'Family and friends', 'Food', 'Travel', 'Home', 'Work', 'Studies', 'Health and sport',
-            'Free time', 'Shopping', 'Technology', 'Environment', 'Culture and media', 'Society'];
         const FORMATS = [['message', 'Message to a friend'], ['email', 'Formal email or letter'], ['story', 'Story'],
             ['article', 'Article or blog'], ['opinion', 'Opinion'], ['essay', 'Essay']];
         const DEFAULT_FORMAT = { A1: 'message', A2: 'message', B1: 'opinion', B2: 'essay', C1: 'essay' };
-        let pick = store.get('writing_pick', { subject: 'Daily life', format: null });
         const kindLabel = (t) => t.source === 'posted' ? 'Your question' : t.own ? 'AI question' : t.type;
         let task = null;
         const allTasks = () => [...window.WRITING_TASKS, ...ownTasks];
@@ -205,19 +191,54 @@
                 </a>`;
             };
             const mine = ownTasks.filter(t => t.level === level);
-            $('tasks-heading').textContent = `Tasks for ${level}`;
+            $('tasks-heading').textContent = `Explore all tasks at ${level}`;
             $('task-grid').innerHTML = [...window.WRITING_TASKS.filter(t => t.level === level), ...mine].map(card).join('');
-            renderPicker();
+            renderFeed();
         }
 
-        // Subject and format chips
-        function renderPicker() {
-            const level = currentLevel();
-            const fmt = pick.format || DEFAULT_FORMAT[level];
-            const subjects = SUBJECTS;
-            const chip = (on) => `min-h-[36px] px-3 rounded-full text-sm font-semibold border transition ${on ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-white border-slate-200 text-slate-700 hover:border-indigo-300'}`;
-            $('subjects').innerHTML = subjects.map(s => `<button type="button" data-subject="${escapeHtml(s)}" class="${chip(s === pick.subject)}">${escapeHtml(s)}</button>`).join('');
-            $('formats').innerHTML = FORMATS.map(([k, label]) => `<button type="button" data-format="${k}" class="${chip(k === fmt)}">${escapeHtml(label)}</button>`).join('');
+        // ---------- The feed: Up next, this week's theme, ideas ----------
+        const goal = () => (LocalStore.get('fs_profile', {}) || {}).goal || '';
+        let feed = {}, ideaChips = {};
+        function upNext(lv) {
+            if (!feed[lv]) feed[lv] = { q: IDEAS.queue('writing', allTasks().filter(t => t.level === lv && !results[t.id]), t => t.id), i: 0, ideas: {} };
+            const f = feed[lv];
+            if (f.i < f.q.length) return { type: 'task', task: f.q[f.i] };
+            if (!f.ideas[f.i]) f.ideas[f.i] = IDEAS.randomIdea(lv, goal());
+            return { type: 'idea', subject: f.ideas[f.i] };
+        }
+        function renderFeed() {
+            const lv = currentLevel(), it = upNext(lv);
+            const card = it.type === 'task'
+                ? IDEAS.upNextCard({ lv, badge: kindLabel(it.task), title: it.task.title, body: it.task.en || it.task.fr, meta: `${it.task.words[0]}–${it.task.words[1]} words${drafts[it.task.id] ? ' · you have a draft' : ''}`, start: drafts[it.task.id] ? '▶ Continue' : '▶ Start' })
+                : IDEAS.upNextCard({ lv, badge: 'Something new', title: it.subject, body: 'A brand-new writing task on this subject, for your level.', meta: `You've done every task at ${lv}. Nice!`, note: '✨ Uses one AI use.', start: '✨ Start' });
+            $('feed-top').innerHTML = card + IDEAS.themeCard('writing', lv);
+            if (!ideaChips[lv]) ideaChips[lv] = IDEAS.suggestions(lv, goal());
+            $('subject-other').placeholder = 'e.g. ' + ideaChips[lv][0];
+            $('ideas').innerHTML = '<span class="text-xs font-semibold text-slate-400 mr-1">Ideas:</span>' + ideaChips[lv].map(c => `<button type="button" data-idea="${escapeHtml(c)}" class="min-h-[34px] px-3 rounded-full text-sm font-semibold bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 text-slate-700 transition">${escapeHtml(c)}</button>`).join('')
+                + '<button type="button" data-more-ideas class="min-h-[34px] px-3 rounded-full text-sm font-semibold text-indigo-700 hover:bg-indigo-50">🔀 Other ideas</button>';
+            const sel = $('own-format'), keep = sel.value;
+            sel.innerHTML = '<option value="">Best format for my level</option>' + FORMATS.map(([k, label]) => `<option value="${k}">${escapeHtml(label)}</option>`).join('');
+            sel.value = keep;
+        }
+        const topError = (m) => { const el = $('topic-error'); if (el) { el.textContent = m; el.classList.toggle('hidden', !m); } };
+        async function startUpNext() {
+            const lv = currentLevel(), it = upNext(lv);
+            if (it.type === 'task') { IDEAS.seen('writing', it.task.id); openTask(it.task.id, true); return; }
+            const btn = document.querySelector('#up-next [data-start]');
+            onGenerate(btn, (m) => topError(m), it.subject, DEFAULT_FORMAT[lv], lv);
+        }
+        async function startTheme() {
+            const lv = currentLevel(), th = IDEAS.thisWeek();
+            const id = IDEAS.made('writing', lv);
+            if (id && findTask(id)) { openTask(id, true); return; }
+            const btn = document.querySelector('#theme-card [data-theme-start]') || $('gen-btn');
+            const label = btn.innerHTML; btn.style.opacity = '0.6';
+            try {
+                const q = await generateQuestion(`${th.en}: ${th.writing}`, DEFAULT_FORMAT[lv], lv);
+                IDEAS.remember('writing', lv, q.id);
+                openTask(q.id, true);
+            } catch (err) { if (!task) { showList(false); topError(err.message); } }
+            btn.style.opacity = ''; btn.innerHTML = label;
         }
 
         // ---------- One task ----------
@@ -552,11 +573,15 @@ Only list real mistakes, at most 12, in the order they appear. "wrong" must be c
             if (a) { e.preventDefault(); openTask(a.dataset.task, true); return; }
             const lv = e.target.closest('#levels [data-level]');
             if (lv) { store.set('writing_level', lv.dataset.level); renderList(); return; }
-            const sj = e.target.closest('[data-subject]');
-            if (sj) { pick.subject = sj.dataset.subject; $('subject-other').value = ''; store.set('writing_pick', pick); renderPicker(); return; }
-            const fm = e.target.closest('[data-format]');
-            if (fm) { pick.format = fm.dataset.format; store.set('writing_pick', pick); renderPicker(); }
+            if (e.target.closest('#up-next [data-start]')) { startUpNext(); return; }
+            if (e.target.closest('#up-next [data-shuffle]')) { const lv = currentLevel(), it = upNext(lv); if (it.task) IDEAS.seen('writing', it.task.id); feed[lv].i++; renderFeed(); return; }
+            const th = e.target.closest('[data-theme-start]');
+            if (th && !e.metaKey && !e.ctrlKey) { e.preventDefault(); startTheme(); return; }
+            const idea = e.target.closest('[data-idea]');
+            if (idea) { $('subject-other').value = idea.dataset.idea; $('subject-other').focus(); return; }
+            if (e.target.closest('[data-more-ideas]')) { ideaChips[currentLevel()] = IDEAS.suggestions(currentLevel(), goal()); renderFeed(); return; }
         });
+        $('toggle-post').addEventListener('click', () => { const h = $('post-box').classList.toggle('hidden'); if (!h) $('post-text').focus(); });
         $('text').addEventListener('input', () => { updateCount(); clearTimeout(saveTimer); saveTimer = setTimeout(saveDraft, 400); });
         $('back').addEventListener('click', () => showList(true));
         $('say-task').addEventListener('click', () => speakFrench(task.fr));
@@ -570,13 +595,13 @@ Only list real mistakes, at most 12, in the order they appear. "wrong" must be c
             if ($('text').value.trim() && !confirm('Clear your text?')) return;
             $('text').value = ''; updateCount(); saveDraft();
         });
-        $('gen-btn').addEventListener('click', () => {
-            const typed = $('subject-other').value.trim();
+        $('ask-form').addEventListener('submit', (e) => {
+            e.preventDefault();
             const level = currentLevel();
+            const typed = $('subject-other').value.trim() || $('subject-other').placeholder.replace(/^e\.g\. /, '');
             const showError = (m) => { $('gen-error').textContent = m; $('gen-error').classList.toggle('hidden', !m); };
-            onGenerate($('gen-btn'), showError, typed || pick.subject, pick.format || DEFAULT_FORMAT[level], level);
+            onGenerate($('gen-btn'), showError, typed, $('own-format').value || DEFAULT_FORMAT[level], level);
         });
-        $('subject-other').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('gen-btn').click(); });
         $('post-btn').addEventListener('click', postQuestion);
         $('btn-sample').addEventListener('click', () => showSample(false));
         $('btn-another').addEventListener('click', () => {
@@ -585,8 +610,9 @@ Only list real mistakes, at most 12, in the order they appear. "wrong" must be c
         });
 
         function route() {
-            const id = new URLSearchParams(location.search).get('task');
-            if (id && findTask(id)) openTask(id, false); else showList(false);
+            const p = new URLSearchParams(location.search), id = p.get('task');
+            if (id && findTask(id)) openTask(id, false);
+            else { showList(false); if (p.get('theme')) startTheme(); }
         }
         window.addEventListener('popstate', route);
         route();
