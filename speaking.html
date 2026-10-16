@@ -48,16 +48,25 @@
 
                 <!-- Conversation -->
                 <section id="mode-conversation" class="space-y-3">
-                    <p class="text-sm text-slate-600">Chat with a French character in an everyday situation. Speak or type; ask "What can I say?" if you're stuck. Your mistakes are corrected as you go, and at the end you get a short report.</p>
+                    <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] gap-3">
+                        <section class="bg-white border border-slate-200 rounded-2xl p-4 space-y-2">
+                            <h2 class="font-black text-slate-900">💬 Talk with a character</h2>
+                            <p class="text-sm text-slate-600">Pick a scene below and chat with a French character in an everyday situation.</p>
+                            <ul class="text-sm text-slate-600 space-y-1">
+                                <li>🎙️ Speak or type your answers.</li>
+                                <li>💡 Stuck? Tap "What can I say?" for ideas.</li>
+                                <li>✏️ Your mistakes are corrected as you go, and you get a short report at the end.</li>
+                            </ul>
+                        </section>
+                        <section class="bg-white border border-slate-200 rounded-2xl p-4 space-y-3 flex flex-col">
+                            <h2 class="font-black text-slate-900">🎭 Your own scene</h2>
+                            <p class="text-sm text-slate-500">Describe any situation and the AI plays the other person.</p>
+                            <input id="own-scene" type="text" maxlength="160" placeholder="e.g. returning a broken phone to a shop" class="w-full text-base md:text-sm px-3 py-2.5 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            <button id="own-scene-btn" type="button" class="self-start min-h-[44px] px-4 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl">Start the scene</button>
+                        </section>
+                    </div>
+                    <h2 class="text-sm font-bold uppercase tracking-wide text-slate-500">Scenes</h2>
                     <div id="scene-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
-                    <section class="bg-white border border-slate-200 rounded-2xl p-4 space-y-2">
-                        <h2 class="font-black text-slate-900">🎭 Your own scene</h2>
-                        <p class="text-sm text-slate-500">Describe any situation and the AI plays the other person.</p>
-                        <div class="flex flex-col sm:flex-row gap-2">
-                            <input id="own-scene" type="text" maxlength="160" placeholder="e.g. returning a broken phone to a shop" class="flex-1 text-base md:text-sm px-3 py-2.5 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                            <button id="own-scene-btn" type="button" class="min-h-[44px] px-4 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl">Start the scene</button>
-                        </div>
-                    </section>
                 </section>
 
                 <!-- Shadowing -->
