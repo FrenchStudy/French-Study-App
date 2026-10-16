@@ -163,12 +163,12 @@ window.LIB = (function () {
             { role: 'system', content: `You write original French ${purpose === 'listening' ? 'listening scripts (written to be read aloud: natural spoken French, short sentences)' : 'reading texts'} for CEFR level ${level} learners, in the style of TV5Monde and DELF exams.
 Write about ${LENGTH[level] || '120-160'} words, at ${level} level (vocabulary and grammar of that level), with a concrete situation and real details.
 Then write 4 multiple-choice comprehension questions, each with 3 options, in ${['A1', 'A2'].includes(level) ? 'simple English' : 'French'}. Put the correct option FIRST (answer: 0); the app shuffles them.
-Reply with JSON only: {"title": "a short French title", "fr": "the text (use \\n between paragraphs or speakers)", "en": "an English translation",
+Reply with JSON only: {"title": "a short French title", "kind": "the type of text in one or two English words, e.g. Dialogue, Announcement", "fr": "the text (use \\n between paragraphs or speakers)", "en": "an English translation",
  "questions": [{"q": "question", "options": ["correct", "wrong", "wrong"], "answer": 0, "why": "one short English explanation quoting the text"}]}` },
             { role: 'user', content: `Subject: ${subject}\nType of text: ${kind}${recent.length ? '\nMake it different from: ' + recent.join('; ') : ''}` }
         ], { json: true, temperature: 0.9, feature: purpose === 'listening' ? 'listening-text' : 'reading-text' });
         if (!t.fr || String(t.fr).length < 40) throw new Error('The AI reply could not be read. Please try again.');
-        const text = { id: '', level, subject, kind, title: String(t.title || subject).slice(0, 120), fr: String(t.fr).trim(), en: String(t.en || '').trim(), questions: cleanQuestions(t.questions), source: 'library' };
+        const text = { id: '', level, subject, kind: String(kind).length > 30 ? String(t.kind || 'Recording').slice(0, 30) : kind, title: String(t.title || subject).slice(0, 120), fr: String(t.fr).trim(), en: String(t.en || '').trim(), questions: cleanQuestions(t.questions), source: 'library' };
         // Share it with everyone at this level; if that fails, keep it on this device
         const dbId = await saveToLibrary(text);
         if (dbId) {

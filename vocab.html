@@ -47,6 +47,8 @@
                     <button id="topic-back" type="button" class="min-h-[44px] px-1 text-sm font-semibold text-slate-600 hover:text-indigo-600">← All topics</button>
                     <div id="topic-nav-top" class="flex items-center gap-1"></div>
                 </div>
+                <div id="topic-layout" class="lg:grid lg:grid-cols-[minmax(0,1fr)_20rem] lg:gap-8">
+                <div class="space-y-4 min-w-0">
                 <div class="flex flex-col md:flex-row md:items-end gap-3 md:gap-8">
                     <div class="min-w-0 flex-1">
                         <span id="topic-crumb" class="text-xs font-bold px-2 py-1 rounded-full bg-slate-100 text-slate-600"></span>
@@ -180,9 +182,11 @@
             </section>
                 <div id="step-next" class="pt-2"></div>
                 <div id="topic-nav" class="grid grid-cols-2 gap-2 pt-2 border-t border-slate-200"></div>
+                </div>
+                <!-- The other topics of this level, as in Grammar (wide screens) -->
+                <aside id="topic-side" class="hidden lg:block lg:sticky lg:top-4 lg:self-start"></aside>
+                </div>
             </div>
-
-            <p class="text-xs text-slate-400">Your progress is saved on this device for now; it will sync to your account in a later update.</p>
         </div>
     </main>
 
@@ -928,6 +932,29 @@
                 ? `<a href="${topicUrl(x.id)}" data-topic="${escapeHtml(x.id)}" title="${escapeHtml(x.short || x.title)}" class="min-h-[40px] px-3 inline-flex items-center text-sm font-semibold text-slate-700 bg-white border border-slate-200 hover:border-indigo-300 rounded-xl">${label}</a>`
                 : `<span class="min-h-[40px] px-3 inline-flex items-center text-sm font-semibold text-slate-300 bg-white border border-slate-100 rounded-xl" aria-hidden="true">${label}</span>`;
             $('topic-nav-top').innerHTML = list.length ? `${small(prev, '‹ Prev', 'prev')}<span class="text-xs text-slate-400 px-1">${i + 1} / ${list.length}</span>${small(nx, 'Next ›', 'next')}` : '';
+            renderTopicSide(list);
+        }
+        // The other topics of this level on the right, with a tick for the ones you know
+        function renderTopicSide(list) {
+            const side = $('topic-side');
+            $('topic-layout').classList.toggle('lg:grid', list.length > 0);
+            side.classList.toggle('lg:block', list.length > 0);
+            if (!list.length) { side.innerHTML = ''; return; }
+            const name = topic.freq ? 'Most common words' : `Vocab · ${topic.level}`;
+            side.innerHTML = `
+                <div class="bg-white border border-slate-200 rounded-2xl p-3">
+                    <div class="text-xs font-bold uppercase tracking-wide text-indigo-700 px-1 pb-2">${escapeHtml(name)}</div>
+                    <div class="max-h-[70vh] overflow-y-auto divide-y divide-slate-100">
+                        ${list.map((x, k) => {
+                            const st = topicState(x), on = x === topic;
+                            return `<a href="${topicUrl(x.id)}" data-topic="${escapeHtml(x.id)}" ${on ? 'aria-current="page"' : ''} class="flex items-center gap-2 px-1 py-2 text-sm rounded-lg ${on ? 'bg-indigo-50 font-bold text-slate-900' : 'text-slate-700 hover:bg-slate-50'}">
+                                <span class="shrink-0 w-6 h-6 rounded-full text-[11px] font-bold flex items-center justify-center ${st.done ? 'bg-emerald-500 text-white' : on ? 'bg-indigo-600 text-white' : st.started ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-600'}">${st.done ? '✓' : k + 1}</span>
+                                <span class="truncate">${escapeHtml(x.short || x.title)}</span></a>`;
+                        }).join('')}
+                    </div>
+                </div>`;
+            const cur = side.querySelector('[aria-current="page"]');
+            if (cur) { const box = cur.parentElement; box.scrollTop = Math.max(0, cur.offsetTop - box.offsetTop - box.clientHeight / 2); }
         }
         function renderTopics() {
             const words = plain($('topic-search').value.trim()).split(/\s+/).filter(Boolean);
