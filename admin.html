@@ -11,8 +11,9 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="Français">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="css/app.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.104.0"></script>
+    <script>window.supabase || document.write('<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"><\/script>')</script>
     <script src="config.js"></script>
 </head>
 <body class="h-full bg-slate-100 flex flex-col overflow-hidden font-sans">
@@ -55,7 +56,9 @@
                 <p class="text-xs text-slate-500">This key is only used in <b>this browser</b>, and only while the AI function above is not deployed. Students never see it.</p>
                 <div>
                     <button onclick="saveGlobalAISettings()" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-4 py-2 rounded-xl transition shadow-sm">💾 Sauvegarder les paramètres globaux</button>
+                    <button id="clear-key-btn" onclick="clearAdminKey()" class="ml-2 bg-white border border-rose-200 hover:bg-rose-50 text-rose-700 text-xs font-bold px-4 py-2 rounded-xl transition">🗑 Remove the key from this browser</button>
                 </div>
+                <p id="key-state" class="text-xs"></p>
             </div>
 
         </main>
@@ -74,7 +77,22 @@
             else el.innerHTML = `⚠️ <b>The AI function answered with an error.</b><br><span class="text-xs text-slate-500">${esc(AIServer.problem || (r.data && r.data.error) || '')}</span>`;
         })();
 
+        function showKeyState() {
+            const has = !!localStorage.getItem('ai_api_key');
+            const el = document.getElementById('key-state');
+            el.className = 'text-xs ' + (has ? 'text-amber-700' : 'text-emerald-700');
+            el.textContent = has ? 'A Groq key is saved in this browser. Once the AI function shows ✅ above, you can remove it: it is no longer needed.'
+                : '✅ No Groq key is saved in this browser. The key is only on the server.';
+            document.getElementById('clear-key-btn').classList.toggle('hidden', !has);
+        }
+        function clearAdminKey() {
+            if (!confirm('Remove the Groq key from this browser? Students are not affected; the server keeps its own key.')) return;
+            localStorage.removeItem('ai_api_key');
+            document.getElementById('global-api-key-input').value = '';
+            showKeyState();
+        }
         function loadAdminSettings() {
+            showKeyState();
             document.getElementById('global-api-key-input').value = localStorage.getItem('ai_api_key') || "";
             document.getElementById('global-model-input').value = localStorage.getItem('ai_model_name') || "openai/gpt-oss-120b";
         }
@@ -84,6 +102,7 @@
             const model = document.getElementById('global-model-input').value.trim();
             
             if (key) localStorage.setItem('ai_api_key', key);
+            showKeyState();
             if (model) localStorage.setItem('ai_model_name', model);
             
             alert("✅ Paramètres globaux de l'IA enregistrés avec succès !");
