@@ -57,11 +57,14 @@ window.TopicsPage = (function () {
                 : vs.length ? '' : '<span class="shrink-0 text-xs font-semibold text-violet-700 bg-violet-50 px-2 py-0.5 rounded-full" title="The AI writes this text the first time someone opens it">✨ New</span>';
             const first = vs[0];
             const meta = first ? [first.kind, cfg.meta(first)].filter(Boolean).join(' · ') + (vs.length > 1 ? ` · ${vs.length} versions` : '') : 'Written for you when you open it';
+            // A topic that is only a theme (title = category): show the text's own headline instead
+            const theme = t.category && t.title.toLowerCase() === t.category.toLowerCase();
+            const heading = theme ? (first ? first.title : t.description || t.title) : t.title;
             return `<a href="${cfg.page}.html?topic=${encodeURIComponent(t.key)}" data-topic="${esc(t.key)}" class="group flex flex-col gap-1.5 bg-white border border-slate-200 hover:border-indigo-400 hover:shadow-md transition rounded-2xl p-4">
                 <span class="flex items-center justify-between gap-2">
                     <span class="text-[11px] font-bold uppercase tracking-wide ${st[0]} ${st[1]} px-2 py-0.5 rounded-full truncate">${esc(t.category || 'General')}</span>${status}
                 </span>
-                <span class="font-bold text-slate-900 group-hover:text-indigo-700 leading-snug">${cfg.icon || ''}${esc(t.title)}</span>
+                <span class="font-bold text-slate-900 group-hover:text-indigo-700 leading-snug">${cfg.icon || ''}${esc(heading)}</span>
                 <span class="text-xs text-slate-500">${esc(meta)}</span>
             </a>`;
         };
