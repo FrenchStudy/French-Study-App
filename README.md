@@ -8,17 +8,17 @@ A browser-based French learning suite backed by Supabase (schema `French-schema`
 |---|---|
 | `index.html` | Home: greeting and progress, the 8 sections, and a Continue row (next flashcards, grammar, conjugation and goal) |
 | `login.html` | Sign in, create account, forgot password, Google |
-| `welcome.html` | First-time setup: goal, level or a 12-question placement test |
+| `welcome.html` | First-time setup: goal, level or a 14-question placement test (A1–C2) |
 | `reset.html` | Choose a new password from the reset email |
 | `lesson.html` | Grammar: one course of 97 lessons (A1–C2), the 78 grammar lessons plus the verb lessons |
 | `vocab.html` | Vocabulary by topic (44 themes plus 4 basics): Learn (hands-on lesson and words), Practise (flashcards), Test (quiz); Review of due words; the 5,000 most common words in sets of 50 |
 | `conjugations.html` | Conjugations: verb tables for 296 verbs in 12 tenses, and Practice (fill in the six forms); no AI |
-| `reading.html` | Reading practice (`reading_topics`) |
-| `listening.html` | Listening practice (`listening_topics`) |
-| `writing.html` | Writing: a new AI question from a subject and format, your own posted question, or 27 ready-made tasks (A1–C1); checklist, word bank, model answer or AI sample reply; AI corrections shown inside your text. `writing-classic.html` is the previous page, kept for comparison |
-| `speaking.html` | Speaking: Conversation (12 AI characters or your own scene, voice or text, hints, report), Shadowing (7 tracks, listen and repeat with a word check, no AI) and Exam task (AI task or your own question, speak with a timer, score and corrections). `speaking-classic.html` is the previous page |
-| `translator.html` | Translator and analyzer |
-| `admin.html` | Save the AI API key, model and URL for this browser |
+| `reading.html` | Reading: texts by level (built-in, shared library, your `reading_topics`), a new AI text by subject and type, or paste your own; tap any word for its meaning and add it to Vocab; questions with explanations |
+| `listening.html` | Listening: recordings by level (built-in, shared library, your `listening_topics`); sentence-by-sentence player, questions, transcript and dictation |
+| `writing.html` | Writing: a new AI question from a subject and format, your own posted question, or 30 ready-made tasks (A1–C2); checklist, word bank, model answer or AI sample reply; AI corrections shown inside your text. |
+| `speaking.html` | Speaking: Conversation (12 AI characters or your own scene, voice or text, hints, report), Shadowing (7 tracks, listen and repeat with a word check, no AI) and Exam task (AI task or your own question, speak with a timer, score and corrections). |
+| `translator.html` | Translator French ⇄ English with grammar notes, a tutor chat and Save to Vocab; one visit counts as one AI use |
+| `admin.html` | Admins only: AI status and a dashboard (students, activity, AI use); needs `supabase/admin/01_dashboard.sql` |
 
 ## Shared configuration
 
@@ -46,4 +46,4 @@ AI requests go through the `ai` Edge Function (`supabase/functions/ai`), which k
 ## Running locally
 
 Serve the folder with any static server, e.g. `npx serve .`, then open `index.html`.
-Until the `ai` Edge Function is deployed, AI uses the Groq key saved on `admin.html` in that browser.
+AI needs the `ai` Edge Function (see `supabase/ai/README.md`). After changing classes in a page, rebuild the stylesheet with `tools/build-css.sh`.

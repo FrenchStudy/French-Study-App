@@ -345,5 +345,51 @@ window.WRITING_TASKS = [
             'But a language carries culture, humour and relationships, which a machine cannot give.',
             'Learning a language changes the way we think.',
             'A strong final sentence.']
+    },
+    {
+        id: 'c2-tribune', level: 'C2', type: 'Opinion piece', title: 'An op-ed on attention',
+        fr: "Un grand quotidien vous invite à publier une tribune intitulée « Avons-nous perdu le droit de nous ennuyer ? ». Défendez une thèse personnelle, nuancée et argumentée, dans un style soutenu.",
+        en: 'A national newspaper invites you to publish an op-ed titled "Have we lost the right to be bored?". Defend a personal, nuanced and well-argued thesis, in a formal style.',
+        words: [280, 350],
+        include: ['A striking opening (anecdote, quotation or paradox)', 'A clear thesis and a counter-argument you answer', 'Varied, precise vocabulary and complex sentences', 'A memorable final line'],
+        bank: [['On aurait tort de croire que…', 'It would be wrong to think that…'], ['Il ne s’agit pas tant de… que de…', 'It is not so much a question of… as of…'],
+            ['Que l’on ne s’y trompe pas : …', 'Make no mistake: …'], ['À l’heure où…', 'At a time when…'], ['Il y a fort à parier que…', 'It is a safe bet that…'],
+            ['quitte à (+ infinitif)', 'even if it means…'], ['Rien n’est moins sûr.', 'Nothing could be less certain.'], ['En définitive, …', 'All in all, …']],
+        plan: ['Opening: a scene from daily life (a queue, a train) where everyone reaches for their phone.',
+            'Thesis: boredom is not empty time but the space where ideas and attention grow.',
+            'Counter-argument: screens also bring learning and connection; answer it with nuance.',
+            'What we lose: daydreaming, patience, the ability to stay with one idea.',
+            'Ending: a call to protect a little boredom, with a memorable sentence.']
+    },
+    {
+        id: 'c2-synthese', level: 'C2', type: 'Formal letter', title: 'Letter to a mayor about a heritage site',
+        fr: "La municipalité envisage de transformer une ancienne halle du XIXe siècle en parking. Au nom d’une association de quartier, rédigez une lettre au maire pour vous y opposer et proposer une alternative crédible.",
+        en: 'The town council plans to turn a 19th-century market hall into a car park. On behalf of a local association, write a letter to the mayor opposing the plan and proposing a credible alternative.',
+        words: [280, 350],
+        include: ['Formal salutation and closing formula', 'Precise arguments: heritage, economy, quality of life', 'A concrete, costed alternative', 'A courteous but firm tone throughout'],
+        bank: [['Monsieur le Maire,', 'Dear Mayor,'], ['Nous avons appris avec inquiétude que…', 'We have learnt with concern that…'],
+            ['Permettez-nous d’attirer votre attention sur…', 'Allow us to draw your attention to…'], ['Il nous paraît essentiel de…', 'It seems essential to us to…'],
+            ['à plus forte raison', 'all the more so'], ['Nous nous tenons à votre disposition pour…', 'We are at your disposal to…'],
+            ['dans l’attente de votre réponse', 'looking forward to your reply'], ['Veuillez agréer, Monsieur le Maire, l’expression de notre haute considération.', 'Yours faithfully (very formal).']],
+        plan: ['Introduce the association and the reason for writing.',
+            'Why the hall matters: history, architecture, place in the neighbourhood.',
+            'The cost of a car park: traffic, heat, lost identity.',
+            'The alternative: a covered market and cultural space, how it could be funded.',
+            'Request a meeting; formal closing.']
+    },
+    {
+        id: 'c2-essai', level: 'C2', type: 'Essay', title: 'Can we still believe in progress?',
+        fr: "« Le progrès n’est que l’accomplissement des utopies. » (Oscar Wilde) Dans un essai argumenté, vous discuterez cette affirmation à la lumière des défis contemporains.",
+        en: '"Progress is the realisation of Utopias." (Oscar Wilde) In an argued essay, discuss this statement in the light of today\'s challenges.',
+        words: [300, 380],
+        include: ['A problématique that questions the quotation', 'A dialectical plan (thesis, antithesis, synthesis)', 'Precise examples (science, society, environment)', 'An elegant, controlled style'],
+        bank: [['Cette affirmation invite à s’interroger sur…', 'This statement invites us to consider…'], ['Si l’on ne saurait nier que…, force est de reconnaître que…', 'While one cannot deny that…, one must admit that…'],
+            ['Dès lors, …', 'Consequently, …'], ['Il convient toutefois de nuancer…', 'However, … should be qualified'], ['À cet égard, …', 'In this respect, …'],
+            ['au demeurant', 'moreover, for that matter'], ['Loin d’être…, …', 'Far from being…, …'], ['C’est à ce prix que…', 'It is at this price that…']],
+        plan: ['Introduction: present the quotation, define progress and utopia, state the problématique.',
+            'Thesis: many past utopias became reality (medicine, rights, communication).',
+            'Antithesis: progress has a cost and some utopias turned into nightmares.',
+            'Synthesis: progress as a choice, guided by values rather than technology alone.',
+            'Conclusion: answer the question and open to a new perspective.']
     }
 ];

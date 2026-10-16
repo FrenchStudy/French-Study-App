@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reading - French Study App</title>
+    <title>Reading - Apprendre le Français</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#4f46e5">
     <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
@@ -37,8 +37,7 @@
             <div id="list-view" class="space-y-4">
                 <div>
                     <h1 class="text-2xl font-black text-slate-900">Reading</h1>
-                    <p class="text-sm text-slate-500 mt-1">Read a text at your level, tap any word for its meaning, then answer the questions.
-                        <a href="reading-classic.html" class="ml-1 font-semibold text-indigo-700 hover:underline">Open the old version</a></p>
+                    <p class="text-sm text-slate-500 mt-1">Read a text at your level, tap any word for its meaning, then answer the questions.</p>
                 </div>
                 <div id="levels" class="flex w-max max-w-full gap-1 p-1 bg-slate-200/70 rounded-xl overflow-x-auto" role="tablist" aria-label="Level"></div>
 
@@ -122,17 +121,17 @@
     <script>
         const $ = (id) => document.getElementById(id);
         const store = LIB.store;
-        const LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1'];
+        const LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
         const LEVEL_STYLE = {
             A1: ['text-emerald-700', 'bg-emerald-50'], A2: ['text-teal-700', 'bg-teal-50'], B1: ['text-sky-700', 'bg-sky-50'],
-            B2: ['text-indigo-700', 'bg-indigo-50'], C1: ['text-purple-700', 'bg-purple-50']
+            B2: ['text-indigo-700', 'bg-indigo-50'], C1: ['text-purple-700', 'bg-purple-50'], C2: ['text-rose-700', 'bg-rose-50']
         };
         const SUBJECTS = ['Daily life', 'Family and friends', 'Food', 'Travel', 'Home', 'Work', 'Studies', 'Health and sport',
             'Free time', 'Shopping', 'Technology', 'Environment', 'Culture and media', 'Society'];
         const KINDS = ['Article', 'Story', 'Dialogue', 'Email or message', 'Blog', 'Advert or notice'];
         const PAGE = 'reading';
         let pick = store.get('reading_pick', { subject: 'Daily life', kind: 'Article' });
-        let dbSubjects = [];
+        let dbTopics = [];          // your reading_topics: shown at their own level, at the bottom
         let libTexts = {};          // level -> texts from the shared library
         let text = null;            // the open text
         let answers = {};           // question index -> chosen option (shuffled index)
@@ -141,12 +140,17 @@
             const saved = store.get('reading_level', null);
             if (LEVELS.includes(saved)) return saved;
             const lv = (LocalStore.get('fs_profile', {}) || {}).level;
-            return LEVELS.includes(lv) ? lv : lv === 'C2' ? 'C1' : 'A1';
+            return LEVELS.includes(lv) ? lv : 'A1';
         }
+        const topicsFor = (lv) => dbTopics.filter(t => t.level === lv);
+        // A text already written for a topic (by any student at that level): reused for free
+        const sameTopic = (t, tp) => String(t.subject || '').trim().toLowerCase() === tp.title.toLowerCase() || String(t.topic || '').trim().toLowerCase() === tp.title.toLowerCase();
+        const topicText = (tp) => [...(libTexts[tp.level] || []), ...LIB.mine()].find(t => t.level === tp.level && sameTopic(t, tp));
         const textsFor = (lv) => {
             const seen = new Set();
             return [...LIB.mine().filter(t => t.level === lv), ...(libTexts[lv] || []), ...LIB.BUILT_IN.filter(t => t.level === lv)]
-                .filter(t => !seen.has(t.id) && seen.add(t.id));
+                .filter(t => !seen.has(t.id) && seen.add(t.id))
+                .filter(t => !topicsFor(lv).some(tp => sameTopic(t, tp)));   // shown on its topic's card instead
         };
         const wordCount = (fr) => (String(fr).match(/[\p{L}]+/gu) || []).length;
         const result = (id) => LIB.results()[PAGE + ':' + id];
@@ -155,17 +159,30 @@
         function renderList() {
             const level = currentLevel();
             $('levels').innerHTML = LEVELS.map(lv => {
-                const list = textsFor(lv);
-                const n = list.filter(t => result(t.id)).length;
+                const list = textsFor(lv), tps = topicsFor(lv);
+                const n = list.filter(t => result(t.id)).length + tps.filter(tp => { const t = topicText(tp); return t && result(t.id); }).length;
                 const on = lv === level;
                 return `<button type="button" role="tab" aria-selected="${on}" data-level="${lv}" class="shrink-0 px-3.5 py-1.5 rounded-lg text-sm font-bold transition ${on ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-800'}">
-                    ${lv}<span class="ml-1.5 text-xs font-semibold ${on ? LEVEL_STYLE[lv][0] : 'text-slate-400'}">${n}/${list.length}</span></button>`;
+                    ${lv}<span class="ml-1.5 text-xs font-semibold ${on ? LEVEL_STYLE[lv][0] : 'text-slate-400'}">${n}/${list.length + tps.length}</span></button>`;
             }).join('');
             renderPicker();
             const st = LEVEL_STYLE[level];
             const list = textsFor(level);
+            const topicCard = (tp) => {
+                const t = topicText(tp), r = t && result(t.id);
+                const status = r ? `<span class="shrink-0 text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">✓ ${r.score}/${r.total}</span>`
+                    : t ? '' : '<span class="shrink-0 text-xs font-semibold text-violet-700 bg-violet-50 px-2 py-0.5 rounded-full" title="Written by AI the first time someone opens it, then shared">✨ New</span>';
+                const words = t ? wordCount(t.fr) : 0;
+                return `<a href="reading.html" data-topic="${tp.id}" class="group flex flex-col gap-1.5 bg-white border border-slate-200 hover:border-indigo-400 hover:shadow-md transition rounded-2xl p-4">
+                    <span class="flex items-center justify-between gap-2">
+                        <span class="text-[11px] font-bold uppercase tracking-wide ${st[0]} ${st[1]} px-2 py-0.5 rounded-full truncate">${escapeHtml(tp.category || 'Topic')}</span>${status}
+                    </span>
+                    <span class="font-bold text-slate-900 group-hover:text-indigo-700 leading-snug">${escapeHtml(t ? t.title : tp.title)}</span>
+                    <span data-topic-meta class="text-xs text-slate-500">${t ? escapeHtml([t.kind, words + ' words', Math.max(1, Math.round(words / 120)) + ' min'].filter(Boolean).join(' · ')) : escapeHtml(tp.description || 'Written for you when you open it')}</span>
+                </a>`;
+            };
             $('texts-heading').textContent = `Texts for ${level}`;
-            $('text-grid').innerHTML = list.length ? list.map(t => {
+            $('text-grid').innerHTML = (list.length || topicsFor(level).length) ? topicsFor(level).map(topicCard).join('') + list.map(t => {
                 const r = result(t.id);
                 const status = r ? `<span class="shrink-0 text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">✓ ${r.score}/${r.total}</span>` : '';
                 const badge = t.source === 'mine' ? ['Your text', 'text-violet-700 bg-violet-50'] : t.source === 'library' ? ['Library', 'text-amber-700 bg-amber-50'] : [t.kind, st[0] + ' ' + st[1]];
@@ -182,7 +199,7 @@
             $('lib-note').textContent = LIB.libraryReady() === false ? 'Shared library not set up yet' : '';
         }
         function renderPicker() {
-            const subjects = [...SUBJECTS, ...dbSubjects.filter(s => !SUBJECTS.includes(s))];
+            const subjects = SUBJECTS;
             const chip = (on) => `min-h-[36px] px-3 rounded-full text-sm font-semibold border transition ${on ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-white border-slate-200 text-slate-700 hover:border-indigo-300'}`;
             $('subjects').innerHTML = subjects.map(s => `<button type="button" data-subject="${escapeHtml(s)}" class="${chip(s === pick.subject)}">${escapeHtml(s)}</button>`).join('');
             $('kinds').innerHTML = KINDS.map(k => `<button type="button" data-kind="${escapeHtml(k)}" class="${chip(k === pick.kind)}">${escapeHtml(k)}</button>`).join('');
@@ -191,13 +208,35 @@
             libTexts[lv] = await LIB.loadLibrary(lv);
             if (!text) renderList();
         }
-        async function loadDbSubjects() {
+        async function loadDbTopics() {
             try {
-                const { data, error } = await window.mySupabase.from('reading_topics').select('title, category').order('id', { ascending: true });
+                let { data, error } = await window.mySupabase.from('reading_topics').select('id, title, level, category, description').order('id', { ascending: true });
+                if (error) ({ data, error } = await window.mySupabase.from('reading_topics').select('id, title, level, category').order('id', { ascending: true }));
                 if (error || !data) return;
-                dbSubjects = [...new Set(data.map(r => String(r.title || r.category || '').trim()).filter(Boolean))].slice(0, 16);
-                if (!text) renderPicker();
-            } catch (e) { /* the built-in subjects are enough */ }
+                dbTopics = data.filter(r => r && r.title).map(r => ({ id: String(r.id), title: String(r.title).trim(), level: String(r.level || '').trim().toUpperCase(), category: String(r.category || '').trim(), description: String(r.description || '').trim() }));
+                if (!text) renderList();
+            } catch (e) { /* no topic table: the built-in texts are enough */ }
+        }
+        // Open a topic: the text someone already made for it, or a new one written now and shared
+        let topicBusy = false;
+        async function openTopic(id, card) {
+            const tp = dbTopics.find(t => t.id === id);
+            if (!tp || topicBusy) return;
+            const have = topicText(tp);
+            if (have) { openText(have.id, true); return; }
+            topicBusy = true;
+            const meta = card && card.querySelector('[data-topic-meta]');
+            if (meta) meta.textContent = 'Writing this text for you…';
+            try {
+                const t = await LIB.generate({ subject: tp.title, kind: 'whichever fits the topic best (article, interview, blog post, report…), on one concrete angle of the topic' + (tp.description ? ' (' + tp.description + ')' : ''), level: tp.level, purpose: PAGE });
+                if (t.source === 'library') libTexts[t.level] = [t, ...(libTexts[t.level] || []).filter(x => x.id !== t.id)];
+                openText(t.id, true);
+            } catch (err) {
+                if (meta) meta.textContent = tp.description || 'Written for you when you open it';
+                $('gen-error').textContent = err.message; $('gen-error').classList.remove('hidden');
+                $('gen-error').scrollIntoView({ block: 'center', behavior: 'smooth' });
+            }
+            topicBusy = false;
         }
 
         // ---------- One text ----------
@@ -308,6 +347,8 @@
         document.addEventListener('click', (e) => {
             const lv = e.target.closest('[data-level]');
             if (lv) { store.set('reading_level', lv.dataset.level); renderList(); if (!libTexts[lv.dataset.level]) loadLevel(lv.dataset.level); return; }
+            const tpc = e.target.closest('[data-topic]');
+            if (tpc && !e.metaKey && !e.ctrlKey) { e.preventDefault(); openTopic(tpc.dataset.topic, tpc); return; }
             const card = e.target.closest('[data-text]');
             if (card && !e.metaKey && !e.ctrlKey) { e.preventDefault(); openText(card.dataset.text, true); return; }
             const s = e.target.closest('[data-subject]');
@@ -347,7 +388,7 @@
         else if (startId) { renderList(); LIB.fetchOne(startId).then(t => { if (t) openText(t.id, false); }); }
         else renderList();
         loadLevel(currentLevel());
-        loadDbSubjects();
+        loadDbTopics();
     </script>
 </body>
 </html>

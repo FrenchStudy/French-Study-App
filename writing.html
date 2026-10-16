@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Writing - French Study App</title>
+    <title>Writing - Apprendre le Français</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#4f46e5">
     <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
@@ -34,8 +34,7 @@
             <div id="list-view" class="space-y-4">
                 <div>
                     <h1 class="text-2xl font-black text-slate-900">Writing</h1>
-                    <p class="text-sm text-slate-500 mt-1">Pick a subject and get a new question for your level, post your own question, or use a ready-made task. Then get your text corrected.
-                        <a href="writing-classic.html" class="ml-1 font-semibold text-indigo-700 hover:underline">Open the old version</a></p>
+                    <p class="text-sm text-slate-500 mt-1">Pick a subject and get a new question for your level, post your own question, or use a ready-made task. Then get your text corrected.</p>
                 </div>
                 <div id="levels" class="flex w-max max-w-full gap-1 p-1 bg-slate-200/70 rounded-xl overflow-x-auto" role="tablist" aria-label="Level"></div>
 
@@ -154,10 +153,10 @@
     <script>
         const db = window.mySupabase;
         const $ = (id) => document.getElementById(id);
-        const LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1'];
+        const LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
         const LEVEL_STYLE = {
             A1: ['text-emerald-700', 'bg-emerald-50'], A2: ['text-teal-700', 'bg-teal-50'], B1: ['text-sky-700', 'bg-sky-50'],
-            B2: ['text-indigo-700', 'bg-indigo-50'], C1: ['text-purple-700', 'bg-purple-50']
+            B2: ['text-indigo-700', 'bg-indigo-50'], C1: ['text-purple-700', 'bg-purple-50'], C2: ['text-rose-700', 'bg-rose-50']
         };
         const ACCENTS = ['é', 'è', 'ê', 'à', 'â', 'ç', 'ù', 'û', 'î', 'ï', 'ô', 'œ', 'ë', '«', '»', 'É', 'À', 'Ç'];
         const store = {
@@ -168,13 +167,12 @@
         let results = store.get('writing_results', {});   // task id -> { score, at, text, feedback }
         let ownTasks = store.get('writing_own', []);      // AI questions and your own questions
         let samples = store.get('writing_samples', {});   // task id -> { fr, en } sample reply written by the AI
-        const WORDS = { A1: [40, 60], A2: [60, 90], B1: [100, 140], B2: [160, 220], C1: [220, 280] };
+        const WORDS = { A1: [40, 60], A2: [60, 90], B1: [100, 140], B2: [160, 220], C1: [220, 280], C2: [280, 350] };
         const SUBJECTS = ['Daily life', 'Family and friends', 'Food', 'Travel', 'Home', 'Work', 'Studies', 'Health and sport',
             'Free time', 'Shopping', 'Technology', 'Environment', 'Culture and media', 'Society'];
         const FORMATS = [['message', 'Message to a friend'], ['email', 'Formal email or letter'], ['story', 'Story'],
             ['article', 'Article or blog'], ['opinion', 'Opinion'], ['essay', 'Essay']];
-        const DEFAULT_FORMAT = { A1: 'message', A2: 'message', B1: 'opinion', B2: 'essay', C1: 'essay' };
-        let dbSubjects = [];                              // extra subjects from the reading_topics table, when it exists
+        const DEFAULT_FORMAT = { A1: 'message', A2: 'message', B1: 'opinion', B2: 'essay', C1: 'essay', C2: 'essay' };
         let pick = store.get('writing_pick', { subject: 'Daily life', format: null });
         const kindLabel = (t) => t.source === 'posted' ? 'Your question' : t.own ? 'AI question' : t.type;
         let task = null;
@@ -186,7 +184,7 @@
             const saved = store.get('writing_level', null);
             if (LEVELS.includes(saved)) return saved;
             const lv = (LocalStore.get('fs_profile', {}) || {}).level;
-            return LEVELS.includes(lv) ? lv : lv === 'C2' ? 'C1' : 'A1';
+            return LEVELS.includes(lv) ? lv : 'A1';
         }
         function renderList() {
             const level = currentLevel();
@@ -222,7 +220,7 @@
         function renderPicker() {
             const level = currentLevel();
             const fmt = pick.format || DEFAULT_FORMAT[level];
-            const subjects = [...SUBJECTS, ...dbSubjects.filter(s => !SUBJECTS.includes(s))];
+            const subjects = SUBJECTS;
             const chip = (on) => `min-h-[36px] px-3 rounded-full text-sm font-semibold border transition ${on ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-white border-slate-200 text-slate-700 hover:border-indigo-300'}`;
             $('subjects').innerHTML = subjects.map(s => `<button type="button" data-subject="${escapeHtml(s)}" class="${chip(s === pick.subject)}">${escapeHtml(s)}</button>`).join('');
             $('formats').innerHTML = FORMATS.map(([k, label]) => `<button type="button" data-format="${k}" class="${chip(k === fmt)}">${escapeHtml(label)}</button>`).join('');
@@ -269,7 +267,7 @@
             if (push) history.pushState({}, '', 'writing.html');
             $('task-view').classList.add('hidden');
             $('list-view').classList.remove('hidden');
-            document.title = 'Writing - French Study App';
+            document.title = 'Writing - Apprendre le Français';
             renderList();
             $('scroller').scrollTop = 0;
         }
@@ -548,15 +546,6 @@ Only list real mistakes, at most 12, in the order they appear. "wrong" must be c
             $('post-btn').disabled = false; $('post-btn').textContent = 'Use my question';
             openTask(q.id, true);
         }
-        // Subjects from the reading_topics table (the old Writing page used them), when it exists
-        async function loadDbSubjects() {
-            try {
-                const { data, error } = await db.from('reading_topics').select('title, category, level').order('id', { ascending: true });
-                if (error || !data) return;
-                dbSubjects = [...new Set(data.map(r => String(r.title || r.category || '').trim()).filter(Boolean))].slice(0, 16);
-                if (!task) renderPicker();
-            } catch (err) { /* the built-in subjects are enough */ }
-        }
 
         // ---------- Wiring ----------
         const accentBar = document.querySelector('[aria-label="French letters"]');
@@ -600,7 +589,6 @@ Only list real mistakes, at most 12, in the order they appear. "wrong" must be c
             const showError = (m) => { if (m) showErrorBox(m); };
             onGenerate($('btn-another'), showError, task.subject || task.title, task.format || DEFAULT_FORMAT[task.level], task.level);
         });
-        loadDbSubjects();
 
         function route() {
             const id = new URLSearchParams(location.search).get('task');
