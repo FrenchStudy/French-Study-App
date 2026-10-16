@@ -10,15 +10,12 @@
     <script src="js/ai.js"></script>
     <script src="js/conjugate.js"></script>
     <script src="js/library.js"></script>
-    <script src="js/topics-page.js"></script>
     <style>
         .w { cursor: pointer; border-radius: 4px; transition: background-color .12s; }
         .w:hover { background: #e0e7ff; }
         .w.on { background: #c7d2fe; color: #1e1b4b; }
         .sent.playing { background: #fef3c7; border-radius: 4px; }
         #text-body p + p { margin-top: 1rem; }
-        #make-own > summary::-webkit-details-marker { display: none; }
-        #make-own[open] .chev { transform: rotate(180deg); }
     </style>
 </head>
 <body class="h-full bg-slate-100 flex flex-col overflow-hidden font-sans text-slate-800">
@@ -29,16 +26,49 @@
         <div class="max-w-6xl mx-auto px-4 py-5 space-y-4">
 
             <!-- ===== ALL TEXTS ===== -->
-            <div id="list-view" class="space-y-4"></div>
-
-            <!-- ===== WRITING A TEXT FOR A TOPIC ===== -->
-            <div id="loading-view" class="hidden space-y-4">
-                <button type="button" data-back class="min-h-[44px] px-1 text-sm font-semibold text-slate-600 hover:text-indigo-600">← All texts</button>
-                <div class="bg-white border border-slate-200 rounded-2xl p-8 text-center space-y-3 max-w-xl mx-auto">
-                    <div class="mx-auto w-10 h-10 rounded-full border-4 border-indigo-100 border-t-indigo-600 animate-spin" aria-hidden="true"></div>
-                    <h1 id="loading-title" class="text-xl font-black text-slate-900"></h1>
-                    <p class="text-sm text-slate-500">Writing this text for you at <b id="loading-level"></b>. It is then saved, so other students at this level get it straight away.</p>
+            <div id="list-view" class="space-y-4">
+                <div>
+                    <h1 class="text-2xl font-black text-slate-900">Reading</h1>
+                    <p class="text-sm text-slate-500 mt-1">Read a text at your level, tap any word for its meaning, then answer the questions.
+                        <a href="reading-classic.html" class="ml-1 font-semibold text-indigo-700 hover:underline">Open the old version</a></p>
                 </div>
+                <div id="levels" class="flex w-max max-w-full gap-1 p-1 bg-slate-200/70 rounded-xl overflow-x-auto" role="tablist" aria-label="Level"></div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] gap-3">
+                    <section class="bg-white border border-slate-200 rounded-2xl p-4 space-y-3">
+                        <h2 class="font-black text-slate-900">✨ A new text</h2>
+                        <div>
+                            <div class="text-sm font-semibold text-slate-700 mb-1.5">Subject</div>
+                            <div id="subjects" class="flex flex-wrap gap-1.5"></div>
+                            <input id="subject-other" type="text" maxlength="80" placeholder="…or type any subject" class="mt-2 w-full text-base md:text-sm px-3 py-2 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                        <div>
+                            <div class="text-sm font-semibold text-slate-700 mb-1.5">Type of text</div>
+                            <div id="kinds" class="flex flex-wrap gap-1.5"></div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <button id="gen-btn" type="button" class="whitespace-nowrap min-h-[48px] px-5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-bold rounded-xl">Write me a text</button>
+                            <span class="hidden sm:inline text-xs text-slate-400">Uses AI. New texts are shared with other students at your level.</span>
+                        </div>
+                        <p id="gen-error" class="hidden text-sm text-rose-700"></p>
+                    </section>
+
+                    <section class="bg-white border border-slate-200 rounded-2xl p-4 space-y-3 flex flex-col">
+                        <h2 class="font-black text-slate-900">📋 Your own text</h2>
+                        <p class="text-sm text-slate-500">Paste a French text from a book, a website or your teacher. It stays on this device.</p>
+                        <textarea id="paste-text" rows="4" maxlength="6000" lang="fr" placeholder="Collez votre texte ici…" class="flex-1 w-full text-base md:text-sm p-3 bg-white border border-slate-200 rounded-xl resize-y focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
+                        <button id="paste-btn" type="button" class="self-start min-h-[44px] px-4 bg-slate-900 hover:bg-slate-800 disabled:opacity-50 text-white font-bold rounded-xl">Read my text</button>
+                        <p id="paste-error" class="hidden text-sm text-rose-700"></p>
+                    </section>
+                </div>
+
+                <section class="space-y-2">
+                    <div class="flex items-baseline justify-between gap-2">
+                        <h2 id="texts-heading" class="text-sm font-bold uppercase tracking-wide text-slate-500">Texts</h2>
+                        <span id="lib-note" class="text-xs text-slate-400"></span>
+                    </div>
+                    <div id="text-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+                </section>
             </div>
 
             <!-- ===== ONE TEXT ===== -->
@@ -47,7 +77,6 @@
                 <div>
                     <span id="crumb" class="text-xs font-bold px-2 py-1 rounded-full bg-slate-100 text-slate-600"></span>
                     <h1 id="text-title" class="text-2xl lg:text-3xl font-black text-slate-900 leading-tight mt-2"></h1>
-                    <div id="version-bar" class="mt-3 empty:hidden"></div>
                 </div>
 
                 <div class="flex flex-col lg:grid lg:grid-cols-[minmax(0,1fr)_24rem] gap-4 lg:gap-6">
@@ -85,10 +114,83 @@
     <script>
         const $ = (id) => document.getElementById(id);
         const store = LIB.store;
-        const LEVEL_STYLE = TopicsPage.LEVEL_STYLE;
+        const LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1'];
+        const LEVEL_STYLE = {
+            A1: ['text-emerald-700', 'bg-emerald-50'], A2: ['text-teal-700', 'bg-teal-50'], B1: ['text-sky-700', 'bg-sky-50'],
+            B2: ['text-indigo-700', 'bg-indigo-50'], C1: ['text-purple-700', 'bg-purple-50']
+        };
+        const SUBJECTS = ['Daily life', 'Family and friends', 'Food', 'Travel', 'Home', 'Work', 'Studies', 'Health and sport',
+            'Free time', 'Shopping', 'Technology', 'Environment', 'Culture and media', 'Society'];
+        const KINDS = ['Article', 'Story', 'Dialogue', 'Email or message', 'Blog', 'Advert or notice'];
         const PAGE = 'reading';
+        let pick = store.get('reading_pick', { subject: 'Daily life', kind: 'Article' });
+        let dbSubjects = [];
+        let libTexts = {};          // level -> texts from the shared library
         let text = null;            // the open text
         let answers = {};           // question index -> chosen option (shuffled index)
+
+        function currentLevel() {
+            const saved = store.get('reading_level', null);
+            if (LEVELS.includes(saved)) return saved;
+            const lv = (LocalStore.get('fs_profile', {}) || {}).level;
+            return LEVELS.includes(lv) ? lv : lv === 'C2' ? 'C1' : 'A1';
+        }
+        const textsFor = (lv) => {
+            const seen = new Set();
+            return [...LIB.mine().filter(t => t.level === lv), ...(libTexts[lv] || []), ...LIB.BUILT_IN.filter(t => t.level === lv)]
+                .filter(t => !seen.has(t.id) && seen.add(t.id));
+        };
+        const wordCount = (fr) => (String(fr).match(/[\p{L}]+/gu) || []).length;
+        const result = (id) => LIB.results()[PAGE + ':' + id];
+
+        // ---------- List ----------
+        function renderList() {
+            const level = currentLevel();
+            $('levels').innerHTML = LEVELS.map(lv => {
+                const list = textsFor(lv);
+                const n = list.filter(t => result(t.id)).length;
+                const on = lv === level;
+                return `<button type="button" role="tab" aria-selected="${on}" data-level="${lv}" class="shrink-0 px-3.5 py-1.5 rounded-lg text-sm font-bold transition ${on ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-800'}">
+                    ${lv}<span class="ml-1.5 text-xs font-semibold ${on ? LEVEL_STYLE[lv][0] : 'text-slate-400'}">${n}/${list.length}</span></button>`;
+            }).join('');
+            renderPicker();
+            const st = LEVEL_STYLE[level];
+            const list = textsFor(level);
+            $('texts-heading').textContent = `Texts for ${level}`;
+            $('text-grid').innerHTML = list.length ? list.map(t => {
+                const r = result(t.id);
+                const status = r ? `<span class="shrink-0 text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">✓ ${r.score}/${r.total}</span>` : '';
+                const badge = t.source === 'mine' ? ['Your text', 'text-violet-700 bg-violet-50'] : t.source === 'library' ? ['Library', 'text-amber-700 bg-amber-50'] : [t.kind, st[0] + ' ' + st[1]];
+                const words = wordCount(t.fr);
+                return `<a href="reading.html?text=${encodeURIComponent(t.id)}" data-text="${escapeHtml(t.id)}" class="group flex flex-col gap-1.5 bg-white border border-slate-200 hover:border-indigo-400 hover:shadow-md transition rounded-2xl p-4">
+                    <span class="flex items-center justify-between gap-2">
+                        <span class="text-[11px] font-bold uppercase tracking-wide ${badge[1]} px-2 py-0.5 rounded-full">${escapeHtml(badge[0])}</span>${status}
+                    </span>
+                    <span class="font-bold text-slate-900 group-hover:text-indigo-700 leading-snug">${escapeHtml(t.title)}</span>
+                    <span class="text-xs text-slate-500">${escapeHtml([t.source === 'built-in' ? t.subject : t.kind !== 'Your text' ? t.kind + ' · ' + t.subject : '', words + ' words', Math.max(1, Math.round(words / 120)) + ' min'].filter(Boolean).join(' · '))}</span>
+                    <span class="text-sm text-slate-500 line-clamp-2">${escapeHtml(t.fr.slice(0, 140))}…</span>
+                </a>`;
+            }).join('') : '<p class="text-sm text-slate-500">No texts yet at this level. Ask for a new one above.</p>';
+            $('lib-note').textContent = LIB.libraryReady() === false ? 'Shared library not set up yet' : '';
+        }
+        function renderPicker() {
+            const subjects = [...SUBJECTS, ...dbSubjects.filter(s => !SUBJECTS.includes(s))];
+            const chip = (on) => `min-h-[36px] px-3 rounded-full text-sm font-semibold border transition ${on ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-white border-slate-200 text-slate-700 hover:border-indigo-300'}`;
+            $('subjects').innerHTML = subjects.map(s => `<button type="button" data-subject="${escapeHtml(s)}" class="${chip(s === pick.subject)}">${escapeHtml(s)}</button>`).join('');
+            $('kinds').innerHTML = KINDS.map(k => `<button type="button" data-kind="${escapeHtml(k)}" class="${chip(k === pick.kind)}">${escapeHtml(k)}</button>`).join('');
+        }
+        async function loadLevel(lv) {
+            libTexts[lv] = await LIB.loadLibrary(lv);
+            if (!text) renderList();
+        }
+        async function loadDbSubjects() {
+            try {
+                const { data, error } = await window.mySupabase.from('reading_topics').select('title, category').order('id', { ascending: true });
+                if (error || !data) return;
+                dbSubjects = [...new Set(data.map(r => String(r.title || r.category || '').trim()).filter(Boolean))].slice(0, 16);
+                if (!text) renderPicker();
+            } catch (e) { /* the built-in subjects are enough */ }
+        }
 
         // ---------- One text ----------
         function openText(id, push) {
@@ -98,12 +200,10 @@
             LIB.stop(); stopPlay();
             if (push) history.pushState({ text: id }, '', 'reading.html?text=' + encodeURIComponent(id));
             $('list-view').classList.add('hidden');
-            $('loading-view').classList.add('hidden');
             $('text-view').classList.remove('hidden');
-            $('crumb').textContent = [t.level, t.source === 'mine' && !t.topic ? 'Your text' : t.kind, t.topic || (t.source === 'mine' ? '' : t.subject)].filter(Boolean).join(' · ');
+            $('crumb').textContent = [t.level, t.source === 'mine' ? 'Your text' : t.kind, t.source === 'mine' ? '' : t.subject].filter(Boolean).join(' · ');
             $('crumb').className = `text-xs font-bold px-2 py-1 rounded-full ${LEVEL_STYLE[t.level] ? LEVEL_STYLE[t.level].join(' ') : 'bg-slate-100 text-slate-600'}`;
             $('text-title').textContent = t.title;
-            $('version-bar').innerHTML = TopicsPage.versionBar(t);
             $('text-body').innerHTML = LIB.renderText(t.fr).html;
             $('en-box').textContent = t.en || '';
             $('en-box').classList.add('hidden');
@@ -119,9 +219,8 @@
             text = null; LIB.stop(); stopPlay(); LIB.closeWord();
             if (push) history.pushState({}, '', 'reading.html');
             $('text-view').classList.add('hidden');
-            $('loading-view').classList.add('hidden');
             $('list-view').classList.remove('hidden');
-            TopicsPage.render();
+            renderList();
         }
         function renderQuestions() {
             const qs = text.questions || [];
@@ -171,8 +270,42 @@
             LIB.say(sents[i].textContent, 0.9, () => { if (playing) setTimeout(() => playFrom(i + 1), 250); });
         }
 
+        // ---------- New texts ----------
+        async function generateText() {
+            const subject = $('subject-other').value.trim() || pick.subject;
+            $('gen-error').classList.add('hidden');
+            $('gen-btn').disabled = true; $('gen-btn').textContent = 'Writing…';
+            try {
+                const t = await LIB.generate({ subject, kind: pick.kind, level: currentLevel(), purpose: PAGE });
+                $('subject-other').value = '';
+                if (t.source === 'library') { libTexts[t.level] = [t, ...(libTexts[t.level] || []).filter(x => x.id !== t.id)]; }
+                openText(t.id, true);
+            } catch (err) {
+                $('gen-error').textContent = err.message; $('gen-error').classList.remove('hidden');
+            }
+            $('gen-btn').disabled = false; $('gen-btn').textContent = 'Write me a text';
+        }
+        async function pasteText() {
+            const fr = $('paste-text').value.trim();
+            $('paste-error').classList.add('hidden');
+            if (fr.length < 40) { $('paste-error').textContent = 'Paste a longer text (at least a few sentences).'; $('paste-error').classList.remove('hidden'); return; }
+            $('paste-btn').disabled = true; $('paste-btn').textContent = 'Preparing questions…';
+            const t = await LIB.fromPasted(fr, currentLevel());
+            $('paste-text').value = '';
+            $('paste-btn').disabled = false; $('paste-btn').textContent = 'Read my text';
+            openText(t.id, true);
+        }
+
         // ---------- Events ----------
         document.addEventListener('click', (e) => {
+            const lv = e.target.closest('[data-level]');
+            if (lv) { store.set('reading_level', lv.dataset.level); renderList(); if (!libTexts[lv.dataset.level]) loadLevel(lv.dataset.level); return; }
+            const card = e.target.closest('[data-text]');
+            if (card && !e.metaKey && !e.ctrlKey) { e.preventDefault(); openText(card.dataset.text, true); return; }
+            const s = e.target.closest('[data-subject]');
+            if (s) { pick.subject = s.dataset.subject; $('subject-other').value = ''; store.set('reading_pick', pick); renderPicker(); return; }
+            const k = e.target.closest('[data-kind]');
+            if (k) { pick.kind = k.dataset.kind; store.set('reading_pick', pick); renderPicker(); return; }
             const opt = e.target.closest('[data-q]');
             if (opt && text) { answers[opt.dataset.q] = Number(opt.dataset.o); renderQuestions(); return; }
             const w = e.target.closest('#text-body .w');
@@ -183,7 +316,9 @@
             const w = e.target.closest && e.target.closest('#text-body .w');
             if (w && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); LIB.openWord(w, text.id); }
         });
-        document.querySelectorAll('#back, [data-back]').forEach(b => b.addEventListener('click', () => showList(true)));
+        $('back').addEventListener('click', () => showList(true));
+        $('gen-btn').addEventListener('click', generateText);
+        $('paste-btn').addEventListener('click', pasteText);
         $('btn-retry').addEventListener('click', () => { answers = {}; renderQuestions(); });
         $('btn-en').addEventListener('click', () => {
             const hidden = $('en-box').classList.toggle('hidden');
@@ -196,40 +331,15 @@
         });
         window.addEventListener('popstate', () => {
             const id = new URLSearchParams(location.search).get('text');
-            const tp = new URLSearchParams(location.search).get('topic');
-            if (id) openText(id, false); else if (tp) TopicsPage.openTopic(tp, false); else showList(false);
+            if (id) openText(id, false); else showList(false);
         });
 
-        const params = new URLSearchParams(location.search);
-        const startId = params.get('text'), startTopic = params.get('topic');
-        TopicsPage.init({
-            page: PAGE, title: 'Reading', intro: 'Pick a topic at your level, tap any word for its meaning, then answer the questions.', classic: 'reading-classic.html',
-            noun: 'text', nounPl: 'texts', icon: '', subjectHint: 'e.g. A day at the beach', genLabel: 'Write me a text', pasteLabel: 'Read my text',
-            kinds: ['Article', 'Story', 'Dialogue', 'Email or message', 'Blog', 'Advert or notice'],
-            meta: (t) => { const n = (String(t.fr).match(/[\p{L}]+/gu) || []).length; return `${n} words · ${Math.max(1, Math.round(n / 120))} min`; },
-            openText, showList,
-            isList: () => !$('list-view').classList.contains('hidden'),
-            refreshVersions: () => { if (text && !$('text-view').classList.contains('hidden')) $('version-bar').innerHTML = TopicsPage.versionBar(text); },
-            loading(topic) {
-                if (!topic) { $('loading-view').classList.add('hidden'); return; }
-                LIB.closeWord();
-                ['list-view', 'text-view'].forEach(id => $(id).classList.add('hidden'));
-                $('loading-view').classList.remove('hidden');
-                $('loading-title').textContent = topic.title;
-                $('loading-level').textContent = topic.level;
-                $('scroller').scrollTop = 0;
-            },
-            versionError(msg) {
-                $('text-view').classList.remove('hidden');
-                $('version-bar').innerHTML = TopicsPage.versionBar(text);
-                const el = $('version-bar').querySelector('[data-version-error]');
-                if (el) { el.textContent = msg; el.classList.remove('hidden'); }
-            },
-            startTopic
-        });
+        const startId = new URLSearchParams(location.search).get('text');
         if (startId && LIB.find(startId)) openText(startId, false);
-        else if (startId) { TopicsPage.render(); LIB.fetchOne(startId).then(t => { if (t) openText(t.id, false); }); }
-        else if (!startTopic) TopicsPage.render();
+        else if (startId) { renderList(); LIB.fetchOne(startId).then(t => { if (t) openText(t.id, false); }); }
+        else renderList();
+        loadLevel(currentLevel());
+        loadDbSubjects();
     </script>
 </body>
 </html>

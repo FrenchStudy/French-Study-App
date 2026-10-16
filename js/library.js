@@ -109,20 +109,18 @@ window.LIB = (function () {
 
     // ---------- The shared library (Supabase) and your own texts (this device) ----------
     let libraryReady = null;   // null = unknown, false = table missing
-    let hasTopics = true;      // false until 02_topics.sql has been run
-    const COLS = 'id, level, subject, kind, title, fr, en, questions';
     const fromRow = (r) => ({ id: 'db-' + r.id, level: r.level, subject: r.subject || '', kind: r.kind || '', title: r.title, fr: r.fr, en: r.en || '',
-        questions: Array.isArray(r.questions) ? r.questions : [], topic: r.topic || '', skill: r.skill || '', source: 'library' });
-    const cacheTexts = (list) => { const cache = store.get('lib_cache', {}); list.forEach(t => { cache[t.id] = t; }); store.set('lib_cache', cache); };
+        questions: Array.isArray(r.questions) ? r.questions : [], source: 'library' });
     async function loadLibrary(level) {
         try {
-            const run = (cols) => db.from('library_texts').select(cols).eq('level', level).order('created_at', { ascending: true }).range(0, 199);
-            let { data, error } = await run(hasTopics ? COLS + ', topic, skill' : COLS);
-            if (error && hasTopics) { hasTopics = false; ({ data, error } = await run(COLS)); }
+            const { data, error } = await db.from('library_texts').select('id, level, subject, kind, title, fr, en, questions')
+                .eq('level', level).order('created_at', { ascending: false }).range(0, 59);
             if (error) { libraryReady = false; return []; }
             libraryReady = true;
             const list = (data || []).map(fromRow);
-            cacheTexts(list);
+            const cache = store.get('lib_cache', {});
+            list.forEach(t => { cache[t.id] = t; });
+            store.set('lib_cache', cache);
             return list;
         } catch (e) { libraryReady = false; return []; }
     }
@@ -131,11 +129,10 @@ window.LIB = (function () {
         const n = Number(String(id).replace(/^db-/, ''));
         if (!String(id).startsWith('db-') || !n) return null;
         try {
-            let { data, error } = await db.from('library_texts').select(COLS + ', topic, skill').eq('id', n).maybeSingle();
-            if (error) ({ data } = await db.from('library_texts').select(COLS).eq('id', n).maybeSingle());
+            const { data } = await db.from('library_texts').select('id, level, subject, kind, title, fr, en, questions').eq('id', n).maybeSingle();
             if (!data) return null;
             const t = fromRow(data);
-            cacheTexts([t]);
+            const cache = store.get('lib_cache', {}); cache[t.id] = t; store.set('lib_cache', cache);
             return t;
         } catch (e) { return null; }
     }
@@ -143,43 +140,13 @@ window.LIB = (function () {
         try {
             const { data: { user } } = await db.auth.getUser();
             if (!user) return null;
-            const row = { level: t.level, subject: t.subject, kind: t.kind, title: t.title.slice(0, 120), fr: t.fr, en: t.en || null, questions: t.questions || [], created_by: user.id };
-            if (hasTopics) { row.topic = t.topic || null; row.skill = t.skill || null; }
-            let { data, error } = await db.from('library_texts').insert(row).select('id').maybeSingle();
-            if (error && hasTopics && /topic|skill|column/i.test(error.message || '')) {
-                hasTopics = false; delete row.topic; delete row.skill;
-                ({ data, error } = await db.from('library_texts').insert(row).select('id').maybeSingle());
-            }
+            const { data, error } = await db.from('library_texts').insert({
+                level: t.level, subject: t.subject, kind: t.kind, title: t.title.slice(0, 120), fr: t.fr, en: t.en || null, questions: t.questions || [], created_by: user.id
+            }).select('id').maybeSingle();
             if (error || !data) return null;
             return 'db-' + data.id;
         } catch (e) { return null; }
     }
-
-    // ---------- Topics: reading_topics / listening_topics (id, title, level, category) + the built-in texts ----------
-    async function loadTopics(skill) {
-        let rows = [];
-        try {
-            const run = (cols) => db.from(skill + '_topics').select(cols).order('id', { ascending: true });
-            let { data, error } = await run('id, title, level, category, description');
-            if (error) ({ data, error } = await run('id, title, level, category'));
-            if (!error && data) rows = data;
-        } catch (e) { /* no topic table: the built-in texts are the topics */ }
-        const fromDb = rows.filter(r => r && r.title).map(r => ({ key: skill + ':' + r.id, title: String(r.title).trim(), level: String(r.level || '').toUpperCase().trim(), category: String(r.category || '').trim(), description: String(r.description || '').trim(), skill }));
-        const builtIn = BUILT_IN.map(t => ({ key: 'b:' + t.id, title: t.title, level: t.level, category: t.subject, builtIn: t.id }));
-        store.set('lib_topics_' + skill, fromDb);
-        return [...fromDb, ...builtIn];
-    }
-    const cachedTopics = (skill) => [...store.get('lib_topics_' + skill, []), ...BUILT_IN.map(t => ({ key: 'b:' + t.id, title: t.title, level: t.level, category: t.subject, builtIn: t.id }))];
-    // Every saved version of a topic: the built-in text first, then library texts in the order they were written
-    function versions(topic, libList, skill) {
-        const out = [];
-        if (topic.builtIn) out.push(BUILT_IN.find(t => t.id === topic.builtIn));
-        const same = (t) => t.topic && t.topic.toLowerCase() === topic.title.toLowerCase() && t.level === topic.level && (!t.skill || !skill || t.skill === skill);
-        (libList || []).filter(same).forEach(t => out.push(t));
-        mine().filter(same).forEach(t => out.push(t));
-        return out.filter(Boolean);
-    }
-
     const mine = () => store.get('lib_mine', []);
     function keepMine(t) { store.set('lib_mine', [t, ...mine().filter(x => x.id !== t.id)].slice(0, 40)); }
     function find(id) {
@@ -190,24 +157,27 @@ window.LIB = (function () {
     const LENGTH = { A1: '70-100', A2: '100-140', B1: '150-200', B2: '200-260', C1: '250-320' };
     const cleanQuestions = (qs) => (Array.isArray(qs) ? qs : []).filter(q => q && q.q && Array.isArray(q.options) && q.options.length >= 2)
         .map(q => ({ q: String(q.q), options: q.options.map(String).slice(0, 4), answer: Math.max(0, Math.min(q.options.length - 1, Number(q.answer) || 0)), why: String(q.why || '') })).slice(0, 6);
-    async function generate({ subject, kind, level, purpose, topic }) {
-        const recent = [...mine(), ...Object.values(store.get('lib_cache', {}))].filter(x => (x.topic || x.subject) === (topic || subject)).slice(-5).map(x => x.title);
+    async function generate({ subject, kind, level, purpose }) {
+        const recent = mine().filter(x => x.subject === subject).slice(0, 5).map(x => x.title);
         const t = await askAI([
-            { role: 'system', content: `You write original French ${purpose === 'listening' ? 'listening scripts (written to be read aloud: natural spoken French, short sentences; for a dialogue, start each line with — )' : 'reading texts'} for CEFR level ${level} learners, in the style of TV5Monde and DELF exams.
+            { role: 'system', content: `You write original French ${purpose === 'listening' ? 'listening scripts (written to be read aloud: natural spoken French, short sentences)' : 'reading texts'} for CEFR level ${level} learners, in the style of TV5Monde and DELF exams.
 Write about ${LENGTH[level] || '120-160'} words, at ${level} level (vocabulary and grammar of that level), with a concrete situation and real details.
 Then write 4 multiple-choice comprehension questions, each with 3 options, in ${['A1', 'A2'].includes(level) ? 'simple English' : 'French'}. Put the correct option FIRST (answer: 0); the app shuffles them.
-Reply with JSON only: {"title": "a short French title", "kind": "the type of text in English, e.g. Dialogue, Announcement, Article", "fr": "the text (use \\n between paragraphs or speakers)", "en": "an English translation",
+Reply with JSON only: {"title": "a short French title", "fr": "the text (use \\n between paragraphs or speakers)", "en": "an English translation",
  "questions": [{"q": "question", "options": ["correct", "wrong", "wrong"], "answer": 0, "why": "one short English explanation quoting the text"}]}` },
-            { role: 'user', content: `${topic ? 'Topic' : 'Subject'}: ${topic || subject}\nType of text: ${kind || 'the most natural type for this topic'}${recent.length ? '\nMake it different from: ' + recent.join('; ') : ''}` }
+            { role: 'user', content: `Subject: ${subject}\nType of text: ${kind}${recent.length ? '\nMake it different from: ' + recent.join('; ') : ''}` }
         ], { json: true, temperature: 0.9, feature: purpose === 'listening' ? 'listening-text' : 'reading-text' });
         if (!t.fr || String(t.fr).length < 40) throw new Error('The AI reply could not be read. Please try again.');
-        const text = { id: '', level, subject: topic ? '' : subject, kind: String(kind || t.kind || '').slice(0, 40), title: String(t.title || topic || subject).slice(0, 120), fr: String(t.fr).trim(),
-            en: String(t.en || '').trim(), questions: cleanQuestions(t.questions), topic: topic || '', skill: purpose || '', source: 'library' };
+        const text = { id: '', level, subject, kind, title: String(t.title || subject).slice(0, 120), fr: String(t.fr).trim(), en: String(t.en || '').trim(), questions: cleanQuestions(t.questions), source: 'library' };
         // Share it with everyone at this level; if that fails, keep it on this device
-        // (topic texts are only shared once 02_topics.sql has added the topic column; until then they stay on this device)
-        const dbId = topic && !hasTopics ? null : await saveToLibrary(text);
-        if (dbId) { text.id = dbId; cacheTexts([text]); }
-        else { text.id = 'mine-' + Date.now().toString(36); text.source = 'mine'; keepMine(text); }
+        const dbId = await saveToLibrary(text);
+        if (dbId) {
+            text.id = dbId;
+            const cache = store.get('lib_cache', {}); cache[dbId] = text; store.set('lib_cache', cache);
+        } else {
+            text.id = 'mine-' + Date.now().toString(36); text.source = 'mine'; keepMine(text);
+        }
+        const made = store.get('lib_made', []); store.set('lib_made', [text.id, ...made].slice(0, 60));
         return text;
     }
     // A text you paste (from a book, an article…): kept on this device only
@@ -439,6 +409,6 @@ Reply with JSON only: {"title": "a short French title", "kind": "the type of tex
         return idx.map(i => ({ text: q.options[i], right: i === q.answer }));
     }
 
-    return { renderText, allSentences, openWord, closeWord, LEVELS, BUILT_IN, loadLibrary, fetchOne, loadTopics, cachedTopics, versions, hasTopics: () => hasTopics, libraryReady: () => libraryReady, mine, find, generate, fromPasted, sentences, candidates, lookupWord, explainWord,
+    return { renderText, allSentences, openWord, closeWord, LEVELS, BUILT_IN, loadLibrary, fetchOne, libraryReady: () => libraryReady, mine, find, generate, fromPasted, sentences, candidates, lookupWord, explainWord,
         addToReview, inReview, say, stop, results, saveResult, shuffled, plain, store };
 })();
