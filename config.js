@@ -251,3 +251,26 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+
+// ---------- Install as an app (phones and computers) ----------
+// Registers sw.js (offline copies of the pages) and powers any [data-install] button:
+// Android / Chrome / Edge show their install prompt; on iPhone we explain Share > Add to Home Screen.
+const InstallApp = (function () {
+    let prompt = null;
+    const standalone = () => window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+    const ios = () => /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    const show = () => document.querySelectorAll('[data-install]').forEach(b => b.classList.toggle('hidden', standalone() || !(prompt || ios())));
+    if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+        window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+    }
+    window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); prompt = e; show(); });
+    window.addEventListener('appinstalled', () => { prompt = null; show(); });
+    document.addEventListener('click', async (e) => {
+        const b = e.target.closest('[data-install]');
+        if (!b) return;
+        if (prompt) { prompt.prompt(); try { await prompt.userChoice; } catch (err) {} prompt = null; show(); return; }
+        if (ios()) alert('To install on iPhone or iPad:\n\n1. Tap the Share button (the square with an arrow) at the bottom of Safari.\n2. Choose "Add to Home Screen".\n3. Tap "Add".\n\nThe app then opens from its own icon, full screen.');
+    });
+    document.addEventListener('DOMContentLoaded', show);
+    return { show, standalone };
+})();
