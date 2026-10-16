@@ -59,6 +59,8 @@
                     <button type="button" data-level="A2" class="choice w-full min-h-[64px] p-3 rounded-2xl border-2 border-slate-200 bg-white text-left hover:border-indigo-400 flex items-center gap-3"><span class="shrink-0 w-11 h-11 rounded-full bg-teal-500 text-white font-black flex items-center justify-center">A2</span><span><span class="block font-bold">I know the basics</span><span class="block text-sm text-slate-500">I can introduce myself and order in a café</span></span></button>
                     <button type="button" data-level="B1" class="choice w-full min-h-[64px] p-3 rounded-2xl border-2 border-slate-200 bg-white text-left hover:border-indigo-400 flex items-center gap-3"><span class="shrink-0 w-11 h-11 rounded-full bg-sky-500 text-white font-black flex items-center justify-center">B1</span><span><span class="block font-bold">I can hold a simple conversation</span><span class="block text-sm text-slate-500">About my day, my plans, my past</span></span></button>
                     <button type="button" data-level="B2" class="choice w-full min-h-[64px] p-3 rounded-2xl border-2 border-slate-200 bg-white text-left hover:border-indigo-400 flex items-center gap-3"><span class="shrink-0 w-11 h-11 rounded-full bg-indigo-500 text-white font-black flex items-center justify-center">B2</span><span><span class="block font-bold">I'm comfortable in most situations</span><span class="block text-sm text-slate-500">I follow the news and give my opinion</span></span></button>
+                    <button type="button" data-level="C1" class="choice w-full min-h-[64px] p-3 rounded-2xl border-2 border-slate-200 bg-white text-left hover:border-indigo-400 flex items-center gap-3"><span class="shrink-0 w-11 h-11 rounded-full bg-purple-500 text-white font-black flex items-center justify-center">C1</span><span><span class="block font-bold">I'm advanced</span><span class="block text-sm text-slate-500">I read novels and follow debates with ease</span></span></button>
+                    <button type="button" data-level="C2" class="choice w-full min-h-[64px] p-3 rounded-2xl border-2 border-slate-200 bg-white text-left hover:border-indigo-400 flex items-center gap-3"><span class="shrink-0 w-11 h-11 rounded-full bg-rose-500 text-white font-black flex items-center justify-center">C2</span><span><span class="block font-bold">I'm near-native</span><span class="block text-sm text-slate-500">I want to polish style, idioms and nuance</span></span></button>
                     <button type="button" id="btn-test" class="w-full min-h-[64px] p-3 rounded-2xl border-2 border-dashed border-indigo-300 bg-indigo-50 text-left hover:border-indigo-500 flex items-center gap-3"><span class="shrink-0 w-11 h-11 rounded-full bg-white text-2xl flex items-center justify-center">🧭</span><span><span class="block font-bold text-indigo-900">Not sure? Take a 2-minute test</span><span class="block text-sm text-indigo-800/80">12 quick questions</span></span></button>
                 </div>
                 <button type="button" id="btn-level-back" class="w-full min-h-[44px] text-sm font-semibold text-slate-600">← Back</button>
@@ -99,9 +101,10 @@
             A2: 'Elementary: talking about your day, the past and simple plans.',
             B1: 'Intermediate: opinions, stories and the conditional.',
             B2: 'Upper intermediate: the subjunctive, nuance and debate.',
-            C1: 'Advanced: formal and literary French.'
+            C1: 'Advanced: formal and literary French.',
+            C2: 'Mastery: near-native French, idioms and fine nuance.'
         };
-        // 12 placement questions, easiest first. Each has exactly one correct answer (index 0 before shuffling).
+        // 14 placement questions, easiest first. Each has exactly one correct answer (index 0 before shuffling).
         const QUIZ = [
             { level: 'A1', q: 'Bonjour ! Comment ___ appelles-tu ?', a: ['te', 'me', 'se', 'vous'] },
             { level: 'A1', q: 'Je ___ étudiant.', a: ['suis', 'es', 'est', 'ai'] },
@@ -114,9 +117,11 @@
             { level: 'B2', q: "Bien qu'il ___ malade, il est venu travailler.", a: ['soit', 'est', 'sera', 'serait'] },
             { level: 'B2', q: "C'est le livre ___ je t'ai parlé.", a: ['dont', 'que', 'qui', 'où'] },
             { level: 'C1', q: "Quoi qu'il ___, je ne changerai pas d'avis.", a: ['dise', 'dit', 'dira', 'disait'] },
-            { level: 'C1', q: 'Le rapport, ___ conclusions ont surpris tout le monde, sera publié demain.', a: ['dont les', 'que les', 'où les', 'qui les'] }
+            { level: 'C1', q: 'Le rapport, ___ conclusions ont surpris tout le monde, sera publié demain.', a: ['dont les', 'que les', 'où les', 'qui les'] },
+            { level: 'C2', q: "Il eût fallu qu'il ___ plus tôt pour éviter ce malentendu.", a: ['intervînt', 'intervient', 'interviendrait', 'intervenait'] },
+            { level: 'C2', q: '« Il ne faut pas vendre la peau de l’ours avant de l’avoir tué » means…', a: ["Don't count your chickens before they hatch", 'Never trust a hunter', 'Bears are dangerous animals', 'Sell things while you can'] }
         ];
-        const ORDER = ['A1', 'A2', 'B1', 'B2', 'C1'];
+        const ORDER = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
         let goal = null, level = null, qi = 0, answers = [], shuffled = [];
 
         function step(name) {

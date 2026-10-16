@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Conjugations - French Study App</title>
+    <title>Conjugations - Apprendre le Français</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#4f46e5">
     <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
@@ -196,7 +196,7 @@
                         <span class="font-bold text-slate-900 truncate">${escapeHtml(v.disp)}</span>
                         <span class="text-xs text-slate-500 truncate">${escapeHtml(v.gloss)}</span>
                     </div>
-                    <span class="text-[10px] text-slate-400 uppercase shrink-0">${GROUP_LABELS[verbGroup(v)]}</span>
+                    <span class="text-[11px] font-semibold text-slate-500 uppercase tracking-wide shrink-0">${GROUP_LABELS[verbGroup(v)]}</span>
                 `;
                 item.addEventListener('click', () => { renderVerb(v); showTablesOnPhone(); });
                 container.appendChild(item);

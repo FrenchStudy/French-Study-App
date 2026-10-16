@@ -8,7 +8,7 @@
 
 window.LIB = (function () {
     const db = window.mySupabase;
-    const LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1'];
+    const LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
     const store = {
         get(k, d) { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch (e) { return d; } },
         set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
@@ -154,7 +154,7 @@ window.LIB = (function () {
     }
 
     // ---------- New texts from the AI ----------
-    const LENGTH = { A1: '70-100', A2: '100-140', B1: '150-200', B2: '200-260', C1: '250-320' };
+    const LENGTH = { A1: '70-100', A2: '100-140', B1: '150-200', B2: '200-260', C1: '250-320', C2: '300-380' };
     const cleanQuestions = (qs) => (Array.isArray(qs) ? qs : []).filter(q => q && q.q && Array.isArray(q.options) && q.options.length >= 2)
         .map(q => ({ q: String(q.q), options: q.options.map(String).slice(0, 4), answer: Math.max(0, Math.min(q.options.length - 1, Number(q.answer) || 0)), why: String(q.why || '') })).slice(0, 6);
     async function generate({ subject, kind, level, purpose }) {

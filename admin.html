@@ -200,7 +200,19 @@
             $('refresh').disabled = false;
         }
         $('refresh').addEventListener('click', load);
-        oldKey(); aiStatus(); load();
+        // This page is for admins only (their data is protected anyway; this just says so plainly)
+        (async () => {
+            const { user, profile } = await Account.profile();
+            if (!user || String((profile || {}).role || '').trim().toLowerCase() !== 'admin') {
+                document.querySelector('main').innerHTML = `<div class="max-w-xl mx-auto px-4 py-16 text-center space-y-3">
+                    <div class="text-4xl" aria-hidden="true">🔒</div>
+                    <h1 class="text-2xl font-black text-slate-900">Admins only</h1>
+                    <p class="text-slate-600">This page is for the people who run the app.</p>
+                    <a href="index.html" class="inline-flex items-center min-h-[44px] px-5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl">Go to Home</a></div>`;
+                return;
+            }
+            oldKey(); aiStatus(); load();
+        })();
     </script>
 </body>
 </html>

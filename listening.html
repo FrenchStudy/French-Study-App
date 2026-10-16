@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Listening - French Study App</title>
+    <title>Listening - Apprendre le Français</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#4f46e5">
     <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
@@ -38,8 +38,7 @@
             <div id="list-view" class="space-y-4">
                 <div>
                     <h1 class="text-2xl font-black text-slate-900">Listening</h1>
-                    <p class="text-sm text-slate-500 mt-1">Listen sentence by sentence, answer the questions, then check the transcript. Or write what you hear in Dictation.
-                        <a href="listening-classic.html" class="ml-1 font-semibold text-indigo-700 hover:underline">Open the old version</a></p>
+                    <p class="text-sm text-slate-500 mt-1">Listen sentence by sentence, answer the questions, then check the transcript. Or write what you hear in Dictation.</p>
                 </div>
                 <div id="levels" class="flex w-max max-w-full gap-1 p-1 bg-slate-200/70 rounded-xl overflow-x-auto" role="tablist" aria-label="Level"></div>
 
@@ -175,10 +174,10 @@
     <script>
         const $ = (id) => document.getElementById(id);
         const store = LIB.store;
-        const LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1'];
+        const LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
         const LEVEL_STYLE = {
             A1: ['text-emerald-700', 'bg-emerald-50'], A2: ['text-teal-700', 'bg-teal-50'], B1: ['text-sky-700', 'bg-sky-50'],
-            B2: ['text-indigo-700', 'bg-indigo-50'], C1: ['text-purple-700', 'bg-purple-50']
+            B2: ['text-indigo-700', 'bg-indigo-50'], C1: ['text-purple-700', 'bg-purple-50'], C2: ['text-rose-700', 'bg-rose-50']
         };
         const SUBJECTS = ['Daily life', 'Family and friends', 'Food', 'Travel', 'Home', 'Work', 'Studies', 'Health and sport',
             'Free time', 'Shopping', 'Technology', 'Environment', 'Culture and media', 'Society'];
@@ -196,7 +195,7 @@
             const saved = store.get('listening_level', null);
             if (LEVELS.includes(saved)) return saved;
             const lv = (LocalStore.get('fs_profile', {}) || {}).level;
-            return LEVELS.includes(lv) ? lv : lv === 'C2' ? 'C1' : 'A1';
+            return LEVELS.includes(lv) ? lv : 'A1';
         }
         const topicsFor = (lv) => dbTopics.filter(t => t.level === lv);
         // A recording already written for a topic (by any student at that level): reused for free

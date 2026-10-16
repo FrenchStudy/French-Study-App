@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Speaking - French Study App</title>
+    <title>Speaking - Apprendre le Français</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#4f46e5">
     <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
@@ -36,8 +36,7 @@
             <div id="home-view" class="space-y-4">
                 <div>
                     <h1 class="text-2xl font-black text-slate-900">Speaking</h1>
-                    <p class="text-sm text-slate-500 mt-1">Talk with a character, repeat after native audio, or practise an exam task.
-                        <a href="speaking-classic.html" class="ml-1 font-semibold text-indigo-700 hover:underline">Open the old version</a></p>
+                    <p class="text-sm text-slate-500 mt-1">Talk with a character, repeat after native audio, or practise an exam task.</p>
                 </div>
                 <nav class="flex gap-1 sm:gap-6 text-sm font-semibold overflow-x-auto overflow-y-hidden shadow-[inset_0_-1px_0_#e2e8f0]" role="tablist" aria-label="Speaking">
                     <button data-mode="conversation" role="tab" class="mode-tab shrink-0 min-h-[44px] px-2 sm:px-0 border-b-2">💬 Conversation</button>
@@ -63,6 +62,10 @@
                             <p class="text-sm text-slate-500">Describe any situation and the AI plays the other person.</p>
                             <input id="own-scene" type="text" maxlength="160" placeholder="e.g. returning a broken phone to a shop" class="w-full text-base md:text-sm px-3 py-2.5 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
                             <button id="own-scene-btn" type="button" class="self-start min-h-[44px] px-4 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl">Start the scene</button>
+                            <div class="pt-2 border-t border-slate-100">
+                                <div class="text-sm font-semibold text-slate-700 mb-1.5">Or pick a subject: the AI invents a situation for your level</div>
+                                <div id="scene-subjects" class="flex flex-wrap gap-1.5"></div>
+                            </div>
                         </section>
                     </div>
                     <h2 class="text-sm font-bold uppercase tracking-wide text-slate-500">Scenes</h2>
@@ -230,12 +233,12 @@
         const SCENES = window.SCENES || [];
         const CS = window.CHEATSHEET;
         const C = window.Conjugator;
-        const LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1'];
+        const LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
         const store = {
             get(k, d) { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch (e) { return d; } },
             set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
         };
-        const myLevel = () => { const lv = (LocalStore.get('fs_profile', {}) || {}).level; return LEVELS.includes(lv) ? lv : lv === 'C2' ? 'C1' : 'A1'; };
+        const myLevel = () => { const lv = (LocalStore.get('fs_profile', {}) || {}).level; return LEVELS.includes(lv) ? lv : 'A1'; };
         const plain = (s) => String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
         const record = () => { if (typeof Activity !== 'undefined') Activity.record(); };
         const errorBox = (m) => `<div class="bg-rose-50 border border-rose-200 text-rose-800 rounded-2xl p-4 text-sm">${escapeHtml(m)}</div>`;
@@ -293,7 +296,7 @@
         }
         function showHome(push) {
             showView('home-view');
-            document.title = 'Speaking - French Study App';
+            document.title = 'Speaking - Apprendre le Français';
             setMode(mode, push);
         }
 
@@ -325,7 +328,8 @@
             A2: 'Use short sentences; the passé composé and futur proche are fine.',
             B1: 'Use natural everyday French at a moderate pace, including past tenses.',
             B2: 'Use natural, fluent French; some idioms are fine.',
-            C1: 'Use rich, natural French, as with a fluent speaker.'
+            C1: 'Use rich, natural French, as with a fluent speaker.',
+            C2: 'Speak exactly as with a native speaker: idioms, nuance and a natural pace.'
         };
         function sceneLevel() { return String(scene.level).split('–')[0]; }
         function systemPrompt() {
@@ -638,11 +642,11 @@ Give at most 4 corrections, only for real mistakes (an empty list if there are n
         // =====================================================================
         // EXAM TASK: speak on a topic, get a score and corrections
         // =====================================================================
-        const SECONDS = { A1: [30, 60], A2: [60, 90], B1: [90, 150], B2: [120, 180], C1: [180, 240] };
+        const SECONDS = { A1: [30, 60], A2: [60, 90], B1: [90, 150], B2: [120, 180], C1: [180, 240], C2: [240, 300] };
         const SUBJECTS = ['Yourself', 'Family and friends', 'Daily life', 'Food', 'Travel', 'Home', 'Work', 'Studies', 'Health and sport',
             'Free time', 'Technology', 'Environment', 'Culture and media', 'Society'];
         const KINDS = [['monologue', 'Talk about a topic'], ['interaction', 'Role-play: get information'], ['opinion', 'Give and defend your opinion']];
-        const DEFAULT_KIND = { A1: 'monologue', A2: 'interaction', B1: 'opinion', B2: 'opinion', C1: 'opinion' };
+        const DEFAULT_KIND = { A1: 'monologue', A2: 'interaction', B1: 'opinion', B2: 'opinion', C1: 'opinion', C2: 'opinion' };
         let examTasks = store.get('speak_tasks', []);
         let examResults = store.get('speak_results', {});
         let examSamples = store.get('speak_samples', {});
@@ -943,6 +947,14 @@ Only list real mistakes, at most 10, in order. "wrong" must be copied exactly fr
                 persona: `a French person in this situation: "${text}". Choose a fitting first name and role, and play your part naturally. Uses "vous" unless the situation is between friends.`, opener: null, phrases: [] }, true);
         });
         $('own-scene').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('own-scene-btn').click(); });
+        // A subject: the AI invents a concrete everyday situation on it, at your level
+        $('scene-subjects').innerHTML = SUBJECTS.map(sj => `<button type="button" data-scene-subject="${escapeHtml(sj)}" class="min-h-[36px] px-3 rounded-full text-sm font-semibold border bg-white border-slate-200 text-slate-700 hover:border-indigo-300">${escapeHtml(sj)}</button>`).join('');
+        $('scene-subjects').addEventListener('click', (e) => {
+            const b = e.target.closest('[data-scene-subject]'); if (!b) return;
+            const sj = b.dataset.sceneSubject, lv = myLevel();
+            startScene({ own: true, id: null, name: 'Your partner', role: '', emoji: '🎭', level: lv, scene: `${sj}: a new situation`, goal: 'Handle the situation in French.',
+                persona: `a French person in an everyday situation about "${sj}" that you invent: concrete, realistic and suited to a ${lv} learner (for example a shop, a call, a neighbour, a colleague, an appointment). Choose a fitting first name and role. In your first message, set the scene in one short sentence and start the conversation. Uses "vous" unless the situation is between friends.`, opener: null, phrases: [] }, true);
+        });
         // Shadowing
         $('sh-listen').addEventListener('click', () => speakFrench(track.items[idx].fr));
         $('sh-slow').addEventListener('click', () => speakFrench(track.items[idx].fr, 0.6));

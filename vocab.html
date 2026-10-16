@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vocabulary - French Study App</title>
+    <title>Vocabulary - Apprendre le Français</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#4f46e5">
     <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
@@ -388,6 +388,9 @@
             for (let n = 1; n <= FREQ_TOTAL; n += FREQ_DECK_SIZE) {
                 TOPICS.push({ id: 'freq:' + n, start: n, set: (n - 1) / FREQ_DECK_SIZE + 1, title: `Most common words ${n}–${n + FREQ_DECK_SIZE - 1}`, short: `Words ${n}–${n + FREQ_DECK_SIZE - 1}`, level: 'TOP', freq: true });
             }
+            // Topic numbers in reading order (A1 first), so they never jump: 1, 2, 3… across the levels
+            let no = 0;
+            ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'].forEach(lv => TOPICS.filter(x => x.n && x.level === lv).forEach(x => { x.no = ++no; }));
         }
         const topicById = (id) => TOPICS.find(x => x.id === id);
         const lessonDone = (l) => !!LocalStore.get('lessons_done', {})['i:' + l.id];
@@ -857,7 +860,7 @@
             $('topic-view').classList.remove('hidden');
             const st = lvStyle(tp.level);
             $('topic-crumb').className = `text-xs font-bold px-2 py-1 rounded-full ${tp.level ? st[1] + ' ' + st[0] : 'bg-slate-100 text-slate-600'}`;
-            $('topic-crumb').textContent = tp.id === 'review' ? 'Words due today' : tp.freq ? `Most common words · Set ${tp.set || ''}` : `Vocab · ${tp.level}${tp.n ? ' · Topic ' + tp.n : ''}`;
+            $('topic-crumb').textContent = tp.id === 'review' ? 'Words due today' : tp.freq ? `Most common words · Set ${tp.set || ''}` : `Vocab · ${tp.level}${tp.no ? ' · Topic ' + tp.no : ''}`;
             $('deck-title').textContent = tp.lesson && !tp.n ? `${tp.emoji || ''} ${tp.title}`.trim() : tp.title;
             document.title = `${tp.title} - Vocabulary`;
             // The hands-on lesson, if this topic has one
@@ -880,7 +883,7 @@
             if (push) history.pushState({}, '', 'vocab.html');
             $('topic-view').classList.add('hidden');
             $('topics-view').classList.remove('hidden');
-            document.title = 'Vocabulary - French Study App';
+            document.title = 'Vocabulary - Apprendre le Français';
             renderTopics();
             $('scroller').scrollTop = 0;
         }
@@ -1014,7 +1017,7 @@
                     ? (s.total ? `<span class="mt-2 flex items-center gap-2"><span class="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden"><span class="block h-full bg-emerald-500" style="width:${Math.round(s.known / s.total * 100)}%"></span></span><span class="text-xs text-slate-500">${s.known}/${s.total} known</span></span>` : '')
                     : `<span class="block text-sm text-slate-500 mt-0.5">${escapeHtml(x.lesson.blurb)}</span>`;
                 return `<a href="${topicUrl(x.id)}" data-topic="${escapeHtml(x.id)}" class="group flex gap-3 ${sub ? '' : 'items-center'} bg-white border ${isNext ? ls[3] + ' ring-2 ' + ls[4] : 'border-slate-200'} hover:border-indigo-400 hover:shadow-md transition rounded-2xl p-4">
-                    <span class="shrink-0 w-10 h-10 rounded-xl flex items-center justify-center font-black ${s.done ? 'bg-emerald-50 text-emerald-700' : ls[1] + ' ' + ls[0]}">${x.n || x.set || x.emoji || '▶'}</span>
+                    <span class="shrink-0 w-10 h-10 rounded-xl flex items-center justify-center font-black ${s.done ? 'bg-emerald-50 text-emerald-700' : ls[1] + ' ' + ls[0]}">${x.no || x.set || x.emoji || '▶'}</span>
                     <span class="min-w-0 flex-1">
                         <span class="flex items-start justify-between gap-2"><span class="font-bold text-slate-900 leading-snug group-hover:text-indigo-700">${escapeHtml(x.short || x.title)}</span>${status}</span>
                         ${sub}
