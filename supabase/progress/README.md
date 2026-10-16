@@ -11,6 +11,14 @@ You should see `progress_rows = 0`. It removes nothing, so no "destructive" warn
 
 From then on, rows appear in **Table Editor → user_progress** as students work.
 
+## Progress on every device (1 minute)
+
+Then paste `02_sync.sql` → **Run**. You should see one row: `data | jsonb`.
+After this, words learned, lessons done, scores, streak, and your own texts and tasks follow each
+student to every device they sign in on. The copies are combined, so nothing is lost: for a word
+studied on two devices, the higher level wins; for a task done twice, the latest score wins.
+If a different person signs in on the same device, they do not get the previous person's progress.
+
 ## Who can see what
 
 - Each student can read, add and update **only their own** rows.

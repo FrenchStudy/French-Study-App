@@ -252,6 +252,116 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
+// ---------- Progress that follows you to every device ----------
+// Progress lives on this device (localStorage) so pages work offline. When you are signed in, each
+// kind of progress is also kept in your account (user_progress, module_type 'state', column data),
+// and on another device the two copies are combined so nothing is lost.
+const ProgressSync = (function () {
+    const byId = (cap) => (a, b) => {   // lists of items with an id: keep both, this device first
+        const seen = new Set(), out = [];
+        [...(Array.isArray(a) ? a : []), ...(Array.isArray(b) ? b : [])].forEach(x => { if (x && x.id && !seen.has(x.id)) { seen.add(x.id); out.push(x); } });
+        return out.slice(0, cap);
+    };
+    const perKey = (pick) => (a, b) => {
+        const out = { ...(b || {}) };
+        Object.entries(a || {}).forEach(([k, v]) => { out[k] = k in out ? pick(v, out[k]) : v; });
+        return out;
+    };
+    const latest = perKey((x, y) => ((x && x.at) || 0) >= ((y && y.at) || 0) ? x : y);
+    // How to combine the copy on this device (a) with the copy in the account (b)
+    const KEYS = {
+        lessons_done: perKey((x, y) => x || y),
+        vocab_progress: perKey((x, y) => ((x.box || 0) > (y.box || 0) || ((x.box || 0) === (y.box || 0) && (x.due || 0) >= (y.due || 0))) ? x : y),
+        vocab_words: perKey((x) => x),
+        vocab_hooks: perKey((x) => x),
+        vocab_topic_stats: perKey((x, y) => ((x.known || 0) >= (y.known || 0) ? x : y)),
+        fs_activity: perKey((x, y) => Math.max(Number(x) || 0, Number(y) || 0)),
+        conj_practice: (a, b) => ((a && a.total) || 0) >= ((b && b.total) || 0) ? a : b,
+        writing_results: latest,
+        writing_drafts: perKey((x) => x),
+        writing_samples: perKey((x) => x),
+        writing_own: byId(40),
+        speak_results: latest,
+        speak_samples: perKey((x) => x),
+        speak_scenes: perKey((x, y) => String(x) >= String(y) ? x : y),
+        speak_shadow: perKey((x, y) => ((x.best || 0) >= (y.best || 0) ? x : y)),
+        speak_tasks: byId(30),
+        lib_results: latest,
+        lib_mine: byId(40)
+    };
+    const read = (k) => { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } };
+    const nativeSet = Storage.prototype.setItem;
+    let user = null, ready = false, dirty = new Set(), timer = null, applying = false;
+    const table = () => window.mySupabase.from('user_progress');
+
+    async function push() {
+        timer = null;
+        if (!user || !dirty.size) return;
+        const keys = [...dirty]; dirty.clear();
+        const rows = keys.map(k => ({ user_id: user.id, module_type: 'state', module_id: k, completed: true, data: read(k), updated_at: new Date() }))
+            .filter(r => r.data !== null && JSON.stringify(r.data).length < 1400000);
+        if (!rows.length) return;
+        try {
+            const { error } = await table().upsert(rows, { onConflict: 'user_id, module_type, module_id' });
+            if (error) keys.forEach(k => dirty.add(k));   // try again on the next change
+        } catch (e) { keys.forEach(k => dirty.add(k)); }
+    }
+    function markDirty(k) {
+        if (applying || !(k in KEYS)) return;
+        dirty.add(k);
+        if (ready && user && !timer) timer = setTimeout(push, 2500);
+    }
+    // Every save on this device marks that kind of progress for upload
+    Storage.prototype.setItem = function (k, v) {
+        nativeSet.call(this, k, v);
+        try { if (this === window.localStorage) markDirty(k); } catch (e) {}
+    };
+    document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden' && timer) { clearTimeout(timer); push(); } });
+
+    async function start() {
+        const page = (location.pathname.split('/').pop() || 'index.html');
+        if (['login.html', 'reset.html'].includes(page) || !window.mySupabase) return;
+        try {
+            const { data } = await window.mySupabase.auth.getUser();
+            user = data && data.user;
+        } catch (e) { user = null; }
+        if (!user) return;
+        // Someone else's progress on this shared device is not mixed into this account
+        const owner = read('fs_progress_owner');
+        applying = true;
+        if (owner && owner !== user.id) Object.keys(KEYS).forEach(k => localStorage.removeItem(k));
+        nativeSet.call(localStorage, 'fs_progress_owner', JSON.stringify(user.id));
+        applying = false;
+        let rows = [];
+        try {
+            const { data, error } = await table().select('module_id, data').eq('user_id', user.id).eq('module_type', 'state');
+            if (error) { ready = true; return; }   // the table or its data column is not set up yet
+            rows = data || [];
+        } catch (e) { ready = true; return; }
+        let changed = false;
+        applying = true;
+        const remote = {};
+        rows.forEach(r => { if (r.module_id in KEYS) remote[r.module_id] = r.data; });
+        Object.keys(KEYS).forEach(k => {
+            const local = read(k), cloud = remote[k];
+            if (cloud == null && local == null) return;
+            const merged = cloud == null ? local : local == null ? cloud : KEYS[k](local, cloud);
+            const m = JSON.stringify(merged);
+            if (m !== JSON.stringify(local)) { nativeSet.call(localStorage, k, m); changed = true; }
+            if (m !== JSON.stringify(cloud)) dirty.add(k);
+        });
+        applying = false;
+        ready = true;
+        if (dirty.size) push();
+        // Progress arrived from another device: show it (once per visit)
+        let shown = false;
+        try { shown = sessionStorage.getItem('fs_synced') === '1'; sessionStorage.setItem('fs_synced', '1'); } catch (e) { shown = true; }
+        if (changed && !shown) location.reload();
+    }
+    document.addEventListener('DOMContentLoaded', () => { start(); });
+    return { push, start, KEYS };
+})();
+
 // ---------- Install as an app (phones and computers) ----------
 // Registers sw.js (offline copies of the pages) and powers any [data-install] button:
 // Android / Chrome / Edge show their install prompt; on iPhone we explain Share > Add to Home Screen.

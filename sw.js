@@ -2,8 +2,8 @@
 // Pages and app files: always fetched fresh when online (so updates show at once); the saved copy is
 // used only when there is no connection. The libraries from the CDNs are reused from the cache and
 // refreshed in the background. Sign-in, the database and the AI are never cached.
-const CACHE = 'fs-v1';
-const CORE = ['./', './index.html', './login.html', './config.js', './js/ai.js', './manifest.json', './icons/icon-192.png'];
+const CACHE = 'fs-v2';
+const CORE = ['./', './index.html', './login.html', './config.js', './css/app.css', './js/ai.js', './manifest.json', './icons/icon-192.png'];
 
 self.addEventListener('install', (e) => {
     e.waitUntil(caches.open(CACHE).then(c => c.addAll(CORE)).catch(() => {}).then(() => self.skipWaiting()));
@@ -12,7 +12,7 @@ self.addEventListener('activate', (e) => {
     e.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim()));
 });
 
-const CDN = ['cdn.tailwindcss.com', 'cdn.jsdelivr.net'];
+const CDN = ['cdn.jsdelivr.net'];
 self.addEventListener('fetch', (e) => {
     const req = e.request;
     if (req.method !== 'GET') return;
