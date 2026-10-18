@@ -243,7 +243,7 @@ Reply with JSON only: {"title": "a short French title", "kind": "the type of tex
         if (inf) add(inf);
         return out;
     }
-    const POS = { n: 'noun', nm: 'noun (m)', nf: 'noun (f)', v: 'verb', adj: 'adjective', adv: 'adverb', prep: 'preposition', conj: 'conjunction', pro: 'pronoun', det: 'determiner', intj: 'interjection' };
+    const POS = { n: 'noun', nm: 'noun (m)', nf: 'noun (f)', v: 'verb', adj: 'adjective', adv: 'adverb', prep: 'preposition', conj: 'conjunction', pro: 'pronoun', det: 'determiner', intj: 'interjection', npr: 'name' };
     const isVerb = (r) => String(r.Part_of_Speech || '').split(',').some(t => /^v/.test(t.trim())) && /(er|ir|re|oir)$/.test(String(r.French));
     const posLabel = (p, fr) => {
         if (fr && isVerb({ Part_of_Speech: p, French: fr })) return 'verb';

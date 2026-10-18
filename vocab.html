@@ -228,7 +228,7 @@
         const POS_LABELS = {
             nm: 'noun (m)', nf: 'noun (f)', nmi: 'noun (m, invariable)', nfi: 'noun (f, invariable)', nmpl: 'noun (m, plural)', nfpl: 'noun (f, plural)',
             nadj: 'noun / adjective', v: 'verb', adj: 'adjective', adji: 'adjective (invariable)', adv: 'adverb',
-            prep: 'preposition', pro: 'pronoun', conj: 'conjunction', det: 'determiner', intj: 'interjection', phrase: 'phrase'
+            prep: 'preposition', pro: 'pronoun', conj: 'conjunction', det: 'determiner', intj: 'interjection', phrase: 'phrase', npr: 'name'
         };
         function parsePos(pos) {
             const tokens = String(pos || '').split(',').map(s => s.trim()).filter(Boolean);
