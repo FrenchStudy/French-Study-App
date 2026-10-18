@@ -3,15 +3,22 @@
 //   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 //   <script src="config.js"></script>
 
-// The anon key is public by design; Row Level Security protects the data.
-const SUPABASE_URL = 'https://bkawfexaikntyivqvetk.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrYXdmZXhhaWtudHlpdnF2ZXRrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcyMDU3ODAsImV4cCI6MjEwMjc4MTc4MH0.8YYkD8pzn97DeqA-o83KoGQ4yHb6WT1HB4DcoPPAMwA';
+// The Supabase address and public key are not stored in GitHub. They are kept as repository
+// secrets and written in here when the site is published (.github/workflows/pages.yml runs
+// tools/build-site.sh). The key is still public by design: every visitor's browser receives it,
+// and Row Level Security protects the data.
+const SUPABASE_URL = '__SUPABASE_URL__';
+const SUPABASE_ANON_KEY = '__SUPABASE_ANON_KEY__';
 const SUPABASE_SCHEMA = 'French-schema';
 
 if (!window.mySupabase && window.supabase) {
-    window.mySupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-        db: { schema: SUPABASE_SCHEMA }
-    });
+    if (/^https:\/\//.test(SUPABASE_URL)) {
+        window.mySupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+            db: { schema: SUPABASE_SCHEMA }
+        });
+    } else {
+        console.warn('Supabase is not set up in this copy of config.js. Build the site with tools/build-site.sh.');
+    }
 }
 
 // AI settings saved from admin.html
