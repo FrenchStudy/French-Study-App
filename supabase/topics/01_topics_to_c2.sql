@@ -3,8 +3,10 @@
 -- Before: reading_topics only had B2, listening_topics stopped at C1 (2 topics).
 -- Each topic is added once: running the file again changes nothing.
 -- Undo: 99_undo.sql.
+-- The inserts are wrapped in "do $$ … $$" so the Supabase SQL editor runs them exactly as written.
 
 -- ---------- Reading: broad themes, like the B2 ones ----------
+do $$ begin
 insert into "French-schema".reading_topics (id, level, category, title, description)
 overriding system value
 select (select coalesce(max(id), 0) from "French-schema".reading_topics) + row_number() over (order by n.n),
@@ -37,8 +39,10 @@ from (values
 where not exists (
     select 1 from "French-schema".reading_topics r where r.level = n.level and r.title = n.title
 );
+end $$;
 
 -- ---------- Listening: situations you would hear ----------
+do $$ begin
 insert into "French-schema".listening_topics (id, level, category, title, description)
 overriding system value
 select (select coalesce(max(id), 0) from "French-schema".listening_topics) + row_number() over (order by n.n),
@@ -54,6 +58,7 @@ from (values
 where not exists (
     select 1 from "French-schema".listening_topics l where l.level = n.level and l.title = n.title
 );
+end $$;
 
 -- Keep the id counters ahead of the new rows (does nothing if id has no counter).
 select setval(pg_get_serial_sequence('"French-schema".reading_topics', 'id'), (select max(id) from "French-schema".reading_topics));
