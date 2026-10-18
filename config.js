@@ -249,6 +249,38 @@ document.addEventListener('DOMContentLoaded', () => {
     GuestBanner.show();
 });
 
+// ---------- Who runs the site: shown on the legal pages and in the footer ----------
+// Fill in email and province before going public (search the site for "[").
+const SITE = {
+    brand: 'Apprendre le Français',
+    email: '[contact email]',          // e.g. hello@your-domain.com
+    province: '[your province]',       // e.g. Ontario
+    updated: 'October 18, 2026'        // change when the Terms or Privacy policy change
+};
+const SiteInfo = {
+    fill() {
+        document.querySelectorAll('[data-site]').forEach(el => {
+            const k = el.dataset.site;
+            if (k === 'email-link') { el.textContent = SITE.email; el.href = 'mailto:' + SITE.email; }
+            else if (SITE[k] !== undefined) el.textContent = SITE[k];
+        });
+    },
+    // Terms · Privacy · Contact at the end of every page
+    footer() {
+        if (document.getElementById('site-footer')) return;
+        const host = document.getElementById('scroller') || document.querySelector('main') || document.body;
+        const f = document.createElement('footer');
+        f.id = 'site-footer';
+        f.className = 'max-w-6xl mx-auto w-full px-4 py-6 text-xs text-slate-500 flex flex-wrap items-center justify-center gap-x-4 gap-y-2';
+        f.innerHTML = `<span>© ${new Date().getFullYear()} ${SITE.brand}</span>
+            <a href="terms.html" class="hover:text-indigo-700 underline-offset-2 hover:underline">Terms</a>
+            <a href="privacy.html" class="hover:text-indigo-700 underline-offset-2 hover:underline">Privacy</a>
+            <a href="mailto:${SITE.email}" class="hover:text-indigo-700 underline-offset-2 hover:underline">Contact</a>`;
+        host.appendChild(f);
+    }
+};
+document.addEventListener('DOMContentLoaded', () => { SiteInfo.fill(); SiteInfo.footer(); });
+
 // ---------- "Please sign in" messages get a Sign in link, wherever a page shows them ----------
 const SignInLinks = {
     start() {
@@ -287,6 +319,7 @@ const GuestBanner = {
             a.className = 'shrink-0 text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 px-3 py-1.5 rounded-lg';
             out.replaceWith(a);
         }
+        if (['terms.html', 'privacy.html'].includes(page)) return;   // the legal pages: Sign in button, no banner
         let hidden = false;
         try { hidden = sessionStorage.getItem('fs_guest_banner') === 'hidden'; } catch (e) {}
         const header = document.getElementById('app-header');

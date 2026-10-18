@@ -54,6 +54,7 @@
                             <button type="button" id="btn-show" class="absolute right-2 top-1/2 -translate-y-1/2 text-sm font-semibold text-slate-500 px-2 py-1">Show</button>
                         </div>
                         <p id="pw-hint" class="hidden text-xs text-slate-500 mt-1">At least 8 characters.</p>
+                        <p id="consent" class="hidden text-xs text-slate-500 mt-2">By creating an account, you agree to the <a href="terms.html" class="text-indigo-700 font-semibold underline">Terms of use</a> and the <a href="privacy.html" class="text-indigo-700 font-semibold underline">Privacy policy</a>.</p>
                     </div>
                     <button type="submit" id="btn-submit" class="w-full min-h-[48px] bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl disabled:opacity-60">Sign in</button>
                 </form>
@@ -130,6 +131,7 @@
             $('google-block').classList.toggle('hidden', !GOOGLE_SIGNIN);
             $('name-field').classList.toggle('hidden', !signup);
             $('pw-hint').classList.toggle('hidden', !signup);
+            $('consent').classList.toggle('hidden', !signup);
             $('btn-forgot').classList.toggle('hidden', signup);
             $('password').autocomplete = signup ? 'new-password' : 'current-password';
             $('btn-submit').textContent = signup ? 'Create my account' : 'Sign in';
