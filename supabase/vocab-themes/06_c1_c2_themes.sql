@@ -22,7 +22,9 @@ values
 on conflict (id) do update set title = excluded.title, group_name = excluded.group_name,
                                level = excluded.level, sort_order = excluded.sort_order, source = excluded.source;
 
--- New words, with an example sentence each
+-- New words, with an example sentence each.
+-- (Wrapped in "do $$ … $$" so the Supabase SQL editor runs it exactly as written.)
+do $$ begin
 insert into "French-schema".vocabulary_bank
        (id, "French", "Article", "Noun_Gender", "Part_of_Speech", "English", "SentenceFR", "SentenceEN", source)
 overriding system value
@@ -232,12 +234,14 @@ where not exists (
     select 1 from "French-schema".vocabulary_bank v
     where v.source = 'advanced' and v."French" = n.french and coalesce(v."Article", '') = coalesce(n.article, '')
 );
+end $$;
 
 -- Keep the id counter ahead of the new rows (does nothing if id has no counter).
 select setval(pg_get_serial_sequence('"French-schema".vocabulary_bank', 'id'), (select max(id) from "French-schema".vocabulary_bank));
 
 -- Link the words to their topics. Existing words are found by their word and where they came from,
 -- new ones by word and article.
+do $$ begin
 insert into "French-schema".word_themes (theme_id, word_id, sort_order)
 select distinct on (l.theme_id, l.sort_order) l.theme_id, v.id, l.sort_order
 from (values
@@ -547,6 +551,7 @@ join "French-schema".vocabulary_bank v
  and (l.src <> 'advanced' or coalesce(v."Article", '') = coalesce(l.article, ''))
 order by l.theme_id, l.sort_order, (v."English" = l.english) desc nulls last, v."Rank" nulls last, v.id
 on conflict (theme_id, word_id) do update set sort_order = excluded.sort_order;
+end $$;
 
 
 select t.id, t.title, t.level, count(w.word_id) as words
