@@ -98,6 +98,11 @@
                         <option value="known">Words I know</option>
                     </select>
                 </div>
+                <div class="flex flex-wrap items-center gap-2">
+                    <button id="btn-copy-list" type="button" class="min-h-[44px] px-4 bg-white border border-slate-200 hover:border-indigo-400 text-slate-700 font-semibold rounded-xl text-sm">📋 Copy list</button>
+                    <button id="btn-download-list" type="button" class="min-h-[44px] px-4 bg-white border border-slate-200 hover:border-indigo-400 text-slate-700 font-semibold rounded-xl text-sm">⬇ Download (Excel)</button>
+                    <span id="copy-status" class="text-sm text-emerald-700" role="status" aria-live="polite"></span>
+                </div>
                 <div id="word-list" class="bg-white border border-slate-200 rounded-2xl divide-y divide-slate-100"></div>
                     </div>
                 </section>
@@ -645,15 +650,65 @@
         // ---------- Word list ----------
         function plain(s) { return String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, ''); }
 
-        function renderList() {
+        // The words shown in the list (search and filter applied)
+        function shownWords() {
             const q = plain($('list-search').value.trim());
             const filter = $('list-filter').value;
-            const rows = deck.words.filter(w => {
+            return deck.words.filter(w => {
                 const st = statusOf(w);
                 if (filter === 'known' && st !== 'known') return false;
                 if (filter === 'notknown' && st === 'known') return false;
                 return !q || plain(w.fr).includes(q) || plain(w.en).includes(q);
             });
+        }
+
+        // ---------- Copy / download the list (Article | French | English) ----------
+        const ARTICLE_COL = /^(le\/la |le |la |les |l['’]|un |une )/i;
+        function exportRows() {
+            return shownWords().map(w => {
+                const fr = String(w.fr || '').trim();
+                const m = /[.?!…]$/.test(fr) ? null : fr.match(ARTICLE_COL);   // sentences keep their first word
+                return m ? [m[1].trim(), fr.slice(m[1].length).trim(), w.en || ''] : ['', fr, w.en || ''];
+            });
+        }
+        const EXPORT_HEAD = ['Article', 'French', 'English'];
+        function listStatus(text) {
+            $('copy-status').textContent = text;
+            clearTimeout(listStatus.t);
+            listStatus.t = setTimeout(() => { $('copy-status').textContent = ''; }, 4000);
+        }
+        async function copyList() {
+            const rows = exportRows();
+            if (!rows.length) { listStatus('No words to copy.'); return; }
+            const clean = (v) => String(v).replace(/[\t\r\n]+/g, ' ');
+            const text = [EXPORT_HEAD, ...rows].map(r => r.map(clean).join('\t')).join('\r\n') + '\r\n';
+            let ok = false;
+            try { await navigator.clipboard.writeText(text); ok = true; } catch (e) { /* older browsers: fall back below */ }
+            if (!ok) {
+                const ta = document.createElement('textarea');
+                ta.value = text; ta.setAttribute('readonly', ''); ta.style.position = 'fixed'; ta.style.opacity = '0';
+                document.body.appendChild(ta); ta.select();
+                try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+                ta.remove();
+            }
+            listStatus(ok ? `Copied ${rows.length} word${rows.length === 1 ? '' : 's'}. Paste into Excel or Google Sheets.` : 'Could not copy. Try Download instead.');
+        }
+        function downloadList() {
+            const rows = exportRows();
+            if (!rows.length) { listStatus('No words to download.'); return; }
+            const cell = (v) => /[",\r\n]/.test(String(v)) ? '"' + String(v).replace(/"/g, '""') + '"' : String(v);
+            const csv = '\uFEFF' + [EXPORT_HEAD, ...rows].map(r => r.map(cell).join(',')).join('\r\n') + '\r\n';   // BOM: Excel shows accents
+            const name = (plain(topic ? topic.title : 'vocab').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'vocab') + '.csv';
+            const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+            const a = document.createElement('a');
+            a.href = url; a.download = name;
+            document.body.appendChild(a); a.click(); a.remove();
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+            listStatus(`Downloaded ${rows.length} word${rows.length === 1 ? '' : 's'} (${name}).`);
+        }
+
+        function renderList() {
+            const rows = shownWords();
             if (!rows.length) {
                 $('word-list').innerHTML = '<p class="p-4 text-sm text-slate-500">No words match.</p>';
                 return;
@@ -1055,6 +1110,8 @@
         $('btn-hook-save').addEventListener('click', saveOwnHook);
         $('list-search').addEventListener('input', renderList);
         $('list-filter').addEventListener('change', renderList);
+        $('btn-copy-list').addEventListener('click', copyList);
+        $('btn-download-list').addEventListener('click', downloadList);
         document.querySelectorAll('.quiz-type').forEach(b => b.addEventListener('click', () => startQuiz(b.dataset.quiz)));
         document.addEventListener('keydown', (e) => {
             if (step !== 'practise' || topic === null || !current || /input|textarea|select/i.test(e.target.tagName)) return;
