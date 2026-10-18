@@ -23,11 +23,20 @@ A browser-based French learning suite backed by Supabase (schema `French-schema`
 
 ## Shared configuration
 
-`config.js` holds the Supabase URL, anon key and schema, creates the shared client
+`config.js` holds the Supabase schema and placeholders for the URL and anon key, creates the shared client
 (`window.mySupabase`), and exposes AI settings through `CONFIG`. It also provides `Account`
 (the signed-in student's profile), `Activity` (days practised, for the streak), draws the shared
 page header into `<header id="app-header">`, and hides Admin links from everyone except admins. Every page that
 talks to Supabase loads it right after the Supabase SDK.
+
+## Publishing
+
+The Supabase URL and anon key are not stored in this repository. `.github/workflows/pages.yml`
+publishes the site to GitHub Pages on every change to `main`: it runs `tools/build-site.sh`, which
+copies the app (without `supabase/` and `tools/`) and writes the two values from the repository
+secrets `SUPABASE_URL` and `SUPABASE_ANON_KEY` into `config.js`. Settings → Pages → Source must be
+**GitHub Actions**. To try the app on your own computer, build it the same way:
+`SUPABASE_URL=… SUPABASE_ANON_KEY=… bash tools/build-site.sh` and serve the `_site` folder.
 
 ## Shared scripts (`js/`)
 
