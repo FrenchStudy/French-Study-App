@@ -105,7 +105,11 @@ window.LIB = (function () {
                 { q: 'Que répondent ses partisans ?', options: ["On peut le pratiquer à petite échelle, même un week-end près de chez soi", 'Il faut prendre un mois de vacances', "Il faut partir à l'étranger"], answer: 0, why: '"On peut l\'appliquer à petite échelle, même le temps d\'un week-end."' }
             ]
         }
-    ].map(t => ({ ...t, source: 'built-in' }));
+    ].map(t => ({ ...t, skill: 'reading' }))
+        // More ready-made texts (js/texts.js): Reading C1–C2, and Listening's own recordings A1–C2
+        .concat(((window.EXTRA_TEXTS || {}).reading || []).map(t => ({ ...t, skill: 'reading' })))
+        .concat(((window.EXTRA_TEXTS || {}).listening || []).map(t => ({ ...t, skill: 'listening' })))
+        .map(t => ({ ...t, source: 'built-in' }));
 
     // ---------- The shared library (Supabase) and your own texts (this device) ----------
     let libraryReady = null;   // null = unknown, false = table missing

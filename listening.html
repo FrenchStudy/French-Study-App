@@ -17,6 +17,7 @@
     <script src="config.js"></script>
     <script src="js/ai.js"></script>
     <script src="js/conjugate.js"></script>
+    <script src="js/texts.js"></script>
     <script src="js/library.js"></script>
     <style>
         .w { cursor: pointer; border-radius: 4px; transition: background-color .12s; }
@@ -204,7 +205,7 @@
         const topicText = (tp) => [...(libTexts[tp.level] || []), ...LIB.mine()].find(t => t.level === tp.level && sameTopic(t, tp));
         const textsFor = (lv) => {
             const seen = new Set();
-            return [...LIB.mine().filter(t => t.level === lv), ...(libTexts[lv] || []), ...LIB.BUILT_IN.filter(t => t.level === lv)]
+            return [...LIB.mine().filter(t => t.level === lv), ...(libTexts[lv] || []), ...LIB.BUILT_IN.filter(t => t.level === lv && t.skill === 'listening')]
                 .filter(t => !seen.has(t.id) && seen.add(t.id))
                 .filter(t => !topicsFor(lv).some(tp => sameTopic(t, tp)));   // shown on its topic's card instead
         };
