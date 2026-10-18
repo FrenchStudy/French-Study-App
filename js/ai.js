@@ -19,8 +19,17 @@ async function askAI(messages, options = {}) {
     } else if (server.ok) {
         text = String(server.data.content || '').trim();
     } else {
-        const err = new Error((server.data && server.data.error) || `The AI service returned an error (${server.status}).`);
-        err.code = server.data && server.data.code;
+        // Messages written for students are shown as they are; anything technical gets a plain message
+        // (the details stay on the Admin page)
+        const code = server.data && server.data.code;
+        const FOR_STUDENTS = ['signin', 'quota', 'session', 'daily', 'busy'];
+        let message = (server.data && server.data.error) || '';
+        if (code === 'setup') message = 'The AI is not available right now. Please try again later.';
+        else if (!FOR_STUDENTS.includes(code) && !/connection/.test(message)) message = server.status === 429 || server.status === 503
+            ? 'The AI is busy right now. Please wait a minute and try again.'
+            : 'The AI could not answer just now. Please try again in a moment.';
+        const err = new Error(message);
+        err.code = code;
         throw err;
     }
     if (!options.json) return text;

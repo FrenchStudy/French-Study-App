@@ -228,15 +228,67 @@ const LessonKit = (function () {
             </li>`).join('')}</ul>`;
     }
 
+    // ---------- Practice: type the answer, the app checks it ----------
+    // Checking is forgiving: capitals, punctuation and apostrophes don't matter, a slash or
+    // parentheses in the answer give alternatives, and you can type only the missing part
+    // (e.g. "vendent" for "ils (vendre)"). Accent slips count, with a note. When the checker
+    // disagrees with you (a sentence can be translated several ways), "I was right" overrules it.
+    const ACCENTS = ['é', 'è', 'ê', 'ë', 'à', 'â', 'ç', 'î', 'ï', 'ô', 'ù', 'û', 'œ', '«', '»'];
+    const normAns = (s) => String(s).normalize('NFC').toLowerCase().replace(/[’‘`]/g, "'").replace(/[«»"“”.,!?;:…()\[\]→]/g, ' ').replace(/\s+/g, ' ').trim();
+    const noAccents = (s) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/œ/g, 'oe');
+    function answerVariants(ansText) {
+        const out = new Set();
+        String(ansText).split(/\s+\/\s+|\s+or\s+|\s+ou\s+/).forEach(v => {
+            const plain = v.replace(/\([^)]*\)/g, ' ');                                  // without notes
+            const expanded = v.replace(/\((e|s|es|x|ne|le|se)\)/g, '$1').replace(/\([^)]*\)/g, ' ');   // devenu(e) -> devenue
+            [plain, expanded].forEach(x => { const n = normAns(x); if (n) out.add(n); });
+        });
+        return [...out];
+    }
+    function judgeAnswer(input, qHtml, ansHtml) {
+        const said = normAns(input);
+        if (!said) return 'empty';
+        const qWords = new Set(normAns(toText(qHtml)).split(' '));
+        const forms = [];
+        answerVariants(toText(ansHtml)).forEach(v => {
+            forms.push(v);
+            const missing = v.split(' ').filter(w => !qWords.has(w)).join(' ');   // just the part to fill in
+            if (missing && missing !== v) forms.push(missing);
+        });
+        if (forms.includes(said)) return 'right';
+        if (forms.some(f => noAccents(f) === noAccents(said))) return 'accents';
+        return 'wrong';
+    }
     function drillBlock(drill) {
-        return `<ol class="space-y-2">${drill.map(([qn, ans], i) => `
-            <li class="border border-slate-100 rounded-xl p-3">
+        return `<div class="flex flex-wrap gap-1" aria-label="French letters">${ACCENTS.map(a => `<button type="button" data-accent="${a}" class="min-w-[36px] min-h-[36px] px-2 text-base bg-slate-100 hover:bg-indigo-100 rounded-lg text-slate-700">${a}</button>`).join('')}</div>
+            <ol class="space-y-2">${drill.map(([qn, ans], i) => `
+            <li data-drill class="border border-slate-200 rounded-xl p-3 space-y-2">
                 <div class="text-base text-slate-900"><span class="text-slate-400 font-bold mr-1">${i + 1}.</span>${qn}</div>
-                <button type="button" data-reveal class="mt-2 min-h-[40px] px-3 text-sm font-semibold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 rounded-lg">Show answer</button>
-                <div class="hidden mt-2 text-base font-semibold text-emerald-800">${ans}
-                    <button type="button" data-say="${escapeHtml(toText(ans))}" class="ml-1 text-indigo-600 text-sm" aria-label="Listen">🔊</button></div>
-            </li>`).join('')}</ol>
-            <button type="button" data-reveal-all class="min-h-[44px] px-4 text-sm font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl">Show all answers</button>`;
+                <template data-answer>${ans}</template>
+                <template data-question>${qn}</template>
+                <form data-drill-form class="flex flex-wrap gap-2">
+                    <input type="text" lang="fr" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Your answer to question ${i + 1}" placeholder="Type your answer"
+                        class="lk-drill-input flex-1 min-w-[12rem] text-base px-3 py-2 bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <button type="submit" class="min-h-[44px] px-4 text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg">Check</button>
+                    <button type="button" data-drill-show class="min-h-[44px] px-3 text-sm font-semibold text-slate-500 hover:text-slate-800">Show answer</button>
+                </form>
+                <div data-drill-result class="hidden text-base" role="status"></div>
+            </li>`).join('')}</ol>`;
+    }
+    function drillResult(li, verdict) {
+        const ans = li.querySelector('template[data-answer]').innerHTML;
+        const said = li.querySelector('input').value.trim();
+        const box = li.querySelector('[data-drill-result]');
+        const ok = verdict === 'right' || verdict === 'accents' || verdict === 'self';
+        li.dataset.result = ok ? 'right' : 'wrong';
+        li.querySelector('input').readOnly = true;
+        li.querySelectorAll('form button').forEach(b => b.classList.add('hidden'));
+        li.className = `border rounded-xl p-3 space-y-2 ${ok ? 'border-emerald-300 bg-emerald-50/50' : 'border-rose-300 bg-rose-50/50'}`;
+        const head = { right: '✓ Right!', accents: '✓ Right, but watch the accents.', self: '✓ Counted as right.', wrong: '✗ Not quite.', shown: 'The answer:' }[verdict];
+        box.innerHTML = `<div class="font-bold ${ok ? 'text-emerald-800' : 'text-rose-800'}">${head}</div>
+            ${verdict === 'right' ? '' : `<div class="mt-1 font-semibold text-slate-900">${ans} <button type="button" data-say="${escapeHtml(toText(ans))}" class="ml-1 text-indigo-600 text-sm" aria-label="Listen">🔊</button></div>`}
+            ${verdict === 'wrong' && said ? `<button type="button" data-drill-mine class="mt-2 min-h-[40px] px-3 text-sm font-semibold text-slate-700 bg-white border border-slate-200 hover:border-emerald-400 rounded-lg">My answer means the same: I was right</button>` : ''}`;
+        box.classList.remove('hidden');
     }
 
     // Grammar topics 2, 3, 10 and 28 have a hand-built practice page shown inside them
@@ -404,13 +456,6 @@ const LessonKit = (function () {
     document.addEventListener('click', (e) => {
         const say = e.target.closest('.lk-root [data-say]');
         if (say) { speakText(say.dataset.say); return; }
-        const rev = e.target.closest('.lk-root [data-reveal]');
-        if (rev) { rev.nextElementSibling.classList.remove('hidden'); rev.remove(); return; }
-        const all = e.target.closest('.lk-root [data-reveal-all]');
-        if (all) {
-            all.closest('.lk-view').querySelectorAll('[data-reveal]').forEach(b => { b.nextElementSibling.classList.remove('hidden'); b.remove(); });
-            all.remove();
-        }
     });
 
     // ---------- Level colours (full class names so the CSS build keeps them) ----------
@@ -485,11 +530,14 @@ const LessonKit = (function () {
         const scrollTop = () => { const sc = root.closest('.overflow-y-auto'); if (sc) sc.scrollTop = 0; else window.scrollTo(0, 0); };
         const nodeLabel = (id, t) => (t && t.n) || id;
 
-        // Default level: the one you saved, else the first with unfinished lessons
+        // Default level: the one you picked here, else your level, else the first with unfinished lessons
         function currentLevel() {
             const all = levels();
             const found = all.find(([name]) => levelCode(name) === level);
             if (found) return found;
+            const mine = ((typeof LocalStore !== 'undefined' && LocalStore.get('fs_profile', {})) || {}).level;
+            const atMine = all.find(([name]) => levelCode(name) === mine);
+            if (atMine) return atMine;
             return all.find(([, list]) => list.some(id => !isDone(section, id))) || all[0];
         }
 
@@ -635,6 +683,8 @@ const LessonKit = (function () {
             q('prev').innerHTML = prev === undefined ? '' : `<span class="block text-xs text-slate-400">← Previous</span><span class="block font-semibold text-slate-800">${label(prev)}</span>`;
             q('next').disabled = next === undefined;
             q('next').innerHTML = next === undefined ? '' : `<span class="block text-xs text-slate-400">Next →</span><span class="block font-semibold text-slate-800">${label(next)}</span>`;
+            q('prev').classList.toggle('invisible', prev === undefined);   // first lesson: no empty box
+            q('next').classList.toggle('invisible', next === undefined);
             q('prev').onclick = () => prev !== undefined && open(prev, true);
             q('next').onclick = () => next !== undefined && open(next, true);
             renderSide(current);
@@ -659,6 +709,78 @@ const LessonKit = (function () {
         q('search').addEventListener('input', renderList);
         q('back').addEventListener('click', () => showList(true));
         q('done').addEventListener('click', async () => { await setDone(section, current, !isDone(section, current)); renderFooter(); });
+
+        // ---------- Practice: check answers, score, and mark the lesson done when you pass ----------
+        const PASS = 0.75;   // 3 of 4, 4 of 5, 5 of 6…
+        let lastInput = null;
+        function drillScore() {
+            const items = [...q('body').querySelectorAll('[data-drill]')];
+            if (!items.length) return;
+            const answered = items.filter(li => li.dataset.result);
+            const right = answered.filter(li => li.dataset.result === 'right').length;
+            let box = q('body').querySelector('.lk-drill-score');
+            if (!box) {
+                box = document.createElement('div');
+                box.className = 'lk-drill-score rounded-2xl p-4 text-center space-y-2';
+                box.setAttribute('role', 'status');
+                items[items.length - 1].closest('section, .lk-card, div').after(box);
+            }
+            if (answered.length < items.length) {
+                box.className = 'lk-drill-score rounded-2xl p-3 text-center text-sm font-semibold text-slate-600 bg-slate-100';
+                box.textContent = `${right} right so far · ${items.length - answered.length} to go`;
+                return;
+            }
+            const passed = right / items.length >= PASS;
+            box.className = `lk-drill-score rounded-2xl p-4 text-center space-y-2 ${passed ? 'bg-emerald-50 text-emerald-900' : 'bg-amber-50 text-amber-900'}`;
+            box.innerHTML = `<div class="text-lg font-black">${passed ? '🎉' : '💪'} ${right} out of ${items.length} right</div>
+                <div class="text-sm">${passed ? 'Lesson complete: it is marked as done.' : `Get ${Math.ceil(items.length * PASS)} right to complete the lesson.`}</div>
+                ${right < items.length ? '<button type="button" data-drill-retry class="min-h-[44px] px-4 text-sm font-bold bg-white border border-slate-200 hover:border-indigo-400 rounded-xl text-slate-800">Try the ones I missed again</button>' : ''}`;
+            if (passed && !isDone(section, current)) setDone(section, current, true).then(renderFooter);
+        }
+        root.addEventListener('submit', (e) => {
+            const form = e.target.closest('[data-drill-form]');
+            if (!form) return;
+            e.preventDefault();
+            const li = form.closest('[data-drill]');
+            const input = form.querySelector('input');
+            const verdict = judgeAnswer(input.value, li.querySelector('template[data-question]').innerHTML, li.querySelector('template[data-answer]').innerHTML);
+            if (verdict === 'empty') { input.focus(); return; }
+            drillResult(li, verdict);
+            drillScore();
+            const next = [...q('body').querySelectorAll('[data-drill]')].find(x => !x.dataset.result);
+            if (next && li.dataset.result === 'right') next.querySelector('input').focus({ preventScroll: false });
+        });
+        root.addEventListener('focusin', (e) => { if (e.target.classList && e.target.classList.contains('lk-drill-input')) lastInput = e.target; });
+        root.addEventListener('mousedown', (e) => { if (e.target.closest('[data-accent]')) e.preventDefault(); });   // keep the cursor in the box
+        root.addEventListener('click', (e) => {
+            const acc = e.target.closest('[data-accent]');
+            if (acc) {
+                const input = (lastInput && !lastInput.readOnly && root.contains(lastInput)) ? lastInput
+                    : [...acc.closest('.lk-view, body').querySelectorAll('.lk-drill-input')].find(x => !x.readOnly);
+                if (!input) return;
+                const a = input.selectionStart ?? input.value.length, z = input.selectionEnd ?? a;
+                input.value = input.value.slice(0, a) + acc.dataset.accent + input.value.slice(z);
+                input.focus(); input.setSelectionRange(a + 1, a + 1);
+                return;
+            }
+            const show = e.target.closest('[data-drill-show]');
+            if (show) { drillResult(show.closest('[data-drill]'), 'shown'); drillScore(); return; }
+            const mine = e.target.closest('[data-drill-mine]');
+            if (mine) { drillResult(mine.closest('[data-drill]'), 'self'); drillScore(); return; }
+            const retry = e.target.closest('[data-drill-retry]');
+            if (retry) {
+                const missed = [...q('body').querySelectorAll('[data-drill][data-result="wrong"]')];
+                missed.forEach(li => {
+                    delete li.dataset.result;
+                    li.className = 'border border-slate-200 rounded-xl p-3 space-y-2';
+                    const input = li.querySelector('input'); input.readOnly = false; input.value = '';
+                    li.querySelectorAll('form button').forEach(b => b.classList.remove('hidden'));
+                    li.querySelector('[data-drill-result]').classList.add('hidden');
+                });
+                drillScore();
+                if (missed[0]) { missed[0].scrollIntoView({ block: 'center' }); missed[0].querySelector('input').focus({ preventScroll: true }); }
+            }
+        });
         root.addEventListener('click', (e) => {
             const lv = e.target.closest('[data-level]');
             if (lv) { level = lv.dataset.level; store.set(LEVEL_KEY, level); renderPath(); return; }
@@ -679,5 +801,5 @@ const LessonKit = (function () {
         return { open, showList, route, renderList, search: (text) => { q('search').value = text; renderList(); } };
     }
 
-    return { mount, INTERACTIVE, VOCAB_LESSONS, URLS, plain, loadInteractive, CONJ_HOME, COURSE_LEVELS, courseGet, isDone: (id) => { done = store.get('lessons_done', {}); return isDone('grammar', id); } };
+    return { mount, judgeAnswer, INTERACTIVE, VOCAB_LESSONS, URLS, plain, loadInteractive, CONJ_HOME, COURSE_LEVELS, courseGet, isDone: (id) => { done = store.get('lessons_done', {}); return isDone('grammar', id); } };
 })();

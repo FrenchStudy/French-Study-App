@@ -105,7 +105,11 @@ window.LIB = (function () {
                 { q: 'Que répondent ses partisans ?', options: ["On peut le pratiquer à petite échelle, même un week-end près de chez soi", 'Il faut prendre un mois de vacances', "Il faut partir à l'étranger"], answer: 0, why: '"On peut l\'appliquer à petite échelle, même le temps d\'un week-end."' }
             ]
         }
-    ].map(t => ({ ...t, source: 'built-in' }));
+    ].map(t => ({ ...t, skill: 'reading' }))
+        // More ready-made texts (js/texts.js): Reading C1–C2, and Listening's own recordings A1–C2
+        .concat(((window.EXTRA_TEXTS || {}).reading || []).map(t => ({ ...t, skill: 'reading' })))
+        .concat(((window.EXTRA_TEXTS || {}).listening || []).map(t => ({ ...t, skill: 'listening' })))
+        .map(t => ({ ...t, source: 'built-in' }));
 
     // ---------- The shared library (Supabase) and your own texts (this device) ----------
     let libraryReady = null;   // null = unknown, false = table missing
@@ -314,6 +318,22 @@ Reply with JSON only: {"title": "a short French title", "kind": "the type of tex
         window.speechSynthesis.speak(u);
     }
     function stop() { if ('speechSynthesis' in window) window.speechSynthesis.cancel(); }
+    // Can this device read French aloud? Calls back with '' (yes) or a message to show.
+    function voiceCheck(cb) {
+        if (!('speechSynthesis' in window)) { cb('This browser cannot read text aloud. Try Chrome, Edge or Safari.'); return; }
+        let done = false;
+        const check = (final) => {
+            if (done) return;
+            const voices = window.speechSynthesis.getVoices ? window.speechSynthesis.getVoices() : [];
+            if (!voices.length && !final) return;   // still loading
+            done = true;
+            cb(voices.length && !voices.some(v => (v.lang || '').toLowerCase().startsWith('fr'))
+                ? 'Your device has no French voice, so the audio may sound English. Add a French voice in your device settings (Speech or Text-to-speech), then reload this page.' : '');
+        };
+        check(false);
+        try { window.speechSynthesis.addEventListener('voiceschanged', () => check(false)); } catch (e) {}
+        setTimeout(() => check(true), 2500);
+    }
 
     // ---------- Text with tappable words, and the word card ----------
     // Renders the French text: paragraphs -> sentences (data-s) -> words (data-w)
@@ -393,8 +413,11 @@ Reply with JSON only: {"title": "a short French title", "kind": "the type of tex
     // ---------- Results ----------
     const results = () => store.get('lib_results', {});
     function saveResult(id, page, score, total) {
-        const all = results(); all[page + ':' + id] = { score, total, at: Date.now() }; store.set('lib_results', all);
         if (typeof Activity !== 'undefined') Activity.record();
+        // Keep your best score: a weaker retry does not replace it
+        const all = results(), old = all[page + ':' + id];
+        if (old && old.total && old.score / old.total > score / total) return;
+        all[page + ':' + id] = { score, total, at: Date.now() }; store.set('lib_results', all);
         db.auth.getUser().then(({ data: { user } }) => {
             if (user) db.from('user_progress').upsert({ user_id: user.id, module_type: page, module_id: id, completed: true, score: Math.round(score / total * 20), updated_at: new Date() },
                 { onConflict: 'user_id, module_type, module_id' });
@@ -410,5 +433,5 @@ Reply with JSON only: {"title": "a short French title", "kind": "the type of tex
     }
 
     return { renderText, allSentences, openWord, closeWord, LEVELS, BUILT_IN, loadLibrary, fetchOne, libraryReady: () => libraryReady, mine, find, generate, fromPasted, sentences, candidates, lookupWord, explainWord,
-        addToReview, inReview, say, stop, results, saveResult, shuffled, plain, store };
+        addToReview, inReview, say, stop, voiceCheck, results, saveResult, shuffled, plain, store };
 })();

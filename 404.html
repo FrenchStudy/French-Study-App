@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Page not found - Apprendre le Français</title>
+    <meta name="robots" content="noindex">
+    <style>
+        * { box-sizing: border-box; }
+        body { margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px 16px;
+               font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; background: #f8fafc; color: #1e293b; }
+        main { max-width: 26rem; text-align: center; }
+        .flag { display: inline-flex; width: 3rem; height: 2rem; border-radius: 4px; overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,.15); }
+        .flag span { flex: 1; }
+        h1 { font-size: 1.75rem; font-weight: 900; color: #0f172a; margin: 1rem 0 .5rem; }
+        p { color: #64748b; line-height: 1.5; margin: 0 0 1.5rem; }
+        a.btn { display: inline-flex; align-items: center; min-height: 48px; padding: 0 1.5rem; border-radius: .75rem;
+                background: #4f46e5; color: #fff; font-weight: 700; text-decoration: none; }
+        a.btn:hover { background: #4338ca; }
+        a.btn:focus-visible { outline: 3px solid #a5b4fc; outline-offset: 2px; }
+    </style>
+</head>
+<body>
+    <main>
+        <span class="flag" aria-hidden="true"><span style="background:#0055a4"></span><span style="background:#fff"></span><span style="background:#ef4135"></span></span>
+        <h1>Page introuvable</h1>
+        <p>This page doesn't exist. The link may be old or mistyped.</p>
+        <a class="btn" id="home" href="./">Go to Home</a>
+    </main>
+    <script>
+        // On GitHub Pages the app lives in a folder named after the repository: send people there
+        if (/\.github\.io$/.test(location.hostname)) {
+            const first = location.pathname.split('/').filter(Boolean)[0];
+            document.getElementById('home').href = first ? '/' + first + '/' : '/';
+        }
+    </script>
+</body>
+</html>

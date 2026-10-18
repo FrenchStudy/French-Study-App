@@ -17,6 +17,7 @@
     <script src="config.js"></script>
     <script src="js/ai.js"></script>
     <script src="js/conjugate.js"></script>
+    <script src="js/texts.js"></script>
     <script src="js/library.js"></script>
     <style>
         .w { cursor: pointer; border-radius: 4px; transition: background-color .12s; }
@@ -64,7 +65,7 @@
                     <section class="bg-white border border-slate-200 rounded-2xl p-4 space-y-3 flex flex-col">
                         <h2 class="font-black text-slate-900">📋 Your own text</h2>
                         <p class="text-sm text-slate-500">Paste any French text and listen to it read aloud. It stays on this device.</p>
-                        <textarea id="paste-text" rows="4" maxlength="6000" lang="fr" placeholder="Collez votre texte ici…" class="flex-1 w-full text-base md:text-sm p-3 bg-white border border-slate-200 rounded-xl resize-y focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
+                        <textarea id="paste-text" rows="4" maxlength="6000" lang="fr" placeholder="Paste a French text here…" class="flex-1 w-full text-base md:text-sm p-3 bg-white border border-slate-200 rounded-xl resize-y focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
                         <button id="paste-btn" type="button" class="self-start min-h-[44px] px-4 bg-slate-900 hover:bg-slate-800 disabled:opacity-50 text-white font-bold rounded-xl">Listen to my text</button>
                         <p id="paste-error" class="hidden text-sm text-rose-700"></p>
                     </section>
@@ -100,6 +101,7 @@
                         </div>
                     </div>
                     <div id="p-bar" class="flex gap-0.5 h-2.5" aria-label="Sentences"></div>
+                    <p id="voice-note" class="hidden text-sm bg-amber-50 border border-amber-200 text-amber-900 rounded-xl px-3 py-2" role="status"></p>
                     <div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
                         <div class="flex items-center gap-1" role="group" aria-label="Speed">
                             <span class="text-slate-500 mr-1">Speed</span>
@@ -140,7 +142,7 @@
                         <button id="d-slow" type="button" class="min-h-[44px] px-3 text-sm font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl">🐢 Slowly</button>
                     </div>
                     <div class="border border-slate-200 rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-indigo-500">
-                        <textarea id="d-input" rows="2" lang="fr" spellcheck="false" autocomplete="off" placeholder="Écrivez la phrase…" class="block w-full p-3 text-base leading-relaxed resize-y focus:outline-none"></textarea>
+                        <textarea id="d-input" rows="2" lang="fr" spellcheck="false" autocomplete="off" placeholder="Type the sentence in French…" class="block w-full p-3 text-base leading-relaxed resize-y focus:outline-none"></textarea>
                         <div id="d-accents" class="flex flex-wrap gap-1 px-2 py-1.5 border-t border-slate-100 bg-slate-50" aria-label="French letters"></div>
                     </div>
                     <div class="flex flex-wrap items-center gap-2">
@@ -203,7 +205,7 @@
         const topicText = (tp) => [...(libTexts[tp.level] || []), ...LIB.mine()].find(t => t.level === tp.level && sameTopic(t, tp));
         const textsFor = (lv) => {
             const seen = new Set();
-            return [...LIB.mine().filter(t => t.level === lv), ...(libTexts[lv] || []), ...LIB.BUILT_IN.filter(t => t.level === lv)]
+            return [...LIB.mine().filter(t => t.level === lv), ...(libTexts[lv] || []), ...LIB.BUILT_IN.filter(t => t.level === lv && t.skill === 'listening')]
                 .filter(t => !seen.has(t.id) && seen.add(t.id))
                 .filter(t => !topicsFor(lv).some(tp => sameTopic(t, tp)));   // shown on its topic's card instead
         };
@@ -513,6 +515,7 @@
             const sen = e.target.closest('#text-body .sent');
             if (sen) { playSentence(Number(sen.dataset.s), false); }
         });
+        LIB.voiceCheck((msg) => { $('voice-note').textContent = msg; $('voice-note').classList.toggle('hidden', !msg); });
         $('p-play').addEventListener('click', () => {
             if (playing) { stop(); return; }
             playSentence(cur >= sents.length - 1 && !$('p-pause').checked && cur > 0 ? 0 : cur, true);
