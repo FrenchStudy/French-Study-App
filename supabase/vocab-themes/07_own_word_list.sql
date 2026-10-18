@@ -21,13 +21,13 @@ do $$ begin
   end if;
 end $$;
 
--- 2. Work table with the new words
-create table if not exists "French-schema".core_words_import (
-  n int primary key, french text not null, pos text, article text, gender text,
-  english text, ex_fr text, ex_en text);
+-- 2. The new words, in 5 blocks of 1,000. Each block makes the work table itself if it is not there yet.
 
 -- 2.1  words 1–1000
 do $$ begin
+create table if not exists "French-schema".core_words_import (
+  n int primary key, french text not null, pos text, article text, gender text,
+  english text, ex_fr text, ex_en text);
 insert into "French-schema".core_words_import (n, french, pos, article, gender, english, ex_fr, ex_en)
 values
 (1, 'le', 'det', null, null, 'the (masculine)', 'Le chat dort sur le canapé.', 'The cat is sleeping on the sofa.'),
@@ -1035,6 +1035,9 @@ end $$;
 
 -- 2.2  words 1001–2000
 do $$ begin
+create table if not exists "French-schema".core_words_import (
+  n int primary key, french text not null, pos text, article text, gender text,
+  english text, ex_fr text, ex_en text);
 insert into "French-schema".core_words_import (n, french, pos, article, gender, english, ex_fr, ex_en)
 values
 (1001, 'librairie', 'nf', 'la', 'f', 'bookshop', 'Il y a une nouvelle librairie en ville.', 'There''s a new bookshop in town.'),
@@ -2042,6 +2045,9 @@ end $$;
 
 -- 2.3  words 2001–3000
 do $$ begin
+create table if not exists "French-schema".core_words_import (
+  n int primary key, french text not null, pos text, article text, gender text,
+  english text, ex_fr text, ex_en text);
 insert into "French-schema".core_words_import (n, french, pos, article, gender, english, ex_fr, ex_en)
 values
 (2001, 'celles', 'pro', null, null, 'those (feminine)', 'Je préfère celles-ci.', 'I prefer these ones.'),
@@ -3049,6 +3055,9 @@ end $$;
 
 -- 2.4  words 3001–4000
 do $$ begin
+create table if not exists "French-schema".core_words_import (
+  n int primary key, french text not null, pos text, article text, gender text,
+  english text, ex_fr text, ex_en text);
 insert into "French-schema".core_words_import (n, french, pos, article, gender, english, ex_fr, ex_en)
 values
 (3001, 'ouvrière', 'adj', null, null, 'working-class', 'Une famille ouvrière.', 'A working-class family.'),
@@ -4056,6 +4065,9 @@ end $$;
 
 -- 2.5  words 4001–5000
 do $$ begin
+create table if not exists "French-schema".core_words_import (
+  n int primary key, french text not null, pos text, article text, gender text,
+  english text, ex_fr text, ex_en text);
 insert into "French-schema".core_words_import (n, french, pos, article, gender, english, ex_fr, ex_en)
 values
 (4001, 'tunnel', 'nm', 'le', 'm', 'tunnel', 'Le train passe sous un tunnel.', 'The train goes through a tunnel.'),
@@ -5065,6 +5077,9 @@ end $$;
 do $$
 declare lost int;
 begin
+  create table if not exists "French-schema".core_words_import (
+  n int primary key, french text not null, pos text, article text, gender text,
+  english text, ex_fr text, ex_en text);
   if (select count(*) from "French-schema".core_words_import) <> 5000 then
     raise exception 'The work table should have 5000 words. Run all the blocks in part 2 first.';
   end if;
