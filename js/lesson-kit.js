@@ -485,11 +485,14 @@ const LessonKit = (function () {
         const scrollTop = () => { const sc = root.closest('.overflow-y-auto'); if (sc) sc.scrollTop = 0; else window.scrollTo(0, 0); };
         const nodeLabel = (id, t) => (t && t.n) || id;
 
-        // Default level: the one you saved, else the first with unfinished lessons
+        // Default level: the one you picked here, else your level, else the first with unfinished lessons
         function currentLevel() {
             const all = levels();
             const found = all.find(([name]) => levelCode(name) === level);
             if (found) return found;
+            const mine = ((typeof LocalStore !== 'undefined' && LocalStore.get('fs_profile', {})) || {}).level;
+            const atMine = all.find(([name]) => levelCode(name) === mine);
+            if (atMine) return atMine;
             return all.find(([, list]) => list.some(id => !isDone(section, id))) || all[0];
         }
 
@@ -635,6 +638,8 @@ const LessonKit = (function () {
             q('prev').innerHTML = prev === undefined ? '' : `<span class="block text-xs text-slate-400">← Previous</span><span class="block font-semibold text-slate-800">${label(prev)}</span>`;
             q('next').disabled = next === undefined;
             q('next').innerHTML = next === undefined ? '' : `<span class="block text-xs text-slate-400">Next →</span><span class="block font-semibold text-slate-800">${label(next)}</span>`;
+            q('prev').classList.toggle('invisible', prev === undefined);   // first lesson: no empty box
+            q('next').classList.toggle('invisible', next === undefined);
             q('prev').onclick = () => prev !== undefined && open(prev, true);
             q('next').onclick = () => next !== undefined && open(next, true);
             renderSide(current);

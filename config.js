@@ -102,6 +102,12 @@ const LocalStore = {
 // Saved in the profiles table, with a copy on this device so pages work before the SQL is run.
 const Account = {
     EDITABLE: ['display_name', 'level', 'goal', 'onboarded_at'],
+    // Level tabs each page remembers: forgotten when your level changes, so every page opens at the new level
+    LEVEL_TABS: ['vocab_level', 'reading_level', 'listening_level', 'writing_level', 'lk_level_grammar'],
+    levelChanged(from, to) {
+        if (!to || from === to) return;
+        try { this.LEVEL_TABS.forEach(k => localStorage.removeItem(k)); } catch (e) {}
+    },
     local() { return LocalStore.get('fs_profile', {}); },
     async session() {
         try {
@@ -124,12 +130,14 @@ const Account = {
         if (!profile.display_name && session.user.user_metadata) profile.display_name = session.user.user_metadata.display_name || session.user.user_metadata.full_name || '';
         const keep = {};
         this.EDITABLE.forEach(k => { if (profile[k]) keep[k] = profile[k]; });
+        if (local.level) this.levelChanged(local.level, keep.level);   // changed on another device
         LocalStore.set('fs_profile', { ...local, ...keep });
         return { user: session.user, profile };
     },
     async save(fields) {
         const clean = {};
         this.EDITABLE.forEach(k => { if (fields[k] !== undefined) clean[k] = fields[k]; });
+        this.levelChanged(this.local().level, clean.level);
         LocalStore.set('fs_profile', { ...this.local(), ...clean });
         const session = await this.session();
         if (!session) return;
@@ -195,6 +203,17 @@ function renderAppHeader() {
             <a href="admin.html" class="shrink-0 text-sm font-semibold px-2 py-1.5 rounded-lg ${page === 'admin.html' ? 'bg-indigo-50 text-indigo-700' : 'text-slate-600 hover:text-indigo-700 hover:bg-slate-100'}"${page === 'admin.html' ? ' aria-current="page"' : ''} style="display:none">Admin</a>
             <button id="logoutBtn" type="button" class="shrink-0 text-sm font-semibold text-slate-600 hover:text-rose-600 px-2 py-1.5 rounded-lg hover:bg-slate-100">Log out</button>
         </div>`;
+    // Keyboard users: a "Skip to content" link, shown when it gets focus
+    const main = document.querySelector('main');
+    if (main && !document.getElementById('skip-link')) {
+        if (!main.id) main.id = 'main-content';
+        if (!main.hasAttribute('tabindex')) main.setAttribute('tabindex', '-1');
+        main.classList.add('focus:outline-none');
+        const skip = document.createElement('a');
+        skip.id = 'skip-link'; skip.href = '#' + main.id; skip.textContent = 'Skip to content';
+        skip.className = 'sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[60] focus:bg-white focus:text-indigo-700 focus:font-bold focus:px-4 focus:py-2 focus:rounded-lg focus:shadow-lg';
+        header.before(skip);
+    }
     // Small screens: the menu scrolls sideways, so fade its edge and show the current page
     if (!document.getElementById('app-header-style')) {
         const st = document.createElement('style');
@@ -230,12 +249,36 @@ document.addEventListener('DOMContentLoaded', () => {
     GuestBanner.show();
 });
 
+// ---------- "Please sign in" messages get a Sign in link, wherever a page shows them ----------
+const SignInLinks = {
+    start() {
+        if (!window.MutationObserver || !document.body) return;
+        const fix = (root) => {
+            const walk = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+            const hits = [];
+            while (walk.nextNode()) if (/Please sign in to/.test(walk.currentNode.nodeValue)) hits.push(walk.currentNode.parentElement);
+            hits.forEach(el => {
+                if (!el || el.closest('a, button, textarea, [data-signin]') || el.querySelector('[data-signin]')) return;
+                const a = document.createElement('a');
+                a.href = 'login.html'; a.dataset.signin = '1'; a.textContent = 'Sign in';
+                a.className = 'ml-1 font-bold underline';
+                el.append(' ', a);
+            });
+        };
+        new MutationObserver((list) => list.forEach(m => {
+            const el = m.target.nodeType === 1 ? m.target : m.target.parentElement;
+            if (el && !el.closest('[data-signin]')) fix(el);
+        })).observe(document.body, { childList: true, characterData: true, subtree: true });
+    }
+};
+document.addEventListener('DOMContentLoaded', () => SignInLinks.start());
+
 // ---------- Visitors who are not signed in ----------
 // Free pages work for everyone; a banner explains what signing in adds, and "Log out" becomes "Sign in".
 const GuestBanner = {
     async show() {
         const page = location.pathname.split('/').pop() || 'index.html';
-        if (['login.html', 'reset.html', 'welcome.html', 'index.html'].includes(page) || !window.mySupabase) return;
+        if (['login.html', 'reset.html', 'welcome.html'].includes(page) || !window.mySupabase) return;
         if (await Account.session()) return;
         const out = document.getElementById('logoutBtn');
         if (out) {

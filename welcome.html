@@ -61,7 +61,7 @@
                     <button type="button" data-level="B2" class="choice w-full min-h-[64px] p-3 rounded-2xl border-2 border-slate-200 bg-white text-left hover:border-indigo-400 flex items-center gap-3"><span class="shrink-0 w-11 h-11 rounded-full bg-indigo-500 text-white font-black flex items-center justify-center">B2</span><span><span class="block font-bold">I'm comfortable in most situations</span><span class="block text-sm text-slate-500">I follow the news and give my opinion</span></span></button>
                     <button type="button" data-level="C1" class="choice w-full min-h-[64px] p-3 rounded-2xl border-2 border-slate-200 bg-white text-left hover:border-indigo-400 flex items-center gap-3"><span class="shrink-0 w-11 h-11 rounded-full bg-purple-500 text-white font-black flex items-center justify-center">C1</span><span><span class="block font-bold">I'm advanced</span><span class="block text-sm text-slate-500">I read novels and follow debates with ease</span></span></button>
                     <button type="button" data-level="C2" class="choice w-full min-h-[64px] p-3 rounded-2xl border-2 border-slate-200 bg-white text-left hover:border-indigo-400 flex items-center gap-3"><span class="shrink-0 w-11 h-11 rounded-full bg-rose-500 text-white font-black flex items-center justify-center">C2</span><span><span class="block font-bold">I'm near-native</span><span class="block text-sm text-slate-500">I want to polish style, idioms and nuance</span></span></button>
-                    <button type="button" id="btn-test" class="w-full min-h-[64px] p-3 rounded-2xl border-2 border-dashed border-indigo-300 bg-indigo-50 text-left hover:border-indigo-500 flex items-center gap-3"><span class="shrink-0 w-11 h-11 rounded-full bg-white text-2xl flex items-center justify-center">🧭</span><span><span class="block font-bold text-indigo-900">Not sure? Take a 2-minute test</span><span class="block text-sm text-indigo-800/80">12 quick questions</span></span></button>
+                    <button type="button" id="btn-test" class="w-full min-h-[64px] p-3 rounded-2xl border-2 border-dashed border-indigo-300 bg-indigo-50 text-left hover:border-indigo-500 flex items-center gap-3"><span class="shrink-0 w-11 h-11 rounded-full bg-white text-2xl flex items-center justify-center">🧭</span><span><span class="block font-bold text-indigo-900">Not sure? Take a 2-minute test</span><span id="test-count" class="block text-sm text-indigo-800/80">Quick questions from A1 to C2</span></span></button>
                 </div>
                 <button type="button" id="btn-level-back" class="w-full min-h-[44px] text-sm font-semibold text-slate-600">← Back</button>
             </section>
@@ -188,6 +188,7 @@
 
         // Start at the highest level where at least half the questions were right,
         // counting up from A1 and stopping at the first level that wasn't passed.
+        document.getElementById('test-count').textContent = `${QUIZ.length} quick questions, A1 to C2`;
         function placement(results) {
             let placed = 'A1';
             for (const lv of ORDER) {
