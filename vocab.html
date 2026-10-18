@@ -17,6 +17,7 @@
     <script src="config.js"></script>
     <script src="js/ai.js"></script>
     <script src="js/cheatsheet-data.js"></script>
+    <script src="js/word-memory.js"></script>
     <script src="js/lesson-kit.js"></script>
 </head>
 <body class="h-full bg-slate-100 flex flex-col overflow-hidden font-sans text-slate-800">
@@ -132,6 +133,7 @@
                             <div id="card-pos" class="text-sm text-slate-400"></div>
                         </div>
                         <div id="card-back" class="hidden space-y-3 border-t border-slate-100 pt-3">
+                            <div id="card-pic" class="hidden text-6xl leading-none text-center" aria-hidden="true"></div>
                             <div id="card-en" class="text-xl font-bold text-emerald-700 text-center"></div>
                             <div id="card-pron" class="text-sm text-indigo-600 text-center"></div>
                             <div id="card-note" class="text-sm text-amber-700 text-center"></div>
@@ -149,7 +151,9 @@
 
                     <!-- Memory hook -->
                     <div id="hook-box" class="hidden mt-3 bg-amber-50 border border-amber-200 rounded-2xl p-4 space-y-2">
-                        <div class="text-sm font-bold text-amber-900">💡 Memory hook</div>
+                        <div class="text-sm font-bold text-amber-900">💡 Memory aids</div>
+                        <ul id="tips-list" class="hidden space-y-1.5 text-base text-slate-800"></ul>
+                        <div id="hook-label" class="hidden text-xs font-bold uppercase tracking-wide text-amber-800 pt-1">Your memory hook</div>
                         <p id="hook-text" class="text-base text-slate-800"></p>
                         <div id="hook-edit" class="hidden space-y-2">
                             <textarea id="hook-input" rows="2" class="w-full text-base p-3 border border-amber-200 rounded-xl" placeholder="Write a picture or sound-alike that helps you remember…"></textarea>
@@ -565,6 +569,9 @@
             $('card-word').className = 'text-3xl font-black break-words ' + genderClass(current);
             $('card-pos').textContent = current.pos || '';
             $('card-en').textContent = current.en;
+            const pic = WordMemory.picture(current);
+            $('card-pic').textContent = pic;
+            $('card-pic').classList.toggle('hidden', !pic);
             $('card-pron').textContent = [current.pron && `Say: ${current.pron}`, current.ipa && `/${current.ipa}/`].filter(Boolean).join(' · ');
             $('card-note').textContent = [current.note, current.register].filter(Boolean).join(' · ');
             $('card-example').classList.toggle('hidden', !current.exFr);
@@ -600,8 +607,20 @@
         }
 
         // ---------- Memory hooks ----------
+        // Free tips (false friends, look-alikes, gender by ending), then the student's own or AI hook
+        const TIP_ICON = { false: '⚠️', alike: '✅', 'gender-x': '❗' };
+        function renderTips() {
+            const tips = WordMemory.tips(current);
+            $('tips-list').innerHTML = tips.map(t => {
+                const icon = t.kind === 'gender' ? (current.gender === 'f' ? '🔴' : '🔵') : TIP_ICON[t.kind];
+                return `<li class="flex gap-2"><span class="shrink-0" aria-hidden="true">${icon}</span><span${t.kind === 'false' ? ' class="font-semibold text-rose-800"' : ''}>${escapeHtml(t.text)}</span></li>`;
+            }).join('');
+            $('tips-list').classList.toggle('hidden', !tips.length);
+            $('hook-label').classList.toggle('hidden', !tips.length);
+        }
         function renderHook() {
             const h = hooks[current.key];
+            renderTips();
             $('hook-box').classList.remove('hidden');
             $('hook-edit').classList.add('hidden');
             $('hook-error').classList.add('hidden');
@@ -720,7 +739,7 @@
                 <div class="flex items-center gap-3 p-3">
                     <button data-say="${escapeHtml(w.key)}" class="shrink-0 w-11 h-11 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700" aria-label="Listen">🔊</button>
                     <div class="min-w-0 flex-1">
-                        <div class="text-base font-bold break-words ${genderClass(w)}">${escapeHtml(w.fr)}</div>
+                        <div class="text-base font-bold break-words ${genderClass(w)}">${escapeHtml(w.fr)}${WordMemory.picture(w) ? ` <span class="text-xl font-normal align-middle" aria-hidden="true">${WordMemory.picture(w)}</span>` : ''}</div>
                         <div class="text-sm text-slate-500 break-words">${escapeHtml(w.en)}</div>
                     </div>
                     <span class="hidden sm:inline text-xs font-bold px-2 py-0.5 rounded-full ${cls}">${label}</span>

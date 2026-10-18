@@ -44,6 +44,7 @@ secrets `SUPABASE_URL` and `SUPABASE_ANON_KEY` into `config.js`. Settings → Pa
 | --- | --- |
 | `lessons-index.js` | Course order and topic titles/levels only, for Home (generated) |
 | `ai.js` | `askAI()` for every AI call (through the server, see `AIServer` in config.js), `escapeHtml()`, `speakFrench()` |
+| `word-memory.js` | Free memory aids for Vocab: `WordMemory.picture(word)` (emoji for about 1,460 words you can picture) and `WordMemory.tips(word)` (false friends, words that look like English, gender by ending) |
 | `conjugate.js` | Rule-based conjugation engine (296 verbs, 12 tenses) |
 | `cheatsheet-data.js` | Cheat sheet vocab themes (fallback for Vocab) |
 | `writing-tasks.js` | The built-in writing tasks |
