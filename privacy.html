@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy - Apprendre le Français</title>
+    <meta name="description" content="How Apprendre le Français collects, uses and protects your personal information.">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#4f46e5">
+    <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+    <link rel="stylesheet" href="css/app.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.104.0"></script>
+    <script>window.supabase || document.write('<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"><\/script>')</script>
+    <script src="config.js"></script>
+</head>
+<body class="h-full bg-slate-50 flex flex-col overflow-hidden font-sans text-slate-800">
+
+    <header id="app-header" class="bg-white border-b border-slate-200 sticky top-0 z-50 shrink-0 h-14"></header>
+
+    <main id="scroller" class="flex-1 overflow-y-auto">
+        <article class="legal max-w-3xl mx-auto px-4 py-8 space-y-6 text-base leading-relaxed text-slate-700">
+            <header class="space-y-2">
+                <h1 class="text-3xl font-black text-slate-900">Privacy policy</h1>
+                <p class="text-sm text-slate-500">Last updated: <span data-site="updated"></span></p>
+                <p><span data-site="brand"></span> ("we", "us") is a website for learning French. This policy explains what personal information we collect, why, who we share it with, and the choices you have. We follow Canada's federal privacy law (PIPEDA) and, for people in Quebec, the Act respecting the protection of personal information in the private sector (Law 25).</p>
+            </header>
+
+            <section class="space-y-2">
+                <h2 class="text-xl font-bold text-slate-900">The short version</h2>
+                <ul class="list-disc pl-6 space-y-1">
+                    <li>We collect what we need to run your account and save your progress, and nothing more.</li>
+                    <li>No ads, no tracking cookies, no analytics, and we never sell your information.</li>
+                    <li>When you use an AI feature, the text you write is sent to our AI provider to get an answer. Your name and email are not sent.</li>
+                    <li>You can see, correct or delete your information at any time by writing to us.</li>
+                </ul>
+            </section>
+
+            <section class="space-y-2">
+                <h2 class="text-xl font-bold text-slate-900">1. Who is responsible</h2>
+                <p><span data-site="brand"></span> is responsible for your personal information. The person in charge of protecting it can be reached at <a data-site="email-link" class="text-indigo-700 font-semibold underline"></a>.</p>
+            </section>
+
+            <section class="space-y-2">
+                <h2 class="text-xl font-bold text-slate-900">2. What we collect</h2>
+                <p><b>Without an account</b>, you can use the lessons, flashcards and verb tables. Your progress is then kept only in your browser on your own device (in "local storage"), and we receive nothing.</p>
+                <p><b>With an account</b>, we collect:</p>
+                <ul class="list-disc pl-6 space-y-1">
+                    <li><b>Account details:</b> your email address, the name you choose to show, and your password (stored only in a scrambled, one-way form by our sign-in provider; we never see it).</li>
+                    <li><b>Your learning profile:</b> your level and your goal.</li>
+                    <li><b>Your progress and your work:</b> lessons completed, flashcard progress, words you save, scores, and the texts you write or paste in Writing, Reading and Speaking, so you find them on every device.</li>
+                    <li><b>AI usage:</b> how many AI activities you have used and which feature (for example "writing check"), so we can apply the free-use limit.</li>
+                    <li><b>Technical information:</b> our hosting and database providers keep standard server logs (such as IP address, browser type and time of access) for security and to keep the service running.</li>
+                </ul>
+                <p><b>Texts written by the AI</b> for a level or topic (for example a reading text) are saved in a shared library so other learners can use them too. They contain no personal information about you; we keep an internal reference to the account that requested them, which is never shown to others.</p>
+            </section>
+
+            <section class="space-y-2">
+                <h2 class="text-xl font-bold text-slate-900">3. Why we use it</h2>
+                <ul class="list-disc pl-6 space-y-1">
+                    <li>To create and secure your account and let you sign in.</li>
+                    <li>To save your progress and show it on any device you use.</li>
+                    <li>To provide the AI features and apply the free-use limit (and, once paid plans exist, to know what you have paid for).</li>
+                    <li>To answer your messages, fix problems and protect the service against abuse.</li>
+                </ul>
+                <p>We use your information only for these purposes. We do not use it for advertising, and we do not make decisions about you based only on automated processing.</p>
+            </section>
+
+            <section class="space-y-2">
+                <h2 class="text-xl font-bold text-slate-900">4. AI features</h2>
+                <p>When you use Writing correction, Speaking conversations, the Translator, new Reading or Listening texts, or word explanations, the text involved (what you wrote, the conversation, or the words to translate) is sent to <b>Groq</b>, our AI provider, which returns the answer. We do not send your name or email address. Please don't type personal or sensitive information (such as health details or ID numbers) into these features.</p>
+                <p>AI answers can be wrong. Use them as learning help, not as professional advice.</p>
+            </section>
+
+            <section class="space-y-2">
+                <h2 class="text-xl font-bold text-slate-900">5. Microphone and speech</h2>
+                <p>If you use speaking practice, your browser asks for permission to use your microphone. Speech is turned into text by your browser's own speech service (for example Google in Chrome or Apple in Safari), under that company's privacy terms. We never receive or store recordings of your voice; we only receive the resulting text when you send it to an AI feature.</p>
+            </section>
+
+            <section class="space-y-2">
+                <h2 class="text-xl font-bold text-slate-900">6. Who we share it with</h2>
+                <p>We share personal information only with the service providers that run the website for us, under contracts that require them to protect it and use it only to provide their service:</p>
+                <ul class="list-disc pl-6 space-y-1">
+                    <li><b>Supabase</b>: database, sign-in and server functions.</li>
+                    <li><b>Groq</b>: the AI that answers in the AI features (only the text described above).</li>
+                    <li><b>GitHub Pages</b> (website hosting) and <b>jsDelivr</b> (delivers a software library): they see technical information such as your IP address when your browser loads the site.</li>
+                    <li><b>Our payment provider</b>, once paid plans are available: it handles card details directly; we never see or store them.</li>
+                </ul>
+                <p>We may also disclose information if the law requires it. We never sell or rent personal information.</p>
+            </section>
+
+            <section class="space-y-2">
+                <h2 class="text-xl font-bold text-slate-900">7. Where your information is stored</h2>
+                <p>Our providers may store and process your information outside Canada, including in the United States. There, it is subject to local laws and may be accessible to authorities under those laws. We choose providers that protect information to a standard comparable to Canadian law.</p>
+            </section>
+
+            <section class="space-y-2">
+                <h2 class="text-xl font-bold text-slate-900">8. How long we keep it</h2>
+                <p>We keep your account information and progress for as long as you have an account. If you ask us to delete your account, we delete your personal information within 30 days, except what the law requires us to keep (for example payment records for tax purposes). Server logs are kept by our providers for a limited period. Texts in the shared library contain no personal information and may remain.</p>
+            </section>
+
+            <section class="space-y-2">
+                <h2 class="text-xl font-bold text-slate-900">9. Your rights</h2>
+                <p>You can ask to <b>see</b> the personal information we hold about you, <b>correct</b> it, <b>delete</b> your account, or <b>withdraw your consent</b> (which may mean we can no longer provide the account features). Write to <a data-site="email-link" class="text-indigo-700 font-semibold underline"></a>; we answer within 30 days. If you are not satisfied with our answer, you can contact the Office of the Privacy Commissioner of Canada (<a class="text-indigo-700 underline" href="https://www.priv.gc.ca" rel="noopener">priv.gc.ca</a>) or, in Quebec, the Commission d'accès à l'information (<a class="text-indigo-700 underline" href="https://www.cai.gouv.qc.ca" rel="noopener">cai.gouv.qc.ca</a>).</p>
+            </section>
+
+            <section class="space-y-2">
+                <h2 class="text-xl font-bold text-slate-900">10. Children</h2>
+                <p>The service is not intended for children under 13. Learners under 14 (under the age of majority where the law requires it) need the permission of a parent or guardian to create an account. If you believe a child has given us information without permission, contact us and we will delete it.</p>
+            </section>
+
+            <section class="space-y-2">
+                <h2 class="text-xl font-bold text-slate-900">11. Security</h2>
+                <p>Information travels encrypted (HTTPS), access to the database is restricted so each learner can only read their own data, and passwords are never stored in readable form. No system is perfectly secure; if a breach creates a real risk of significant harm, we will notify you and the authorities as the law requires.</p>
+            </section>
+
+            <section class="space-y-2">
+                <h2 class="text-xl font-bold text-slate-900">12. Changes</h2>
+                <p>If we change this policy, we will update the date above, and tell you in the app or by email before an important change takes effect.</p>
+            </section>
+
+            <p class="text-sm text-slate-500 border-t border-slate-200 pt-4">Questions? Write to <a data-site="email-link" class="text-indigo-700 font-semibold underline"></a>. See also our <a href="terms.html" class="text-indigo-700 font-semibold underline">Terms of use</a>.</p>
+        </article>
+    </main>
+</body>
+</html>
