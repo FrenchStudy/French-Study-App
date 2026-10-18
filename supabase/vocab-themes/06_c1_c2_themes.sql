@@ -1,6 +1,6 @@
 -- 06_c1_c2_themes.sql
 -- Adds 12 Vocab topics for C1 and C2 (ids 45–56), about 25 words each.
--- Words already in vocabulary_bank with the same meaning are reused; the others are added
+-- Words already in vocabulary_bank with the same meaning are reused, the others are added
 -- as new entries (source = 'advanced', no frequency Rank, so the frequency sets are unchanged).
 -- Run 04_themes.sql (and 05) first. Safe to run more than once. 99_undo.sql removes it all.
 
@@ -113,9 +113,9 @@ from (values
 (82, 'remonter à', null, null, 'v', 'to date back to', 'Cette tradition remonte au Moyen Âge.', 'This tradition dates back to the Middle Ages.'),
 (83, 'Moyen Âge', 'le', 'm', 'nm', 'the Middle Ages', 'Le Moyen Âge a duré près de mille ans.', 'The Middle Ages lasted almost a thousand years.'),
 (84, 'point de vue', 'le', 'm', 'nm', 'point of view', 'Je respecte ton point de vue.', 'I respect your point of view.'),
-(85, 'en revanche', null, null, 'adv', 'on the other hand', 'Le film est long ; en revanche, il est passionnant.', 'The film is long; on the other hand, it''s gripping.'),
+(85, 'en revanche', null, null, 'adv', 'on the other hand', 'Le film est long : en revanche, il est passionnant.', 'The film is long, on the other hand, it''s gripping.'),
 (86, 'd''ailleurs', null, null, 'adv', 'besides, moreover', 'D''ailleurs, personne ne l''a jamais prouvé.', 'Besides, nobody has ever proved it.'),
-(87, 'par conséquent', null, null, 'adv', 'consequently', 'Le train était en retard ; par conséquent, j''ai raté le rendez-vous.', 'The train was late; consequently, I missed the meeting.'),
+(87, 'par conséquent', null, null, 'adv', 'consequently', 'Le train était en retard : par conséquent, j''ai raté le rendez-vous.', 'The train was late, consequently, I missed the meeting.'),
 (88, 'or', null, null, 'conj', 'now, yet (in an argument)', 'Il faut des preuves. Or, nous n''en avons aucune.', 'We need proof. Yet we have none.'),
 (89, 'bien que', null, null, 'conj', 'although (+ subjunctive)', 'Bien qu''il soit tard, je continue.', 'Although it is late, I''m carrying on.'),
 (90, 'quand bien même', null, null, 'conj', 'even if', 'Quand bien même il s''excuserait, je ne le croirais pas.', 'Even if he apologised, I wouldn''t believe him.'),
@@ -236,10 +236,10 @@ where not exists (
 -- Keep the id counter ahead of the new rows (does nothing if id has no counter).
 select setval(pg_get_serial_sequence('"French-schema".vocabulary_bank', 'id'), (select max(id) from "French-schema".vocabulary_bank));
 
--- Link the words to their topics. Existing words are found by their word and where they came from;
+-- Link the words to their topics. Existing words are found by their word and where they came from,
 -- new ones by word and article.
 insert into "French-schema".word_themes (theme_id, word_id, sort_order)
-select l.theme_id, w.id, l.sort_order
+select distinct on (l.theme_id, l.sort_order) l.theme_id, v.id, l.sort_order
 from (values
 (45, 1, 'diagnostic', 'frequency', 'le', 'diagnosis'),
 (45, 2, 'ordonnance', 'frequency', 'l''', 'prescription, organisation, edict, ruling'),
@@ -422,14 +422,14 @@ from (values
 (52, 2, 'liberté', 'frequency', 'la', 'liberty, freedom'),
 (52, 3, 'libre arbitre', 'advanced', 'le', null),
 (52, 4, 'vérité', 'frequency', 'la', 'truth'),
-(52, 5, 'morale', 'frequency', 'la', 'ethics; moral'),
+(52, 5, 'morale', 'frequency', 'la', 'ethics, moral'),
 (52, 6, 'éthique', 'frequency', null, 'ethical, ethics'),
 (52, 7, 'raison', 'frequency', 'la', 'reason'),
 (52, 8, 'bonheur', 'frequency', 'le', 'happiness'),
 (52, 9, 'existence', 'frequency', 'l''', 'existence'),
 (52, 10, 'essence', 'advanced', 'l''', null),
 (52, 11, 'absurde', 'frequency', null, 'absurd'),
-(52, 12, 'devoir', 'frequency', null, 'to have to, owe; duty'),
+(52, 12, 'devoir', 'frequency', null, 'to have to, owe, duty'),
 (52, 13, 'justice', 'frequency', 'la', 'justice'),
 (52, 14, 'paradoxe', 'frequency', 'le', 'paradox'),
 (52, 15, 'préjugé', 'frequency', 'le', 'prejudice, bias'),
@@ -530,7 +530,7 @@ from (values
 (56, 12, 'nana', 'advanced', 'la', null),
 (56, 13, 'pote', 'advanced', 'le', null),
 (56, 14, 'fringues', 'advanced', 'les', null),
-(56, 15, 'truc', 'frequency', 'le', 'trick; thingamajig'),
+(56, 15, 'truc', 'frequency', 'le', 'trick, thingamajig'),
 (56, 16, 'boulet', 'advanced', 'le', null),
 (56, 17, 'crevé', 'advanced', null, null),
 (56, 18, 'relou', 'advanced', null, null),
@@ -542,16 +542,14 @@ from (values
 (56, 24, 'ça me saoule', 'advanced', null, null),
 (56, 25, 'avoir la flemme', 'advanced', null, null)
 ) as l(theme_id, sort_order, french, src, article, english)
-cross join lateral (
-    select v.id from "French-schema".vocabulary_bank v
-    where v."French" = l.french and v.source = l.src
-      and (l.src <> 'advanced' or coalesce(v."Article", '') = coalesce(l.article, ''))
-    order by (v."English" = l.english) desc nulls last, v."Rank" nulls last, v.id
-    limit 1
-) w
+join "French-schema".vocabulary_bank v
+  on v."French" = l.french and v.source = l.src
+ and (l.src <> 'advanced' or coalesce(v."Article", '') = coalesce(l.article, ''))
+order by l.theme_id, l.sort_order, (v."English" = l.english) desc nulls last, v."Rank" nulls last, v.id
 on conflict (theme_id, word_id) do update set sort_order = excluded.sort_order;
 
 
 select t.id, t.title, t.level, count(w.word_id) as words
 from "French-schema".themes t left join "French-schema".word_themes w on w.theme_id = t.id
-where t.id >= 45 group by t.id, t.title, t.level order by t.id;
+where t.id >= 45 group by t.id, t.title, t.level order by t.id
+limit 100;
