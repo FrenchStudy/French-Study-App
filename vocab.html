@@ -622,9 +622,15 @@
             $('hook-box').classList.remove('hidden');
             $('hook-edit').classList.add('hidden');
             $('hook-error').classList.add('hidden');
-            $('hook-text').textContent = h ? h.text : 'No memory hook yet. Create one with AI or write your own.';
-            $('hook-text').classList.toggle('text-slate-500', !h);
-            $('btn-hook-ai').textContent = h ? '✨ New AI hook' : '✨ Create with AI';
+            // The student's own (or AI) hook wins; otherwise the hook written for the app, if there is one
+            const builtIn = h ? '' : WordMemory.hook(current);
+            if (h) $('hook-text').textContent = h.text;
+            else if (builtIn) $('hook-text').innerHTML = WordMemory.hookHtml(builtIn);
+            else $('hook-text').textContent = 'No memory hook yet. Create one with AI or write your own.';
+            $('hook-text').classList.toggle('text-slate-500', !h && !builtIn);
+            $('hook-label').textContent = h ? 'Your memory hook' : 'Memory hook';
+            $('hook-label').classList.toggle('hidden', !h && !builtIn && $('tips-list').classList.contains('hidden'));
+            $('btn-hook-ai').textContent = h || builtIn ? '✨ New AI hook' : '✨ Create with AI';
         }
 
         async function aiHook() {
