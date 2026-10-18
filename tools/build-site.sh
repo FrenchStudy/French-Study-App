@@ -15,10 +15,24 @@ p = sys.argv[1]
 url, key = os.environ['SUPABASE_URL'].strip().rstrip('/'), os.environ['SUPABASE_ANON_KEY'].strip()
 if not re.fullmatch(r'https://[a-z0-9-]+\.supabase\.co', url):
     sys.exit('SUPABASE_URL should look like https://xxxx.supabase.co')
-if not re.fullmatch(r'[A-Za-z0-9._-]{20,}', key):
-    sys.exit('SUPABASE_ANON_KEY does not look like a Supabase key')
-if key.startswith('sb_secret_') or '"role":"service_role"' in key:
-    sys.exit('That is a secret key. Use the anon / publishable key.')
+import base64, json
+def jwt_role(k):
+    try:
+        part = k.split('.')[1]
+        return json.loads(base64.urlsafe_b64decode(part + '=' * (-len(part) % 4))).get('role')
+    except Exception:
+        return None
+if key.startswith('sb_secret_'):
+    sys.exit('SUPABASE_ANON_KEY is a Supabase SECRET key. Use the anon / publishable key (Project Settings > API).')
+if re.fullmatch(r'sb_publishable_[A-Za-z0-9_-]{10,}', key):
+    pass
+elif re.fullmatch(r'eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+', key):
+    role = jwt_role(key)
+    if role != 'anon':
+        sys.exit(f'SUPABASE_ANON_KEY has role "{role}". Use the anon (public) key, never service_role.')
+else:
+    hint = ' It looks like a Groq key (gsk_...): keep that only in Supabase Edge Function secrets.' if key.startswith('gsk_') else ''
+    sys.exit('SUPABASE_ANON_KEY is not a Supabase public key (it should start with eyJ or sb_publishable_).' + hint)
 s = open(p, encoding='utf-8', newline='').read()
 if '__SUPABASE_URL__' not in s or '__SUPABASE_ANON_KEY__' not in s:
     sys.exit('config.js has no placeholders to fill')
