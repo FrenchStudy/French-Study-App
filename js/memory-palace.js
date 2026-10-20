@@ -183,6 +183,21 @@ const CSS = `
 @media (max-width:1023px){.mp-grid{grid-template-columns:minmax(0,1fr)}}
 .mp-scene{background:#fff;border:1px solid #e2e8f0;border-radius:16px;overflow-x:auto}
 .mp-scene svg{display:block;min-width:780px;width:100%;height:auto}
+.mp-tools{display:flex;flex-wrap:wrap;gap:8px}
+.mp-zoom{display:flex;align-items:center;gap:2px;background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:4px}
+.mp-zoom button{font-weight:800;font-size:16px;color:#334155;background:transparent;border:0;border-radius:9px;min-width:40px;min-height:40px;padding:0 10px;cursor:pointer}
+.mp-zoom button:hover:not(:disabled){background:#f1f5f9}
+.mp-zoom button:disabled{opacity:.35;cursor:default}
+.mp-zoom .mp-fullbtn{font-size:14px;color:#4f46e5}
+.mp-zoom button:focus-visible{outline:3px solid #6366f1;outline-offset:2px}
+.mp-zl{font-size:13px;font-weight:700;color:#64748b;min-width:44px;text-align:center;font-variant-numeric:tabular-nums}
+.mp-full{position:fixed;inset:0;margin:0!important;z-index:60;background:#f8fafc;overflow:auto;display:flex;flex-direction:column;gap:12px;
+  padding:calc(env(safe-area-inset-top,0px) + 12px) max(16px,env(safe-area-inset-right,0px)) calc(env(safe-area-inset-bottom,0px) + 12px) max(16px,env(safe-area-inset-left,0px))}
+.mp-full .mp-grid{flex:1;min-height:0}
+.mp-full .mp-scene{max-height:calc(100vh - 110px);overflow:auto}
+@media (max-width:1023px){.mp-full .mp-scene{max-height:58vh}}
+.mp-full .mp-hint{display:none}
+.mp-lock,.mp-lock body{overflow:hidden}
 .mp-hint{font-size:13px;color:#64748b;margin-top:6px}
 .mp-card{background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:16px;display:grid;gap:10px}
 @media (min-width:1024px){.mp-card{position:sticky;top:12px}}
@@ -288,14 +303,22 @@ function mount(root, themeId, deckWords, opts = {}) {
     root.innerHTML = `
         <div class="mp-top">
             <div><div class="mp-eyebrow">Memory palace</div><div class="mp-title">${esc(P.title)}</div></div>
-            <div class="mp-modes" role="group" aria-label="Palace mode">
-                <button type="button" data-m="explore" aria-pressed="true">Explore</button>
-                <button type="button" data-m="walk" aria-pressed="false">Walk through</button>
-                <button type="button" data-m="quiz" aria-pressed="false">Quiz</button>
+            <div class="mp-tools">
+                <div class="mp-modes" role="group" aria-label="Palace mode">
+                    <button type="button" data-m="explore" aria-pressed="true">Explore</button>
+                    <button type="button" data-m="walk" aria-pressed="false">Walk through</button>
+                    <button type="button" data-m="quiz" aria-pressed="false">Quiz</button>
+                </div>
+                <div class="mp-zoom" role="group" aria-label="Picture size">
+                    <button type="button" data-z="-1" aria-label="Smaller">−</button>
+                    <span class="mp-zl" aria-live="polite">100%</span>
+                    <button type="button" data-z="1" aria-label="Bigger">+</button>
+                    <button type="button" class="mp-fullbtn" data-full aria-pressed="false">⤢ Enlarge</button>
+                </div>
             </div>
         </div>
         <div class="mp-grid">
-            <div><div class="mp-scene"></div><p class="mp-hint">Tap an object to see and hear the word. On a phone, slide the picture sideways.</p></div>
+            <div><div class="mp-scene"></div><p class="mp-hint">Tap an object to see and hear the word. Use + and − or ⤢ Enlarge to make the picture bigger; slide it sideways on a phone.</p></div>
             <div class="mp-card" aria-live="polite"></div>
         </div>`;
     const sceneBox = root.querySelector('.mp-scene');
@@ -343,7 +366,7 @@ function mount(root, themeId, deckWords, opts = {}) {
     items.forEach(it => {
         const [x, y] = pos[it.k];
         const w = it.w;
-        const m = /^(le |la |les |l['’]|un |une )(.*)$/i.exec(w.fr);
+        const m = /^(le\/la |le |la |les |l['’]|un |une )(.*)$/i.exec(w.fr);
         const art = m ? m[1].trim() : '';
         const word = m ? m[2] : w.fr;
         const g = mk('g', { class: 'mp-spot', tabindex: 0, role: 'button', 'aria-label': `${w.fr}: ${w.en}` }, svg);
@@ -356,6 +379,42 @@ function mount(root, themeId, deckWords, opts = {}) {
     });
 
     // ---------- modes ----------
+    // ---------- size: zoom steps and a full-screen view ----------
+    const ZOOMS = [1, 1.25, 1.5, 2, 2.5];
+    let zi = 0;
+    function applyZoom(keepCentre) {
+        const z = ZOOMS[zi];
+        const cx = sceneBox.scrollLeft + sceneBox.clientWidth / 2, cy = sceneBox.scrollTop + sceneBox.clientHeight / 2;
+        const oldW = svg.clientWidth || 1, oldH = svg.clientHeight || 1;
+        svg.style.width = (z * 100) + '%';
+        svg.style.minWidth = Math.round(780 * z) + 'px';
+        root.querySelector('.mp-zl').textContent = Math.round(z * 100) + '%';
+        root.querySelector('[data-z="-1"]').disabled = zi === 0;
+        root.querySelector('[data-z="1"]').disabled = zi === ZOOMS.length - 1;
+        if (keepCentre) {   // keep the same spot in the middle while zooming
+            const kx = svg.clientWidth / oldW, ky = svg.clientHeight / oldH;
+            sceneBox.scrollLeft = cx * kx - sceneBox.clientWidth / 2;
+            sceneBox.scrollTop = cy * ky - sceneBox.clientHeight / 2;
+        }
+    }
+    root.querySelectorAll('[data-z]').forEach(b => b.addEventListener('click', () => {
+        zi = Math.max(0, Math.min(ZOOMS.length - 1, zi + Number(b.dataset.z)));
+        applyZoom(true);
+    }));
+    const fullBtn = root.querySelector('[data-full]');
+    function setFull(on) {
+        root.classList.toggle('mp-full', on);
+        document.documentElement.classList.toggle('mp-lock', on);
+        fullBtn.setAttribute('aria-pressed', on);
+        fullBtn.textContent = on ? '✕ Close' : '⤢ Enlarge';
+        if (on && zi === 0 && window.innerWidth < 700) { zi = 1; }
+        applyZoom(false);
+        fullBtn.focus();
+    }
+    fullBtn.addEventListener('click', () => setFull(!root.classList.contains('mp-full')));
+    root.addEventListener('keydown', (e) => { if (e.key === 'Escape' && root.classList.contains('mp-full')) setFull(false); });
+    applyZoom(false);
+
     let mode = 'explore', quiz = null;
     const modeBtns = root.querySelectorAll('.mp-modes button');
     modeBtns.forEach(b => b.addEventListener('click', () => setMode(b.dataset.m)));
@@ -364,8 +423,10 @@ function mount(root, themeId, deckWords, opts = {}) {
         spots.forEach(g => g.classList.remove('on'));
         if (!it) return;
         const g = spots.get(it); g.classList.add('on');
-        const bb = g.getBBox(), px = (bb.x + bb.width / 2) / P.w * svg.clientWidth;
-        if (sceneBox.scrollWidth > sceneBox.clientWidth) sceneBox.scrollTo({ left: Math.max(0, px - sceneBox.clientWidth / 2), behavior: 'smooth' });
+        const bb = g.getBBox(), px = (bb.x + bb.width / 2) / P.w * svg.clientWidth, py = (bb.y + bb.height / 2) / P.h * svg.clientHeight;
+        const left = sceneBox.scrollWidth > sceneBox.clientWidth ? Math.max(0, px - sceneBox.clientWidth / 2) : 0;
+        const top = sceneBox.scrollHeight > sceneBox.clientHeight ? Math.max(0, py - sceneBox.clientHeight / 2) : 0;
+        if (left || top || sceneBox.scrollLeft || sceneBox.scrollTop) sceneBox.scrollTo({ left, top, behavior: 'smooth' });
     }
     function setMode(m) {
         mode = m;
