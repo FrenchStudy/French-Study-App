@@ -45,6 +45,7 @@ secrets `SUPABASE_URL` and `SUPABASE_ANON_KEY` into `config.js`. Settings → Pa
 | `lessons-index.js` | Course order and topic titles/levels only, for Home (generated) |
 | `ai.js` | `askAI()` for every AI call (through the server, see `AIServer` in config.js), `escapeHtml()`, `speakFrench()` |
 | `word-memory.js` | Free memory aids for Vocab: `WordMemory.picture(word)` (emoji for about 1,460 words you can picture) `WordMemory.tips(word)` (false friends, words that look like English, gender by ending) and `WordMemory.hook(word)` (about 780 written memory hooks for the most common words and the A1–A2 topics) |
+| `memory-palace.js` | The Memory palace step in Vocab: a place cut open (house, station, street of shops) with each word as an object in its room; Explore, Walk through and Quiz (quiz answers count in reviews). `MemoryPalace.has(themeId)`, `MemoryPalace.mount(el, themeId, words, { say, grade })`. Palace data for the other topics is in `palaces-data.js`: 17 topics in all (8, 9, 11, 15, 18–24, 26–29, 32, 35) |
 | `conjugate.js` | Rule-based conjugation engine (296 verbs, 12 tenses) |
 | `cheatsheet-data.js` | Cheat sheet vocab themes (fallback for Vocab) |
 | `writing-tasks.js` | The built-in writing tasks |

@@ -18,6 +18,8 @@
     <script src="js/ai.js"></script>
     <script src="js/cheatsheet-data.js"></script>
     <script src="js/word-memory.js"></script>
+    <script src="js/palaces-data.js"></script>
+    <script src="js/memory-palace.js"></script>
     <script src="js/lesson-kit.js"></script>
 </head>
 <body class="h-full bg-slate-100 flex flex-col overflow-hidden font-sans text-slate-800">
@@ -72,6 +74,7 @@
 
                 <nav id="step-tabs" class="flex gap-1 sm:gap-6 text-sm font-semibold overflow-x-auto overflow-y-hidden shadow-[inset_0_-1px_0_#e2e8f0]" role="tablist" aria-label="Steps">
                     <button data-step="learn" role="tab" class="step-tab shrink-0 min-h-[44px] px-2 sm:px-0 border-b-2"><span class="step-num">1</span> Learn</button>
+                    <button data-step="palace" role="tab" class="step-tab shrink-0 min-h-[44px] px-2 sm:px-0 border-b-2 hidden"><span class="step-num">2</span> Memory palace</button>
                     <button data-step="practise" role="tab" class="step-tab shrink-0 min-h-[44px] px-2 sm:px-0 border-b-2"><span class="step-num">2</span> Practise</button>
                     <button data-step="test" role="tab" class="step-tab shrink-0 min-h-[44px] px-2 sm:px-0 border-b-2"><span class="step-num">3</span> Test</button>
                 </nav>
@@ -177,6 +180,7 @@
 
                 <!-- STEP 3: TEST -->
             <!-- (quiz) -->
+            <section id="step-palace" class="hidden space-y-3"></section>
             <section id="mode-quiz" class="hidden space-y-3 max-w-2xl">
                 <div class="grid grid-cols-3 gap-2">
                     <button data-quiz="meaning" class="quiz-type min-h-[56px] bg-white border border-slate-200 rounded-xl text-sm font-semibold">Pick the meaning</button>
@@ -876,14 +880,21 @@
         }
 
         // ---------- Steps: Learn, Practise, Test ----------
-        const STEPS = ['learn', 'practise', 'test'];
-        const STEP_BOX = { learn: 'step-learn', practise: 'mode-cards', test: 'mode-quiz' };
-        const STEP_NEXT = { learn: ['practise', 'Practise with flashcards'], practise: ['test', 'Take the test'], test: null };
+        const STEPS = ['learn', 'palace', 'practise', 'test'];
+        const STEP_BOX = { learn: 'step-learn', palace: 'step-palace', practise: 'mode-cards', test: 'mode-quiz' };
+        const STEP_LABEL = { palace: 'Walk the memory palace', practise: 'Practise with flashcards', test: 'Take the test' };
+        const hasPalace = (tp) => !!(tp && tp.n && window.MemoryPalace && MemoryPalace.has(tp.n));
         function stepsFor(tp) {
-            if (!tp) return STEPS;
+            if (!tp) return STEPS.filter(x => x !== 'palace');
             if (tp.id === 'review') return ['practise'];
             if (!tp.n && tp.lesson) return ['learn'];
-            return STEPS;
+            return STEPS.filter(x => x !== 'palace' || hasPalace(tp));
+        }
+        // Memory palace answers count like the test: found first time moves the word up a box
+        function palaceGrade(w, firstTime) {
+            const p = progress[w.key] || { box: 0 };
+            grade(w, firstTime ? (p.box === 0 ? 'learning' : 'know') : 'dontknow');
+            renderProgress();
         }
         function setStep(s, push) {
             const allowed = stepsFor(topic);
@@ -897,12 +908,18 @@
                 b.setAttribute('aria-selected', on);
             });
             $('step-tabs').classList.toggle('hidden', allowed.length < 2);
+            document.querySelectorAll('.step-tab').forEach(b => { const n = allowed.indexOf(b.dataset.step); if (n >= 0) b.querySelector('.step-num').textContent = n + 1; });
             STEPS.forEach(x => $(STEP_BOX[x]).classList.toggle('hidden', x !== s));
             if (push) history.pushState({}, '', topicUrl(topic.id, s));
-            const nx = STEP_NEXT[s];
-            $('step-next').innerHTML = nx && allowed.includes(nx[0])
+            const nxStep = allowed[allowed.indexOf(s) + 1];
+            const nx = nxStep ? [nxStep, STEP_LABEL[nxStep]] : null;
+            $('step-next').innerHTML = nx
                 ? `<button type="button" data-goto-step="${nx[0]}" class="min-h-[48px] px-5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl">Next: ${nx[1]} →</button>`
                 : '';
+            // the palace needs the full width: hide the topic list beside it while it is open
+            $('topic-layout').classList.toggle('lg:grid', s !== 'palace');
+            $('topic-side').classList.toggle('lg:block', s !== 'palace');
+            if (s === 'palace') MemoryPalace.mount($('step-palace'), topic.n, deck.words, { say: (t) => speakFrench(t, 0.9), grade: palaceGrade });
             if (s === 'practise') startCards();
             if (s === 'learn') renderList();
             $('scroller').scrollTop = 0;
