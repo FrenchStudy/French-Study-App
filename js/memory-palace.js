@@ -27,7 +27,7 @@ const PALACES = {
             { id: 'cuisine', k: 'cuisine', fr: 'la cuisine', en: 'kitchen', x: 610, y: 410, w: 340, h: 150 },
             { id: 'sous', k: 'sous-sol', fr: 'le sous-sol', en: 'basement', x: 190, y: 652, w: 760, h: 128 },
             { id: 'immeuble', k: 'immeuble', fr: "l'immeuble", en: 'block of flats', x: 962, y: 328, w: 188, h: 302, cols: 2 },
-            { id: 'jardin', k: 'jardin', fr: 'le jardin', en: 'garden', x: 0, y: 410, w: 180, h: 228, cols: 1 },
+            { id: 'jardin', k: 'jardin', fr: 'le jardin', en: 'garden', x: 0, y: 404, w: 180, h: 236, cols: 1 },
         ],
         items: [
             { k: 'toit', e: '🏠', z: 'grenier', l: 'Right above the attic: the roof, where the pigeons sit.' },
@@ -51,7 +51,7 @@ const PALACES = {
             { k: 'cave', e: '🍷', z: 'sous', l: 'Not a cave: a cellar full of wine bottles.' },
             { k: 'garage', e: '🚗', z: 'sous', l: 'The car sleeps in the garage, down in the basement.' },
             { k: 'appartement', e: '🏢', z: 'immeuble', l: 'Next door: flats stacked on top of each other.' },
-            { k: 'studio', e: '🛋️', z: 'immeuble', l: 'One room for everything: a studio flat.' },
+            { k: 'studio', e: '1️⃣', z: 'immeuble', l: 'One room for everything: a studio flat.' },
             { k: 'ascenseur', e: '🛗', z: 'immeuble', l: 'It ascends: the lift.' },
             { k: 'balcon', e: '🌿', z: 'immeuble', l: 'Plants on the balcony of the third floor.' },
             { k: 'piscine', e: '🏊', z: 'jardin', l: 'Pisces is the fish sign: swim like a fish in the pool.' },
@@ -61,13 +61,13 @@ const PALACES = {
 
     // ---------------- Transport & Travel ----------------
     22: {
-        title: 'Gare, aéroport et route', w: 1160, h: 690,
-        backdrop: { roof: [190, 760, 104], arch: true, ground: 640, sign: 'Gare de Lyon', tower: [770, 1150] },
+        title: 'Gare, aéroport et route', w: 1160, h: 720,
+        backdrop: { roof: [190, 760, 104], arch: true, ground: 670, sign: 'Gare de Lyon', tower: [770, 1150] },
         zones: [
-            { id: 'port', fr: 'Le port', en: 'Harbour', x: 0, y: 122, w: 180, h: 318, cols: 1 },
-            { id: 'gare', fr: 'La gare', en: 'Station', x: 190, y: 122, w: 570, h: 318 },
-            { id: 'aero', k: 'aéroport', fr: "l'aéroport", en: 'airport', x: 770, y: 122, w: 380, h: 318 },
-            { id: 'route', k: 'route', fr: 'la route', en: 'road', x: 0, y: 450, w: 1150, h: 180 },
+            { id: 'port', fr: 'Le port', en: 'Harbour', x: 0, y: 122, w: 180, h: 346, cols: 1 },
+            { id: 'gare', fr: 'La gare', en: 'Station', x: 190, y: 122, w: 570, h: 346 },
+            { id: 'aero', k: 'aéroport', fr: "l'aéroport", en: 'airport', x: 770, y: 122, w: 380, h: 346 },
+            { id: 'route', k: 'route', fr: 'la route', en: 'road', x: 0, y: 478, w: 1150, h: 180 },
         ],
         items: [
             { k: 'bateau', e: '⛴️', z: 'port', l: 'The ferry waits at the quay: le bateau.' },
@@ -227,10 +227,11 @@ function drawBackdrop(svg, P) {
     mk('rect', { x: 0, y: 0, width: P.w, height: P.h, fill: '#e0f2fe' }, svg);
     mk('rect', { x: 0, y: b.ground || P.h, width: P.w, height: P.h - (b.ground || P.h), fill: '#d1e7d6' }, svg);
     if (b.street) {
-        mk('rect', { x: 0, y: 0, width: P.w, height: P.h, fill: '#f1f5f9' }, svg);
-        mk('rect', { x: 0, y: 718, width: P.w, height: 172, fill: '#cbd5e1' }, svg);
-        for (let x = 30; x < P.w; x += 120) mk('rect', { x, y: 800, width: 60, height: 8, rx: 4, fill: '#fff' }, svg);
-        mk('text', { x: P.w / 2, y: 770, 'text-anchor': 'middle', style: 'font-size:22px;font-weight:900;fill:#475569' }, svg).textContent = 'Rue de la Gourmandise';
+        const sy = typeof b.street === 'number' ? b.street : 718;
+        mk('rect', { x: 0, y: 0, width: P.w, height: P.h, fill: b.sky || '#f1f5f9' }, svg);
+        mk('rect', { x: 0, y: sy, width: P.w, height: P.h - sy, fill: b.streetColor || '#cbd5e1' }, svg);
+        if (!b.noDashes) for (let x = 30; x < P.w; x += 120) mk('rect', { x, y: sy + 82, width: 60, height: 8, rx: 4, fill: '#fff' }, svg);
+        mk('text', { x: P.w / 2, y: sy + 52, 'text-anchor': 'middle', style: 'font-size:22px;font-weight:900;fill:#475569' }, svg).textContent = b.streetName || 'Rue de la Gourmandise';
     }
     if (b.roof) {
         const [x1, x2, top] = b.roof;
@@ -244,7 +245,7 @@ function drawBackdrop(svg, P) {
         }
     }
     if (b.block) { const [x1, x2, top] = b.block; mk('rect', { x: x1 - 6, y: top, width: x2 - x1 + 12, height: (b.ground || P.h) - top + 8, rx: 4, fill: '#475569' }, svg); }
-    if (b.tower) { const [x1, x2] = b.tower; mk('rect', { x: x1 - 6, y: 112, width: x2 - x1 + 12, height: 336, rx: 4, fill: '#475569' }, svg);
+    if (b.tower) { const [x1, x2] = b.tower; mk('rect', { x: x1 - 6, y: 112, width: x2 - x1 + 12, height: 364, rx: 4, fill: '#475569' }, svg);
         mk('rect', { x: x2 - 70, y: 40, width: 46, height: 76, rx: 4, fill: '#475569' }, svg); mk('rect', { x: x2 - 80, y: 30, width: 66, height: 16, rx: 4, fill: '#334155' }, svg); }
 }
 
@@ -259,7 +260,7 @@ function layout(P, items) {
         its.forEach((it, i) => {
             const r = Math.floor(i / cols), inRow = Math.min(cols, its.length - r * cols), c = i % cols;
             const step = z.w / inRow;
-            pos[it.k] = [z.x + step * (c + 0.5), z.y + (z.shop ? 76 : 64) + r * 96];
+            pos[it.k] = [z.x + step * (c + 0.5), z.y + (z.shop ? 76 : 64) + r * 108];
         });
         z._rows = rows;
     });
@@ -269,6 +270,7 @@ function layout(P, items) {
 // ---------- the step ----------
 function mount(root, themeId, deckWords, opts = {}) {
     const P = PALACES[themeId];
+    P.items = P.items.map(it => Array.isArray(it) ? { k: it[0], e: it[1], z: it[2], l: it[3] } : it);
     if (!P || !root) return;
     injectCss();
     const say = opts.say || (() => {});
@@ -461,6 +463,9 @@ function mount(root, themeId, deckWords, opts = {}) {
     }
     intro();
 }
+
+// more palaces live in js/palaces-data.js (loaded before this file)
+Object.assign(PALACES, window.PALACE_DATA || {});
 
 window.MemoryPalace = {
     has: (id) => !!PALACES[id],
