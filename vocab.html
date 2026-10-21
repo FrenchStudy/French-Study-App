@@ -21,6 +21,7 @@
     <script src="js/palaces-data.js"></script>
     <script src="js/memory-palace.js"></script>
     <script src="js/clock.js"></script>
+    <script src="js/watch.js"></script>
     <script src="js/lesson-kit.js"></script>
 </head>
 <body class="h-full bg-slate-100 flex flex-col overflow-hidden font-sans text-slate-800">
@@ -93,7 +94,10 @@
                         <div id="learn-lesson-body" class="lk-root text-base"></div>
                     </div>
                     <div id="learn-words" class="space-y-3">
-                        <h2 id="learn-words-title" class="text-sm font-bold uppercase tracking-wide text-slate-500">Words</h2>
+                        <div class="flex flex-wrap items-center justify-between gap-2">
+                            <h2 id="learn-words-title" class="text-sm font-bold uppercase tracking-wide text-slate-500">Words</h2>
+                            <button id="btn-watch" type="button" class="min-h-[44px] px-4 bg-slate-900 hover:bg-slate-700 text-white font-bold rounded-xl text-sm">▶ Watch hands-free</button>
+                        </div>
                         <p class="text-sm text-slate-500">Tap 🔊 to hear a word. Tick the ones you already know: they skip the flashcards.</p>
                 <div class="flex flex-wrap sm:flex-nowrap gap-2">
                     <input id="list-search" type="search" placeholder="Search these words (French or English)" class="w-full sm:w-auto sm:flex-1 min-w-0 text-base px-3 py-3 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
@@ -183,10 +187,11 @@
             <!-- (quiz) -->
             <section id="step-palace" class="hidden space-y-3"></section>
             <section id="mode-quiz" class="hidden space-y-3 max-w-2xl">
-                <div class="grid grid-cols-3 gap-2">
+                <div id="quiz-types" class="grid grid-cols-3 gap-2">
                     <button data-quiz="meaning" class="quiz-type min-h-[56px] bg-white border border-slate-200 rounded-xl text-sm font-semibold">Pick the meaning</button>
                     <button data-quiz="type" class="quiz-type min-h-[56px] bg-white border border-slate-200 rounded-xl text-sm font-semibold">Type the French</button>
                     <button data-quiz="listen" class="quiz-type min-h-[56px] bg-white border border-slate-200 rounded-xl text-sm font-semibold">Listen and pick</button>
+                    <button data-quiz="picture" id="quiz-picture-btn" class="quiz-type hidden min-h-[56px] bg-white border border-slate-200 rounded-xl text-sm font-semibold">🖼️ Picture game</button>
                 </div>
                 <div id="quiz-box" class="bg-white border border-slate-200 rounded-2xl p-5 space-y-4">
                     <p class="text-base text-slate-600">Choose a quiz above. Questions use the words you don't know yet first.</p>
@@ -788,11 +793,18 @@
                 $('quiz-box').innerHTML = '<p class="text-base text-slate-600">This deck needs at least 4 words for a quiz.</p>';
                 return;
             }
-            quiz = { type, items: quizPool().slice(0, 10), i: 0, score: 0, answered: false };
+            const pool = type === 'picture' ? quizPool().filter(w => WordMemory.picture(w)) : quizPool();
+            if (pool.length < 4) {
+                $('quiz-box').innerHTML = '<p class="text-base text-slate-600">This deck needs at least 4 words with pictures for the picture game.</p>';
+                return;
+            }
+            quiz = { type, items: pool.slice(0, 10), i: 0, score: 0, answered: false };
             renderQuestion();
         }
-        function choicesFor(w, field) {
-            const others = shuffle(deck.words.filter(o => o.key !== w.key && o[field] && o[field] !== w[field])).slice(0, 3);
+        function choicesFor(w, field, pictured) {
+            let pool = deck.words.filter(o => o.key !== w.key && o[field] && o[field] !== w[field]);
+            if (pictured && pool.filter(o => WordMemory.picture(o)).length >= 3) pool = pool.filter(o => WordMemory.picture(o));
+            const others = shuffle(pool).slice(0, 3);
             return shuffle([w, ...others]);
         }
         function acceptedAnswers(fr) {
@@ -840,15 +852,19 @@
                 return;
             }
             const listen = quiz.type === 'listen';
-            const options = choicesFor(w, listen ? 'fr' : 'en');
+            const picture = quiz.type === 'picture';
+            const options = choicesFor(w, listen || picture ? 'fr' : 'en', picture);
             $('quiz-box').innerHTML = `${head}
-                ${listen
+                ${picture
+                    ? `<p class="text-base text-slate-600">What is this in French?</p>
+                       <p class="text-7xl leading-none py-2" aria-label="Picture">${WordMemory.picture(w)}</p>`
+                    : listen
                     ? `<p class="text-base text-slate-600">Listen and pick the word you hear.</p>
                        <button id="quiz-play" class="min-h-[56px] px-6 bg-indigo-600 text-white text-lg font-bold rounded-xl">🔊 Play again</button>`
                     : `<p class="text-base text-slate-600">What does this mean?</p>
                        <p class="text-3xl font-black break-words ${genderClass(w)}">${escapeHtml(w.fr)}</p>`}
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    ${options.map((o, idx) => `<button data-opt="${idx}" class="quiz-opt min-h-[52px] text-left text-base px-4 py-2 bg-white border border-slate-200 hover:border-indigo-400 rounded-xl">${escapeHtml(listen ? o.fr : o.en)}</button>`).join('')}
+                    ${options.map((o, idx) => `<button data-opt="${idx}" class="quiz-opt min-h-[52px] text-left text-base px-4 py-2 bg-white border border-slate-200 hover:border-indigo-400 rounded-xl">${escapeHtml(listen || picture ? o.fr : o.en)}</button>`).join('')}
                 </div>
                 <div id="quiz-feedback"></div>`;
             if (listen) {
@@ -864,7 +880,8 @@
                     const right = options.findIndex(o => o.key === w.key);
                     $('quiz-box').querySelector(`[data-opt="${right}"]`).classList.add('bg-emerald-100', 'border-emerald-500');
                 }
-                finishQuestion(w, ok, ok ? 'Correct!' : `It was: ${listen ? w.fr : w.en}`);
+                if (picture) speakFrench(w.fr, 0.9);
+                finishQuestion(w, ok, ok ? 'Correct!' : `It was: ${listen || picture ? w.fr : w.en}`);
             }));
         }
         function finishQuestion(w, ok, message) {
@@ -936,6 +953,9 @@
             renderProgress();
             quiz = null;
             $('quiz-box').innerHTML = '<p class="text-base text-slate-600">Choose a quiz above. Questions use the words you don\'t know yet first.</p>';
+            const pictured = deck.words.filter(w => WordMemory.picture(w)).length >= 4;
+            $('quiz-picture-btn').classList.toggle('hidden', !pictured);
+            $('quiz-types').className = 'grid gap-2 ' + (pictured ? 'grid-cols-2 sm:grid-cols-4' : 'grid-cols-3');
             $('learn-words').classList.toggle('hidden', !deck.words.length);
             $('learn-words-title').textContent = `Words in this ${topic && topic.freq ? 'set' : topic && topic.id === 'review' ? 'review' : 'topic'} (${deck.words.length})`;
             $('topic-progress').classList.toggle('hidden', !deck.words.length);
@@ -1159,6 +1179,8 @@
         $('list-search').addEventListener('input', renderList);
         $('list-filter').addEventListener('change', renderList);
         $('btn-copy-list').addEventListener('click', copyList);
+        // Watch: a hands-free slideshow of the words shown (search and filter apply)
+        $('btn-watch').addEventListener('click', () => WatchMode.open(shownWords(), { title: topic ? topic.title : 'Words' }));
         $('btn-download-list').addEventListener('click', downloadList);
         document.querySelectorAll('.quiz-type').forEach(b => b.addEventListener('click', () => startQuiz(b.dataset.quiz)));
         document.addEventListener('keydown', (e) => {
