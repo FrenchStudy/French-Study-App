@@ -326,4 +326,7 @@ function mount(root, opts = {}) {
 }
 
 window.FrenchClock = { mount, say: frenchTime };
+// the clock is the hands-on tool of Telling Time (Vocab theme 6)
+window.VocabTools = window.VocabTools || {};
+window.VocabTools[6] = { name: 'Interactive clock', next: 'Try the interactive clock', mount };
 })();

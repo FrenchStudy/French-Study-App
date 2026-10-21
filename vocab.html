@@ -22,6 +22,7 @@
     <script src="js/memory-palace.js"></script>
     <script src="js/clock.js"></script>
     <script src="js/watch.js"></script>
+    <script src="js/vocab-tools.js"></script>
     <script src="js/lesson-kit.js"></script>
 </head>
 <body class="h-full bg-slate-100 flex flex-col overflow-hidden font-sans text-slate-800">
@@ -901,10 +902,10 @@
         const STEPS = ['learn', 'palace', 'practise', 'test'];
         const STEP_BOX = { learn: 'step-learn', palace: 'step-palace', practise: 'mode-cards', test: 'mode-quiz' };
         const STEP_LABEL = { palace: 'Walk the memory palace', practise: 'Practise with flashcards', test: 'Take the test' };
-        // Telling Time (theme 6) gets an interactive clock in the same place as a memory palace
-        const CLOCK_THEME = 6;
-        const hasClock = (tp) => !!(tp && tp.n === CLOCK_THEME && window.FrenchClock);
-        const hasPalace = (tp) => hasClock(tp) || !!(tp && tp.n && window.MemoryPalace && MemoryPalace.has(tp.n));
+        // Topics about rules rather than things (numbers, calendar, telling time, colours) get a
+        // hands-on tool (js/vocab-tools.js, js/clock.js) in the place where others have a memory palace
+        const toolFor = (tp) => (tp && tp.n && window.VocabTools && VocabTools[tp.n] && VocabTools[tp.n].mount) ? VocabTools[tp.n] : null;
+        const hasPalace = (tp) => !!toolFor(tp) || !!(tp && tp.n && window.MemoryPalace && MemoryPalace.has(tp.n));
         function stepsFor(tp) {
             if (!tp) return STEPS.filter(x => x !== 'palace');
             if (tp.id === 'review') return ['practise'];
@@ -933,8 +934,8 @@
             STEPS.forEach(x => $(STEP_BOX[x]).classList.toggle('hidden', x !== s));
             if (push) history.pushState({}, '', topicUrl(topic.id, s));
             const palaceTab = document.querySelector('[data-step="palace"] .step-name');
-            if (palaceTab) palaceTab.textContent = hasClock(topic) ? 'Interactive clock' : 'Memory palace';
-            STEP_LABEL.palace = hasClock(topic) ? 'Try the interactive clock' : 'Walk the memory palace';
+            if (palaceTab) palaceTab.textContent = toolFor(topic) ? toolFor(topic).name : 'Memory palace';
+            STEP_LABEL.palace = toolFor(topic) ? toolFor(topic).next : 'Walk the memory palace';
             const nxStep = allowed[allowed.indexOf(s) + 1];
             const nx = nxStep ? [nxStep, STEP_LABEL[nxStep]] : null;
             $('step-next').innerHTML = nx
@@ -943,7 +944,7 @@
             // the palace needs the full width: hide the topic list beside it while it is open
             $('topic-layout').classList.toggle('lg:grid', s !== 'palace');
             $('topic-side').classList.toggle('lg:block', s !== 'palace');
-            if (s === 'palace' && hasClock(topic)) FrenchClock.mount($('step-palace'), { say: (t) => speakFrench(t, 0.9) });
+            if (s === 'palace' && toolFor(topic)) toolFor(topic).mount($('step-palace'), { say: (t) => speakFrench(t, 0.9) });
             else if (s === 'palace') MemoryPalace.mount($('step-palace'), topic.n, deck.words, { say: (t) => speakFrench(t, 0.9), grade: palaceGrade });
             if (s === 'practise') startCards();
             if (s === 'learn') renderList();
