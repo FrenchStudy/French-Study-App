@@ -17,7 +17,8 @@ A browser-based French learning suite backed by Supabase (schema `French-schema`
 | `listening.html` | Listening: recordings by level A1–C2 (its own built-in recordings, shared library, your `listening_topics`); sentence-by-sentence player, questions, transcript and dictation |
 | `writing.html` | Writing: a new AI question from a subject and format, your own posted question, or 30 ready-made tasks (A1–C2); checklist, word bank, model answer or AI sample reply; AI corrections shown inside your text. |
 | `speaking.html` | Speaking: Conversation (12 AI characters or your own scene, voice or text, hints, report), Shadowing (7 tracks, listen and repeat with a word check, no AI) and Exam task (AI task or your own question, speak with a timer, score and corrections). |
-| `terms.html`, `privacy.html` | Terms of use and Privacy policy (Canada: PIPEDA and Quebec Law 25), linked in every page's footer and at sign-up; brand, contact email and province come from `SITE` in `config.js` |
+| `terms.html`, `privacy.html` | Terms of use and Privacy policy (Canada: PIPEDA and Quebec Law 25), linked in every page's footer and at sign-up; brand and date come from `SITE` in `config.js` |
+| `contact.html` | Contact form (no email address shown): messages go to the `contact_messages` table, admins read them on the Admin page; needs `supabase/contact/01_contact.sql` |
 | `translator.html` | Translator French ⇄ English with grammar notes, a tutor chat and Save to Vocab; one visit counts as one AI use |
 | `admin.html` | Admins only: AI status and a dashboard (students, activity, AI use); needs `supabase/admin/01_dashboard.sql` |
 

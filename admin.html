@@ -89,6 +89,13 @@
                     <h2 class="text-sm font-bold text-slate-900 mb-2">Learning</h2>
                     <div id="learning" class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3"></div>
                 </section>
+                <section class="bg-white border border-slate-200 rounded-2xl p-4 space-y-3">
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                        <h2 class="text-sm font-bold text-slate-900">Messages <span id="msg-count" class="font-normal text-slate-500"></span></h2>
+                        <label class="text-sm text-slate-600 flex items-center gap-2 min-h-[40px]"><input id="msg-all" type="checkbox" class="w-4 h-4"> Show handled</label>
+                    </div>
+                    <div id="messages" class="space-y-2 text-sm"></div>
+                </section>
                 <p class="text-xs text-slate-400">To make someone premium or admin: Supabase → Table Editor → <b>profiles</b> → <code>is_premium</code> or <code>role</code>.</p>
             </div>
         </div>
@@ -199,7 +206,41 @@
             }
             $('refresh').disabled = false;
         }
+        // ---------- Messages from the contact form ----------
+        const TOPIC = { question: 'Question', problem: 'Problem', idea: 'Idea', privacy: '🔒 Privacy request', other: 'Other' };
+        let messages = [];
+        function renderMessages() {
+            const all = $('msg-all').checked;
+            const list = messages.filter(m => all || !m.handled);
+            const open = messages.filter(m => !m.handled).length;
+            $('msg-count').textContent = `· ${open} to answer`;
+            $('messages').innerHTML = list.length ? list.map(m => `
+                <div class="border ${m.topic === 'privacy' ? 'border-amber-300 bg-amber-50' : 'border-slate-200'} rounded-xl p-3 space-y-1 ${m.handled ? 'opacity-60' : ''}">
+                    <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500">
+                        <b class="text-slate-800">${esc(TOPIC[m.topic] || m.topic)}</b>
+                        <span>${esc(new Date(m.created_at).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }))}</span>
+                        <span class="select-all">${esc(m.email || 'no email')}</span>${m.signed_in ? '<span>· signed in</span>' : ''}
+                        ${m.handled ? '<span>· handled</span>' : `<button type="button" data-done="${esc(m.id)}" class="ml-auto min-h-[32px] px-3 font-semibold bg-white border border-slate-200 hover:border-emerald-400 rounded-lg text-slate-700">✓ Mark handled</button>`}
+                    </div>
+                    <p class="whitespace-pre-wrap break-words text-slate-800">${esc(m.message)}</p>
+                </div>`).join('') : '<p class="text-slate-500">No messages to answer.</p>';
+            $('messages').querySelectorAll('[data-done]').forEach(b => b.addEventListener('click', () => loadMessages(b.dataset.done)));
+        }
+        async function loadMessages(markId) {
+            try {
+                const { data, error } = await db.rpc('admin_messages', markId ? { mark_handled: markId } : {});
+                if (error) {
+                    $('messages').innerHTML = /could not find|does not exist|PGRST202/i.test(String(error.message) + (error.code || ''))
+                        ? '<p class="text-slate-600">To receive messages from the contact form, run <code>supabase/contact/01_contact.sql</code> in the Supabase SQL Editor.</p>'
+                        : `<p class="text-rose-700">Messages could not load: ${esc(error.message)}</p>`;
+                    return;
+                }
+                messages = data || []; renderMessages();
+            } catch (e) { $('messages').innerHTML = '<p class="text-slate-500">Messages could not load. Press Refresh.</p>'; }
+        }
+        $('msg-all').addEventListener('change', renderMessages);
         $('refresh').addEventListener('click', load);
+        $('refresh').addEventListener('click', () => loadMessages());
         // This page is for admins only (their data is protected anyway; this just says so plainly)
         (async () => {
             const { user, profile } = await Account.profile();
@@ -211,7 +252,7 @@
                     <a href="index.html" class="inline-flex items-center min-h-[44px] px-5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl">Go to Home</a></div>`;
                 return;
             }
-            oldKey(); aiStatus(); load();
+            oldKey(); aiStatus(); load(); loadMessages();
         })();
     </script>
 </body>

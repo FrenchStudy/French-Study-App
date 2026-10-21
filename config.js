@@ -257,18 +257,18 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ---------- Who runs the site: shown on the legal pages and in the footer ----------
-// Fill in email and province before going public (search the site for "[").
+// Leave email empty to use the contact form (contact.html) instead of showing an address.
 const SITE = {
     brand: 'Apprendre le Français',
-    email: '[contact email]',          // e.g. hello@your-domain.com
-    province: '[your province]',       // e.g. Ontario
-    updated: 'October 18, 2026'        // change when the Terms or Privacy policy change
+    email: '',                          // e.g. hello@your-domain.com (optional)
+    updated: 'October 21, 2026'         // change when the Terms or Privacy policy change
 };
+const contactHref = (topic) => SITE.email ? 'mailto:' + SITE.email : 'contact.html' + (topic ? '?topic=' + topic : '');
 const SiteInfo = {
     fill() {
         document.querySelectorAll('[data-site]').forEach(el => {
             const k = el.dataset.site;
-            if (k === 'email-link') { el.textContent = SITE.email; el.href = 'mailto:' + SITE.email; }
+            if (k === 'email-link') { el.textContent = SITE.email || 'our contact form'; el.href = contactHref(el.dataset.topic); }
             else if (SITE[k] !== undefined) el.textContent = SITE[k];
         });
     },
@@ -282,7 +282,7 @@ const SiteInfo = {
         f.innerHTML = `<span>© ${new Date().getFullYear()} ${SITE.brand}</span>
             <a href="terms.html" class="hover:text-indigo-700 underline-offset-2 hover:underline">Terms</a>
             <a href="privacy.html" class="hover:text-indigo-700 underline-offset-2 hover:underline">Privacy</a>
-            <a href="mailto:${SITE.email}" class="hover:text-indigo-700 underline-offset-2 hover:underline">Contact</a>`;
+            <a href="${contactHref()}" class="hover:text-indigo-700 underline-offset-2 hover:underline">Contact</a>`;
         host.appendChild(f);
     }
 };
@@ -326,7 +326,7 @@ const GuestBanner = {
             a.className = 'shrink-0 text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 px-3 py-1.5 rounded-lg';
             out.replaceWith(a);
         }
-        if (['terms.html', 'privacy.html'].includes(page)) return;   // the legal pages: Sign in button, no banner
+        if (['terms.html', 'privacy.html', 'contact.html'].includes(page)) return;   // legal and contact pages: Sign in button, no banner
         let hidden = false;
         try { hidden = sessionStorage.getItem('fs_guest_banner') === 'hidden'; } catch (e) {}
         const header = document.getElementById('app-header');
