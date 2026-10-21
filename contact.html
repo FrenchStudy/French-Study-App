@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact - Apprendre le Français</title>
+    <meta name="description" content="Write to Apprendre le Français: questions, privacy requests, problems and ideas.">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#4f46e5">
+    <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+    <link rel="stylesheet" href="css/app.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.104.0"></script>
+    <script>window.supabase || document.write('<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"><\/script>')</script>
+    <script src="config.js"></script>
+</head>
+<body class="h-full bg-slate-50 flex flex-col overflow-hidden font-sans text-slate-800">
+
+    <header id="app-header" class="bg-white border-b border-slate-200 sticky top-0 z-50 shrink-0 h-14"></header>
+
+    <main id="scroller" class="flex-1 overflow-y-auto">
+        <section class="max-w-2xl mx-auto px-4 py-8 space-y-6">
+            <header class="space-y-2">
+                <h1 class="text-3xl font-black text-slate-900">Contact us</h1>
+                <p class="text-base text-slate-600">Questions, a problem, an idea, or a privacy request (see, correct or delete your data)? Write to us here. We answer privacy requests within 30 days.</p>
+            </header>
+
+            <form id="contact-form" class="bg-white border border-slate-200 rounded-2xl p-5 space-y-4" novalidate>
+                <div class="space-y-1">
+                    <label for="c-topic" class="block text-sm font-bold text-slate-700">What is it about?</label>
+                    <select id="c-topic" class="w-full text-base px-3 py-3 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <option value="question">A question</option>
+                        <option value="problem">Something doesn't work</option>
+                        <option value="idea">An idea or suggestion</option>
+                        <option value="privacy">Privacy request (see, correct or delete my data)</option>
+                        <option value="other">Something else</option>
+                    </select>
+                </div>
+                <div class="space-y-1">
+                    <label for="c-email" class="block text-sm font-bold text-slate-700">Your email <span class="font-normal text-slate-500">(so we can answer)</span></label>
+                    <input id="c-email" type="email" autocomplete="email" maxlength="200" class="w-full text-base px-3 py-3 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="you@example.com">
+                </div>
+                <div class="space-y-1">
+                    <label for="c-message" class="block text-sm font-bold text-slate-700">Your message</label>
+                    <textarea id="c-message" rows="6" maxlength="3000" class="w-full text-base px-3 py-3 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Write your message…"></textarea>
+                    <p id="c-count" class="text-xs text-slate-400 text-right"></p>
+                </div>
+                <!-- left empty by people, filled by spam robots -->
+                <div class="hidden" aria-hidden="true"><label for="c-website">Website</label><input id="c-website" type="text" tabindex="-1" autocomplete="off"></div>
+                <p id="c-error" class="hidden text-sm text-rose-700 bg-rose-50 rounded-xl p-3" role="alert"></p>
+                <button id="c-send" type="submit" class="min-h-[48px] px-6 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl">Send message</button>
+                <p class="text-xs text-slate-500">We only use your message and email to answer you. See our <a href="privacy.html" class="text-indigo-700 underline">Privacy policy</a>.</p>
+            </form>
+
+            <div id="c-done" class="hidden bg-emerald-50 border border-emerald-200 rounded-2xl p-6 space-y-2 text-center">
+                <div class="text-3xl">✉️</div>
+                <p class="text-lg font-bold text-emerald-800">Message sent. Merci !</p>
+                <p class="text-sm text-slate-600">We'll answer at the email you gave us.</p>
+                <a href="index.html" class="inline-block mt-2 min-h-[44px] px-5 py-2.5 bg-white border border-emerald-300 rounded-xl font-semibold text-emerald-800">Back to Home</a>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        (function () {
+            const $ = (id) => document.getElementById(id);
+            const db = window.mySupabase;
+            const params = new URLSearchParams(location.search);
+            if (params.get('topic') && [...$('c-topic').options].some(o => o.value === params.get('topic'))) $('c-topic').value = params.get('topic');
+            // fill in the email of a signed-in student
+            (async () => {
+                try { const { data } = await db.auth.getSession(); const e = data && data.session && data.session.user && data.session.user.email; if (e && !$('c-email').value) $('c-email').value = e; } catch (e) { /* not signed in */ }
+            })();
+            const count = () => { const n = $('c-message').value.length; $('c-count').textContent = n > 2500 ? `${n} / 3000` : ''; };
+            $('c-message').addEventListener('input', count);
+            const showError = (t) => { $('c-error').textContent = t; $('c-error').classList.remove('hidden'); };
+            $('contact-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                $('c-error').classList.add('hidden');
+                const email = $('c-email').value.trim(), message = $('c-message').value.trim(), topic = $('c-topic').value;
+                if ($('c-website').value) { $('contact-form').classList.add('hidden'); $('c-done').classList.remove('hidden'); return; }
+                if (!message) { showError('Please write a message.'); $('c-message').focus(); return; }
+                if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showError('Please give an email address we can answer, like you@example.com.'); $('c-email').focus(); return; }
+                if (!db) { showError('The message could not be sent: the app is offline. Please try again later.'); return; }
+                $('c-send').disabled = true; $('c-send').textContent = 'Sending…';
+                try {
+                    const { error } = await db.from('contact_messages').insert({ email, topic, message });
+                    if (error) throw error;
+                    $('contact-form').classList.add('hidden');
+                    $('c-done').classList.remove('hidden');
+                } catch (err) {
+                    console.warn(err);
+                    showError('The message could not be sent. Check your connection and try again.');
+                    $('c-send').disabled = false; $('c-send').textContent = 'Send message';
+                }
+            });
+        })();
+    </script>
+</body>
+</html>
