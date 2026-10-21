@@ -48,6 +48,7 @@ secrets `SUPABASE_URL` and `SUPABASE_ANON_KEY` into `config.js`. Settings → Pa
 | `word-memory.js` | Free memory aids for Vocab: `WordMemory.picture(word)` (emoji for about 1,460 words you can picture) `WordMemory.tips(word)` (false friends, words that look like English, gender by ending) and `WordMemory.hook(word)` (about 780 written memory hooks for the most common words and the A1–A2 topics) |
 | `memory-palace.js` | The Memory palace step in Vocab: a place cut open (house, station, street of shops) with each word as an object in its room; Explore, Walk through and Quiz (quiz answers count in reviews). `MemoryPalace.has(themeId)`, `MemoryPalace.mount(el, themeId, words, { say, grade })`. Palace data for the other topics is in `palaces-data.js`: 17 topics in all (8, 9, 11, 15, 18–24, 26–29, 32, 35) |
 | `clock.js` | The interactive clock for Telling Time (Vocab theme 6, in the palace step): drag the hands or use ±5 min / ±1 h; shows the time in everyday French (trois heures moins le quart du soir) and 24-hour French; Set the clock, Read the clock and Listen quizzes. `FrenchClock.say(h, m)` gives both sentences |
+| `watch.js` | Watch mode in Vocab → Learn: a hands-free slideshow (picture, French spoken twice, English spoken, example spoken), with pause, next/previous, slow, English voice and examples on/off. `WatchMode.open(words, { title })` |
 | `conjugate.js` | Rule-based conjugation engine (296 verbs, 12 tenses) |
 | `cheatsheet-data.js` | Cheat sheet vocab themes (fallback for Vocab) |
 | `writing-tasks.js` | The built-in writing tasks |
