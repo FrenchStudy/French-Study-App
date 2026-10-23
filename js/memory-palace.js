@@ -1,7 +1,8 @@
 // memory-palace.js - the "Memory palace" step in Vocab.
 // Each topic with a palace is a picture of a place cut open (a house, a station, a street of shops).
 // Every word sits in the room where it happens, as an object you can tap.
-// Modes: Explore (tap anything), Walk through (room by room, in order), Quiz (names hidden: find the object).
+// Modes: Explore (tap anything), Walk through (room by room, in order; each stop is read out, "Play the walk" moves on
+// by itself), Quiz (names hidden: find the object).
 //
 //   MemoryPalace.has(themeId)                      -> true if that topic has a palace
 //   MemoryPalace.mount(el, themeId, words, opts)   -> draws it into el
@@ -428,7 +429,12 @@ function mount(root, themeId, deckWords, opts = {}) {
         const top = sceneBox.scrollHeight > sceneBox.clientHeight ? Math.max(0, py - sceneBox.clientHeight / 2) : 0;
         if (left || top || sceneBox.scrollLeft || sceneBox.scrollTop) sceneBox.scrollTo({ left, top, behavior: 'smooth' });
     }
+    // Auto walk: speaks each stop and moves on by itself until paused
+    let autoTimer = null;
+    const AUTO_MS = 3200;
+    function stopAuto() { clearTimeout(autoTimer); autoTimer = null; }
     function setMode(m) {
+        stopAuto();
         mode = m;
         modeBtns.forEach(b => b.setAttribute('aria-pressed', b.dataset.m === m));
         svg.classList.toggle('mp-quiz', m === 'quiz');
@@ -457,15 +463,29 @@ function mount(root, themeId, deckWords, opts = {}) {
     function show(i, walking) {
         const it = walking ? order[i] : i;
         highlight(it);
+        if (walking && autoTimer) clearTimeout(autoTimer);   // a tap on the picture replaces the pending step
+        const auto = walking && autoTimer !== null;
         card.innerHTML = wordHtml(it) + `<div class="mp-row">
             <button type="button" class="mp-btn" data-a="say">🔊 Listen</button>
             ${walking ? `<button type="button" class="mp-btn" data-a="prev" ${i === 0 ? 'disabled' : ''}>← Back</button>
                          <button type="button" class="mp-btn pri" data-a="next">${i === order.length - 1 ? 'Finish' : 'Next →'}</button>` : ''}
-            </div>${walking ? `<p class="mp-muted">Stop ${i + 1} of ${order.length}</p>` : ''}`;
+            </div>${walking ? `<div class="mp-row"><button type="button" class="mp-btn" data-a="auto" aria-pressed="${auto}">${auto ? '⏸ Pause' : '▶ Play the walk'}</button></div>
+            <p class="mp-muted">Stop ${i + 1} of ${order.length}${auto ? ' · moving on by itself' : ''}</p>` : ''}`;
         card.querySelector('[data-a="say"]').addEventListener('click', () => say(it.w.fr));
         if (walking) {
-            card.querySelector('[data-a="prev"]').addEventListener('click', () => show(Math.max(0, i - 1), true));
-            card.querySelector('[data-a="next"]').addEventListener('click', () => i === order.length - 1 ? walkDone() : show(i + 1, true));
+            // Each stop reads its word out as soon as you reach it
+            say(it.w.fr);
+            const next = () => {
+                if (!root.isConnected || !card.offsetParent) return stopAuto();   // left the palace: stop talking
+                if (i === order.length - 1) { stopAuto(); walkDone(); } else show(i + 1, true);
+            };
+            card.querySelector('[data-a="prev"]').addEventListener('click', () => { stopAuto(); show(Math.max(0, i - 1), true); });
+            card.querySelector('[data-a="next"]').addEventListener('click', () => { if (autoTimer !== null) { clearTimeout(autoTimer); autoTimer = 0; } next(); });
+            card.querySelector('[data-a="auto"]').addEventListener('click', () => {
+                if (autoTimer !== null) { stopAuto(); show(i, true); return; }
+                autoTimer = 0; next();
+            });
+            if (autoTimer !== null) autoTimer = setTimeout(next, AUTO_MS);
         }
     }
     function walkDone() {
