@@ -200,9 +200,18 @@ function lookalike(key, en) {
     return '';
 }
 
-// All the tips for one word: [{ kind: 'false'|'alike'|'gender', text }]
+// Facts worth knowing about a few words (from lessons that were folded into topics)
+const NOTES = {
+    'prénom': 'You give your first name first: « Je m\'appelle Jean Dupont. »',
+    'nom de famille': 'On French forms the surname is written in capitals: Jean DUPONT.',
+    'code postal': 'French address order: 12 rue de la Paix, then 75001 Paris (postcode before the town).',
+    'numéro': 'In an address the number comes first, with no comma: 12 rue de la Paix.'
+};
+
+// All the tips for one word: [{ kind: 'note'|'false'|'alike'|'gender', text }]
 function tipsFor(key, en, gender) {
     const out = [];
+    if (NOTES[key]) out.push({ kind: 'note', text: NOTES[key] });
     const ff = FALSE_FRIENDS[key];
     if (ff) out.push({ kind: 'false', text: `False friend: not "${ff[0]}". It means ${ff[1]}.` });
     else {

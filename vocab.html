@@ -387,7 +387,7 @@
         };
         const lvStyle = (lv) => LEVEL_STYLE[lv] || LEVEL_STYLE.A1;
         // Hands-on lessons with no word list of their own, and where they sit
-        const LESSON_TOPICS = { lalphabet: 0, 'noms-prenoms': 1, ladresse: 4, 'objets-classe': 17 };   // after theme N (0 = first)
+        const LESSON_TOPICS = { lalphabet: 0, 'objets-classe': 17 };   // after theme N (0 = first)
 
         function buildTopics() {
             const themes = dbThemes
@@ -618,7 +618,7 @@
 
         // ---------- Memory hooks ----------
         // Free tips (false friends, look-alikes, gender by ending), then the student's own or AI hook
-        const TIP_ICON = { false: '⚠️', alike: '✅', 'gender-x': '❗' };
+        const TIP_ICON = { note: '💡', false: '⚠️', alike: '✅', 'gender-x': '❗' };
         function renderTips() {
             const tips = WordMemory.tips(current);
             $('tips-list').innerHTML = tips.map(t => {
@@ -1201,6 +1201,10 @@
             let id = p.get('topic'), s = p.get('step') || 'learn';
             if (!id && p.get('deck')) { id = p.get('deck'); }                       // old: ?deck=theme:9
             if (!id && p.get('review')) { id = 'review'; s = 'practise'; }
+            // Lessons folded into a topic: Noms et prénoms went into Greetings, L'adresse into Numbers
+            const MERGED = { 'noms-prenoms': 'theme:1', ladresse: 'theme:4' };
+            if (id && id.startsWith('lesson:') && MERGED[id.slice(7)]) id = MERGED[id.slice(7)];
+            if (!id && MERGED[p.get('lesson')]) id = MERGED[p.get('lesson')];
             if (!id && p.get('lesson')) {                                            // old: ?lesson=famille-proche
                 const l = LessonKit.VOCAB_LESSONS.find(x => x.id === p.get('lesson'));
                 if (l) id = l.theme ? 'theme:' + l.theme : 'lesson:' + l.id;

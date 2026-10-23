@@ -16,6 +16,8 @@ Run them in order in the Supabase SQL editor. Each file is safe to run twice, an
 | `07_own_word_list.sql` | Replaces the 5,000-word frequency list found online with our own 5,000-word list (`source = 'core'`, Rank 1–5000, an example sentence for every word). Moves every topic link to the new words, then deletes the old rows. Backs up both tables first | `core_words` = 5000, `old_frequency_words` = 0, `topic_links` unchanged, `ranks` = 1–5000 |
 | `07_undo_own_word_list.sql` | Puts the old list back from the `07` backups | `frequency_words` = 5000 |
 | `07_drop_old_list_backups.sql` | Deletes the backup tables that still contain the old list. Run it once the Vocab page looks right | `backups_left` = 0 |
+| `08_names_and_address.sql` | Adds *prénom* and *nom de famille* to Greetings & Politeness, and *adresse, numéro, rue, code postal, ville* to Numbers & Scale Units (the two hands-on lessons they came from were removed) | 2 rows: Greetings with 2 added words, Numbers with 5 |
+| `08_undo_names_and_address.sql` | Removes only those links | `links_left` = 0 |
 | `99_undo.sql` | Removes the themes, the new entries and the new columns, and restores gender and article from the backup | `rows_now` = 5000 |
 
 Before running `05_new_themes.sql`, look through `05_new_themes_review.csv` (GitHub shows it as a table).
