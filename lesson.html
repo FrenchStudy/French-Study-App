@@ -52,7 +52,7 @@
 
         // ---------- Routing: ?g=33, ?g=v6; older links still work (verb tables moved to Conjugations) ----------
         const OLD_TITLES = {
-            "l'alphabet": 'lalphabet', 'les nombres': 'nombres', 'noms et prénoms': 'noms-prenoms', "l'adresse": 'ladresse',
+            "l'alphabet": 'lalphabet', 'les nombres': 'nombres',
             'objets personnels': 'objets-personnels', 'objets de la classe': 'objets-classe', 'les nationalités': 'nationalites',
             'les professions': 'professions', 'la famille proche': 'famille-proche', "l'heure & les prix": 'lheure-prix',
             'météo, date & jours': 'meteo-date-jours', 'les loisirs (hobbies)': 'loisirs-hobbies',
@@ -68,9 +68,12 @@
         function route() {
             const p = new URLSearchParams(location.search);
             if (p.get('c')) return location.replace(LessonKit.URLS.conjugation(p.get('c')));
+            if ({ 'noms-prenoms': 1, ladresse: 1 }[p.get('i')]) return location.replace('vocab.html?lesson=' + p.get('i'));
             if (p.get('i') && openInteractive(p.get('i'))) return;
             if (p.get('topic')) {
                 const old = p.get('topic').trim();
+                const MERGED = { 'noms et prénoms': 'theme:1', "l'adresse": 'theme:4' };   // lessons folded into Vocab topics
+                if (MERGED[old.toLowerCase()]) return location.replace('vocab.html?topic=' + MERGED[old.toLowerCase()]);
                 if (OLD_TITLES[old.toLowerCase()] && openInteractive(OLD_TITLES[old.toLowerCase()])) return;
                 grammar.route(new URLSearchParams());
                 grammar.search(old.replace(/\(.*?\)/g, '').trim());
