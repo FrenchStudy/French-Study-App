@@ -550,6 +550,7 @@ Object.assign(PALACES, window.PALACE_DATA || {});
 
 window.MemoryPalace = {
     has: (id) => !!PALACES[id],
+    css: injectCss,   // other step-2 tools (the World map) reuse these styles
     mount,
     _data: PALACES   // for tests
 };

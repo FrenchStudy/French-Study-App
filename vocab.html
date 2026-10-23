@@ -24,6 +24,7 @@
     <script src="js/clock.js"></script>
     <script src="js/watch.js"></script>
     <script src="js/vocab-tools.js"></script>
+    <script src="js/nationalites.js"></script>
     <script src="js/lesson-kit.js"></script>
 </head>
 <body class="h-full bg-slate-100 flex flex-col overflow-hidden font-sans text-slate-800">
@@ -904,7 +905,7 @@
         const STEP_BOX = { learn: 'step-learn', palace: 'step-palace', practise: 'mode-cards', test: 'mode-quiz' };
         const STEP_LABEL = { palace: 'Walk the memory palace', practise: 'Practise with flashcards', test: 'Take the test' };
         // Topics about rules rather than things (numbers, calendar, telling time, colours) get a
-        // hands-on tool (js/vocab-tools.js, js/clock.js) in the place where others have a memory palace
+        // hands-on tool (js/vocab-tools.js, js/clock.js, js/nationalites.js) in the place where others have a memory palace
         const toolFor = (tp) => (tp && tp.n && window.VocabTools && VocabTools[tp.n] && VocabTools[tp.n].mount) ? VocabTools[tp.n] : null;
         const hasPalace = (tp) => !!toolFor(tp) || !!(tp && tp.n && window.MemoryPalace && MemoryPalace.has(tp.n));
         function stepsFor(tp) {

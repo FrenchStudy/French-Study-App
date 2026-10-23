@@ -346,7 +346,7 @@ const LessonKit = (function () {
                 box.innerHTML = await res.text();
                 if (item.widget === 'clock') bindClockModuleEvents(box);
                 if (item.widget === 'meteo') bindMeteoModuleEvents(box);
-                if (item.widget === 'nationalites') { await loadScript('js/nationalites.js'); window.Nationalites.bind(box); }
+                if (item.widget === 'nationalites') { if (!window.Nationalites) await loadScript('js/nationalites.js'); window.Nationalites.bind(box); }
             } catch (err) {
                 box.innerHTML = '<p class="text-sm text-rose-700">This lesson could not be loaded. Check your connection and try again.</p>';
             }
