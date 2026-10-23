@@ -29,7 +29,7 @@ const LessonKit = (function () {
         { id: 'ladresse', emoji: '🏠', title: "L'adresse", blurb: 'Saying and understanding an address.', level: 'A1', path: 'content/vocab/ladresse.html' },
         { id: 'objets-personnels', emoji: '🎒', title: 'Objets personnels', blurb: 'Everyday personal objects.', level: 'A1', path: 'content/vocab/objets-personnels.html', theme: 17 },
         { id: 'objets-classe', emoji: '✏️', title: 'Objets de la classe', blurb: 'Classroom objects.', level: 'A1', path: 'content/vocab/objets-classe.html' },
-        { id: 'nationalites', emoji: '🌍', title: 'Les nationalités', blurb: 'Countries and nationalities.', level: 'A1', path: 'content/vocab/nationalites.html', theme: 10, grammar: [27] },
+        { id: 'nationalites', emoji: '🌍', title: 'Les nationalités', blurb: 'Countries and nationalities.', level: 'A1', path: 'content/vocab/nationalites.html', theme: 10, grammar: [27], widget: 'nationalites' },
         { id: 'professions', emoji: '👩‍⚕️', title: 'Les professions', blurb: 'Jobs, with and without an article.', level: 'A1', path: 'content/vocab/professions.html', theme: 11, grammar: [11] },
         { id: 'famille-proche', emoji: '👨‍👩‍👧', title: 'La famille', blurb: 'An interactive family tree.', level: 'A1', path: 'content/vocab/famille-proche.html', theme: 9 },
         { id: 'lheure-prix', emoji: '⏰', title: "L'heure et les prix", blurb: 'Telling the time and prices, with a practice clock.', level: 'A1', path: 'content/vocab/lheure-prix.html', theme: 6, widget: 'clock' },
@@ -327,6 +327,16 @@ const LessonKit = (function () {
         return parts.join('');
     }
 
+    // Load a lesson's own script once, when the lesson is first opened
+    const scripts = {};
+    function loadScript(src) {
+        return scripts[src] || (scripts[src] = new Promise((ok, fail) => {
+            const s = document.createElement('script');
+            s.src = src; s.onload = ok; s.onerror = () => { delete scripts[src]; fail(new Error(src)); };
+            document.head.appendChild(s);
+        }));
+    }
+
     // Fill every [data-interactive] placeholder with its lesson page
     async function loadInteractive(container) {
         for (const box of container.querySelectorAll('[data-interactive]')) {
@@ -338,6 +348,7 @@ const LessonKit = (function () {
                 box.innerHTML = await res.text();
                 if (item.widget === 'clock') bindClockModuleEvents(box);
                 if (item.widget === 'meteo') bindMeteoModuleEvents(box);
+                if (item.widget === 'nationalites') { await loadScript('js/nationalites.js'); window.Nationalites.bind(box); }
             } catch (err) {
                 box.innerHTML = '<p class="text-sm text-rose-700">This lesson could not be loaded. Check your connection and try again.</p>';
             }
