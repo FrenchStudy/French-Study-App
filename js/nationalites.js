@@ -1,5 +1,6 @@
 // js/nationalites.js - the interactive parts of the "Les nationalités" hands-on lesson (content/vocab/nationalites.html):
-// a tap-to-hear world map with a "Find it" game, the four masculine ➔ feminine patterns, and a 10-question practice round.
+// three pages: 1 Learn (tap-to-hear list and the masculine ➔ feminine patterns), 2 Interactive map (with a "Find it" game),
+// 3 Practice (a 10-question round).
 // Loaded on demand by lesson-kit.js; needs speakFrench from js/ai.js.
 window.Nationalites = (function () {
     // [map name, article, French, English, in/to, nationality m, nationality f ('' = same for both), gender, region, note]
@@ -168,6 +169,34 @@ window.Nationalites = (function () {
             if (mode === 'find') answerFind(n); else if (BY[n]) select(n);
         });
 
+        // ---------- Pages ----------
+        const PAGES = ['learn', 'map', 'practice'];
+        function showPage(pg, scroll) {
+            PAGES.forEach(p => {
+                $('nat-page-' + p).hidden = p !== pg;
+                $('nat-tab-' + p).setAttribute('aria-selected', p === pg);
+            });
+            if (pg === 'map') sizeCheck();
+            if (scroll) root.querySelector('.nat-tabs').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+        root.querySelector('.nat-tabs').addEventListener('keydown', e => {
+            if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+            const i = PAGES.findIndex(p => $('nat-tab-' + p).getAttribute('aria-selected') === 'true');
+            const nx = PAGES[(i + (e.key === 'ArrowRight' ? 1 : PAGES.length - 1)) % PAGES.length];
+            showPage(nx); $('nat-tab-' + nx).focus();
+        });
+
+        // ---------- Learn: the list, by continent ----------
+        const GROUPS = [["L'Europe", ['France', 'United Kingdom', 'England', 'Ireland', 'Spain', 'Portugal', 'Italy', 'Germany', 'Belgium', 'Switzerland', 'Netherlands', 'Poland', 'Greece', 'Russia', 'Turkey']],
+            ['Les Amériques', ['Canada', 'United States of America', 'Mexico', 'Brazil', 'Argentina']],
+            ["L'Asie et l'Océanie", ['China', 'Japan', 'India', 'Australia']], ["L'Afrique", ['Morocco', 'Algeria', 'Tunisia', 'Senegal']]];
+        $('nat-list').innerHTML = GROUPS.map(([h, ns]) => `<div class="nat-group"><h5>${h}</h5>${ns.map(n => { const r = BY[n];
+            return `<div class="nat-li" data-g="${r[7]}">
+                <button type="button" class="nat-w cn" data-nat-say="${esc(full(r))}"><span class="art">${r[1]}${r[1] === "l'" ? '' : ' '}</span>${r[2]}</button>
+                <button type="button" class="nat-w pp" data-nat-say="${esc(r[4])}">${r[4]}</button>
+                <span class="nt"><button type="button" class="nat-w" data-nat-say="${esc(natSay(r))}">${natHtml(r)}</button> <span style="color:var(--muted)">· ${r[3]}</span></span>
+            </div>`; }).join('')}</div>`).join('');
+
         // ---------- Patterns ----------
         const byM = {}; C.forEach(r => (byM[r[5]] = r));
         $('nat-rules').innerHTML = RULES.map(([h, p, list]) => `<div class="nat-rule"><h5>${h}</h5><p>${p}</p><div class="nat-chips">${list.map(m => {
@@ -239,6 +268,7 @@ window.Nationalites = (function () {
         // ---------- One click handler for the whole lesson ----------
         root.addEventListener('click', e => {
             const s = e.target.closest('[data-nat-say]'); if (s) { e.stopPropagation(); say(s.dataset.natSay); }
+            const pgb = e.target.closest('[data-nat-page]'); if (pgb) showPage(pgb.dataset.natPage, !pgb.classList.contains('nat-tab'));
             const v = e.target.closest('[data-nat-view]'); if (v) setView(v.dataset.natView);
             const m = e.target.closest('[data-nat-mode]'); if (m) setMode(m.dataset.natMode);
             const o = e.target.closest('[data-nat-opt]'); if (o) answerQ(o.dataset.natOpt, o);
