@@ -1,55 +1,17 @@
 <style>
     /* Les nationalités: styles for this lesson only (kept here so they don't depend on the Tailwind build) */
     .nat { --m:#2563eb; --m-soft:#c7d7fb; --f:#db2759; --f-soft:#f9cad7; --pl:#7c3aed; --pl-soft:#ddd0fb;
-           --ink:#0f172a; --muted:#64748b; --line:#e2e8f0; --sea:#e0ecf7; --land:#f1f3f0; --border:#b8c2cf; --ok:#059669; --bad:#e11d48; }
+           --ink:#0f172a; --muted:#64748b; --line:#e2e8f0; --ok:#059669; --bad:#e11d48; }
     .nat [data-g="m"] { --g:var(--m); --gs:var(--m-soft); }
     .nat [data-g="f"] { --g:var(--f); --gs:var(--f-soft); }
     .nat [data-g="pl"] { --g:var(--pl); --gs:var(--pl-soft); }
-    .nat-bar { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
-    .nat-seg { display:inline-flex; border:1px solid var(--line); border-radius:999px; overflow:hidden; background:#fff; }
-    .nat-seg button { border:0; background:none; font:inherit; font-size:12px; padding:6px 12px; cursor:pointer; color:var(--ink); }
-    .nat-seg button[aria-pressed="true"] { background:var(--ink); color:#fff; }
     .nat-key { display:flex; flex-wrap:wrap; gap:10px; font-size:11px; color:var(--muted); }
     .nat-key i { display:inline-block; width:10px; height:10px; border-radius:3px; margin-right:4px; vertical-align:-1px; }
-    .nat-stage { display:grid; grid-template-columns:minmax(0,1fr) 260px; gap:12px; align-items:start; }
-    @media (max-width: 760px) { .nat-stage { grid-template-columns:minmax(0,1fr); } }
-    .nat-map { background:var(--sea); border:1px solid var(--line); border-radius:12px; overflow:hidden; position:relative; min-height:120px; }
-    .nat-map svg { display:block; width:100%; height:auto; touch-action:manipulation; }
-    .nat-c { fill:var(--land); stroke:var(--border); stroke-width:.6; vector-effect:non-scaling-stroke; }
-    .nat-c.v { cursor:pointer; }
-    .nat-c.v[data-g="m"] { fill:var(--m-soft); } .nat-c.v[data-g="f"] { fill:var(--f-soft); } .nat-c.v[data-g="pl"] { fill:var(--pl-soft); }
-    .nat-c.v:hover { stroke:var(--ink); stroke-width:1.2; }
-    .nat-c.sel[data-g="m"] { fill:var(--m); } .nat-c.sel[data-g="f"] { fill:var(--f); } .nat-c.sel[data-g="pl"] { fill:var(--pl); }
-    .nat-c.sel { stroke:var(--ink); stroke-width:1.6; }
-    .nat-c.right { fill:var(--ok) !important; } .nat-c.wrong { fill:var(--bad) !important; opacity:.55; }
-    .nat-find .nat-c.v { fill:var(--land); } .nat-find .nat-c.v:hover { fill:#e2e8f0; }
-    .nat-hit { fill:transparent; cursor:pointer; }
-    .nat-lbl { font-weight:700; fill:var(--ink); paint-order:stroke; stroke:var(--sea); stroke-linejoin:round; pointer-events:none; text-anchor:middle; dominant-baseline:middle; }
-    .nat-world .nat-lbl { font-size:8.5px; stroke-width:2.6px; } .nat-europe .nat-lbl { font-size:2.15px; stroke-width:.65px; }
-    .nat-world .eu, .nat-europe .noneu { display:none; }
-    .nat-find .nat-lbl, .nat-small.nat-world .nat-lbl { display:none; }
-    .nat-small.nat-europe .nat-lbl { font-size:2.6px; stroke-width:.75px; }
-    .nat-hint { position:absolute; left:8px; bottom:6px; font-size:11px; color:var(--muted); background:rgba(255,255,255,.85); padding:2px 8px; border-radius:999px; }
-    .nat-card { background:#fff; border:1px solid var(--line); border-radius:12px; padding:14px; display:grid; gap:10px; min-width:0; }
-    .nat-big { font-size:22px; font-weight:800; line-height:1.15; color:var(--ink); }
-    .nat-big .art { color:var(--g); }
-    .nat-say { appearance:none; font:inherit; text-align:left; cursor:pointer; background:#f8fafc; border:1px solid var(--line); border-radius:10px; padding:7px 9px; display:flex; gap:9px; align-items:center; color:var(--ink); width:100%; }
-    .nat-say:hover { border-color:var(--g, #6366f1); background:#fff; }
-    .nat-say small { display:block; color:var(--muted); font-size:11px; }
-    .nat-say:focus-visible, .nat-chip:focus-visible, .nat-opt:focus-visible, .nat-seg button:focus-visible { outline:2px solid #6366f1; outline-offset:2px; }
-    .nat-play { flex:none; width:24px; height:24px; border-radius:50%; background:#059669; display:grid; place-items:center; }
-    .nat-play::after { content:""; border-left:7px solid #fff; border-top:4.5px solid transparent; border-bottom:4.5px solid transparent; margin-left:2px; }
     .nat-m { color:var(--m); font-weight:700; } .nat-f { color:var(--f); font-weight:700; }
-    .nat-sep { border:0; border-top:1px solid var(--line); margin:2px 0; }
-    .nat-note { font-size:11px; color:var(--muted); }
     .nat-rules { display:grid; grid-template-columns:repeat(auto-fit, minmax(min(100%, 230px), 1fr)); gap:10px; }
     .nat-rule { background:#fff; border:1px solid var(--line); border-radius:12px; padding:12px; display:grid; gap:8px; align-content:start; }
     .nat-rule h5 { margin:0; font-size:13px; font-weight:800; color:var(--ink); }
     .nat-rule p { margin:0; color:var(--muted); font-size:11px; }
-    .nat-chips { display:flex; flex-wrap:wrap; gap:6px; }
-    .nat-chip { appearance:none; font:inherit; font-size:12px; cursor:pointer; border:1px solid var(--line); background:#f8fafc; border-radius:999px; padding:4px 10px; color:var(--ink); }
-    .nat-chip:hover { border-color:#6366f1; background:#eef2ff; }
-    .nat-chip b { color:var(--f); }
     .nat-ex { background:#fff; border:1px solid var(--line); border-radius:12px; padding:16px; display:grid; gap:12px; }
     .nat-q { font-size:17px; color:var(--ink); line-height:1.5; }
     .nat-q .gap { display:inline-block; min-width:80px; border-bottom:2px solid #6366f1; text-align:center; font-weight:800; }
@@ -65,12 +27,6 @@
     .nat-meter { height:6px; background:#e2e8f0; border-radius:99px; overflow:hidden; flex:1 1 120px; max-width:220px; }
     .nat-meter span { display:block; height:100%; background:#059669; width:0; transition:width .3s; }
     @media (prefers-reduced-motion: reduce) { .nat-meter span { transition:none; } }
-    .nat-tabs { display:flex; gap:6px; flex-wrap:wrap; border-bottom:1px solid var(--line); padding-bottom:8px; }
-    .nat-tab { appearance:none; font:inherit; font-size:13px; font-weight:700; border:1px solid var(--line); background:#fff; color:var(--muted); border-radius:999px; padding:7px 14px; cursor:pointer; display:inline-flex; gap:7px; align-items:center; }
-    .nat-tab .n { display:inline-grid; place-items:center; width:20px; height:20px; border-radius:50%; background:#e2e8f0; color:var(--muted); font-size:11px; }
-    .nat-tab[aria-selected="true"] { background:#4f46e5; border-color:#4f46e5; color:#fff; }
-    .nat-tab[aria-selected="true"] .n { background:#fff; color:#4f46e5; }
-    .nat-tab:focus-visible { outline:2px solid #6366f1; outline-offset:2px; }
     .nat-list { columns:2 250px; column-gap:20px; }
     .nat-group { margin-bottom:12px; }
     .nat-group h5 { margin:0 0 4px; font-size:13px; font-weight:800; color:var(--ink); break-after:avoid; }
@@ -82,77 +38,39 @@
     .nat-li .cn { font-size:13px; font-weight:700; color:var(--ink); } .nat-li .cn .art { color:var(--g); }
     .nat-li .pp { font-size:12px; color:var(--muted); justify-self:end; }
     .nat-li .nt { grid-column:1/-1; font-size:12px; }
-    .nat-next { display:flex; justify-content:flex-end; }
+    .nat-chip:focus-visible, .nat-opt:focus-visible, .nat-btn:focus-visible { outline:2px solid #6366f1; outline-offset:2px; }
+
 </style>
 
 <div class="nat space-y-5 text-xs text-slate-700" id="nat-root">
 
-    <!-- Pages: 1 Learn, 2 Interactive map, 3 Practice -->
-    <div class="nat-tabs" role="tablist" aria-label="Lesson pages">
-        <button type="button" class="nat-tab" role="tab" id="nat-tab-learn" data-nat-page="learn" aria-selected="true" aria-controls="nat-page-learn"><span class="n">1</span>Learn</button>
-        <button type="button" class="nat-tab" role="tab" id="nat-tab-map" data-nat-page="map" aria-selected="false" aria-controls="nat-page-map"><span class="n">2</span>Interactive map</button>
-        <button type="button" class="nat-tab" role="tab" id="nat-tab-practice" data-nat-page="practice" aria-selected="false" aria-controls="nat-page-practice"><span class="n">3</span>Practice</button>
+    <div class="bg-indigo-50 border border-indigo-100 p-4 rounded-xl space-y-1.5">
+        <h3 class="font-bold text-sm text-indigo-900">🌍 Les Nationalités (Nationalities)</h3>
+        <p class="text-indigo-700 leading-relaxed">En français, les nationalités s'accordent en genre (masculin et féminin) selon la personne dont on parle. Touchez un mot pour l'écouter : le pays, la préposition (<em>en, au, aux</em>) et la nationalité. Ensuite, voyagez sur la carte à l'étape 2.</p>
     </div>
 
-    <!-- 1. Learn -->
-    <div class="space-y-5" id="nat-page-learn" role="tabpanel" aria-labelledby="nat-tab-learn">
-        <div class="bg-indigo-50 border border-indigo-100 p-4 rounded-xl space-y-1.5">
-            <h3 class="font-bold text-sm text-indigo-900">🌍 Les Nationalités (Nationalities)</h3>
-            <p class="text-indigo-700 leading-relaxed">En français, les nationalités s'accordent en genre (masculin et féminin) selon la personne dont on parle. Touchez un mot pour l'écouter : le pays, la préposition (<em>en, au, aux</em>) et la nationalité.</p>
+    <div class="space-y-2">
+        <h4 class="font-bold uppercase tracking-wider text-slate-400 text-[10px]">Les pays et les nationalités</h4>
+        <div class="nat-key">
+            <span><i style="background:var(--m)"></i>masculine · au</span>
+            <span><i style="background:var(--f)"></i>feminine · en</span>
+            <span><i style="background:var(--pl)"></i>plural · aux</span>
         </div>
-
-        <div class="space-y-2">
-            <h4 class="font-bold uppercase tracking-wider text-slate-400 text-[10px]">Les pays et les nationalités</h4>
-            <div class="nat-key">
-                <span><i style="background:var(--m)"></i>masculine · au</span>
-                <span><i style="background:var(--f)"></i>feminine · en</span>
-                <span><i style="background:var(--pl)"></i>plural · aux</span>
-            </div>
-            <div class="nat-list" id="nat-list"></div>
-        </div>
-
-        <div class="bg-amber-50 border border-amber-200/60 p-4 rounded-xl space-y-1">
-            <h4 class="font-bold text-amber-900 uppercase tracking-wide text-[11px]">💡 Règle d'accord</h4>
-            <p class="text-amber-800 leading-relaxed">En règle générale, pour former le féminin d'une nationalité, on ajoute un <strong class="text-amber-950">« e »</strong> à la fin du masculin (ex: <em>il est américain</em> ➔ <em>elle est américaine</em>). Une nationalité s'écrit avec une minuscule (<em>il est français</em>), mais une personne prend une majuscule (<em>un Français, une Française</em>).</p>
-        </div>
-
-        <div class="space-y-2">
-            <h4 class="font-bold uppercase tracking-wider text-slate-400 text-[10px]">Masculin ➔ féminin : touchez pour entendre « il est… / elle est… »</h4>
-            <div class="nat-rules" id="nat-rules"></div>
-        </div>
-
-        <div class="nat-next"><button type="button" class="nat-btn" data-nat-page="map">Next: Interactive map ›</button></div>
+        <div class="nat-list" id="nat-list"></div>
     </div>
 
-    <!-- 2. Interactive map -->
-    <div class="space-y-3" id="nat-page-map" role="tabpanel" aria-labelledby="nat-tab-map" hidden>
-        <div class="nat-bar">
-            <div class="nat-seg" role="group" aria-label="Map view">
-                <button type="button" data-nat-view="world" aria-pressed="true">World</button>
-                <button type="button" data-nat-view="europe" aria-pressed="false">Europe</button>
-            </div>
-            <div class="nat-seg" role="group" aria-label="Map mode">
-                <button type="button" data-nat-mode="explore" aria-pressed="true">Explore</button>
-                <button type="button" data-nat-mode="find" aria-pressed="false">Find it</button>
-            </div>
-            <div class="nat-key">
-                <span><i style="background:var(--m)"></i>le · au</span>
-                <span><i style="background:var(--f)"></i>la / l' · en</span>
-                <span><i style="background:var(--pl)"></i>les · aux</span>
-            </div>
-        </div>
-        <div class="nat-stage">
-            <div class="nat-map" id="nat-mapbox">
-                <svg id="nat-svg" class="nat-world" role="img" aria-label="World map of the countries in this lesson"></svg>
-                <span class="nat-hint" id="nat-hint">Loading the map…</span>
-            </div>
-            <div class="nat-card" id="nat-card" aria-live="polite"></div>
-        </div>
-        <div class="nat-next"><button type="button" class="nat-btn" data-nat-page="practice">Next: Practice ›</button></div>
+    <div class="bg-amber-50 border border-amber-200/60 p-4 rounded-xl space-y-1">
+        <h4 class="font-bold text-amber-900 uppercase tracking-wide text-[11px]">💡 Règle d'accord</h4>
+        <p class="text-amber-800 leading-relaxed">En règle générale, pour former le féminin d'une nationalité, on ajoute un <strong class="text-amber-950">« e »</strong> à la fin du masculin (ex: <em>il est américain</em> ➔ <em>elle est américaine</em>). Une nationalité s'écrit avec une minuscule (<em>il est français</em>), mais une personne prend une majuscule (<em>un Français, une Française</em>).</p>
     </div>
 
-    <!-- 3. Practice -->
-    <div class="space-y-2" id="nat-page-practice" role="tabpanel" aria-labelledby="nat-tab-practice" hidden>
+    <div class="space-y-2">
+        <h4 class="font-bold uppercase tracking-wider text-slate-400 text-[10px]">Masculin ➔ féminin : touchez pour entendre « il est… / elle est… »</h4>
+        <div class="nat-rules" id="nat-rules"></div>
+    </div>
+
+    <div class="space-y-2">
+        <h4 class="font-bold uppercase tracking-wider text-slate-400 text-[10px]">Vérifiez : il / elle est…, en / au / aux</h4>
         <div class="nat-ex" id="nat-ex"></div>
     </div>
 </div>
