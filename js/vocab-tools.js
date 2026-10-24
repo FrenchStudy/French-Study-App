@@ -330,7 +330,7 @@ function colourWord(c, t, shade) {
 }
 function why(c, t, shade) {
     if (shade) return `With <b>clair</b> (light) or <b>foncé</b> (dark), a colour never changes: ${t.art} ${t.fr} ${c.m} ${shade}.`;
-    if (c.inv) return `<b>${c.m}</b> comes from a thing (${c.m === 'orange' ? 'an orange' : c.m === 'marron' ? 'a chestnut' : c.m === 'bordeaux' ? 'the wine' : c.m === 'kaki' ? 'a fruit' : 'the navy'}), so it never changes.`;
+    if (c.inv) return `<b>${c.m}</b> comes from a noun (${c.m === 'orange' ? 'an orange' : c.m === 'marron' ? 'a chestnut' : c.m === 'bordeaux' ? 'the wine' : c.m === 'kaki' ? 'a Hindi word for dust-coloured' : 'the navy'}), so it never changes.`;
     const parts = [];
     if (t.g === 'f') parts.push(c.f === c.m ? `<b>${c.m}</b> already ends in -e, so it stays the same for a feminine word` : `<b>${t.fr}</b> is feminine: ${c.m} → <b>${c.f}</b>`);
     else parts.push(`<b>${t.fr}</b> is masculine: <b>${c.m}</b>`);

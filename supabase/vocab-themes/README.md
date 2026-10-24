@@ -18,6 +18,7 @@ Run them in order in the Supabase SQL editor. Each file is safe to run twice, an
 | `07_drop_old_list_backups.sql` | Deletes the backup tables that still contain the old list. Run it once the Vocab page looks right | `backups_left` = 0 |
 | `08_names_and_address.sql` | Adds *prénom* and *nom de famille* to Greetings & Politeness, and *adresse, numéro, rue, code postal, ville* to Numbers & Scale Units (the two hands-on lessons they came from were removed) | 2 rows: Greetings with 2 added words, Numbers with 5 |
 | `08_undo_names_and_address.sql` | Removes only those links | `links_left` = 0 |
+| `09_fix_topic_links.sql` | Points 28 topic words at the entry with the right meaning (for example *avant* = before, not *l'avant* = the front, in Frequency & Time Adverbs; *le dîner* = dinner, not *dîner* = to have dinner) | one row per word, each with the meaning that fits its topic |
 | `99_undo.sql` | Removes the themes, the new entries and the new columns, and restores gender and article from the backup | `rows_now` = 5000 |
 
 Before running `05_new_themes.sql`, look through `05_new_themes_review.csv` (GitHub shows it as a table).
