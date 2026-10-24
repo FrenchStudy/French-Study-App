@@ -159,6 +159,7 @@
                     <div class="flex justify-center gap-2 mt-2">
                         <button id="btn-say" class="min-h-[44px] px-4 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-semibold rounded-xl">🔊 Listen</button>
                         <button id="btn-say-ex" class="hidden min-h-[44px] px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl">🔊 Example</button>
+                        <button id="btn-next" title="Next word without grading (→ key)" class="min-h-[44px] px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl">Next →</button>
                     </div>
 
                     <!-- Memory hook -->
@@ -229,6 +230,7 @@
         let step = 'learn';       // learn | practise | test
         let topic = null;         // the open topic
         let queue = [];           // flashcard session
+        let skipped = 0;          // cards passed with Next this session (not graded)
         let current = null;
         let reviewAll = false;
         let quiz = null;
@@ -583,6 +585,7 @@
 
         function startCards() {
             queue = buildQueue();
+            skipped = 0;
             nextCard();
         }
 
@@ -596,7 +599,7 @@
             if (done) {
                 const known = deck.words.filter(w => statusOf(w) === 'known').length;
                 $('card-done-text').textContent = deck.words.length
-                    ? `${known} of ${deck.words.length} words known. Come back tomorrow for your reviews, or take the test.`
+                    ? `${known} of ${deck.words.length} words known.` + (skipped ? ` ${skipped} ${skipped === 1 ? 'word was' : 'words were'} not graded: ${skipped === 1 ? 'it comes' : 'they come'} back next time.` : '') + ' Come back tomorrow for your reviews, or take the test.'
                     : 'This deck has no words yet.';
                 $('session-info').textContent = '';
                 renderProgress();
@@ -646,6 +649,14 @@
             if (result === 'dontknow') queue.splice(Math.min(3, queue.length), 0, current);  // see it again soon
             if (sessionMix) sessionMix = null;   // the mix is shown for the first card only
             renderProgress();
+            nextCard();
+        }
+
+        // Next word without grading: nothing is saved, so the word stays due or new and comes back next session
+        function onNext() {
+            if (!current) return;
+            skipped++;
+            if (sessionMix) sessionMix = null;
             nextCard();
         }
 
@@ -1208,6 +1219,7 @@
         $('card').addEventListener('click', flipCard);
         $('btn-say').addEventListener('click', () => current && speakFrench(current.fr));
         $('btn-say-ex').addEventListener('click', () => current && speakFrench(current.exFr));
+        $('btn-next').addEventListener('click', onNext);
         document.querySelectorAll('[data-grade]').forEach(b => b.addEventListener('click', () => onGrade(b.dataset.grade)));
         $('btn-review-all').addEventListener('click', () => { reviewAll = true; startCards(); });
         $('btn-hook-ai').addEventListener('click', aiHook);
@@ -1230,6 +1242,7 @@
         document.addEventListener('keydown', (e) => {
             if (step !== 'practise' || topic === null || !current || /input|textarea|select/i.test(e.target.tagName)) return;
             if (e.key === ' ') { e.preventDefault(); flipCard(); }
+            if (e.key === 'ArrowRight') { e.preventDefault(); onNext(); return; }
             if (!$('card-back').classList.contains('hidden')) {
                 if (e.key === '1') onGrade('dontknow');
                 if (e.key === '2') onGrade('learning');
