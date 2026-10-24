@@ -441,9 +441,9 @@
 
         // One word bank row -> one card. Uses the Article column when filled (after the SQL),
         // otherwise works the article out from Part_of_Speech.
-        // Days and months are said without an article (lundi, en janvier), so they are shown without one
+        // Days and months are said without an article (lundi, en janvier), so they are shown without one; so is madame
         const NO_ARTICLE = new Set(['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche',
-            'janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre']);
+            'janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre', 'madame']);
         function rowToWord(r) {
             const pos = parsePos(r.Part_of_Speech);
             const art = NO_ARTICLE.has(wordKey(r.French)) ? '' : String(r.Article || '').trim();
