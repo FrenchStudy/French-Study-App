@@ -81,7 +81,7 @@ function open(words, opts = {}) {
             <button type="button" data-a="next" aria-label="Next word">⏭</button>
             <button type="button" data-a="slow" aria-pressed="${settings.slow}">🐢 Slow</button>
             <button type="button" data-a="english" aria-pressed="${settings.english}">🇬🇧 English voice</button>
-            <button type="button" data-a="examples" aria-pressed="${settings.examples}">💬 Examples</button>
+            ${words.some(w => w.exFr) ? `<button type="button" data-a="examples" aria-pressed="${settings.examples}">💬 Examples</button>` : ''}
         </div>
         <div class="wm-count"></div>`;
     document.body.appendChild(el);
