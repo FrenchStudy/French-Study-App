@@ -153,6 +153,7 @@ function cjSimple(s, t) {
   return null;
 }
 function cjPP(s, i) {
+  if (s.noAgree) return s.pp;   // se téléphoner: the pronoun is indirect (téléphoner à), so no agreement
   if (s.aux === "être" || s.refl) return [s.pp + "(e)", s.pp + "(e)", s.pp + "(e)", s.pp + "(e)s", s.pp + "(e)(s)", s.pp + "(e)s"][i];
   return s.pp;
 }
@@ -271,8 +272,11 @@ V("s'endormir", "ir3", "to fall asleep"); V("se sentir", "ir3", "to feel");
 V("se souvenir", "venir", "to remember"); V("se plaindre", "indre", "to complain"); V("s'inscrire", "crire", "to enrol");
 
 /* Auxiliary être and dual-auxiliary verbs */
-["arriver","entrer","tomber","rester","venir","devenir","revenir","parvenir","partir","repartir","naître","mourir","aller"].forEach(k => { if (CJ[k]) CJ[k].aux = "être"; });
+["arriver","entrer","tomber","rester","venir","devenir","revenir","parvenir","partir","repartir","naître","mourir","aller","apparaître"].forEach(k => { if (CJ[k]) CJ[k].aux = "être"; });
 ["rentrer","retourner","monter","passer","sortir","descendre"].forEach(k => { if (CJ[k]) { CJ[k].aux = "être"; CJ[k].dual = true; } });
+
+/* Reflexive verbs whose pronoun is an indirect object: the participle never agrees */
+["se téléphoner"].forEach(k => { if (CJ[k]) CJ[k].noAgree = true; });
 
 /* Lookup */
 const CJ_MODEL = { er:"parler", "e_è":"acheter", "é_è":"espérer", ll:"appeler", tt:"jeter", yer:"payer", envoyer:"envoyer", ir:"finir", re:"vendre", ir3:"partir", ouv:"ouvrir", prendre:"prendre", mettre:"mettre", venir:"venir", tenir:"tenir", crire:"écrire", duire:"conduire", truire:"construire", lire:"lire", rire:"rire", dire:"dire", voir:"voir", croire:"croire", cevoir:"recevoir", vivre:"vivre", suivre:"suivre", courir:"courir", aitre:"connaître", indre:"craindre" };
@@ -306,6 +310,7 @@ function cjNotes(s) {
   else out.push("Irregular verb. Conjugates like " + CJ_MODEL[s.kind] + ".");
   if (s.soft === "g") out.push("-ger verbs keep an e before a and o: nous mangeons, je mangeais.");
   if (s.soft === "c") out.push("-cer verbs take ç before a and o: nous commençons, je commençais.");
+  if (s.noAgree) out.push("The pronoun is indirect (téléphoner à quelqu'un), so the participle never agrees: elles se sont téléphoné.");
   if (s.dual) out.push("Takes être without an object and avoir with a direct object: il est sorti, but il a sorti le chien.");
   if (s.refl) out.push("Reflexive verb: the pronoun matches the subject, and compound tenses use être.");
   return out;

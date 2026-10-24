@@ -344,7 +344,7 @@ const LessonKit = (function () {
                 const res = await fetch(item.path);
                 if (!res.ok) throw new Error(res.status);
                 box.innerHTML = await res.text();
-                if (item.widget === 'clock') bindClockModuleEvents(box);
+                if (item.widget === 'clock') { if (!window.FrenchClock) await loadScript('js/clock.js'); bindClockModuleEvents(box); }
                 if (item.widget === 'meteo') bindMeteoModuleEvents(box);
                 if (item.widget === 'nationalites') { if (!window.Nationalites) await loadScript('js/nationalites.js'); window.Nationalites.bind(box); }
             } catch (err) {
@@ -370,59 +370,15 @@ const LessonKit = (function () {
 
         if (!hourInput || !minInput || !outputCurrent) return;
 
-        const hours = ["", "une heure", "deux heures", "trois heures", "quatre heures", "cinq heures", "six heures", "sept heures", "huit heures", "neuf heures", "dix heures", "onze heures", "douze heures"];
-        const numbers = ["zéro", "une", "deux", "trois", "quatre", "cinq", "six", "sept", "huit", "neuf", "dix", "onze", "douze", "treize", "quatorze", "quinze", "seize", "dix-sept", "dix-huit", "dix-neuf", "vingt", "vingt et un", "vingt-deux", "vingt-trois", "vingt-quatre", "vingt-cinq", "vingt-six", "vingt-sept", "vingt-huit", "vingt-neuf", "trente", "trente et un", "trente-deux", "trente-trois", "trente-quatre", "trente-cinq", "trente-six", "trente-sept", "trente-huit", "trente-neuf", "quarante", "quarante et un", "quarante-deux", "quarante-trois", "quarante-quatre", "quarante-cinq", "quarante-six", "quarante-sept", "quarante-huit", "quarante-neuf", "cinquante", "cinquante et un", "cinquante-deux", "cinquante-trois", "cinquante-quatre", "cinquante-cinq", "cinquante-six", "cinquante-sept", "cinquante-huit", "cinquante-neuf"];
-
-        function getPeriod(hour) {
-            if (hour >= 5 && hour < 12) return "du matin";
-            if (hour >= 12 && hour < 18) return "de l'après-midi";
-            return "du soir";
-        }
-
         function updateClock() {
             let h = parseInt(hourInput.value, 10);
             let m = parseInt(minInput.value, 10);
-
             if (isNaN(h)) h = 0;
             if (isNaN(m)) m = 0;
-
             h = Math.max(0, Math.min(23, h));
             m = Math.max(0, Math.min(59, m));
-
-            if (h === 0 && m === 0) {
-                outputCurrent.textContent = "Il est minuit pile.";
-                currentPracticeTarget = outputCurrent.textContent;
-                return;
-            }
-            if (h === 12 && m === 0) {
-                outputCurrent.textContent = "Il est midi pile.";
-                currentPracticeTarget = outputCurrent.textContent;
-                return;
-            }
-
-            let h12 = h % 12;
-            if (h12 === 0) h12 = 12;
-
-            let timeStr = "";
-            if (m === 0) {
-                timeStr = `${hours[h12]} pile ${getPeriod(h)}`;
-            } else if (m === 15) {
-                timeStr = `${hours[h12]} et quart ${getPeriod(h)}`;
-            } else if (m === 30) {
-                timeStr = `${hours[h12]} et demie ${getPeriod(h)}`;
-            } else if (m === 45) {
-                let nextHour = (h12 % 12) + 1;
-                let nextPeriod = (nextHour === 1 && h >= 11 && h < 12) ? "de l'après-midi" : getPeriod(h);
-                timeStr = `${hours[nextHour]} moins le quart ${nextPeriod}`;
-            } else if (m > 45) {
-                let nextHour = (h12 % 12) + 1;
-                let diff = 60 - m;
-                timeStr = `${hours[nextHour]} moins ${numbers[diff]} ${getPeriod(h)}`;
-            } else {
-                timeStr = `${hours[h12]} ${numbers[m]} ${getPeriod(h)}`;
-            }
-
-            outputCurrent.textContent = `Il est ${timeStr}.`;
+            // The French comes from js/clock.js (midi / minuit, et demie, moins le quart, du matin / du soir)
+            outputCurrent.textContent = window.FrenchClock ? FrenchClock.say(h, m).everyday : `${h}:${String(m).padStart(2, '0')}`;
             currentPracticeTarget = outputCurrent.textContent;
         }
 
@@ -437,6 +393,7 @@ const LessonKit = (function () {
     function bindMeteoModuleEvents(container) {
         const daySelect = container.querySelector("#meteo-day");
         const monthSelect = container.querySelector("#meteo-month");
+        const dateSelect = container.querySelector("#meteo-date");
         const condSelect = container.querySelector("#meteo-condition");
         const output = container.querySelector("#meteo-output");
 
@@ -447,16 +404,17 @@ const LessonKit = (function () {
             const monthText = monthSelect.value;
             const condText = condSelect.value;
             
-            const vowelMonths = ['avril', 'août', 'octobre'];
-            const prefix = vowelMonths.includes(monthText.toLowerCase()) ? "d'" : "de ";
-            
-            const result = `Aujourd'hui, nous sommes ${dayText} ${prefix}${monthText} et ${condText.toLowerCase()}.`;
+            // "nous sommes mercredi 12 mars": day + date + month; only the 1st is "1er"
+            const d = dateSelect ? Number(dateSelect.value) : 0;
+            const date = d ? (d === 1 ? '1er ' : d + ' ') : '';
+            const result = `Aujourd'hui, nous sommes ${dayText} ${date}${monthText} et ${condText.toLowerCase()}.`;
             output.textContent = result;
             currentPracticeTarget = result;
         }
 
         daySelect.addEventListener("change", updateMeteo);
         monthSelect.addEventListener("change", updateMeteo);
+        if (dateSelect) dateSelect.addEventListener("change", updateMeteo);
         condSelect.addEventListener("change", updateMeteo);
         updateMeteo();
     }

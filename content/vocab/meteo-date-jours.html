@@ -3,12 +3,12 @@
     <!-- Interactive Weather & Date Generator -->
     <div style="background: #ffffff; border: 1px solid #cbd5e1; padding: 18px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
         <h3 style="color: #1e1b4b; font-size: 16px; font-weight: bold; margin-top: 0; margin-bottom: 4px;">🌤️ Interactive Weather & Date Builder</h3>
-        <p style="color: #64748b; font-size: 12px; margin-bottom: 16px;">Select a day, month, and weather condition to see how they are expressed in French.</p>
+        <p style="color: #64748b; font-size: 12px; margin-bottom: 16px;">Choose a day, a date, a month and the weather to build the sentence in French.</p>
         
         <div style="display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap;">
             <div style="flex: 1; min-width: 120px;">
                 <label style="display: block; font-weight: bold; font-size: 11px; margin-bottom: 6px; color: #475569; text-transform: uppercase;">Day of the week:</label>
-                <select id="meteo-day" onchange="updateMeteo()" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; background: #fff;">
+                <select id="meteo-day" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; background: #fff;">
                     <option value="lundi">lundi</option>
                     <option value="mardi">mardi</option>
                     <option value="mercredi" selected>mercredi</option>
@@ -19,9 +19,14 @@
                 </select>
             </div>
             
+            <div style="flex: 1; min-width: 90px;">
+                <label for="meteo-date" style="display: block; font-weight: bold; font-size: 11px; margin-bottom: 6px; color: #475569; text-transform: uppercase;">Date:</label>
+                <select id="meteo-date" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; background: #fff;"><option value="1">1er</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option><option value="11">11</option><option value="12" selected>12</option><option value="13">13</option><option value="14">14</option><option value="15">15</option><option value="16">16</option><option value="17">17</option><option value="18">18</option><option value="19">19</option><option value="20">20</option><option value="21">21</option><option value="22">22</option><option value="23">23</option><option value="24">24</option><option value="25">25</option><option value="26">26</option><option value="27">27</option><option value="28">28</option><option value="29">29</option><option value="30">30</option><option value="31">31</option></select>
+            </div>
+            
             <div style="flex: 1; min-width: 120px;">
                 <label style="display: block; font-weight: bold; font-size: 11px; margin-bottom: 6px; color: #475569; text-transform: uppercase;">Month:</label>
-                <select id="meteo-month" onchange="updateMeteo()" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; background: #fff;">
+                <select id="meteo-month" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; background: #fff;">
                     <option value="janvier">janvier</option>
                     <option value="février">février</option>
                     <option value="mars" selected>mars</option>
@@ -39,7 +44,7 @@
 
             <div style="flex: 1; min-width: 140px;">
                 <label style="display: block; font-weight: bold; font-size: 11px; margin-bottom: 6px; color: #475569; text-transform: uppercase;">Weather condition:</label>
-                <select id="meteo-condition" onchange="updateMeteo()" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; background: #fff;">
+                <select id="meteo-condition" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; background: #fff;">
                     <option value="il fait beau">Il fait beau</option>
                     <option value="il fait mauvais" selected>Il fait mauvais</option>
                     <option value="il pleut">Il pleut</option>
@@ -52,7 +57,7 @@
 
         <div style="background: #eef2ff; border: 1px solid #c7d2fe; padding: 14px; border-radius: 12px; text-align: center;">
             <div style="font-size: 10px; font-weight: bold; color: #4338ca; text-transform: uppercase; margin-bottom: 4px;">Dynamic Output (Click to Listen)</div>
-            <div id="meteo-output" style="font-weight: bold; color: #312e81; font-size: 14px; cursor: pointer;" onclick="speakText(this.innerText)">Aujourd'hui, nous sommes mercredi de mars et il fait mauvais.</div>
+            <div id="meteo-output" style="font-weight: bold; color: #312e81; font-size: 14px; cursor: pointer;" onclick="speakText(this.innerText)">Aujourd'hui, nous sommes mercredi 12 mars et il fait mauvais.</div>
         </div>
     </div>
 
@@ -61,31 +66,9 @@
         <p style="font-size: 14px; font-weight: bold; color: #1e1b4b; margin: 0 0 10px;">📖 Days, Dates & Weather Guide:</p>
         <div style="font-size: 12px; color: #334155; line-height: 1.6;">
             <p style="margin: 0 0 4px;">• <strong>Quel jour sommes-nous ?</strong> <span style="color: #64748b;">(What day is it?)</span></p>
-            <p style="margin: 0 0 8px;">• <strong>Nous sommes lundi, le 31 août.</strong> <span style="color: #64748b;">(It is Monday, August 31st.)</span></p>
+            <p style="margin: 0 0 8px;">• <strong>Nous sommes lundi 31 août.</strong> <span style="color: #64748b;">(It is Monday, August 31st.)</span></p>
+            <p style="margin: 0 0 8px;">• <strong>Nous sommes le 1er mai.</strong> <span style="color: #64748b;">(It is the 1st of May: only the 1st takes « premier ».)</span></p>
         </div>
     </div>
 </div>
 
-<script>
-    function updateMeteo() {
-        const dayEl = document.getElementById('meteo-day');
-        const monthEl = document.getElementById('meteo-month');
-        const conditionEl = document.getElementById('meteo-condition');
-        const outputEl = document.getElementById('meteo-output');
-
-        if (!dayEl || !monthEl || !conditionEl || !outputEl) return;
-
-        const day = dayEl.value;
-        const month = monthEl.value;
-        const condition = conditionEl.value;
-        
-        // Handle proper French contraction for vowel-starting months (avril, août, octobre)
-        const vowelMonths = ['avril', 'août', 'octobre'];
-        const prefix = vowelMonths.includes(month.toLowerCase()) ? "d'" : "de ";
-        
-        outputEl.innerText = `Aujourd'hui, nous sommes ${day} ${prefix}${month} et ${condition}.`;
-    }
-
-    // Force initialization call
-    updateMeteo();
-</script>
