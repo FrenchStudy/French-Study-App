@@ -19,6 +19,7 @@ Run them in order in the Supabase SQL editor. Each file is safe to run twice, an
 | `08_names_and_address.sql` | Adds *prénom* and *nom de famille* to Greetings & Politeness, and *adresse, numéro, rue, code postal, ville* to Numbers & Scale Units (the two hands-on lessons they came from were removed) | 2 rows: Greetings with 2 added words, Numbers with 5 |
 | `08_undo_names_and_address.sql` | Removes only those links | `links_left` = 0 |
 | `09_fix_topic_links.sql` | Points 28 topic words at the entry with the right meaning (for example *avant* = before, not *l'avant* = the front, in Frequency & Time Adverbs; *le dîner* = dinner, not *dîner* = to have dinner) | one row per word, each with the meaning that fits its topic |
+| `10_fix_word_list.sql` | Fixes 20 words found in a French review of the word list: articles (*le yaourt*, *le yoga*, *madame* with none), *otage* always masculine, *ouvrier* as the headword, and example sentences with a grammar slip or that used a different word. `06` and `07` already include these fixes, so run this only if you ran them before | 20 rows with the corrected values |
 | `99_undo.sql` | Removes the themes, the new entries and the new columns, and restores gender and article from the backup | `rows_now` = 5000 |
 
 Before running `05_new_themes.sql`, look through `05_new_themes_review.csv` (GitHub shows it as a table).
