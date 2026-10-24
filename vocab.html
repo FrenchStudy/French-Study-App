@@ -63,7 +63,7 @@
                         <h1 id="deck-title" class="text-2xl lg:text-3xl font-black text-slate-900 leading-tight mt-2"></h1>
                     </div>
                     <div id="topic-progress" class="md:w-96 space-y-1.5">
-                        <div class="flex items-center justify-between text-sm"><span class="font-semibold text-slate-700">Your progress</span><span id="deck-counts" class="text-slate-500"></span></div>
+                        <div class="flex items-center justify-between text-sm"><span class="font-semibold text-slate-700">Your progress</span><span id="deck-counts" class="text-slate-500 flex flex-wrap justify-end gap-x-3 gap-y-1"></span></div>
                         <div class="h-2.5 bg-slate-200 rounded-full overflow-hidden flex">
                             <div id="bar-known" class="h-full bg-emerald-500" style="width:0%"></div>
                             <div id="bar-learning" class="h-full bg-amber-400" style="width:0%"></div>
@@ -108,6 +108,9 @@
                         <option value="all">All words</option>
                         <option value="notknown">Words I don't know yet</option>
                         <option value="known">Words I know</option>
+                        <option value="learning">Learning</option>
+                        <option value="review">To review now</option>
+                        <option value="new">New</option>
                     </select>
                     <button id="btn-copy-list" type="button" title="Copy list (paste into Excel)" aria-label="Copy list (paste into Excel)" class="shrink-0 w-[50px] min-h-[50px] text-xl bg-white border border-slate-200 hover:border-indigo-400 rounded-xl">📋</button>
                     <button id="btn-download-list" type="button" title="Download for Excel (.csv)" aria-label="Download for Excel (.csv)" class="shrink-0 w-[50px] min-h-[50px] text-xl bg-white border border-slate-200 hover:border-indigo-400 rounded-xl">⬇️</button>
@@ -217,6 +220,8 @@
         const FREQ_DECK_SIZE = 50;
         const FREQ_TOTAL = 5000;
         const SESSION_SIZE = 20;
+        const MIN_SESSION = 10;   // top a short session up with learning words
+        let sessionMix = null;    // what the current session is made of
         const DAY = 86400000;
         const INTERVAL_DAYS = { 1: 0, 2: 1, 3: 3, 4: 7, 5: 21 };   // Leitner box -> days until next review
 
@@ -309,6 +314,13 @@
             learning: ['Learning', 'bg-amber-100 text-amber-800'],
             known: ['Known', 'bg-emerald-100 text-emerald-800']
         };
+        // "review now", "review tomorrow", "review in 3 days"
+        function whenDue(w) {
+            const p = progress[w.key];
+            if (!p || !p.box) return '';
+            const days = Math.ceil((p.due - Date.now()) / DAY);
+            return days <= 0 ? 'review now' : days === 1 ? 'review tomorrow' : `review in ${days} days`;
+        }
         const genderClass = (w) => w.gender === 'm' ? 'text-sky-700' : w.gender === 'f' ? 'text-rose-600' : 'text-slate-900';
 
         // ---------- Grading (Leitner boxes) ----------
@@ -494,6 +506,8 @@
                     const words = (data || []).map(rowToWord);
                     next = { id: value, title: `Most frequent words ${n}–${n + FREQ_DECK_SIZE - 1}`, words };
                 }
+                // Words the word bank has no example for get one from the built-in list
+                next.words.forEach(w => { const ex = !w.exFr && WordMemory.example(w); if (ex) { w.exFr = ex[0]; w.exEn = ex[1]; } });
                 cacheWords(next.words);
             } catch (err) {
                 console.error(err);
@@ -538,7 +552,12 @@
             const known = deck.words.filter(w => statusOf(w) === 'known').length;
             const learning = deck.words.filter(w => statusOf(w) === 'learning').length;
             const due = deck.words.filter(isDue).length;
-            $('deck-counts').textContent = total ? `${known} of ${total} known · ${due} to review` : '';
+            const fresh = total - known - learning;
+            // Each count opens the word list filtered to those words
+            const chip = (n, label, f, cls) => `<button type="button" data-count-filter="${f}" class="underline decoration-dotted underline-offset-2 hover:text-indigo-700 ${n ? cls : ''}">${n} ${label}</button>`;
+            $('deck-counts').innerHTML = total ? [chip(known, 'known', 'known', 'text-emerald-700'), chip(learning, 'learning', 'learning', 'text-amber-700'),
+                chip(due, 'to review', 'review', 'text-rose-700 font-semibold'), chip(fresh, 'new', 'new', '')].join('') : '';
+            $('deck-counts').title = total ? `Known: ${known} · Learning: ${learning} (${due} of them due for review now) · New: ${fresh}` : '';
             $('bar-known').style.width = total ? (known / total * 100) + '%' : '0%';
             $('bar-learning').style.width = total ? (learning / total * 100) + '%' : '0%';
         }
@@ -549,7 +568,12 @@
             if (reviewAll) return words.slice();
             const due = words.filter(isDue);
             const fresh = words.filter(w => statusOf(w) === 'new');
-            return due.concat(fresh).slice(0, SESSION_SIZE);
+            const q = due.concat(fresh).slice(0, SESSION_SIZE);
+            // Fewer than 10 cards waiting: add the learning words that come back soonest, so a session is never just one card
+            const extra = words.filter(w => statusOf(w) === 'learning' && !isDue(w))
+                .sort((a, b) => progress[a.key].due - progress[b.key].due).slice(0, Math.max(0, MIN_SESSION - q.length));
+            sessionMix = { due: Math.min(due.length, SESSION_SIZE), fresh: q.length - Math.min(due.length, SESSION_SIZE), extra: extra.length };
+            return q.concat(extra);
         }
 
         function startCards() {
@@ -562,7 +586,8 @@
             const done = !current;
             $('card-done').classList.toggle('hidden', !done);
             $('card-area').classList.toggle('hidden', done);
-            $('btn-review-all').classList.toggle('hidden', !done || !deck.words.length);
+            $('btn-review-all').classList.toggle('hidden', !deck.words.length || reviewAll);
+            $('btn-review-all').textContent = `Practise all ${deck.words.length} words`;
             if (done) {
                 const known = deck.words.filter(w => statusOf(w) === 'known').length;
                 $('card-done-text').textContent = deck.words.length
@@ -572,7 +597,8 @@
                 renderProgress();
                 return;
             }
-            $('session-info').textContent = `${queue.length + 1} card${queue.length ? 's' : ''} left in this session`;
+            const mix = sessionMix && !reviewAll ? [sessionMix.due && `${sessionMix.due} to review`, sessionMix.fresh && `${sessionMix.fresh} new`, sessionMix.extra && `${sessionMix.extra} extra practice`].filter(Boolean).join(' + ') : '';
+            $('session-info').textContent = `${queue.length + 1} card${queue.length ? 's' : ''} left` + (mix ? ` · this session: ${mix}` : '');
             const [label, cls] = STATUS_STYLE[statusOf(current)];
             $('card-status').textContent = label;
             $('card-status').className = 'text-xs font-bold px-2 py-0.5 rounded-full ' + cls;
@@ -613,6 +639,7 @@
             if (!current) return;
             grade(current, result);
             if (result === 'dontknow') queue.splice(Math.min(3, queue.length), 0, current);  // see it again soon
+            if (sessionMix) sessionMix = null;   // the mix is shown for the first card only
             renderProgress();
             nextCard();
         }
@@ -694,6 +721,8 @@
                 const st = statusOf(w);
                 if (filter === 'known' && st !== 'known') return false;
                 if (filter === 'notknown' && st === 'known') return false;
+                if ((filter === 'learning' || filter === 'new') && st !== filter) return false;
+                if (filter === 'review' && !isDue(w)) return false;
                 return !q || plain(w.fr).includes(q) || plain(w.en).includes(q);
             });
         }
@@ -757,7 +786,7 @@
                     <button data-say="${escapeHtml(w.key)}" class="shrink-0 w-11 h-11 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700" aria-label="Listen">🔊</button>
                     <div class="min-w-0 flex-1">
                         <div class="text-base font-bold break-words ${genderClass(w)}">${escapeHtml(w.fr)}${WordMemory.picture(w) ? ` <span class="text-xl font-normal align-middle" aria-hidden="true">${WordMemory.picture(w)}</span>` : ''}</div>
-                        <div class="text-sm text-slate-500 break-words">${escapeHtml(w.en)}</div>
+                        <div class="text-sm text-slate-500 break-words">${escapeHtml(w.en)}${st === 'learning' ? ` <span class="whitespace-nowrap text-xs ${isDue(w) ? 'text-rose-700 font-semibold' : 'text-slate-400'}">· ${whenDue(w)}</span>` : ''}</div>
                     </div>
                     <span class="hidden sm:inline text-xs font-bold px-2 py-0.5 rounded-full ${cls}">${label}</span>
                     <label class="shrink-0 flex items-center gap-2 text-sm text-slate-600 min-h-[44px] cursor-pointer">
@@ -1182,6 +1211,13 @@
         $('list-search').addEventListener('input', renderList);
         $('list-filter').addEventListener('change', renderList);
         $('btn-copy-list').addEventListener('click', copyList);
+        $('deck-counts').addEventListener('click', (e) => {
+            const b = e.target.closest('[data-count-filter]'); if (!b || !topic) return;
+            $('list-filter').value = b.dataset.countFilter; $('list-search').value = '';
+            if (step !== 'learn') openTopic(topic.id, 'learn');
+            renderList();
+            $('learn-words').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
         // Watch: a hands-free slideshow of the words shown (search and filter apply)
         $('btn-watch').addEventListener('click', () => WatchMode.open(shownWords(), { title: topic ? topic.title : 'Words' }));
         $('btn-download-list').addEventListener('click', downloadList);

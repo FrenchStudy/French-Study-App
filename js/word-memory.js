@@ -3,6 +3,7 @@
 //   WordMemory.tips(word)     -> [{ kind, text }]: false friends, look-alikes, gender by ending
 // A word is { key, en, gender, pos } as built in vocab.html.
 //   WordMemory.hook(word)     -> a written memory hook (sound guide + picture), or ''
+//   WordMemory.example(word)  -> [French, English] example sentence for words the bank has none for, or null
 (function () {
 // Pictures: word key -> emoji. "n:", "v:" or "a:" in front means only for that kind of word
 // (son = sound, not son = his).
@@ -208,6 +209,9 @@ const NOTES = {
     'numéro': 'In an address the number comes first, with no comma: 12 rue de la Paix.'
 };
 
+// Example sentences for words the word bank has none for (key -> [French, English])
+const EXAMPLES = {"et":["J'aime le thé et le café.","I like tea and coffee."],"mais":["C'est petit, mais c'est joli.","It's small, but it's pretty."],"ou":["Tu veux du thé ou du café ?","Do you want tea or coffee?"],"donc":["Il pleut, donc je reste à la maison.","It's raining, so I'm staying at home."],"parce que / parce qu'":["Je mange parce que j'ai faim.","I'm eating because I'm hungry."],"parce que":["Je mange parce que j'ai faim.","I'm eating because I'm hungry."],"car":["Je reste ici, car il fait froid dehors.","I'm staying here, because it's cold outside."],"alors":["Il est tard. Alors, on rentre ?","It's late. So, shall we go home?"],"aussi":["Moi aussi, j'aime Paris.","I like Paris too."],"si":["Si tu veux, on va au cinéma.","If you like, we'll go to the cinema."],"d'abord":["D'abord, je prends une douche.","First, I have a shower."],"ensuite":["Ensuite, je prends le petit-déjeuner.","Then I have breakfast."],"puis":["Je mange, puis je pars au travail.","I eat, then I leave for work."],"après":["On se voit après le cours.","See you after class."],"enfin":["Enfin, le week-end !","Finally, the weekend!"],"très":["Elle est très gentille.","She is very kind."],"trop":["C'est trop cher pour moi.","It's too expensive for me."],"beaucoup":["J'aime beaucoup ce livre.","I really like this book."],"peu":["Je parle un peu français.","I speak a little French."],"un peu":["Je parle un peu français.","I speak a little French."],"assez":["J'ai assez mangé, merci.","I've had enough to eat, thanks."],"plus":["Je voudrais plus de pain, s'il vous plaît.","I'd like more bread, please."],"moins":["Je travaille moins le vendredi.","I work less on Fridays."],"vraiment":["C'est vraiment bon !","It's really good!"],"seulement":["J'ai seulement cinq euros.","I only have five euros."],"peut-être":["Il va peut-être pleuvoir.","It might rain."],"avec":["Je vais au parc avec mon chien.","I'm going to the park with my dog."],"sans":["Un café sans sucre, s'il vous plaît.","A coffee without sugar, please."],"pour":["C'est un cadeau pour toi.","It's a present for you."],"chez":["Je dîne chez Marie ce soir.","I'm having dinner at Marie's tonight."],"dans":["Les clés sont dans mon sac.","The keys are in my bag."],"sur":["Le livre est sur la table.","The book is on the table."],"sous":["Le chat dort sous le lit.","The cat is sleeping under the bed."]};
+
 // All the tips for one word: [{ kind: 'note'|'false'|'alike'|'gender', text }]
 function tipsFor(key, en, gender) {
     const out = [];
@@ -255,6 +259,8 @@ window.WordMemory = {
         const m = /^([A-Za-zÀ-ÿ' ()-]{1,40}?)\. (.+)$/s.exec(html);
         return m && /[A-Z]{2}/.test(m[1]) ? `<span class="block text-sm font-semibold text-indigo-700">Say: ${m[1]}</span>${m[2]}` : html;
     },
+    // A built-in example sentence: [French, English] or null
+    example(w) { return (w && EXAMPLES[w.key]) || null; },
     tips(w) {
         if (!w) return [];
         const kind = KIND(w.pos);
