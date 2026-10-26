@@ -2,8 +2,8 @@
 -- Grows the Environment & Climate topic (theme 31) with the words from the TCF environment list
 -- and the climate word list: 61 new entries (source = 'topic', no frequency Rank, so the
 -- frequency sets are unchanged), plus links to 16 words already in the 5,000-word list.
--- The app splits the topic into rounds of about 10 words (js/rounds-data.js), so it never shows
--- one long list. Also gives « émission » its environment meaning.
+-- The app groups the topic into 11 chapters of about 10 words, each with a short story
+-- (js/chapters-data.js). Also gives « émission » its environment meaning.
 -- Run 04–07 first. Safe to run more than once. 11_undo_environment_words.sql removes it.
 
 -- 1. New words, with an example sentence each
@@ -86,7 +86,7 @@ end $$;
 select setval(pg_get_serial_sequence('"French-schema".vocabulary_bank', 'id'), (select max(id) from "French-schema".vocabulary_bank));
 
 -- 2. Link them to the topic: the new words, and the ones already in the 5,000-word list.
--- The rounds in the app set the order, so these all go after the topic's first 49 words.
+-- The chapters in the app set the order, so these all go after the topic's first 49 words.
 do $$ begin
 insert into "French-schema".word_themes (theme_id, word_id, sort_order)
 select 31, v.id, 100 + l.n

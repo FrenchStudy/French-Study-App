@@ -6,23 +6,22 @@ const R = (id, k, fr, en, x, y, w, h, cols) => ({ id, k, fr, en, x, y, w, h, col
 
 window.PALACE_DATA = Object.assign(window.PALACE_DATA || {}, {
 // ---------------- 31 Environment & Climate ----------------
-// One room per round (js/rounds-data.js). Vocab passes only the words of the rounds you have opened,
-// so the rooms fill up as you go.
+// One room per chapter (js/chapters-data.js).
 31: {
     title: 'La planète en danger', w: 1160, h: 1720,
     backdrop: { street: 1630, streetName: 'Sauvons la planète', streetColor: '#bbf7d0', noDashes: true, sky: '#f0fdf4' },
     zones: [
-        S('r1', null, 'Round 1 · La nature', 'Nature around us', 10, 20, 560, 250, '#15803d'),
-        S('r2', null, 'Round 2 · Quel temps !', 'Weather and extremes', 590, 20, 560, 250, '#0284c7'),
-        S('r3', null, 'Round 3 · Le climat change', 'A changing climate', 10, 288, 560, 250, '#f59e0b'),
-        S('r4', null, 'Round 4 · Les espèces menacées', 'Wildlife in danger', 590, 288, 560, 250, '#b91c1c'),
-        S('r5', null, 'Round 5 · L\'énergie', 'Energy', 10, 556, 560, 250, '#57534e'),
-        S('r6', null, 'Round 6 · Les déchets', 'Waste', 590, 556, 560, 250, '#475569'),
-        S('r7', null, 'Round 7 · Consommer mieux', 'Buying better', 10, 824, 560, 250, '#7c3aed'),
-        S('r8', null, 'Round 8 · Se déplacer', 'Getting around', 590, 824, 560, 250, '#0f766e'),
-        S('r9', null, 'Round 9 · Protéger la planète', 'Protecting the planet', 10, 1092, 560, 250, '#16a34a'),
-        S('r10', null, 'Round 10 · Agir', 'Taking action', 590, 1092, 560, 250, '#db2777'),
-        S('r11', null, 'Round 11 · Pour argumenter', 'Giving your opinion', 10, 1360, 560, 250, '#4338ca'),
+        S('r1', null, 'Chapter 1 · La nature', 'Nature around us', 10, 20, 560, 250, '#15803d'),
+        S('r2', null, 'Chapter 2 · Quel temps !', 'Weather and extremes', 590, 20, 560, 250, '#0284c7'),
+        S('r3', null, 'Chapter 3 · Le climat change', 'A changing climate', 10, 288, 560, 250, '#f59e0b'),
+        S('r4', null, 'Chapter 4 · Les espèces menacées', 'Wildlife in danger', 590, 288, 560, 250, '#b91c1c'),
+        S('r5', null, 'Chapter 5 · L\'énergie', 'Energy', 10, 556, 560, 250, '#57534e'),
+        S('r6', null, 'Chapter 6 · Les déchets', 'Waste', 590, 556, 560, 250, '#475569'),
+        S('r7', null, 'Chapter 7 · Consommer mieux', 'Buying better', 10, 824, 560, 250, '#7c3aed'),
+        S('r8', null, 'Chapter 8 · Se déplacer', 'Getting around', 590, 824, 560, 250, '#0f766e'),
+        S('r9', null, 'Chapter 9 · Protéger la planète', 'Protecting the planet', 10, 1092, 560, 250, '#16a34a'),
+        S('r10', null, 'Chapter 10 · Agir', 'Taking action', 590, 1092, 560, 250, '#db2777'),
+        S('r11', null, 'Chapter 11 · Pour argumenter', 'Giving your opinion', 10, 1360, 560, 250, '#4338ca'),
     ],
     items: [
         ['campagne', '🌾', 'r1', 'The countryside (and a campaign).'],

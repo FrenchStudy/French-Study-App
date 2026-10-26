@@ -1,12 +1,13 @@
-// rounds-data.js - topics split into rounds of about 10 words, so a long topic never shows one long list.
-//   Rounds.for(themeId)  -> [{ title, en, keys: [word keys], story: [[French, English], …] }] or null
-//   Rounds.parts(key)    -> [[French, English], …]: the words a phrase is built from, or []
-//   Rounds.family(key)   -> [[French, English], …]: other words of the same family, or []
-// In a story, [[text]] or [[text|word key]] marks a word of the round (tap it to see the meaning).
-// A round opens once you know 8 of its 10 words (vocab.html). Words of a topic that no round lists
-// go into an extra last round, and words that look the same as in English are left out of the rounds.
+// chapters-data.js - a long topic split into chapters of about 10 words, each with a short story.
+//   Chapters.for(themeId) -> [{ title, en, keys: [word keys], story: [[French, English], …] }] or null
+//   Chapters.parts(key)   -> [[French, English], …]: the words a phrase is built from, or []
+//   Chapters.family(key)  -> [[French, English], …]: other words of the same family, or []
+// In a story, [[text]] or [[text|word key]] marks a word of the chapter (tap it to see the meaning).
+// Chapters set the order of the Learn page and of new words in Practise; nothing is locked.
+// Words of a topic that no chapter lists go into an extra last chapter, and words that look the
+// same as in English are left out of the chapters (vocab.html shows them on their own).
 (function () {
-const ROUNDS = {
+const CHAPTERS = {
     // ---------------- 31 Environment & Climate ----------------
     31: [
         { title: 'La nature', en: 'Nature around us',
@@ -231,8 +232,8 @@ const keyOf = (fr) => String(fr).toLowerCase().replace(/[’]/g, "'").replace(AR
 const FAMILY_OF = {};
 FAMILIES.forEach(g => g.forEach(([fr]) => { (FAMILY_OF[keyOf(fr)] = FAMILY_OF[keyOf(fr)] || []).push(g); }));
 
-window.Rounds = {
-    for(themeId) { return ROUNDS[themeId] || null; },
+window.Chapters = {
+    for(themeId) { return CHAPTERS[themeId] || null; },
     parts(key) { return PARTS[key] || []; },
     family(key) {
         const seen = new Set([key]);
