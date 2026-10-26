@@ -1364,7 +1364,7 @@
             const st = lvStyle(tp.level);
             $('topic-crumb').className = `text-xs font-bold px-2 py-1 rounded-full ${tp.level ? st[1] + ' ' + st[0] : 'bg-slate-100 text-slate-600'}`;
             $('topic-back').textContent = tp.tcf ? '← Back to the theme' : '← All topics';
-            $('topic-crumb').textContent = tp.tcf ? 'Exam practice · theme words' : tp.id === 'review' ? 'Words due today' : tp.freq ? `Most common words · Set ${tp.set || ''}` : `Vocab · ${tp.level}${tp.no ? ' · Topic ' + tp.no : ''}`;
+            $('topic-crumb').textContent = tp.tcf ? 'Exam preparation · theme words' : tp.id === 'review' ? 'Words due today' : tp.freq ? `Most common words · Set ${tp.set || ''}` : `Vocab · ${tp.level}${tp.no ? ' · Topic ' + tp.no : ''}`;
             $('deck-title').textContent = tp.lesson && !tp.n ? `${tp.emoji || ''} ${tp.title}`.trim() : tp.title;
             document.title = `${tp.title} - Vocabulary`;
             // The hands-on lesson, if this topic has one

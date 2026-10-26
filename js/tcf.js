@@ -1,4 +1,5 @@
-// tcf.js - the TCF question bank (exam.html), shared with Writing, Speaking and Vocab.
+// tcf.js - the exam preparation question bank (exam.html), shared with Writing, Speaking and Vocab.
+// The questions follow the TCF Canada tasks; several also match TEF Canada sections (TASKS[k].exams).
 // Content: content/tcf/index.json (the themes) and content/tcf/<slug>.json (one theme:
 // its words and its 40 prompts with sample answers, from the TCF theme packs).
 //
@@ -14,30 +15,30 @@
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
 const TASKS = {
-    W2: { kind: 'writing', label: 'Writing · Tâche 2', short: 'Écrit 2', words: [120, 150],
+    W2: { kind: 'writing', label: 'Writing 2 · Experience or advice', short: 'Writing 2', exams: 'TCF writing task 2', words: [120, 150],
         what: 'Tell an experience or give advice: an introduction, two or three developed points, a conclusion.',
         consigne: 'Rédigez un texte de 120 à 150 mots.',
         include: ['An introduction that sets the scene', 'Two or three developed points with examples', 'A conclusion', 'Use some of the theme words'] },
-    W3: { kind: 'writing', label: 'Writing · Tâche 3', short: 'Écrit 3', words: [120, 180],
+    W3: { kind: 'writing', label: 'Writing 3 · Summary and opinion', short: 'Writing 3', exams: 'TCF writing task 3 · TEF writing section B (opinion part)', words: [120, 180],
         what: 'Two short documents with opposite views. Part 1: sum them up in your own words (about 50 words). Part 2: give your argued opinion (about 100 words).',
         consigne: 'Partie 1 : résumez les deux documents en 40 à 60 mots. Partie 2 : donnez votre opinion en 80 à 120 mots.',
         include: ['Part 1: a neutral summary of both documents, in your own words', 'Part 2: your opinion with two arguments', 'Linking words (d\'abord, cependant, en revanche, donc…)', 'Use some of the theme words'] },
-    S2: { kind: 'speaking', label: 'Speaking · Tâche 2', short: 'Oral 2', seconds: [180, 330],
+    S2: { kind: 'speaking', label: 'Speaking 2 · Role-play', short: 'Speaking 2', exams: 'TCF speaking task 2 · TEF speaking section A', seconds: [180, 330],
         what: 'Role-play: the examiner plays the other person and you ask the questions. Greet and explain why you are calling, vary your questions, react to the answers, then close politely.',
         consigne: 'Posez des questions à l\'examinateur pour obtenir les informations dont vous avez besoin.',
         include: ['Greet and explain why you are calling', 'Ask 8–10 questions in different forms (est-ce que, inversion, quel…)', 'React to the answers', 'Close politely'] },
-    S3: { kind: 'speaking', label: 'Speaking · Tâche 3', short: 'Oral 3', seconds: [120, 270],
+    S3: { kind: 'speaking', label: 'Speaking 3 · Opinion', short: 'Speaking 3', exams: 'TCF speaking task 3 · TEF speaking section B (arguing)', seconds: [120, 270],
         what: 'Give and defend an opinion: state your position, give two arguments with examples, concede a point, conclude. Then answer the examiner\'s challenge.',
         consigne: 'Donnez votre opinion et justifiez-la avec des arguments et des exemples.',
         include: ['State your position first', 'Two arguments with examples', 'Concede a point (certes…, mais…)', 'Conclude clearly'] },
 };
-TASKS.W1 = { kind: 'writing', label: 'Writing · Tâche 1', short: 'Écrit 1', words: [60, 120],
+TASKS.W1 = { kind: 'writing', label: 'Writing 1 · Short message', short: 'Writing 1', exams: 'TCF writing task 1', words: [60, 120],
     what: 'A short message (email, note, post) to describe, tell or invite.', consigne: 'Rédigez un message de 60 à 120 mots.',
     include: ['Greeting and closing suited to the reader', 'Answer every point of the task', 'Use some of the theme words'] };
-TASKS.S1 = { kind: 'speaking', label: 'Speaking · Tâche 1', short: 'Oral 1', seconds: [60, 120],
+TASKS.S1 = { kind: 'speaking', label: 'Speaking 1 · Interview', short: 'Speaking 1', exams: 'TCF speaking task 1', seconds: [60, 120],
     what: 'Guided interview: the examiner asks about you, your life and your plans.', consigne: 'Répondez aux questions de l\'examinateur.',
     include: ['Answer in full sentences', 'Give details and examples', 'Use some of the theme words'] };
-const ORDER = ['W1', 'W2', 'W3', 'S1', 'S2', 'S3'];
+const ORDER = ['W1', 'W2', 'W3', 'S1', 'S2', 'S3'];   // the bank shows only the tasks a theme has
 
 let indexP = null;
 const themes = {};

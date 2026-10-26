@@ -240,7 +240,7 @@
             $('task-view').classList.remove('hidden');
             const st = LEVEL_STYLE[t.level];
             $('crumb').className = `text-xs font-bold px-2 py-1 rounded-full ${st[1]} ${st[0]}`;
-            $('crumb').textContent = t.tcf ? `Exam practice · ${t.type} · ${t.subject}` : `Writing · ${t.level} · ${kindLabel(t)}${t.subject ? ' · ' + t.subject : ''}`;
+            $('crumb').textContent = t.tcf ? `Exam preparation · ${t.type} · ${t.subject}` : `Writing · ${t.level} · ${kindLabel(t)}${t.subject ? ' · ' + t.subject : ''}`;
             $('back').textContent = t.tcf ? '← Back to the question' : '← All tasks';
             $('task-title').textContent = t.title;
             document.title = `${t.title} - Writing`;

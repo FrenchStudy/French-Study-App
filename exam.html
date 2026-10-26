@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Exam practice - Apprendre le Français</title>
+    <title>Exam preparation - Apprendre le Français</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#4f46e5">
     <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
@@ -28,8 +28,8 @@
             <!-- ===== ALL THEMES ===== -->
             <div id="themes-view" class="space-y-4">
                 <div>
-                    <h1 class="text-2xl font-black text-slate-900">Exam practice</h1>
-                    <p class="text-sm text-slate-500 mt-1">TCF-style writing and speaking tasks on 24 themes, each with a B2–C1 sample answer and the theme's key words. Write or speak your answer to get it corrected.</p>
+                    <h1 class="text-2xl font-black text-slate-900">Exam preparation</h1>
+                    <p class="text-sm text-slate-500 mt-1">Writing and speaking tasks for French exams such as the TCF and TEF, on 24 themes. Each has a B2–C1 sample answer and the theme's key words. Write or speak your answer to get it corrected.</p>
                 </div>
                 <div id="task-filter" class="flex gap-1 p-1 bg-slate-200/70 rounded-xl overflow-x-auto w-max max-w-full" role="tablist" aria-label="Task"></div>
                 <p id="filter-note" class="text-sm text-slate-600"></p>
@@ -111,7 +111,7 @@
             set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
         };
         const T = TCF.TASKS;
-        const BANK_TASKS = ['W2', 'W3', 'S2', 'S3'];
+        const BANK_TASKS = TCF.ORDER;
         let idx = null, theme = null, prompt = null, filter = store.get('exam_filter', 'all');
 
         // Your results on the Writing and Speaking pages, by task id
@@ -123,10 +123,10 @@
 
         // ---------- All themes ----------
         function renderHome() {
-            const tabs = [['all', 'All tasks']].concat(BANK_TASKS.map(k => [k, T[k].label]));
+            const tabs = [['all', 'All tasks']].concat(BANK_TASKS.map(k => [k, T[k].short]));
             $('task-filter').innerHTML = tabs.map(([k, label]) => `<button type="button" role="tab" data-filter="${k}" aria-selected="${k === filter}"
                 class="shrink-0 px-3 py-1.5 rounded-lg text-sm font-bold ${k === filter ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-800'}">${escapeHtml(label)}</button>`).join('');
-            $('filter-note').textContent = filter === 'all' ? '' : T[filter].what;
+            $('filter-note').textContent = filter === 'all' ? '' : `${T[filter].label}: ${T[filter].what} Matches ${T[filter].exams}.`;
             const done = store.get('exam_done', {});
             $('theme-grid').innerHTML = idx.themes.map(t => {
                 const n = filter === 'all' ? Object.values(t.tasks).reduce((a, b) => a + b, 0) : (t.tasks[filter] || 0);
@@ -163,7 +163,7 @@
                 const list = theme.prompts.filter(p => p.task === k);
                 if (!list.length) return '';
                 return `<div class="space-y-2">
-                    <div><h2 class="text-lg font-black text-slate-900">${escapeHtml(T[k].label)}</h2><p class="text-sm text-slate-500">${escapeHtml(T[k].what)}</p></div>
+                    <div><h2 class="text-lg font-black text-slate-900">${escapeHtml(T[k].label)}</h2><p class="text-sm text-slate-500">${escapeHtml(T[k].what)} <span class="text-slate-400">Matches ${escapeHtml(T[k].exams)}.</span></p></div>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">${list.map(p => {
                         const r = resultOf(taskId(theme.slug, p));
                         return `<a href="exam.html?theme=${encodeURIComponent(theme.slug)}&q=${encodeURIComponent(p.id)}" data-prompt="${escapeHtml(p.id)}" class="group flex items-start gap-3 bg-white border border-slate-200 hover:border-indigo-400 rounded-2xl p-3">
@@ -171,7 +171,7 @@
                             <span class="flex-1 min-w-0 font-semibold text-slate-900 leading-snug group-hover:text-indigo-700" lang="fr">${escapeHtml(p.title)}</span>
                             ${r ? `<span class="shrink-0 text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">✓ ${r.score}/20</span>` : ''}</a>`;
                     }).join('')}</div></div>`;
-            }).join('') + (filter !== 'all' ? `<button type="button" data-filter="all" class="text-sm font-semibold text-indigo-700 min-h-[44px]">Show all four tasks</button>` : '');
+            }).join('') + (filter !== 'all' ? `<button type="button" data-filter="all" class="text-sm font-semibold text-indigo-700 min-h-[44px]">Show all tasks</button>` : '');
         }
         // Theme words by group, with meaning, example and "I know it" (shared with Vocab)
         function renderWords() {
@@ -218,14 +218,14 @@
         function renderPrompt() {
             const p = prompt, k = T[p.task];
             const id = taskId(theme.slug, p);
-            document.title = `${p.title} - Exam practice`;
+            document.title = `${p.title} - Exam preparation`;
             $('prompt-back').href = `exam.html?theme=${encodeURIComponent(theme.slug)}`;
             $('prompt-back').textContent = `← ${theme.en}`;
             $('prompt-crumb').textContent = `${theme.emoji} ${theme.en} · ${k.label} · ${p.id}`;
             $('prompt-title').textContent = p.title;
             const consigne = `<p class="font-semibold">${escapeHtml(k.consigne)}</p>`;
             $('prompt-body').innerHTML = p.task === 'S3' ? `<p>${TCF.highlight(theme, p.title)}</p>${consigne}` : paras(p.prompt) + consigne;
-            $('prompt-what').textContent = k.what;
+            $('prompt-what').textContent = `${k.what} Matches ${k.exams}.`;
             $('prompt-checklist').innerHTML = k.include.map(x => `<li class="flex gap-2"><span class="text-indigo-500">•</span><span>${escapeHtml(x)}</span></li>`).join('');
             $('prompt-words').innerHTML = TCF.glossHtml(TCF.wordsFor(theme, p, 12));
             const page = k.kind === 'writing' ? 'writing.html' : 'speaking.html';
@@ -239,7 +239,7 @@
             $('answer-body').innerHTML = paras(p.answer);
             $('answer-words').innerHTML = TCF.answerWordsHtml(theme, p);
             $('answer-follow').classList.toggle('hidden', !p.followup);
-            $('answer-follow').innerHTML = p.followup ? `<b class="block text-amber-900">The examiner may push back</b><span lang="fr">${TCF.highlight(theme, p.followup)}</span>` : '';
+            $('answer-follow').innerHTML = p.followup ? `<b class="block text-amber-900">${p.task === 'S1' ? 'The examiner may ask next' : 'The examiner may push back'}</b><span lang="fr">${TCF.highlight(theme, p.followup)}</span>` : '';
         }
         function toggleAnswer() {
             const open = $('answer-box').classList.toggle('hidden') === false;
@@ -261,11 +261,11 @@
             try {
                 idx = idx || await TCF.index();
                 const slug = q.get('theme');
-                if (!slug || !idx.themes.some(t => t.slug === slug)) { theme = null; document.title = 'Exam practice - Apprendre le Français'; renderHome(); show('themes-view'); return; }
+                if (!slug || !idx.themes.some(t => t.slug === slug)) { theme = null; document.title = 'Exam preparation - Apprendre le Français'; renderHome(); show('themes-view'); return; }
                 theme = await TCF.theme(slug);
                 const p = q.get('q') && theme.prompts.find(x => x.id === q.get('q'));
                 if (p) { prompt = p; renderPrompt(); show('prompt-view'); return; }
-                document.title = `${theme.en} - Exam practice`;
+                document.title = `${theme.en} - Exam preparation`;
                 renderTheme(); setTab(q.get('tab') === 'words' ? 'words' : 'prompts'); show('theme-view');
             } catch (err) {
                 show('themes-view');

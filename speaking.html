@@ -748,7 +748,7 @@ Reply with JSON only:
             if (push) history.pushState({}, '', `speaking.html?task=${encodeURIComponent(t.id)}`);
             showView('exam-view');
             document.title = `${t.title} - Speaking`;
-            $('exam-crumb').textContent = t.tcf ? `Exam practice · ${t.kindLabel} · ${t.subject}` : `Exam task · ${t.level} · ${t.source === 'posted' ? 'Your question' : t.kindLabel}${t.subject ? ' · ' + t.subject : ''}`;
+            $('exam-crumb').textContent = t.tcf ? `Exam preparation · ${t.kindLabel} · ${t.subject}` : `Exam task · ${t.level} · ${t.source === 'posted' ? 'Your question' : t.kindLabel}${t.subject ? ' · ' + t.subject : ''}`;
             $('exam-back').textContent = t.tcf ? '← Back to the question' : '← All tasks';
             $('exam-sample').textContent = t.tcf ? '📖 Sample answer' : '✨ Sample answer';
             $('exam-title').textContent = t.title;
@@ -902,7 +902,7 @@ Only list real mistakes, at most 10, in order. "wrong" must be copied exactly fr
                         <button type="button" id="sample-say" class="min-h-[36px] px-2.5 text-sm font-semibold text-amber-900 bg-white border border-amber-200 rounded-lg">🔊 Listen</button>
                     </div>
                     <div lang="fr" class="space-y-3 text-base text-slate-900 leading-relaxed">${lines}</div>
-                    ${p.followup ? `<div class="bg-white border border-amber-200 rounded-xl p-3 text-sm"><b class="block text-amber-900">The examiner may push back</b><span lang="fr">${TCF.highlight(th, p.followup)}</span></div>` : ''}
+                    ${p.followup ? `<div class="bg-white border border-amber-200 rounded-xl p-3 text-sm"><b class="block text-amber-900">${p.task === 'S1' ? 'The examiner may ask next' : 'The examiner may push back'}</b><span lang="fr">${TCF.highlight(th, p.followup)}</span></div>` : ''}
                     ${TCF.answerWordsHtml(th, p)}`;
                 $('sample-say').onclick = () => speakFrench(TCF.answerText(p).replace(/•/g, ''));
                 return;
