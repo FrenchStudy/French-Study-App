@@ -47,6 +47,14 @@
                     <input id="topic-search" type="search" placeholder="Search topics, e.g. famille" class="md:ml-auto w-full md:w-72 text-base md:text-sm px-3 py-2.5 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
                 </div>
                 <div id="topic-banner"></div>
+                <!-- The word lists of many topics at once, for Excel or Google Sheets -->
+                <div class="flex flex-wrap items-center gap-2 bg-white border border-slate-200 rounded-2xl p-3">
+                    <span class="text-sm font-bold text-slate-700 px-1">📄 Word lists</span>
+                    <select id="bulk-scope" aria-label="Which words to get" class="flex-1 min-w-[12rem] text-base sm:text-sm px-3 py-2.5 bg-white border border-slate-200 rounded-xl"></select>
+                    <button id="bulk-download" type="button" class="min-h-[44px] px-4 bg-slate-900 hover:bg-slate-700 text-white font-bold rounded-xl text-sm">⬇️ Download (.csv)</button>
+                    <button id="bulk-copy" type="button" class="min-h-[44px] px-4 bg-white border border-slate-200 hover:border-indigo-400 font-semibold rounded-xl text-sm">📋 Copy</button>
+                    <p id="bulk-status" class="w-full text-sm text-emerald-700 px-1 empty:hidden" role="status" aria-live="polite"></p>
+                </div>
                 <div id="topic-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
             </div>
 
@@ -54,9 +62,13 @@
             <div id="topic-view" class="hidden space-y-4">
                 <div class="flex items-center justify-between gap-2">
                     <button id="topic-back" type="button" class="min-h-[44px] px-1 text-sm font-semibold text-slate-600 hover:text-indigo-600">← All topics</button>
-                    <div id="topic-nav-top" class="flex items-center gap-1"></div>
+                    <!-- Prev / Topic 3 of 7 ▾ / Next: the button opens this level's topics as a drop-down -->
+                    <div class="relative">
+                        <div id="topic-nav-top" class="flex items-center gap-1"></div>
+                        <div id="topic-side" hidden class="absolute right-0 top-full mt-2 z-40 w-80 max-w-[calc(100vw-2rem)] shadow-xl rounded-2xl"></div>
+                    </div>
                 </div>
-                <div id="topic-layout" class="lg:grid lg:grid-cols-[minmax(0,1fr)_20rem] lg:gap-8">
+                <div id="topic-layout">
                 <div class="space-y-4 min-w-0">
                 <div class="flex flex-col md:flex-row md:items-end gap-3 md:gap-8">
                     <div class="min-w-0 flex-1">
@@ -248,7 +260,6 @@
                 <div id="topic-nav" class="grid grid-cols-2 gap-2 pt-2 border-t border-slate-200"></div>
                 </div>
                 <!-- The other topics of this level, as in Grammar (wide screens) -->
-                <aside id="topic-side" class="hidden lg:block lg:sticky lg:top-4 lg:self-start"></aside>
                 </div>
             </div>
         </div>
@@ -974,11 +985,9 @@
             clearTimeout(listStatus.t);
             listStatus.t = setTimeout(() => { $('copy-status').textContent = ''; }, 4000);
         }
-        async function copyList() {
-            const rows = exportRows();
-            if (!rows.length) { listStatus('No words to copy.'); return; }
+        async function copyRows(head, rows) {
             const clean = (v) => String(v).replace(/[\t\r\n]+/g, ' ');
-            const text = [exportHead(), ...rows].map(r => r.map(clean).join('\t')).join('\r\n') + '\r\n';
+            const text = [head, ...rows].map(r => r.map(clean).join('\t')).join('\r\n') + '\r\n';
             let ok = false;
             try { await navigator.clipboard.writeText(text); ok = true; } catch (e) { /* older browsers: fall back below */ }
             if (!ok) {
@@ -988,20 +997,123 @@
                 try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
                 ta.remove();
             }
-            listStatus(ok ? `Copied ${rows.length} word${rows.length === 1 ? '' : 's'}. Paste into Excel or Google Sheets.` : 'Could not copy. Try Download instead.');
+            return ok;
         }
-        function downloadList() {
-            const rows = exportRows();
-            if (!rows.length) { listStatus('No words to download.'); return; }
+        function saveCsv(head, rows, title) {
             const cell = (v) => /[",\r\n]/.test(String(v)) ? '"' + String(v).replace(/"/g, '""') + '"' : String(v);
-            const csv = '\uFEFF' + [exportHead(), ...rows].map(r => r.map(cell).join(',')).join('\r\n') + '\r\n';   // BOM: Excel shows accents
-            const name = (plain(topic ? topic.title : 'vocab').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'vocab') + '.csv';
+            const csv = '\uFEFF' + [head, ...rows].map(r => r.map(cell).join(',')).join('\r\n') + '\r\n';   // BOM: Excel shows accents
+            const name = (plain(title || 'vocab').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'vocab') + '.csv';
             const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
             const a = document.createElement('a');
             a.href = url; a.download = name;
             document.body.appendChild(a); a.click(); a.remove();
             setTimeout(() => URL.revokeObjectURL(url), 1000);
+            return name;
+        }
+        async function copyList() {
+            const rows = exportRows();
+            if (!rows.length) { listStatus('No words to copy.'); return; }
+            const ok = await copyRows(exportHead(), rows);
+            listStatus(ok ? `Copied ${rows.length} word${rows.length === 1 ? '' : 's'}. Paste into Excel or Google Sheets.` : 'Could not copy. Try Download instead.');
+        }
+        function downloadList() {
+            const rows = exportRows();
+            if (!rows.length) { listStatus('No words to download.'); return; }
+            const name = saveCsv(exportHead(), rows, topic ? topic.title : 'vocab');
             listStatus(`Downloaded ${rows.length} word${rows.length === 1 ? '' : 's'} (${name}).`);
+        }
+
+        // ---------- Word lists of many topics at once (topics page) ----------
+        // One level's topics, every topic from A1 to C2, or the 5,000 most common words, in one file:
+        // Level | Topic | Round | Article | French | English | Example | Example (English)
+        const BULK_HEAD = ['Level', 'Topic', 'Round', 'Article', 'French', 'English', 'Example', 'Example (English)'];
+        function renderBulkScope() {
+            const ORDER = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
+            const levels = [...new Set(TOPICS.filter(x => x.n).map(x => x.level))].sort((a, b) => ORDER.indexOf(a) - ORDER.indexOf(b));
+            const keep = $('bulk-scope').value;
+            $('bulk-scope').innerHTML = levels.map(lv => `<option value="${lv}">${lv} topics (${TOPICS.filter(x => x.n && x.level === lv).length})</option>`).join('')
+                + `<option value="topics">Every topic, ${levels[0] || 'A1'} to ${levels[levels.length - 1] || 'C2'} (${TOPICS.filter(x => x.n).length})</option>
+                   <option value="TOP">The ${FREQ_TOTAL.toLocaleString('en')} most common words</option>`;
+            const level = currentLevel();
+            const has = (v) => [...$('bulk-scope').options].some(o => o.value === v);
+            $('bulk-scope').value = keep && has(keep) ? keep : has(level) ? level : (levels[0] || 'topics');
+        }
+        // Supabase sends at most 1,000 rows at a time
+        async function fetchPaged(make) {
+            const out = [];
+            for (let from = 0; ; from += 1000) {
+                const { data, error } = await make().range(from, from + 999);
+                if (error) throw error;
+                out.push(...(data || []));
+                if (!data || data.length < 1000) return out;
+            }
+        }
+        const BANK_COLS = 'id, Rank, French, English, Part_of_Speech, Article, Noun_Gender, IPA, SentenceFR, SentenceEN, Register';
+        function wordRow(level, title, round, w) {
+            const fr = String(w.fr || '').trim();
+            const m = /[.?!…]$/.test(fr) ? null : fr.match(ARTICLE_COL);
+            const [art, word] = m ? [m[1].trim(), fr.slice(m[1].length).trim()] : ['', fr];
+            return [level, title, round, art, word, w.en || '', w.exFr || '', w.exEn || ''];
+        }
+        async function bulkRows(scope) {
+            if (scope === 'TOP') {
+                const rows = await fetchPaged(() => db.from('vocabulary_bank').select(BANK_COLS).order('Rank', { ascending: true }));
+                return rows.filter(r => r.Rank && r.Rank <= FREQ_TOTAL).map(r => {
+                    const w = rowToWord(r), set = Math.floor((r.Rank - 1) / FREQ_DECK_SIZE) * FREQ_DECK_SIZE + 1;
+                    return wordRow('Most common', `Words ${set}–${set + FREQ_DECK_SIZE - 1}`, WordMemory.easy(w) ? 'Same as in English' : '', w);
+                });
+            }
+            const topics = TOPICS.filter(x => x.n && (scope === 'topics' || x.level === scope));
+            let wordsOf;
+            if (dbThemes) {
+                const ids = new Set(topics.map(x => x.n));
+                const links = (await fetchPaged(() => db.from('word_themes').select('theme_id, word_id, sort_order').order('theme_id', { ascending: true })))
+                    .filter(l => ids.has(l.theme_id)).sort((a, b) => a.theme_id - b.theme_id || a.sort_order - b.sort_order);
+                const want = [...new Set(links.map(l => l.word_id))], byId = new Map();
+                for (let i = 0; i < want.length; i += 200) {
+                    const { data, error } = await db.from('vocabulary_bank').select(BANK_COLS).in('id', want.slice(i, i + 200));
+                    if (error) throw error;
+                    (data || []).forEach(r => byId.set(r.id, r));
+                }
+                wordsOf = (n) => links.filter(l => l.theme_id === n).map(l => byId.get(l.word_id)).filter(Boolean).map(rowToWord);
+            } else {
+                wordsOf = (n) => themeWords(n);
+            }
+            return topics.flatMap(x => {
+                const d = { words: wordsOf(x.n), themeId: x.n };
+                d.words.forEach(w => { const ex = !w.exFr && WordMemory.example(w); if (ex) { w.exFr = ex[0]; w.exEn = ex[1]; } });
+                splitDeck(d);
+                const title = x.no ? `${x.no}. ${x.title}` : x.title;
+                const learn = d.rounds ? d.rounds.flatMap((r, i) => r.words.map(w => wordRow(x.level, title, `Round ${i + 1} · ${r.title}`, w)))
+                    : d.words.map(w => wordRow(x.level, title, '', w));
+                return learn.concat(d.easy.map(w => wordRow(x.level, title, 'Same as in English', w)));
+            });
+        }
+        async function bulkExport(kind) {
+            const scope = $('bulk-scope').value, label = $('bulk-scope').selectedOptions[0].textContent.replace(/\s*\(.*\)$/, '');
+            const btns = [$('bulk-download'), $('bulk-copy')];
+            btns.forEach(b => { b.disabled = true; });
+            $('bulk-status').className = 'w-full text-sm text-indigo-700 px-1 empty:hidden';
+            $('bulk-status').textContent = 'Getting the words…';
+            try {
+                const rows = await bulkRows(scope);
+                if (!rows.length) throw new Error('No words found for this choice.');
+                let msg;
+                if (kind === 'copy') {
+                    const ok = await copyRows(BULK_HEAD, rows);
+                    if (!ok) throw new Error('Could not copy. Try Download instead.');
+                    msg = `Copied ${rows.length.toLocaleString('en')} words. Paste into Excel or Google Sheets.`;
+                } else {
+                    msg = `Downloaded ${rows.length.toLocaleString('en')} words (${saveCsv(BULK_HEAD, rows, 'french-words-' + label)}).`;
+                }
+                $('bulk-status').className = 'w-full text-sm text-emerald-700 px-1 empty:hidden';
+                $('bulk-status').textContent = msg;
+            } catch (err) {
+                console.error(err);
+                $('bulk-status').className = 'w-full text-sm text-rose-700 px-1 empty:hidden';
+                $('bulk-status').textContent = err.message && !/fetch|network/i.test(err.message) ? err.message : 'Could not get the words. Check your connection and try again.';
+            }
+            btns.forEach(b => { b.disabled = false; });
         }
 
         function renderList() {
@@ -1218,8 +1330,6 @@
                 ? `<button type="button" data-goto-step="${nx[0]}" class="min-h-[48px] px-5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl">Next: ${nx[1]} →</button>`
                 : '';
             // the palace needs the full width: hide the topic list beside it while it is open
-            $('topic-layout').classList.toggle('lg:grid', s !== 'palace');
-            $('topic-side').classList.toggle('lg:block', s !== 'palace');
             if (s === 'palace' && toolFor(topic)) toolFor(topic).mount($('step-palace'), { say: (t) => speakFrench(t, 0.9) });
             else if (s === 'palace') MemoryPalace.mount($('step-palace'), topic.n, palaceWords(), { say: (t) => speakFrench(t, 0.9), grade: palaceGrade });
             if (s === 'practise') startCards();
@@ -1339,14 +1449,16 @@
             const small = (x, label, dir) => x
                 ? `<a href="${topicUrl(x.id)}" data-topic="${escapeHtml(x.id)}" title="${escapeHtml(x.short || x.title)}" class="min-h-[40px] px-3 inline-flex items-center text-sm font-semibold text-slate-700 bg-white border border-slate-200 hover:border-indigo-300 rounded-xl">${label}</a>`
                 : `<span class="min-h-[40px] px-3 inline-flex items-center text-sm font-semibold text-slate-300 bg-white border border-slate-100 rounded-xl" aria-hidden="true">${label}</span>`;
-            $('topic-nav-top').innerHTML = list.length ? `${small(prev, '‹ Prev', 'prev')}<span class="text-xs text-slate-400 px-1">${i + 1} / ${list.length}</span>${small(nx, 'Next ›', 'next')}` : '';
+            const menuBtn = `<button type="button" id="topic-menu-btn" aria-expanded="false" aria-controls="topic-side" title="All topics of this level"
+                class="min-h-[40px] px-3 inline-flex items-center gap-1.5 text-sm font-semibold text-slate-700 bg-white border border-slate-200 hover:border-indigo-300 rounded-xl">
+                <span class="whitespace-nowrap">${topic.freq ? 'Set' : 'Topic'} ${i + 1} of ${list.length}</span><span class="text-slate-400" aria-hidden="true">▾</span></button>`;
+            $('topic-nav-top').innerHTML = list.length ? `${small(prev, '‹ Prev', 'prev')}${menuBtn}${small(nx, 'Next ›', 'next')}` : '';
+            $('topic-side').hidden = true;
             renderTopicSide(list);
         }
-        // The other topics of this level on the right, with a tick for the ones you know
+        // The other topics of this level (drop-down from "Topic 3 of 7"), with a tick for the ones you know
         function renderTopicSide(list) {
             const side = $('topic-side');
-            $('topic-layout').classList.toggle('lg:grid', list.length > 0);
-            side.classList.toggle('lg:block', list.length > 0);
             if (!list.length) { side.innerHTML = ''; return; }
             const name = topic.freq ? 'Most common words' : `Vocab · ${topic.level}`;
             side.innerHTML = `
@@ -1365,6 +1477,7 @@
             if (cur) { const box = cur.parentElement; box.scrollTop = Math.max(0, cur.offsetTop - box.offsetTop - box.clientHeight / 2); }
         }
         function renderTopics() {
+            renderBulkScope();
             const words = plain($('topic-search').value.trim()).split(/\s+/).filter(Boolean);
             const level = currentLevel();
             const levels = [...new Set(TOPICS.map(x => x.level))];
@@ -1433,6 +1546,22 @@
 
         // ---------- Wiring ----------
         $('topic-back').addEventListener('click', () => showTopics(true));
+        function setTopicMenu(open) {
+            const btn = $('topic-menu-btn');
+            $('topic-side').hidden = !open;
+            if (btn) btn.setAttribute('aria-expanded', open);
+            if (open) {
+                const cur = $('topic-side').querySelector('[aria-current="page"]');
+                if (cur) { const box = cur.parentElement; box.scrollTop = Math.max(0, cur.offsetTop - box.offsetTop - box.clientHeight / 2); }
+            }
+        }
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('#topic-menu-btn')) { setTopicMenu($('topic-side').hidden); return; }
+            if (!$('topic-side').hidden && !e.target.closest('#topic-side')) setTopicMenu(false);
+        });
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !$('topic-side').hidden) { setTopicMenu(false); $('topic-menu-btn')?.focus(); }
+        });
         $('topic-search').addEventListener('input', renderTopics);
         $('topic-levels').addEventListener('click', (e) => {
             const b = e.target.closest('[data-level]');
@@ -1503,6 +1632,8 @@
             const w = (deck.easy || []).find(x => x.key === b.dataset.easy); if (w) speakFrench(w.fr, 0.9);
         });
         $('btn-download-list').addEventListener('click', downloadList);
+        $('bulk-download').addEventListener('click', () => bulkExport('download'));
+        $('bulk-copy').addEventListener('click', () => bulkExport('copy'));
         document.querySelectorAll('.quiz-type').forEach(b => b.addEventListener('click', () => startQuiz(b.dataset.quiz)));
         document.addEventListener('keydown', (e) => {
             if (step !== 'practise' || topic === null || !current || /input|textarea|select/i.test(e.target.tagName)) return;
