@@ -18,6 +18,7 @@
     <script src="js/ai.js"></script>
     <script src="js/cheatsheet-data.js"></script>
     <script src="js/word-memory.js"></script>
+    <script src="js/rounds-data.js"></script>
     <script src="js/palaces-data.js"></script>
     <script src="js/palaces-data-2.js"></script>
     <script src="js/memory-palace.js"></script>
@@ -63,7 +64,7 @@
                         <h1 id="deck-title" class="text-2xl lg:text-3xl font-black text-slate-900 leading-tight mt-2"></h1>
                     </div>
                     <div id="topic-progress" class="md:w-96 space-y-1.5">
-                        <div class="flex items-center justify-between text-sm"><span class="font-semibold text-slate-700">Your progress</span><span id="deck-counts" class="text-slate-500 flex flex-wrap justify-end gap-x-3 gap-y-1"></span></div>
+                        <div class="flex items-center justify-between text-sm"><span id="progress-label" class="font-semibold text-slate-700 whitespace-nowrap">Your progress</span><span id="deck-counts" class="text-slate-500 flex flex-wrap justify-end gap-x-3 gap-y-1"></span></div>
                         <div class="h-2.5 bg-slate-200 rounded-full overflow-hidden flex">
                             <div id="bar-known" class="h-full bg-emerald-500" style="width:0%"></div>
                             <div id="bar-learning" class="h-full bg-amber-400" style="width:0%"></div>
@@ -75,6 +76,12 @@
                             <span class="sm:ml-auto"><span class="text-sky-700 font-bold">blue</span> = masculine · <span class="text-rose-600 font-bold">red</span> = feminine</span>
                         </div>
                     </div>
+                </div>
+
+                <!-- Rounds: a long topic in steps of about 10 words -->
+                <div id="round-bar" class="hidden space-y-2">
+                    <div id="round-list" class="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1" role="tablist" aria-label="Rounds"></div>
+                    <p id="round-note" class="text-sm text-slate-500" role="status" aria-live="polite"></p>
                 </div>
 
                 <nav id="step-tabs" class="flex gap-1 sm:gap-6 text-sm font-semibold overflow-x-auto overflow-y-hidden shadow-[inset_0_-1px_0_#e2e8f0]" role="tablist" aria-label="Steps">
@@ -95,6 +102,19 @@
                             <button id="lesson-done" type="button" class="min-h-[40px] px-3 rounded-xl text-sm font-bold"></button>
                         </div>
                         <div id="learn-lesson-body" class="lk-root text-base"></div>
+                    </div>
+                    <div id="learn-story" class="hidden bg-white border border-slate-200 rounded-2xl p-4 sm:p-5 space-y-3">
+                        <div class="flex flex-wrap items-center justify-between gap-2">
+                            <div class="min-w-0">
+                                <h2 id="story-title" class="text-sm font-bold uppercase tracking-wide text-emerald-700"></h2>
+                                <p class="text-sm text-slate-500">Tap a coloured word to hear it and see what it means.</p>
+                            </div>
+                            <div class="flex gap-2">
+                                <button id="btn-story-listen" type="button" class="min-h-[44px] px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-sm">🔊 Listen</button>
+                                <button id="btn-story-en" type="button" aria-pressed="false" class="min-h-[44px] px-4 bg-white border border-slate-200 hover:border-emerald-400 font-semibold rounded-xl text-sm">Show English</button>
+                            </div>
+                        </div>
+                        <div id="story-body" class="space-y-3 text-lg leading-relaxed text-slate-800"></div>
                     </div>
                     <div id="learn-words" class="space-y-3">
                         <div class="flex flex-wrap items-center justify-between gap-2">
@@ -118,6 +138,15 @@
                 <p id="copy-status" class="text-sm text-emerald-700 empty:hidden" role="status" aria-live="polite"></p>
                 <div id="word-list" class="bg-white border border-slate-200 rounded-2xl divide-y divide-slate-100"></div>
                     </div>
+                    <details id="learn-easy" class="hidden group bg-white border border-slate-200 rounded-2xl">
+                        <summary class="min-h-[52px] px-4 py-3 flex items-center gap-3 cursor-pointer list-none">
+                            <span class="text-xl" aria-hidden="true">✅</span>
+                            <span class="flex-1 min-w-0"><span id="easy-title" class="block font-bold text-slate-900"></span>
+                            <span class="block text-sm text-slate-500">Same as in English, so they stay out of the flashcards and the test. Mind the gender.</span></span>
+                            <span class="text-slate-400 group-open:rotate-180 transition" aria-hidden="true">▾</span>
+                        </summary>
+                        <div id="easy-list" class="flex flex-wrap gap-2 px-4 pb-4"></div>
+                    </details>
                 </section>
 
                 <!-- STEP 2: PRACTISE -->
@@ -141,6 +170,7 @@
                             <span class="text-xs text-slate-400">Tap the card to flip</span>
                         </div>
                         <div id="card-front" class="text-center space-y-2">
+                            <div id="card-front-pic" class="hidden text-7xl leading-none py-2" aria-hidden="true"></div>
                             <div id="card-word" class="text-3xl font-black break-words"></div>
                             <div id="card-pos" class="text-sm text-slate-400"></div>
                         </div>
@@ -152,6 +182,14 @@
                             <div id="card-example" class="hidden bg-slate-50 rounded-xl p-3 text-sm">
                                 <div id="card-ex-fr" class="italic text-slate-800"></div>
                                 <div id="card-ex-en" class="text-slate-500"></div>
+                            </div>
+                            <div id="card-parts" class="hidden text-sm space-y-1.5">
+                                <div class="text-xs font-bold uppercase tracking-wide text-slate-500">Built from</div>
+                                <div id="card-parts-list" class="flex flex-wrap gap-1.5"></div>
+                            </div>
+                            <div id="card-family" class="hidden text-sm space-y-1.5">
+                                <div class="text-xs font-bold uppercase tracking-wide text-slate-500">Same family</div>
+                                <div id="card-family-list" class="flex flex-wrap gap-1.5"></div>
                             </div>
                         </div>
                     </button>
@@ -436,8 +474,9 @@
             return { done: s.known >= s.total, started: s.known > 0, known: s.known, total: s.total };
         }
         function saveTopicStats() {
-            if (!topic || !(topic.n || topic.freq) || !deck || !deck.words.length) return;
-            topicStats[topic.id] = { known: deck.words.filter(w => statusOf(w) === 'known').length, total: deck.words.length };
+            const all = deck && (deck.all || deck.words);
+            if (!topic || !(topic.n || topic.freq) || !all || !all.length) return;
+            topicStats[topic.id] = { known: all.filter(w => statusOf(w) === 'known').length, total: all.length };
             store.set('vocab_topic_stats', topicStats);
         }
 
@@ -493,11 +532,11 @@
                 if (type === 'theme' && dbThemes) {
                     const th = dbThemes.find(x => x.id === n) || dbThemes[0];
                     const words = await loadDbTheme(th.id);
-                    next = { id: `theme:${th.id}`, title: th.title, words };
+                    next = { id: `theme:${th.id}`, title: th.title, words, themeId: th.id };
                 } else if (type === 'theme') {
                     const id = CS.blocks[n] ? n : 1;
                     const words = themeWords(id);
-                    next = { id: `theme:${id}`, title: CS.blocks[id].title, words };
+                    next = { id: `theme:${id}`, title: CS.blocks[id].title, words, themeId: id };
                     await enrichFromBank(words);
                 } else if (type === 'review') {
                     next = { id: 'review', title: 'Review', words: dueWords() };
@@ -516,6 +555,7 @@
                 // Words the word bank has no example for get one from the built-in list
                 next.words.forEach(w => { const ex = !w.exFr && WordMemory.example(w); if (ex) { w.exFr = ex[0]; w.exEn = ex[1]; } });
                 cacheWords(next.words);
+                if (type === 'theme' || type === 'freq') splitDeck(next);
             } catch (err) {
                 console.error(err);
                 next = { id: value, title: 'Deck', words: [] };
@@ -552,6 +592,136 @@
             }
         }
 
+        // ---------- Same-as-English words and rounds ----------
+        // Words that look the same as in English leave the flashcards (deck.easy, shown in a strip).
+        // A topic with rounds (js/rounds-data.js) is studied about 10 words at a time: deck.words is
+        // the open round, deck.all the whole topic. A round opens when you know 8 of the previous round's 10.
+        const ROUND_SIZE = 10, ROUND_PASS = 0.8;
+        function splitDeck(d) {
+            d.easy = d.words.filter(w => WordMemory.easy(w));
+            d.all = d.words.filter(w => !WordMemory.easy(w));
+            d.words = d.all;
+            const plan = d.themeId && window.Rounds ? Rounds.for(d.themeId) : null;
+            if (!plan) return;
+            const byKey = new Map(d.all.map(w => [w.key, w]));
+            const used = new Set();
+            d.rounds = plan.map(r => ({
+                title: r.title, en: r.en, story: r.story,
+                words: r.keys.map(k => byKey.get(k)).filter(w => w && !used.has(w.key) && used.add(w.key))
+            })).filter(r => r.words.length);
+            const rest = d.all.filter(w => !used.has(w.key));
+            for (let i = 0; i < rest.length; i += ROUND_SIZE) d.rounds.push({ title: 'More words', en: '', story: null, words: rest.slice(i, i + ROUND_SIZE) });
+            if (d.rounds.length < 2) { delete d.rounds; return; }
+            d.all = d.rounds.flatMap(r => r.words);
+            d.round = pickRound(d);
+            d.words = d.rounds[d.round].words;
+        }
+        const knownIn = (words) => words.filter(w => statusOf(w) === 'known').length;
+        const roundNeed = (r) => Math.ceil(r.words.length * ROUND_PASS);
+        const roundDone = (r) => knownIn(r.words) >= roundNeed(r);
+        // the last round you may open: the first one not done yet
+        function lastOpenRound(d) {
+            const i = d.rounds.findIndex(r => !roundDone(r));
+            return i < 0 ? d.rounds.length - 1 : i;
+        }
+        function pickRound(d) {
+            const saved = store.get('vocab_round', {})[d.id];
+            const last = lastOpenRound(d);
+            return Number.isInteger(saved) && saved >= 0 && saved <= last ? saved : last;
+        }
+        function openRound(i) {
+            if (!deck || !deck.rounds || !deck.rounds[i]) return;
+            if (i > lastOpenRound(deck)) {
+                const prev = deck.rounds[lastOpenRound(deck)];
+                $('round-note').textContent = `Round ${i + 1} opens when you know ${roundNeed(prev)} of the ${prev.words.length} words in round ${lastOpenRound(deck) + 1}.`;
+                return;
+            }
+            deck.round = i;
+            deck.words = deck.rounds[i].words;
+            const saved = store.get('vocab_round', {}); saved[deck.id] = i; store.set('vocab_round', saved);
+            reviewAll = false;
+            $('list-search').value = ''; $('list-filter').value = 'all';
+            renderAll();
+        }
+        function renderRounds() {
+            const on = !!(deck && deck.rounds);
+            $('round-bar').classList.toggle('hidden', !on);
+            if (!on) { $('progress-label').textContent = 'Your progress'; return; }
+            const last = lastOpenRound(deck);
+            $('progress-label').textContent = `Round ${deck.round + 1} of ${deck.rounds.length}`;
+            $('round-list').innerHTML = deck.rounds.map((r, i) => {
+                const done = roundDone(r), locked = i > last, cur = i === deck.round;
+                const cls = cur ? 'bg-indigo-600 border-indigo-600 text-white' : done ? 'bg-emerald-50 border-emerald-200 text-emerald-900 hover:border-emerald-400'
+                    : locked ? 'bg-slate-50 border-slate-200 text-slate-400' : 'bg-white border-slate-200 text-slate-800 hover:border-indigo-400';
+                return `<button type="button" role="tab" data-round="${i}" aria-selected="${cur}" ${locked ? 'aria-disabled="true"' : ''} class="shrink-0 min-h-[56px] px-3 py-1.5 rounded-xl border text-left ${cls}">
+                    <span class="block text-xs font-bold ${cur ? 'text-indigo-100' : ''}">Round ${i + 1} ${done ? '✓' : locked ? '🔒' : ''}</span>
+                    <span class="block text-sm font-semibold whitespace-nowrap">${escapeHtml(r.title)}</span></button>`;
+            }).join('');
+            const r = deck.rounds[deck.round], k = knownIn(r.words), need = roundNeed(r), nx = deck.rounds[deck.round + 1];
+            $('round-note').textContent = r.en ? `${r.en}: ` : '';
+            $('round-note').textContent += !nx ? `${k} of ${r.words.length} known. This is the last round.`
+                : roundDone(r) ? `${k} of ${r.words.length} known. Round ${deck.round + 2} is open.`
+                : `${k} of ${r.words.length} known. Know ${need} to open round ${deck.round + 2}.`;
+            const cur = $('round-list').querySelector('[aria-selected="true"]');
+            if (cur) cur.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+        }
+
+        // The round's story: a short text with every word of the round in it
+        const STORY_MARK = /\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/g;
+        function renderStory() {
+            const r = deck && deck.rounds && deck.rounds[deck.round];
+            const story = r && r.story;
+            $('learn-story').classList.toggle('hidden', !story);
+            if (!story) return;
+            const byKey = Object.fromEntries(deck.all.map(w => [w.key, w]));
+            $('story-title').textContent = `Story · Round ${deck.round + 1}: ${r.title}`;
+            const showEn = $('btn-story-en').getAttribute('aria-pressed') === 'true';
+            $('story-body').innerHTML = story.map(([fr, en], n) => {
+                let html = '', at = 0;
+                fr.replace(STORY_MARK, (m, text, key, pos) => {
+                    html += escapeHtml(fr.slice(at, pos));
+                    const w = byKey[key || text];
+                    html += w ? `<button type="button" data-story-word="${escapeHtml(w.key)}" data-line="${n}" class="font-bold underline decoration-2 underline-offset-4 ${genderClass(w)} hover:bg-amber-50 rounded">${escapeHtml(text)}</button>` : escapeHtml(text);
+                    at = pos + m.length;
+                    return m;
+                });
+                html += escapeHtml(fr.slice(at));
+                return `<p><span class="block">${html}</span>
+                    <span class="story-gloss hidden block text-sm font-semibold text-amber-800 bg-amber-50 rounded-lg px-2 py-1 mt-1" data-gloss="${n}"></span>
+                    <span class="story-en ${showEn ? '' : 'hidden'} block text-base text-slate-500">${escapeHtml(en)}</span></p>`;
+            }).join('');
+        }
+        const storyText = () => (deck.rounds[deck.round].story || []).map(([fr]) => fr.replace(STORY_MARK, (m, text) => text)).join(' ');
+
+        function renderEasy() {
+            const easy = (deck && deck.easy) || [];
+            $('learn-easy').classList.toggle('hidden', !easy.length);
+            if (!easy.length) return;
+            $('easy-title').textContent = `You already know these ${easy.length} word${easy.length === 1 ? '' : 's'}`;
+            $('easy-list').innerHTML = easy.map(w => `<button type="button" data-easy="${escapeHtml(w.key)}" class="inline-flex items-center gap-1.5 min-h-[40px] px-3 rounded-xl bg-slate-50 border border-slate-200 hover:border-emerald-400 text-left">
+                ${WordMemory.picture(w) ? `<span aria-hidden="true">${WordMemory.picture(w)}</span>` : ''}<span class="font-semibold ${genderClass(w)}">${escapeHtml(w.fr)}</span><span class="text-xs text-slate-500">${escapeHtml(w.en)}</span></button>`).join('');
+        }
+
+        // Back of the card: what a phrase is built from (✓ on the parts you know) and its word family
+        function partKnown(fr, en) {
+            const key = Rounds.keyOf(fr);
+            return statusOf({ key }) === 'known' || WordMemory.easy({ key, en });
+        }
+        function chips(list, tick) {
+            return list.map(([fr, en]) => {
+                const ok = tick && partKnown(fr, en);
+                return `<span class="inline-flex items-baseline gap-1 px-2.5 py-1 rounded-lg ${ok ? 'bg-emerald-50 text-emerald-900' : 'bg-slate-100 text-slate-800'}">${ok ? '<span aria-label="you know this">✓</span>' : ''}<b>${escapeHtml(fr)}</b><span class="text-slate-500">${escapeHtml(en)}</span></span>`;
+            }).join('');
+        }
+        function renderCardExtras(w) {
+            const parts = window.Rounds ? Rounds.parts(w.key) : [];
+            const fam = window.Rounds ? Rounds.family(w.key) : [];
+            $('card-parts').classList.toggle('hidden', !parts.length);
+            $('card-parts-list').innerHTML = chips(parts, true);
+            $('card-family').classList.toggle('hidden', !fam.length);
+            $('card-family-list').innerHTML = chips(fam, false);
+        }
+
         // ---------- Progress bar ----------
         function renderProgress() {
             const total = deck.words.length;
@@ -567,6 +737,7 @@
             $('deck-counts').title = total ? `Known: ${known} · Learning: ${learning} (${due} of them due for review now) · New: ${fresh}` : '';
             $('bar-known').style.width = total ? (known / total * 100) + '%' : '0%';
             $('bar-learning').style.width = total ? (learning / total * 100) + '%' : '0%';
+            renderRounds();
         }
 
         // ---------- Flashcards ----------
@@ -614,9 +785,18 @@
             $('card-word').className = 'text-3xl font-black break-words ' + genderClass(current);
             $('card-pos').textContent = current.pos || '';
             $('card-en').textContent = current.en;
+            // New words show their picture on the front, to learn word and picture together.
+            // Words you have graded keep it for the back, so you recall the meaning yourself.
             const pic = WordMemory.picture(current);
+            const picFront = !!pic && statusOf(current) === 'new';
+            $('card-front-pic').textContent = picFront ? pic : '';
+            $('card-front-pic').classList.toggle('hidden', !picFront);
             $('card-pic').textContent = pic;
-            $('card-pic').classList.toggle('hidden', !pic);
+            $('card-pic').classList.toggle('hidden', !pic || picFront);
+            $('card').classList.remove('border-t-[6px]', 'border-t-sky-500', 'border-t-rose-500');
+            if (current.gender === 'm') $('card').classList.add('border-t-[6px]', 'border-t-sky-500');
+            if (current.gender === 'f') $('card').classList.add('border-t-[6px]', 'border-t-rose-500');
+            renderCardExtras(current);
             $('card-pron').textContent = [current.pron && `Say: ${current.pron}`, current.ipa && `/${current.ipa}/`].filter(Boolean).join(' · ');
             $('card-note').textContent = [current.note, current.register].filter(Boolean).join(' · ');
             $('card-example').classList.toggle('hidden', !current.exFr);
@@ -965,6 +1145,8 @@
             grade(w, firstTime ? (p.box === 0 ? 'learning' : 'know') : 'dontknow');
             renderProgress();
         }
+        // The palace fills up round by round: it shows the words of every round you have opened
+        const palaceWords = () => deck.rounds ? deck.rounds.slice(0, lastOpenRound(deck) + 1).flatMap(r => r.words) : deck.words;
         function setStep(s, push) {
             const allowed = stepsFor(topic);
             if (!allowed.includes(s)) s = allowed[0];
@@ -992,7 +1174,7 @@
             $('topic-layout').classList.toggle('lg:grid', s !== 'palace');
             $('topic-side').classList.toggle('lg:block', s !== 'palace');
             if (s === 'palace' && toolFor(topic)) toolFor(topic).mount($('step-palace'), { say: (t) => speakFrench(t, 0.9) });
-            else if (s === 'palace') MemoryPalace.mount($('step-palace'), topic.n, deck.words, { say: (t) => speakFrench(t, 0.9), grade: palaceGrade });
+            else if (s === 'palace') MemoryPalace.mount($('step-palace'), topic.n, palaceWords(), { say: (t) => speakFrench(t, 0.9), grade: palaceGrade });
             if (s === 'practise') startCards();
             if (s === 'learn') renderList();
             $('scroller').scrollTop = 0;
@@ -1005,7 +1187,11 @@
             $('quiz-picture-btn').classList.toggle('hidden', !pictured);
             $('quiz-types').className = 'grid gap-2 ' + (pictured ? 'grid-cols-2 sm:grid-cols-4' : 'grid-cols-3');
             $('learn-words').classList.toggle('hidden', !deck.words.length);
-            $('learn-words-title').textContent = `Words in this ${topic && topic.freq ? 'set' : topic && topic.id === 'review' ? 'review' : 'topic'} (${deck.words.length})`;
+            $('learn-words-title').textContent = deck.rounds ? `Words in round ${deck.round + 1} (${deck.words.length})`
+                : `Words in this ${topic && topic.freq ? 'set' : topic && topic.id === 'review' ? 'review' : 'topic'} (${deck.words.length})`;
+            renderRounds();
+            renderStory();
+            renderEasy();
             $('topic-progress').classList.toggle('hidden', !deck.words.length);
             setStep(step, false);
         }
@@ -1236,7 +1422,38 @@
             $('learn-words').scrollIntoView({ behavior: 'smooth', block: 'start' });
         });
         // Watch: a hands-free slideshow of the words shown (search and filter apply)
-        $('btn-watch').addEventListener('click', () => WatchMode.open(shownWords(), { title: topic ? topic.title : 'Words' }));
+        $('btn-watch').addEventListener('click', () => {
+            const r = deck && deck.rounds && deck.rounds[deck.round];
+            const all = !$('list-search').value.trim() && $('list-filter').value === 'all';
+            WatchMode.open(shownWords(), {
+                title: topic ? topic.title + (r ? ` · Round ${deck.round + 1}` : '') : 'Words',
+                // the story plays after the words, when the whole round is shown
+                story: r && r.story && all ? r.story.map(([fr, en]) => [fr.replace(STORY_MARK, (m, text) => text), en]) : null
+            });
+        });
+        $('round-list').addEventListener('click', (e) => { const b = e.target.closest('[data-round]'); if (b) openRound(Number(b.dataset.round)); });
+        $('btn-story-listen').addEventListener('click', () => {
+            if ('speechSynthesis' in window && speechSynthesis.speaking) { speechSynthesis.cancel(); return; }
+            speakFrench(storyText(), 0.85);
+        });
+        $('btn-story-en').addEventListener('click', () => {
+            const on = $('btn-story-en').getAttribute('aria-pressed') !== 'true';
+            $('btn-story-en').setAttribute('aria-pressed', on);
+            $('btn-story-en').textContent = on ? 'Hide English' : 'Show English';
+            $('story-body').querySelectorAll('.story-en').forEach(el => el.classList.toggle('hidden', !on));
+        });
+        $('story-body').addEventListener('click', (e) => {
+            const b = e.target.closest('[data-story-word]'); if (!b) return;
+            const w = deck.all.find(x => x.key === b.dataset.storyWord); if (!w) return;
+            speakFrench(w.fr, 0.9);
+            const g = $('story-body').querySelector(`[data-gloss="${b.dataset.line}"]`);
+            g.textContent = `${WordMemory.picture(w) ? WordMemory.picture(w) + ' ' : ''}${w.fr} = ${w.en}`;
+            g.classList.remove('hidden');
+        });
+        $('easy-list').addEventListener('click', (e) => {
+            const b = e.target.closest('[data-easy]'); if (!b) return;
+            const w = (deck.easy || []).find(x => x.key === b.dataset.easy); if (w) speakFrench(w.fr, 0.9);
+        });
         $('btn-download-list').addEventListener('click', downloadList);
         document.querySelectorAll('.quiz-type').forEach(b => b.addEventListener('click', () => startQuiz(b.dataset.quiz)));
         document.addEventListener('keydown', (e) => {

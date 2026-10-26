@@ -1,7 +1,8 @@
 // watch.js - "Watch" mode in Vocab: a hands-free slideshow of the words, like a short video.
 // For each word: the picture and the French word (spoken twice), then the English (spoken too,
 // unless turned off), then the example sentence (spoken). Then the next word.
-//   WatchMode.open(words, { start, title })   words: [{ key, fr, en, gender, exFr, exEn }]
+//   WatchMode.open(words, { start, title, story })   words: [{ key, fr, en, gender, exFr, exEn }]
+//   story (optional): [[French, English], …], read sentence by sentence after the words
 (function () {
 const CSS = `
 .wm{position:fixed;inset:0;z-index:70;background:#0f172a;color:#f8fafc;display:flex;flex-direction:column;
@@ -20,6 +21,7 @@ const CSS = `
 .wm-ex i{display:block;font-style:italic}
 .wm-ex span{display:block;color:#94a3b8;font-size:.85em;margin-top:4px}
 .wm-hide{opacity:0}
+.wm-story{font-size:clamp(24px,4.6vw,40px);font-weight:800;line-height:1.25;max-width:44rem}
 .wm-ctl{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:8px}
 .wm-ctl button{font-weight:800;font-size:16px;border:1px solid #334155;background:#1e293b;color:#f8fafc;border-radius:14px;min-height:52px;min-width:56px;padding:0 16px;cursor:pointer}
 .wm-ctl .wm-play{background:#6366f1;border-color:#6366f1;min-width:120px}
@@ -115,6 +117,20 @@ function open(words, opts = {}) {
             show(w, 2);
             if (settings.examples && w.exFr) { await wait(300, run); if (!alive()) return; await speak(w.exFr, 'fr-FR', rate, run); if (!alive()) return; }
             await wait(settings.slow ? 1400 : 900, run); if (!alive()) return;
+        }
+        if (opts.story && opts.story.length) {
+            const rate = settings.slow ? 0.7 : 0.9;
+            for (let n = 0; n < opts.story.length; n++) {
+                const [fr, en] = opts.story[n];
+                q('.wm-pic').textContent = '📖';
+                const el2 = q('.wm-fr'); el2.textContent = fr; el2.className = 'wm-fr wm-story';
+                q('.wm-en').textContent = en; q('.wm-en').classList.add('wm-hide');
+                q('.wm-ex').innerHTML = ''; q('.wm-ex').classList.add('wm-hide');
+                q('.wm-count').textContent = `Story · ${n + 1} / ${opts.story.length}`;
+                await speak(fr, 'fr-FR', rate, run); if (!alive()) return;
+                q('.wm-en').classList.remove('wm-hide');
+                await wait(settings.slow ? 2600 : 1800, run); if (!alive()) return;
+            }
         }
         i = words.length - 1;
         playing = false; setPlayBtn();
