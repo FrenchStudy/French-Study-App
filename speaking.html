@@ -19,6 +19,7 @@
     <script src="js/conjugate.js"></script>
     <script src="js/cheatsheet-data.js"></script>
     <script src="js/scenes.js"></script>
+    <script src="js/task-angles.js"></script>
     <style>
         .fix-del { text-decoration: line-through; text-decoration-thickness: 2px; }
         @keyframes pulse-ring { 0% { box-shadow: 0 0 0 0 rgba(244,63,94,.45); } 100% { box-shadow: 0 0 0 14px rgba(244,63,94,0); } }
@@ -676,15 +677,34 @@ Give at most 4 corrections, only for real mistakes (an empty list if there are n
         function saveTask(t) { examTasks = [t, ...examTasks.filter(x => x.id !== t.id)].slice(0, 30); store.set('speak_tasks', examTasks); }
         async function generateTask(subject, kind, level) {
             const kindLabel = (KINDS.find(([k]) => k === kind) || [, kind])[1];
-            const recent = examTasks.filter(x => x.subject === subject).slice(0, 6).map(x => x.title);
-            const t = await askAI([
-                { role: 'system', content: `You write French speaking tasks in the style of the DELF and TCF oral exams, for CEFR level ${level}. Task types: "Talk about a topic" (a short monologue), "Role-play: get information" (the learner must ask questions to get what they need; describe who they talk to), "Give and defend your opinion" (a short statement or question to react to). Invent a new, concrete situation each time. Reply with JSON only:
-{"title": "short English title", "fr": "the task in French, at ${level} level, 2-4 sentences", "en": "the same task in English",
- "include": ["3 or 4 short English points to talk about"], "bank": [["useful French phrase", "English meaning"], ... 8 items suited to ${level}]}` },
-                { role: 'user', content: `Subject: ${subject}\nTask type: ${kindLabel}${recent.length ? '\nMake it different from: ' + recent.join('; ') : ''}` }
-            ], { json: true, temperature: 0.9, feature: 'speaking-task' });
+            const earlier = examTasks.filter(x => x.subject === subject).slice(0, 8);
+            const angle = pickTaskAngle(subject, level, earlier.map(x => x.angle).filter(Boolean));
+            const topic = angle ? `${subject}, and more precisely: ${angle}` : subject;
+            const messages = [
+                { role: 'system', content: `You write French speaking tasks in the style of the DELF and TCF oral exams, for CEFR level ${level}.
+The task must be clearly and specifically about the topic given, never a general question about the subject.
+- "Talk about a topic": ask the learner about their own experience of this exact topic, with 2 or 3 precise questions (when, where, who, what happened, how they felt).
+- "Role-play: get information": set a precise scene linked to the topic (where, who the learner talks to, what they need to find out or arrange).
+- "Give and defend your opinion": start from a concrete stimulus about the topic, such as a proposal, a decision, a news fact, a survey result or a quotation (for example: "Your town wants to make public transport free and pay for it with higher local taxes."). Then ask the learner to say whether they agree, to give arguments and examples, and to answer a likely objection.
+Never write vague instructions like "Give your opinion about X" or "Explain why you like or dislike it".
+Reply with JSON only:
+{"title": "short English title naming the precise topic", "fr": "the task in French, at ${level} level, 2-4 sentences", "en": "the same task in English",
+ "include": ["3 or 4 short English points to talk about, specific to this task"], "bank": [["useful French phrase", "English meaning"], ... 8 items suited to ${level} and this topic]}` },
+                { role: 'user', content: `Topic: ${topic}\nTask type: ${kindLabel}${earlier.length ? '\nMake it different from: ' + earlier.slice(0, 6).map(x => x.title).join('; ') : ''}` }
+            ];
+            // Both attempts share one session, so a retry does not cost the student a second free use
+            const session = 'speaking-task-' + Date.now().toString(36);
+            let t = await askAI(messages, { json: true, temperature: 0.9, feature: 'speaking-task', session });
+            if (t.fr && isGenericTask(t)) {
+                try {
+                    const again = await askAI([...messages, { role: 'assistant', content: JSON.stringify(t) },
+                        { role: 'user', content: 'This task is too vague. Rewrite it around a concrete situation or statement about the topic, as described. Same JSON format.' }],
+                        { json: true, temperature: 0.8, feature: 'speaking-task', session });
+                    if (again.fr) t = again;
+                } catch (e) { /* keep the first task */ }
+            }
             if (!t.fr) throw new Error('The AI reply could not be read. Please try again.');
-            const task = { id: 'sp-' + Date.now().toString(36), source: 'ai', level, subject, kind, kindLabel, title: String(t.title || subject), fr: String(t.fr), en: String(t.en || ''), ...cleanLists(t) };
+            const task = { id: 'sp-' + Date.now().toString(36), source: 'ai', level, subject, angle, kind, kindLabel, title: String(t.title || subject), fr: String(t.fr), en: String(t.en || ''), ...cleanLists(t) };
             saveTask(task);
             return task;
         }
