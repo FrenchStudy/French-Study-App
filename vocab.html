@@ -18,7 +18,7 @@
     <script src="js/ai.js"></script>
     <script src="js/cheatsheet-data.js"></script>
     <script src="js/word-memory.js"></script>
-    <script src="js/rounds-data.js"></script>
+    <script src="js/chapters-data.js"></script>
     <script src="js/palaces-data.js"></script>
     <script src="js/palaces-data-2.js"></script>
     <script src="js/memory-palace.js"></script>
@@ -47,6 +47,14 @@
                     <input id="topic-search" type="search" placeholder="Search topics, e.g. famille" class="md:ml-auto w-full md:w-72 text-base md:text-sm px-3 py-2.5 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
                 </div>
                 <div id="topic-banner"></div>
+                <!-- The word lists of many topics at once, for Excel or Google Sheets -->
+                <div class="flex flex-wrap items-center gap-2 bg-white border border-slate-200 rounded-2xl p-3">
+                    <span class="text-sm font-bold text-slate-700 px-1">📄 Word lists</span>
+                    <select id="bulk-scope" aria-label="Which words to get" class="flex-1 min-w-[12rem] text-base sm:text-sm px-3 py-2.5 bg-white border border-slate-200 rounded-xl"></select>
+                    <button id="bulk-download" type="button" class="min-h-[44px] px-4 bg-slate-900 hover:bg-slate-700 text-white font-bold rounded-xl text-sm">⬇️ Download (.csv)</button>
+                    <button id="bulk-copy" type="button" class="min-h-[44px] px-4 bg-white border border-slate-200 hover:border-indigo-400 font-semibold rounded-xl text-sm">📋 Copy</button>
+                    <p id="bulk-status" class="w-full text-sm text-emerald-700 px-1 empty:hidden" role="status" aria-live="polite"></p>
+                </div>
                 <div id="topic-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
             </div>
 
@@ -54,9 +62,13 @@
             <div id="topic-view" class="hidden space-y-4">
                 <div class="flex items-center justify-between gap-2">
                     <button id="topic-back" type="button" class="min-h-[44px] px-1 text-sm font-semibold text-slate-600 hover:text-indigo-600">← All topics</button>
-                    <div id="topic-nav-top" class="flex items-center gap-1"></div>
+                    <!-- Prev / Topic 3 of 7 ▾ / Next: the button opens this level's topics as a drop-down -->
+                    <div class="relative">
+                        <div id="topic-nav-top" class="flex items-center gap-1"></div>
+                        <div id="topic-side" hidden class="absolute right-0 top-full mt-2 z-40 w-80 max-w-[calc(100vw-2rem)] shadow-xl rounded-2xl"></div>
+                    </div>
                 </div>
-                <div id="topic-layout" class="lg:grid lg:grid-cols-[minmax(0,1fr)_20rem] lg:gap-8">
+                <div id="topic-layout">
                 <div class="space-y-4 min-w-0">
                 <div class="flex flex-col md:flex-row md:items-end gap-3 md:gap-8">
                     <div class="min-w-0 flex-1">
@@ -78,17 +90,12 @@
                     </div>
                 </div>
 
-                <!-- Rounds: a long topic in steps of about 10 words -->
-                <div id="round-bar" class="hidden space-y-2">
-                    <div id="round-list" class="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1" role="tablist" aria-label="Rounds"></div>
-                    <p id="round-note" class="text-sm text-slate-500" role="status" aria-live="polite"></p>
-                </div>
-
                 <nav id="step-tabs" class="flex gap-1 sm:gap-6 text-sm font-semibold overflow-x-auto overflow-y-hidden shadow-[inset_0_-1px_0_#e2e8f0]" role="tablist" aria-label="Steps">
                     <button data-step="learn" role="tab" class="step-tab shrink-0 min-h-[44px] px-2 sm:px-0 border-b-2"><span class="step-num">1</span> Learn</button>
                     <button data-step="palace" role="tab" class="step-tab shrink-0 min-h-[44px] px-2 sm:px-0 border-b-2 hidden"><span class="step-num">2</span> <span class="step-name">Memory palace</span></button>
                     <button data-step="practise" role="tab" class="step-tab shrink-0 min-h-[44px] px-2 sm:px-0 border-b-2"><span class="step-num">2</span> Practise</button>
                     <button data-step="test" role="tab" class="step-tab shrink-0 min-h-[44px] px-2 sm:px-0 border-b-2"><span class="step-num">3</span> Test</button>
+                    <button data-step="list" role="tab" class="step-tab shrink-0 min-h-[44px] px-2 sm:px-0 border-b-2"><span class="step-num">4</span> List</button>
                 </nav>
 
                 <div id="loading" class="hidden text-sm text-indigo-600 animate-pulse">Loading words…</div>
@@ -103,41 +110,15 @@
                         </div>
                         <div id="learn-lesson-body" class="lk-root text-base"></div>
                     </div>
-                    <div id="learn-story" class="hidden bg-white border border-slate-200 rounded-2xl p-4 sm:p-5 space-y-3">
-                        <div class="flex flex-wrap items-center justify-between gap-2">
-                            <div class="min-w-0">
-                                <h2 id="story-title" class="text-sm font-bold uppercase tracking-wide text-emerald-700"></h2>
-                                <p class="text-sm text-slate-500">Tap a coloured word to hear it and see what it means.</p>
-                            </div>
-                            <div class="flex gap-2">
-                                <button id="btn-story-listen" type="button" class="min-h-[44px] px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-sm">🔊 Listen</button>
-                                <button id="btn-story-en" type="button" aria-pressed="false" class="min-h-[44px] px-4 bg-white border border-slate-200 hover:border-emerald-400 font-semibold rounded-xl text-sm">Show English</button>
-                            </div>
-                        </div>
-                        <div id="story-body" class="space-y-3 text-lg leading-relaxed text-slate-800"></div>
-                    </div>
-                    <div id="learn-words" class="space-y-3">
+                    <div id="learn-words" class="space-y-4">
                         <div class="flex flex-wrap items-center justify-between gap-2">
                             <h2 id="learn-words-title" class="text-sm font-bold uppercase tracking-wide text-slate-500">Words</h2>
                             <button id="btn-watch" type="button" class="min-h-[44px] px-4 bg-slate-900 hover:bg-slate-700 text-white font-bold rounded-xl text-sm">▶ Watch hands-free</button>
                         </div>
-                        <p class="text-sm text-slate-500">Tap a picture to hear the word. Tick the ones you already know: they skip the flashcards.</p>
-                <div class="flex flex-wrap sm:flex-nowrap gap-2">
-                    <select id="list-scope" aria-label="Which words" class="hidden flex-1 sm:flex-none min-w-0 text-base px-3 py-3 bg-white border border-slate-200 rounded-xl font-semibold"></select>
-                    <input id="list-search" type="search" placeholder="Search these words (French or English)" class="w-full sm:w-auto sm:flex-1 min-w-0 text-base px-3 py-3 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                    <select id="list-filter" class="flex-1 sm:flex-none min-w-0 text-base px-3 py-3 bg-white border border-slate-200 rounded-xl">
-                        <option value="all">All words</option>
-                        <option value="notknown">Words I don't know yet</option>
-                        <option value="known">Words I know</option>
-                        <option value="learning">Learning</option>
-                        <option value="review">To review now</option>
-                        <option value="new">New</option>
-                    </select>
-                    <button id="btn-copy-list" type="button" title="Copy list (paste into Excel)" aria-label="Copy list (paste into Excel)" class="shrink-0 w-[50px] min-h-[50px] text-xl bg-white border border-slate-200 hover:border-indigo-400 rounded-xl">📋</button>
-                    <button id="btn-download-list" type="button" title="Download for Excel (.csv)" aria-label="Download for Excel (.csv)" class="shrink-0 w-[50px] min-h-[50px] text-xl bg-white border border-slate-200 hover:border-indigo-400 rounded-xl">⬇️</button>
-                </div>
-                <p id="copy-status" class="text-sm text-emerald-700 empty:hidden" role="status" aria-live="polite"></p>
-                <div id="word-list" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5"></div>
+                        <p id="learn-hint" class="text-sm text-slate-500">Tap a picture to hear the word. Tick “Know” for the words you already know: they skip the flashcards.</p>
+                        <!-- Contents: jump to a chapter -->
+                        <nav id="chapter-nav" class="hidden flex gap-2 overflow-x-auto pb-1 -mx-1 px-1" aria-label="Chapters"></nav>
+                        <div id="learn-body" class="space-y-8"></div>
                     </div>
                     <details id="learn-easy" class="hidden group bg-white border border-slate-200 rounded-2xl">
                         <summary class="min-h-[52px] px-4 py-3 flex items-center gap-3 cursor-pointer list-none">
@@ -148,6 +129,26 @@
                         </summary>
                         <div id="easy-list" class="flex flex-wrap gap-2 px-4 pb-4"></div>
                     </details>
+                </section>
+
+                <!-- STEP 5: WORD LIST (every word of the topic, to search, copy or download) -->
+                <section id="step-list" class="hidden space-y-3">
+                    <h2 id="list-title" class="text-sm font-bold uppercase tracking-wide text-slate-500">Word list</h2>
+                    <div class="flex flex-wrap sm:flex-nowrap gap-2">
+                        <input id="list-search" type="search" placeholder="Search these words (French or English)" class="w-full sm:w-auto sm:flex-1 min-w-0 text-base px-3 py-3 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <select id="list-filter" class="flex-1 sm:flex-none min-w-0 text-base px-3 py-3 bg-white border border-slate-200 rounded-xl">
+                            <option value="all">All words</option>
+                            <option value="notknown">Words I don't know yet</option>
+                            <option value="known">Words I know</option>
+                            <option value="learning">Learning</option>
+                            <option value="review">To review now</option>
+                            <option value="new">New</option>
+                        </select>
+                        <button id="btn-copy-list" type="button" title="Copy list (paste into Excel)" aria-label="Copy list (paste into Excel)" class="shrink-0 w-[50px] min-h-[50px] text-xl bg-white border border-slate-200 hover:border-indigo-400 rounded-xl">📋</button>
+                        <button id="btn-download-list" type="button" title="Download for Excel (.csv)" aria-label="Download for Excel (.csv)" class="shrink-0 w-[50px] min-h-[50px] text-xl bg-white border border-slate-200 hover:border-indigo-400 rounded-xl">⬇️</button>
+                    </div>
+                    <p id="copy-status" class="text-sm text-emerald-700 empty:hidden" role="status" aria-live="polite"></p>
+                    <div id="word-list" class="bg-white border border-slate-200 rounded-2xl divide-y divide-slate-100"></div>
                 </section>
 
                 <!-- STEP 2: PRACTISE -->
@@ -248,7 +249,6 @@
                 <div id="topic-nav" class="grid grid-cols-2 gap-2 pt-2 border-t border-slate-200"></div>
                 </div>
                 <!-- The other topics of this level, as in Grammar (wide screens) -->
-                <aside id="topic-side" class="hidden lg:block lg:sticky lg:top-4 lg:self-start"></aside>
                 </div>
             </div>
         </div>
@@ -483,7 +483,7 @@
             return { done: s.known >= s.total, started: s.known > 0, known: s.known, total: s.total };
         }
         function saveTopicStats() {
-            const all = deck && (deck.all || deck.words);
+            const all = deck && deck.words;
             if (!topic || !(topic.n || topic.freq) || !all || !all.length) return;
             topicStats[topic.id] = { known: all.filter(w => statusOf(w) === 'known').length, total: all.length };
             store.set('vocab_topic_stats', topicStats);
@@ -601,106 +601,116 @@
             }
         }
 
-        // ---------- Same-as-English words and rounds ----------
+        // ---------- Same-as-English words and chapters ----------
         // Words that look the same as in English leave the flashcards (deck.easy, shown in a strip).
-        // A topic with rounds (js/rounds-data.js) is studied about 10 words at a time: deck.words is
-        // the open round, deck.all the whole topic. A round opens when you know 8 of the previous round's 10.
-        const ROUND_SIZE = 10, ROUND_PASS = 0.8;
+        // A topic with chapters (js/chapters-data.js) shows them one after the other on the Learn page,
+        // each with its story; Practise, Test, the palace and the list still cover the whole topic,
+        // and new words come in chapter order. Nothing is locked.
+        const CHAPTER_SIZE = 10, CHAPTER_DONE = 0.8;
         function splitDeck(d) {
             d.easy = d.words.filter(w => WordMemory.easy(w));
-            d.all = d.words.filter(w => !WordMemory.easy(w));
-            d.words = d.all;
-            const plan = d.themeId && window.Rounds ? Rounds.for(d.themeId) : null;
+            d.words = d.words.filter(w => !WordMemory.easy(w));
+            const plan = d.themeId && window.Chapters ? Chapters.for(d.themeId) : null;
             if (!plan) return;
-            const byKey = new Map(d.all.map(w => [w.key, w]));
+            const byKey = new Map(d.words.map(w => [w.key, w]));
             const used = new Set();
-            d.rounds = plan.map(r => ({
-                title: r.title, en: r.en, story: r.story,
-                words: r.keys.map(k => byKey.get(k)).filter(w => w && !used.has(w.key) && used.add(w.key))
-            })).filter(r => r.words.length);
-            const rest = d.all.filter(w => !used.has(w.key));
-            for (let i = 0; i < rest.length; i += ROUND_SIZE) d.rounds.push({ title: 'More words', en: '', story: null, words: rest.slice(i, i + ROUND_SIZE) });
-            if (d.rounds.length < 2) { delete d.rounds; return; }
-            d.all = d.rounds.flatMap(r => r.words);
-            d.round = pickRound(d);
-            d.words = d.rounds[d.round].words;
+            d.chapters = plan.map(c => ({
+                title: c.title, en: c.en, story: c.story,
+                words: c.keys.map(k => byKey.get(k)).filter(w => w && !used.has(w.key) && used.add(w.key))
+            })).filter(c => c.words.length);
+            const rest = d.words.filter(w => !used.has(w.key));
+            for (let i = 0; i < rest.length; i += CHAPTER_SIZE) d.chapters.push({ title: 'More words', en: '', story: null, words: rest.slice(i, i + CHAPTER_SIZE) });
+            if (d.chapters.length < 2) { delete d.chapters; return; }
+            d.words = d.chapters.flatMap(c => c.words);   // chapter order: new words come in this order
         }
         const knownIn = (words) => words.filter(w => statusOf(w) === 'known').length;
-        const roundNeed = (r) => Math.ceil(r.words.length * ROUND_PASS);
-        const roundDone = (r) => knownIn(r.words) >= roundNeed(r);
-        // the last round you may open: the first one not done yet
-        function lastOpenRound(d) {
-            const i = d.rounds.findIndex(r => !roundDone(r));
-            return i < 0 ? d.rounds.length - 1 : i;
-        }
-        function pickRound(d) {
-            const saved = store.get('vocab_round', {})[d.id];
-            const last = lastOpenRound(d);
-            return Number.isInteger(saved) && saved >= 0 && saved <= last ? saved : last;
-        }
-        function openRound(i) {
-            if (!deck || !deck.rounds || !deck.rounds[i]) return;
-            if (i > lastOpenRound(deck)) {
-                const prev = deck.rounds[lastOpenRound(deck)];
-                $('round-note').textContent = `Round ${i + 1} opens when you know ${roundNeed(prev)} of the ${prev.words.length} words in round ${lastOpenRound(deck) + 1}.`;
-                return;
-            }
-            deck.round = i;
-            deck.words = deck.rounds[i].words;
-            const saved = store.get('vocab_round', {}); saved[deck.id] = i; store.set('vocab_round', saved);
-            reviewAll = false;
-            $('list-search').value = ''; $('list-filter').value = 'all';
-            renderAll();
-        }
-        function renderRounds() {
-            const on = !!(deck && deck.rounds);
-            $('round-bar').classList.toggle('hidden', !on);
-            if (!on) { $('progress-label').textContent = 'Your progress'; return; }
-            const last = lastOpenRound(deck);
-            $('progress-label').textContent = `Round ${deck.round + 1} of ${deck.rounds.length}`;
-            $('round-list').innerHTML = deck.rounds.map((r, i) => {
-                const done = roundDone(r), locked = i > last, cur = i === deck.round;
-                const cls = cur ? 'bg-indigo-600 border-indigo-600 text-white' : done ? 'bg-emerald-50 border-emerald-200 text-emerald-900 hover:border-emerald-400'
-                    : locked ? 'bg-slate-50 border-slate-200 text-slate-400' : 'bg-white border-slate-200 text-slate-800 hover:border-indigo-400';
-                return `<button type="button" role="tab" data-round="${i}" aria-selected="${cur}" ${locked ? 'aria-disabled="true"' : ''} class="shrink-0 min-h-[56px] px-3 py-1.5 rounded-xl border text-left ${cls}">
-                    <span class="block text-xs font-bold ${cur ? 'text-indigo-100' : ''}">Round ${i + 1} ${done ? '✓' : locked ? '🔒' : ''}</span>
-                    <span class="block text-sm font-semibold whitespace-nowrap">${escapeHtml(r.title)}</span></button>`;
-            }).join('');
-            const r = deck.rounds[deck.round], k = knownIn(r.words), need = roundNeed(r), nx = deck.rounds[deck.round + 1];
-            $('round-note').textContent = r.en ? `${r.en}: ` : '';
-            $('round-note').textContent += !nx ? `${k} of ${r.words.length} known. This is the last round.`
-                : roundDone(r) ? `${k} of ${r.words.length} known. Round ${deck.round + 2} is open.`
-                : `${k} of ${r.words.length} known. Know ${need} to open round ${deck.round + 2}.`;
-            const cur = $('round-list').querySelector('[aria-selected="true"]');
-            if (cur) cur.scrollIntoView({ block: 'nearest', inline: 'nearest' });
-        }
+        const chapterDone = (c) => knownIn(c.words) >= Math.ceil(c.words.length * CHAPTER_DONE);
+        const chapterOf = (w) => deck && deck.chapters ? deck.chapters.findIndex(c => c.words.includes(w)) : -1;
 
-        // The round's story: a short text with every word of the round in it
+        // A word as a picture tile: tap to hear it, tick "Know" to skip it in the flashcards
+        function tileHtml(w, easy) {
+            const st = statusOf(w);
+            const [label, cls] = easy ? ['Same as English', 'bg-emerald-50 text-emerald-800'] : STATUS_STYLE[st];
+            const pic = WordMemory.picture(w);
+            const edge = w.gender === 'm' ? 'border-b-sky-500' : w.gender === 'f' ? 'border-b-rose-500' : 'border-b-slate-300';
+            return `<div class="flex flex-col bg-white border border-slate-200 border-b-4 ${edge} rounded-2xl overflow-hidden">
+                <button type="button" data-say="${escapeHtml(w.key)}" aria-label="Listen: ${escapeHtml(w.fr)}" class="flex-1 flex flex-col items-center text-center gap-1 px-2 pt-3 pb-2 hover:bg-emerald-50/60">
+                    <span class="${pic ? 'text-4xl' : 'text-2xl opacity-60'} leading-tight" aria-hidden="true">${pic || '🔊'}</span>
+                    <span class="text-base font-bold leading-snug break-words ${genderClass(w)}">${escapeHtml(w.fr)}</span>
+                    <span class="text-xs text-slate-500 break-words">${escapeHtml(w.en)}</span>
+                </button>
+                <div class="flex items-center justify-between gap-1 px-2 pb-2">
+                    <span class="text-[11px] font-bold px-1.5 py-0.5 rounded-full ${cls}" title="${escapeHtml(whenDue(w))}">${label}</span>
+                    ${easy ? '' : `<label class="flex items-center gap-1 text-xs text-slate-600 min-h-[36px] cursor-pointer" title="I know it">
+                        <input type="checkbox" data-known="${escapeHtml(w.key)}" class="w-4 h-4 accent-emerald-600" ${st === 'known' ? 'checked' : ''}> Know</label>`}
+                </div>
+            </div>`;
+        }
+        const TILE_GRID = 'grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5';
+
+        // A chapter's story: [[text]] or [[text|key]] marks a word of the chapter
         const STORY_MARK = /\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/g;
-        function renderStory() {
-            const r = deck && deck.rounds && deck.rounds[deck.round];
-            const story = r && r.story;
-            $('learn-story').classList.toggle('hidden', !story);
-            if (!story) return;
-            const byKey = Object.fromEntries(deck.all.map(w => [w.key, w]));
-            $('story-title').textContent = `Story · Round ${deck.round + 1}: ${r.title}`;
-            const showEn = $('btn-story-en').getAttribute('aria-pressed') === 'true';
-            $('story-body').innerHTML = story.map(([fr, en], n) => {
+        const storyPlain = (fr) => fr.replace(STORY_MARK, (m, text) => text);
+        function storyHtml(story, ci, byKey) {
+            return story.map(([fr, en], n) => {
                 let html = '', at = 0;
                 fr.replace(STORY_MARK, (m, text, key, pos) => {
                     html += escapeHtml(fr.slice(at, pos));
                     const w = byKey[key || text];
-                    html += w ? `<button type="button" data-story-word="${escapeHtml(w.key)}" data-line="${n}" class="font-bold underline decoration-2 underline-offset-4 ${genderClass(w)} hover:bg-amber-50 rounded">${escapeHtml(text)}</button>` : escapeHtml(text);
+                    html += w ? `<button type="button" data-story-word="${escapeHtml(w.key)}" data-line="${ci}-${n}" class="font-bold underline decoration-2 underline-offset-4 ${genderClass(w)} hover:bg-amber-50 rounded">${escapeHtml(text)}</button>` : escapeHtml(text);
                     at = pos + m.length;
                     return m;
                 });
                 html += escapeHtml(fr.slice(at));
                 return `<p><span class="block">${html}</span>
-                    <span class="story-gloss hidden block text-sm font-semibold text-amber-800 bg-amber-50 rounded-lg px-2 py-1 mt-1" data-gloss="${n}"></span>
-                    <span class="story-en ${showEn ? '' : 'hidden'} block text-base text-slate-500">${escapeHtml(en)}</span></p>`;
+                    <span class="hidden block text-sm font-semibold text-amber-800 bg-amber-50 rounded-lg px-2 py-1 mt-1" data-gloss="${ci}-${n}"></span>
+                    <span class="story-en hidden block text-base text-slate-500">${escapeHtml(en)}</span></p>`;
             }).join('');
         }
-        const storyText = () => (deck.rounds[deck.round].story || []).map(([fr]) => fr.replace(STORY_MARK, (m, text) => text)).join(' ');
+
+        // ---------- Learn: every chapter (story + words), or the words as tiles ----------
+        function renderLearn() {
+            const chapters = deck.chapters;
+            $('learn-words').classList.toggle('hidden', !deck.words.length);
+            $('chapter-nav').classList.toggle('hidden', !chapters);
+            if (!chapters) {
+                $('learn-words-title').textContent = `Words in this ${topic && topic.freq ? 'set' : 'topic'} (${deck.words.length})`;
+                $('learn-body').innerHTML = `<div class="${TILE_GRID}">${deck.words.map(w => tileHtml(w, false)).join('')}</div>`;
+                renderEasy();
+                return;
+            }
+            $('learn-words-title').textContent = `${chapters.length} chapters · ${deck.words.length} words`;
+            $('chapter-nav').innerHTML = chapters.map((c, i) => {
+                const done = chapterDone(c);
+                return `<a href="#chapter-${i + 1}" data-chapter-jump="${i}" class="shrink-0 min-h-[52px] px-3 py-1.5 rounded-xl border text-left ${done ? 'bg-emerald-50 border-emerald-200 text-emerald-900' : 'bg-white border-slate-200 text-slate-800'} hover:border-indigo-400">
+                    <span class="block text-xs font-bold ${done ? 'text-emerald-700' : 'text-slate-500'}">Chapter ${i + 1} ${done ? '✓' : `· ${knownIn(c.words)}/${c.words.length}`}</span>
+                    <span class="block text-sm font-semibold whitespace-nowrap">${escapeHtml(c.title)}</span></a>`;
+            }).join('');
+            const byKey = Object.fromEntries(deck.words.map(w => [w.key, w]));
+            $('learn-body').innerHTML = chapters.map((c, i) => `
+                <section id="chapter-${i + 1}" class="space-y-3 scroll-mt-4" aria-labelledby="chapter-title-${i + 1}">
+                    <div class="flex flex-wrap items-end justify-between gap-2">
+                        <div class="min-w-0">
+                            <div class="text-xs font-bold uppercase tracking-wider text-emerald-700">Chapter ${i + 1}${c.en ? ` · ${escapeHtml(c.en)}` : ''}</div>
+                            <h3 id="chapter-title-${i + 1}" class="text-xl font-black text-slate-900">${escapeHtml(c.title)}</h3>
+                        </div>
+                        <span class="text-sm text-slate-500">${knownIn(c.words)} of ${c.words.length} known${chapterDone(c) ? ' ✓' : ''}</span>
+                    </div>
+                    ${c.story ? `<div class="vc-stage border border-emerald-100 rounded-2xl p-4 sm:p-5 space-y-3">
+                        <div class="flex flex-wrap items-center justify-between gap-2">
+                            <p class="text-sm text-slate-600">📖 Story · tap a coloured word to hear it and see what it means.</p>
+                            <div class="flex flex-wrap gap-2">
+                                <button type="button" data-story-listen="${i}" class="min-h-[40px] px-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-sm">🔊 Listen</button>
+                                <button type="button" data-story-en="${i}" aria-pressed="false" class="min-h-[40px] px-3 bg-white border border-slate-200 hover:border-emerald-400 font-semibold rounded-xl text-sm">Show English</button>
+                                <button type="button" data-chapter-watch="${i}" class="min-h-[40px] px-3 bg-slate-900 hover:bg-slate-700 text-white font-bold rounded-xl text-sm">▶ Watch</button>
+                            </div>
+                        </div>
+                        <div data-story="${i}" class="space-y-3 text-lg leading-relaxed text-slate-800">${storyHtml(c.story, i, byKey)}</div>
+                    </div>` : ''}
+                    <div class="${TILE_GRID}">${c.words.map(w => tileHtml(w, false)).join('')}</div>
+                </section>`).join('');
+            renderEasy();
+        }
 
         function renderEasy() {
             const easy = (deck && deck.easy) || [];
@@ -713,7 +723,7 @@
 
         // Back of the card: what a phrase is built from (✓ on the parts you know) and its word family
         function partKnown(fr, en) {
-            const key = Rounds.keyOf(fr);
+            const key = Chapters.keyOf(fr);
             return statusOf({ key }) === 'known' || WordMemory.easy({ key, en });
         }
         function chips(list, tick) {
@@ -723,8 +733,8 @@
             }).join('');
         }
         function renderCardExtras(w) {
-            const parts = window.Rounds ? Rounds.parts(w.key) : [];
-            const fam = window.Rounds ? Rounds.family(w.key) : [];
+            const parts = window.Chapters ? Chapters.parts(w.key) : [];
+            const fam = window.Chapters ? Chapters.family(w.key) : [];
             $('card-parts').classList.toggle('hidden', !parts.length);
             $('card-parts-list').innerHTML = chips(parts, true);
             $('card-family').classList.toggle('hidden', !fam.length);
@@ -746,7 +756,6 @@
             $('deck-counts').title = total ? `Known: ${known} · Learning: ${learning} (${due} of them due for review now) · New: ${fresh}` : '';
             $('bar-known').style.width = total ? (known / total * 100) + '%' : '0%';
             $('bar-learning').style.width = total ? (learning / total * 100) + '%' : '0%';
-            renderRounds();
         }
 
         // ---------- Flashcards ----------
@@ -796,8 +805,8 @@
             $('card-pos').textContent = gl[0];
             $('card-pos').className = 'text-xs font-bold px-2.5 py-1 rounded-full ' + gl[1];
             $('card-pos').classList.toggle('hidden', !gl[0]);
-            const rd = deck.rounds && deck.rounds.find(r => r.words.includes(current));
-            $('card-tag').textContent = rd ? `Round ${deck.rounds.indexOf(rd) + 1} · ${rd.title}` : (topic ? topic.title : '');
+            const ci = chapterOf(current);
+            $('card-tag').textContent = ci >= 0 ? `Chapter ${ci + 1} · ${deck.chapters[ci].title}` : (topic ? topic.title : '');
             $('card-en').textContent = current.en;
             // New words show their picture on the front, to learn word and picture together.
             // Words you have graded keep it for the back, so you recall the meaning yourself.
@@ -924,26 +933,14 @@
         function plain(s) { return String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, ''); }
 
         // The words shown in the list (search and filter applied)
-        // "This round" (or the words to learn) or the whole topic, with the same-as-English words
-        const wholeTopic = () => !$('list-scope').classList.contains('hidden') && $('list-scope').value === 'all';
-        function listBase() {
-            return wholeTopic() ? (deck.all || deck.words).concat(deck.easy || []) : deck.words;
-        }
+        // The list step: every word of the topic, then the same-as-English words
+        const listBase = () => deck.words.concat(deck.easy || []);
         function groupOf(w) {
             if ((deck.easy || []).includes(w)) return 'Same as in English';
-            const i = deck.rounds ? deck.rounds.findIndex(r => r.words.includes(w)) : -1;
-            return i >= 0 ? `Round ${i + 1} · ${deck.rounds[i].title}` : '';
+            const i = chapterOf(w);
+            return i >= 0 ? `Chapter ${i + 1} · ${deck.chapters[i].title}` : '';
         }
-        function renderScope() {
-            const easyN = (deck.easy || []).length, allN = (deck.all || deck.words).length + easyN;
-            const on = !!deck.rounds || easyN > 0;
-            const keep = $('list-scope').value;
-            $('list-scope').classList.toggle('hidden', !on);
-            if (!on) return;
-            $('list-scope').innerHTML = `<option value="round">${deck.rounds ? `Round ${deck.round + 1} (${deck.words.length} words)` : `Words to learn (${deck.words.length})`}</option>
-                <option value="all">${deck.rounds ? 'Whole topic' : 'All words'} (${allN} words)</option>`;
-            $('list-scope').value = keep === 'all' ? 'all' : 'round';
-        }
+        const grouped = () => !!(deck.chapters || (deck.easy && deck.easy.length));
         function shownWords() {
             const q = plain($('list-search').value.trim());
             const filter = $('list-filter').value;
@@ -960,25 +957,23 @@
         // ---------- Copy / download the list (Article | French | English) ----------
         const ARTICLE_COL = /^(le\/la |le |la |les |l['’]|un |une )/i;
         function exportRows() {
-            const grouped = wholeTopic();
+            const g = grouped();
             return shownWords().map(w => {
                 const fr = String(w.fr || '').trim();
                 const m = /[.?!…]$/.test(fr) ? null : fr.match(ARTICLE_COL);   // sentences keep their first word
                 const row = m ? [m[1].trim(), fr.slice(m[1].length).trim(), w.en || ''] : ['', fr, w.en || ''];
-                return grouped ? row.concat(groupOf(w)) : row;
+                return g ? row.concat(groupOf(w)) : row;
             });
         }
-        const exportHead = () => wholeTopic() ? ['Article', 'French', 'English', deck.rounds ? 'Round' : 'Group'] : ['Article', 'French', 'English'];
+        const exportHead = () => grouped() ? ['Article', 'French', 'English', deck.chapters ? 'Chapter' : 'Group'] : ['Article', 'French', 'English'];
         function listStatus(text) {
             $('copy-status').textContent = text;
             clearTimeout(listStatus.t);
             listStatus.t = setTimeout(() => { $('copy-status').textContent = ''; }, 4000);
         }
-        async function copyList() {
-            const rows = exportRows();
-            if (!rows.length) { listStatus('No words to copy.'); return; }
+        async function copyRows(head, rows) {
             const clean = (v) => String(v).replace(/[\t\r\n]+/g, ' ');
-            const text = [exportHead(), ...rows].map(r => r.map(clean).join('\t')).join('\r\n') + '\r\n';
+            const text = [head, ...rows].map(r => r.map(clean).join('\t')).join('\r\n') + '\r\n';
             let ok = false;
             try { await navigator.clipboard.writeText(text); ok = true; } catch (e) { /* older browsers: fall back below */ }
             if (!ok) {
@@ -988,30 +983,130 @@
                 try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
                 ta.remove();
             }
-            listStatus(ok ? `Copied ${rows.length} word${rows.length === 1 ? '' : 's'}. Paste into Excel or Google Sheets.` : 'Could not copy. Try Download instead.');
+            return ok;
         }
-        function downloadList() {
-            const rows = exportRows();
-            if (!rows.length) { listStatus('No words to download.'); return; }
+        function saveCsv(head, rows, title) {
             const cell = (v) => /[",\r\n]/.test(String(v)) ? '"' + String(v).replace(/"/g, '""') + '"' : String(v);
-            const csv = '\uFEFF' + [exportHead(), ...rows].map(r => r.map(cell).join(',')).join('\r\n') + '\r\n';   // BOM: Excel shows accents
-            const name = (plain(topic ? topic.title : 'vocab').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'vocab') + '.csv';
+            const csv = '\uFEFF' + [head, ...rows].map(r => r.map(cell).join(',')).join('\r\n') + '\r\n';   // BOM: Excel shows accents
+            const name = (plain(title || 'vocab').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'vocab') + '.csv';
             const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
             const a = document.createElement('a');
             a.href = url; a.download = name;
             document.body.appendChild(a); a.click(); a.remove();
             setTimeout(() => URL.revokeObjectURL(url), 1000);
+            return name;
+        }
+        async function copyList() {
+            const rows = exportRows();
+            if (!rows.length) { listStatus('No words to copy.'); return; }
+            const ok = await copyRows(exportHead(), rows);
+            listStatus(ok ? `Copied ${rows.length} word${rows.length === 1 ? '' : 's'}. Paste into Excel or Google Sheets.` : 'Could not copy. Try Download instead.');
+        }
+        function downloadList() {
+            const rows = exportRows();
+            if (!rows.length) { listStatus('No words to download.'); return; }
+            const name = saveCsv(exportHead(), rows, topic ? topic.title : 'vocab');
             listStatus(`Downloaded ${rows.length} word${rows.length === 1 ? '' : 's'} (${name}).`);
+        }
+
+        // ---------- Word lists of many topics at once (topics page) ----------
+        // One level's topics, every topic from A1 to C2, or the 5,000 most common words, in one file:
+        // Level | Topic | Chapter | Article | French | English | Example | Example (English)
+        const BULK_HEAD = ['Level', 'Topic', 'Chapter', 'Article', 'French', 'English', 'Example', 'Example (English)'];
+        function renderBulkScope() {
+            const ORDER = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
+            const levels = [...new Set(TOPICS.filter(x => x.n).map(x => x.level))].sort((a, b) => ORDER.indexOf(a) - ORDER.indexOf(b));
+            const keep = $('bulk-scope').value;
+            $('bulk-scope').innerHTML = levels.map(lv => `<option value="${lv}">${lv} topics (${TOPICS.filter(x => x.n && x.level === lv).length})</option>`).join('')
+                + `<option value="topics">Every topic, ${levels[0] || 'A1'} to ${levels[levels.length - 1] || 'C2'} (${TOPICS.filter(x => x.n).length})</option>
+                   <option value="TOP">The ${FREQ_TOTAL.toLocaleString('en')} most common words</option>`;
+            const level = currentLevel();
+            const has = (v) => [...$('bulk-scope').options].some(o => o.value === v);
+            $('bulk-scope').value = keep && has(keep) ? keep : has(level) ? level : (levels[0] || 'topics');
+        }
+        // Supabase sends at most 1,000 rows at a time
+        async function fetchPaged(make) {
+            const out = [];
+            for (let from = 0; ; from += 1000) {
+                const { data, error } = await make().range(from, from + 999);
+                if (error) throw error;
+                out.push(...(data || []));
+                if (!data || data.length < 1000) return out;
+            }
+        }
+        const BANK_COLS = 'id, Rank, French, English, Part_of_Speech, Article, Noun_Gender, IPA, SentenceFR, SentenceEN, Register';
+        function wordRow(level, title, round, w) {
+            const fr = String(w.fr || '').trim();
+            const m = /[.?!…]$/.test(fr) ? null : fr.match(ARTICLE_COL);
+            const [art, word] = m ? [m[1].trim(), fr.slice(m[1].length).trim()] : ['', fr];
+            return [level, title, round, art, word, w.en || '', w.exFr || '', w.exEn || ''];
+        }
+        async function bulkRows(scope) {
+            if (scope === 'TOP') {
+                const rows = await fetchPaged(() => db.from('vocabulary_bank').select(BANK_COLS).order('Rank', { ascending: true }));
+                return rows.filter(r => r.Rank && r.Rank <= FREQ_TOTAL).map(r => {
+                    const w = rowToWord(r), set = Math.floor((r.Rank - 1) / FREQ_DECK_SIZE) * FREQ_DECK_SIZE + 1;
+                    return wordRow('Most common', `Words ${set}–${set + FREQ_DECK_SIZE - 1}`, WordMemory.easy(w) ? 'Same as in English' : '', w);
+                });
+            }
+            const topics = TOPICS.filter(x => x.n && (scope === 'topics' || x.level === scope));
+            let wordsOf;
+            if (dbThemes) {
+                const ids = new Set(topics.map(x => x.n));
+                const links = (await fetchPaged(() => db.from('word_themes').select('theme_id, word_id, sort_order').order('theme_id', { ascending: true })))
+                    .filter(l => ids.has(l.theme_id)).sort((a, b) => a.theme_id - b.theme_id || a.sort_order - b.sort_order);
+                const want = [...new Set(links.map(l => l.word_id))], byId = new Map();
+                for (let i = 0; i < want.length; i += 200) {
+                    const { data, error } = await db.from('vocabulary_bank').select(BANK_COLS).in('id', want.slice(i, i + 200));
+                    if (error) throw error;
+                    (data || []).forEach(r => byId.set(r.id, r));
+                }
+                wordsOf = (n) => links.filter(l => l.theme_id === n).map(l => byId.get(l.word_id)).filter(Boolean).map(rowToWord);
+            } else {
+                wordsOf = (n) => themeWords(n);
+            }
+            return topics.flatMap(x => {
+                const d = { words: wordsOf(x.n), themeId: x.n };
+                d.words.forEach(w => { const ex = !w.exFr && WordMemory.example(w); if (ex) { w.exFr = ex[0]; w.exEn = ex[1]; } });
+                splitDeck(d);
+                const title = x.no ? `${x.no}. ${x.title}` : x.title;
+                const learn = d.chapters ? d.chapters.flatMap((c, i) => c.words.map(w => wordRow(x.level, title, `Chapter ${i + 1} · ${c.title}`, w)))
+                    : d.words.map(w => wordRow(x.level, title, '', w));
+                return learn.concat(d.easy.map(w => wordRow(x.level, title, 'Same as in English', w)));
+            });
+        }
+        async function bulkExport(kind) {
+            const scope = $('bulk-scope').value, label = $('bulk-scope').selectedOptions[0].textContent.replace(/\s*\(.*\)$/, '');
+            const btns = [$('bulk-download'), $('bulk-copy')];
+            btns.forEach(b => { b.disabled = true; });
+            $('bulk-status').className = 'w-full text-sm text-indigo-700 px-1 empty:hidden';
+            $('bulk-status').textContent = 'Getting the words…';
+            try {
+                const rows = await bulkRows(scope);
+                if (!rows.length) throw new Error('No words found for this choice.');
+                let msg;
+                if (kind === 'copy') {
+                    const ok = await copyRows(BULK_HEAD, rows);
+                    if (!ok) throw new Error('Could not copy. Try Download instead.');
+                    msg = `Copied ${rows.length.toLocaleString('en')} words. Paste into Excel or Google Sheets.`;
+                } else {
+                    msg = `Downloaded ${rows.length.toLocaleString('en')} words (${saveCsv(BULK_HEAD, rows, 'french-words-' + label)}).`;
+                }
+                $('bulk-status').className = 'w-full text-sm text-emerald-700 px-1 empty:hidden';
+                $('bulk-status').textContent = msg;
+            } catch (err) {
+                console.error(err);
+                $('bulk-status').className = 'w-full text-sm text-rose-700 px-1 empty:hidden';
+                $('bulk-status').textContent = err.message && !/fetch|network/i.test(err.message) ? err.message : 'Could not get the words. Check your connection and try again.';
+            }
+            btns.forEach(b => { b.disabled = false; });
         }
 
         function renderList() {
             const rows = shownWords();
-            const all = wholeTopic();
-            $('learn-words-title').textContent = all ? `All words in this topic (${listBase().length})`
-                : deck.rounds ? `Words in round ${deck.round + 1} (${deck.words.length})`
-                : `Words in this ${topic && topic.freq ? 'set' : topic && topic.id === 'review' ? 'review' : 'topic'} (${deck.words.length})`;
+            $('list-title').textContent = `Word list (${listBase().length})`;
             if (!rows.length) {
-                $('word-list').innerHTML = '<p class="col-span-full p-4 text-sm text-slate-500 bg-white border border-slate-200 rounded-2xl">No words match.</p>';
+                $('word-list').innerHTML = '<p class="p-4 text-sm text-slate-500">No words match.</p>';
                 return;
             }
             const easy = new Set(deck.easy || []);
@@ -1019,37 +1114,33 @@
             $('word-list').innerHTML = rows.map(w => {
                 const st = statusOf(w);
                 const [label, cls] = easy.has(w) ? ['Same as English', 'bg-emerald-50 text-emerald-800'] : STATUS_STYLE[st];
-                const g = all ? groupOf(w) : '';
-                const head = g && g !== last ? `<h3 class="col-span-full pt-3 first:pt-0 text-sm font-black text-slate-900">${escapeHtml(g)}</h3>` : '';
+                const g = groupOf(w);
+                const head = g && g !== last ? `<h3 class="px-3 pt-4 pb-1 text-sm font-black text-slate-900 bg-slate-50">${escapeHtml(g)}</h3>` : '';
                 last = g || last;
                 const pic = WordMemory.picture(w);
-                const edge = w.gender === 'm' ? 'border-b-sky-500' : w.gender === 'f' ? 'border-b-rose-500' : 'border-b-slate-300';
                 return `${head}
-                <div class="flex flex-col bg-white border border-slate-200 border-b-4 ${edge} rounded-2xl overflow-hidden">
-                    <button type="button" data-say="${escapeHtml(w.key)}" aria-label="Listen: ${escapeHtml(w.fr)}" class="flex-1 flex flex-col items-center text-center gap-1 px-2 pt-3 pb-2 hover:bg-emerald-50/60">
-                        <span class="${pic ? 'text-4xl' : 'text-2xl opacity-60'} leading-tight" aria-hidden="true">${pic || '🔊'}</span>
-                        <span class="text-base font-bold leading-snug break-words ${genderClass(w)}">${escapeHtml(w.fr)}</span>
-                        <span class="text-xs text-slate-500 break-words">${escapeHtml(w.en)}</span>
-                    </button>
-                    <div class="flex items-center justify-between gap-1 px-2 pb-2">
-                        <span class="text-[11px] font-bold px-1.5 py-0.5 rounded-full ${cls}" title="${escapeHtml(whenDue(w))}">${label}</span>
-                        ${easy.has(w) ? '' : `<label class="flex items-center gap-1 text-xs text-slate-600 min-h-[36px] cursor-pointer" title="I know it">
-                            <input type="checkbox" data-known="${escapeHtml(w.key)}" class="w-4 h-4 accent-emerald-600" ${st === 'known' ? 'checked' : ''}> Know</label>`}
+                <div class="flex items-center gap-3 p-3">
+                    <button data-say="${escapeHtml(w.key)}" class="shrink-0 w-11 h-11 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-xl" aria-label="Listen: ${escapeHtml(w.fr)}">${pic || '🔊'}</button>
+                    <div class="min-w-0 flex-1">
+                        <div class="text-base font-bold break-words ${genderClass(w)}">${escapeHtml(w.fr)}</div>
+                        <div class="text-sm text-slate-500 break-words">${escapeHtml(w.en)}${st === 'learning' ? ` <span class="whitespace-nowrap text-xs ${isDue(w) ? 'text-rose-700 font-semibold' : 'text-slate-400'}">· ${whenDue(w)}</span>` : ''}</div>
                     </div>
+                    <span class="hidden sm:inline text-xs font-bold px-2 py-0.5 rounded-full ${cls}">${label}</span>
+                    ${easy.has(w) ? '' : `<label class="shrink-0 flex items-center gap-2 text-sm text-slate-600 min-h-[44px] cursor-pointer">
+                        <input type="checkbox" data-known="${escapeHtml(w.key)}" class="w-5 h-5 accent-emerald-600" ${st === 'known' ? 'checked' : ''}> I know it</label>`}
                 </div>`;
             }).join('');
-            const byKey = Object.fromEntries(listBase().map(w => [w.key, w]));
-            $('word-list').querySelectorAll('[data-say]').forEach(b => b.addEventListener('click', () => speakFrench(byKey[b.dataset.say].fr)));
-            $('word-list').querySelectorAll('[data-known]').forEach(c => c.addEventListener('change', () => {
-                setKnown(byKey[c.dataset.known], c.checked);
-                renderProgress();
-                if ($('list-filter').value !== 'all') renderList();
-            }));
         }
 
         // ---------- Quiz (no AI) ----------
         function quizPool() {
             const order = { new: 0, learning: 1, known: 2 };
+            // A topic with chapters tests the words you have studied (at least the first chapter)
+            if (deck.chapters) {
+                const seen = deck.words.filter(w => statusOf(w) !== 'new');
+                const pool = seen.length >= 4 ? seen : deck.chapters[0].words;
+                return pool.slice().sort((a, b) => order[statusOf(a)] - order[statusOf(b)]);
+            }
             // Words you don't know come first, in deck order
             return deck.words.slice().sort((a, b) => order[statusOf(a)] - order[statusOf(b)]);
         }
@@ -1173,9 +1264,9 @@
         }
 
         // ---------- Steps: Learn, Practise, Test ----------
-        const STEPS = ['learn', 'palace', 'practise', 'test'];
-        const STEP_BOX = { learn: 'step-learn', palace: 'step-palace', practise: 'mode-cards', test: 'mode-quiz' };
-        const STEP_LABEL = { palace: 'Walk the memory palace', practise: 'Practise with flashcards', test: 'Take the test' };
+        const STEPS = ['learn', 'palace', 'practise', 'test', 'list'];
+        const STEP_BOX = { learn: 'step-learn', palace: 'step-palace', practise: 'mode-cards', test: 'mode-quiz', list: 'step-list' };
+        const STEP_LABEL = { palace: 'Walk the memory palace', practise: 'Practise with flashcards', test: 'Take the test', list: 'See the word list' };
         // Topics about rules rather than things (numbers, calendar, telling time, colours) get a
         // hands-on tool (js/vocab-tools.js, js/clock.js, js/nationalites.js) in the place where others have a memory palace
         const toolFor = (tp) => (tp && tp.n && window.VocabTools && VocabTools[tp.n] && VocabTools[tp.n].mount) ? VocabTools[tp.n] : null;
@@ -1192,8 +1283,7 @@
             grade(w, firstTime ? (p.box === 0 ? 'learning' : 'know') : 'dontknow');
             renderProgress();
         }
-        // The palace fills up round by round: it shows the words of every round you have opened
-        const palaceWords = () => deck.rounds ? deck.rounds.slice(0, lastOpenRound(deck) + 1).flatMap(r => r.words) : deck.words;
+        const palaceWords = () => deck.words;
         function setStep(s, push) {
             const allowed = stepsFor(topic);
             if (!allowed.includes(s)) s = allowed[0];
@@ -1210,7 +1300,8 @@
             STEPS.forEach(x => $(STEP_BOX[x]).classList.toggle('hidden', x !== s));
             if (push) history.pushState({}, '', topicUrl(topic.id, s));
             const palaceTab = document.querySelector('[data-step="palace"] .step-name');
-            if (palaceTab) palaceTab.textContent = toolFor(topic) ? toolFor(topic).name : 'Memory palace';
+            // "Palace" on phones so the five steps fit on one line
+            if (palaceTab) palaceTab.innerHTML = toolFor(topic) ? escapeHtml(toolFor(topic).name) : '<span class="sm:hidden">Palace</span><span class="hidden sm:inline">Memory palace</span>';
             STEP_LABEL.palace = toolFor(topic) ? toolFor(topic).next : 'Walk the memory palace';
             const nxStep = allowed[allowed.indexOf(s) + 1];
             const nx = nxStep ? [nxStep, STEP_LABEL[nxStep]] : null;
@@ -1218,26 +1309,21 @@
                 ? `<button type="button" data-goto-step="${nx[0]}" class="min-h-[48px] px-5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl">Next: ${nx[1]} →</button>`
                 : '';
             // the palace needs the full width: hide the topic list beside it while it is open
-            $('topic-layout').classList.toggle('lg:grid', s !== 'palace');
-            $('topic-side').classList.toggle('lg:block', s !== 'palace');
             if (s === 'palace' && toolFor(topic)) toolFor(topic).mount($('step-palace'), { say: (t) => speakFrench(t, 0.9) });
             else if (s === 'palace') MemoryPalace.mount($('step-palace'), topic.n, palaceWords(), { say: (t) => speakFrench(t, 0.9), grade: palaceGrade });
             if (s === 'practise') startCards();
-            if (s === 'learn') renderList();
+            if (s === 'learn') renderLearn();
+            if (s === 'list') renderList();
             $('scroller').scrollTop = 0;
         }
         function renderAll() {
             renderProgress();
             quiz = null;
-            $('quiz-box').innerHTML = '<p class="text-base text-slate-600">Choose a quiz above. Questions use the words you don\'t know yet first.</p>';
+            $('quiz-box').innerHTML = `<p class="text-base text-slate-600">Choose a quiz above. ${deck.chapters ? 'Questions use the words you have studied so far, the ones you don\'t know yet first.' : 'Questions use the words you don\'t know yet first.'}</p>`;
             const pictured = deck.words.filter(w => WordMemory.picture(w)).length >= 4;
             $('quiz-picture-btn').classList.toggle('hidden', !pictured);
             $('quiz-types').className = 'grid gap-2 ' + (pictured ? 'grid-cols-2 sm:grid-cols-4' : 'grid-cols-3');
             $('learn-words').classList.toggle('hidden', !deck.words.length);
-            renderScope();
-            renderRounds();
-            renderStory();
-            renderEasy();
             $('topic-progress').classList.toggle('hidden', !deck.words.length);
             setStep(step, false);
         }
@@ -1280,7 +1366,6 @@
             step = s || 'learn';
             $('learn-words').classList.add('hidden');
             $('topic-progress').classList.add('hidden');
-            $('list-scope').value = 'round';
             loadDeck(tp.id === 'review' ? 'review' : tp.n ? `theme:${tp.n}` : tp.freq ? tp.id : `lesson:${l.id}`);
         }
         function showTopics(push) {
@@ -1339,14 +1424,16 @@
             const small = (x, label, dir) => x
                 ? `<a href="${topicUrl(x.id)}" data-topic="${escapeHtml(x.id)}" title="${escapeHtml(x.short || x.title)}" class="min-h-[40px] px-3 inline-flex items-center text-sm font-semibold text-slate-700 bg-white border border-slate-200 hover:border-indigo-300 rounded-xl">${label}</a>`
                 : `<span class="min-h-[40px] px-3 inline-flex items-center text-sm font-semibold text-slate-300 bg-white border border-slate-100 rounded-xl" aria-hidden="true">${label}</span>`;
-            $('topic-nav-top').innerHTML = list.length ? `${small(prev, '‹ Prev', 'prev')}<span class="text-xs text-slate-400 px-1">${i + 1} / ${list.length}</span>${small(nx, 'Next ›', 'next')}` : '';
+            const menuBtn = `<button type="button" id="topic-menu-btn" aria-expanded="false" aria-controls="topic-side" title="All topics of this level"
+                class="min-h-[40px] px-3 inline-flex items-center gap-1.5 text-sm font-semibold text-slate-700 bg-white border border-slate-200 hover:border-indigo-300 rounded-xl">
+                <span class="whitespace-nowrap">${topic.freq ? 'Set' : 'Topic'} ${i + 1} of ${list.length}</span><span class="text-slate-400" aria-hidden="true">▾</span></button>`;
+            $('topic-nav-top').innerHTML = list.length ? `${small(prev, '‹ Prev', 'prev')}${menuBtn}${small(nx, 'Next ›', 'next')}` : '';
+            $('topic-side').hidden = true;
             renderTopicSide(list);
         }
-        // The other topics of this level on the right, with a tick for the ones you know
+        // The other topics of this level (drop-down from "Topic 3 of 7"), with a tick for the ones you know
         function renderTopicSide(list) {
             const side = $('topic-side');
-            $('topic-layout').classList.toggle('lg:grid', list.length > 0);
-            side.classList.toggle('lg:block', list.length > 0);
             if (!list.length) { side.innerHTML = ''; return; }
             const name = topic.freq ? 'Most common words' : `Vocab · ${topic.level}`;
             side.innerHTML = `
@@ -1365,6 +1452,7 @@
             if (cur) { const box = cur.parentElement; box.scrollTop = Math.max(0, cur.offsetTop - box.offsetTop - box.clientHeight / 2); }
         }
         function renderTopics() {
+            renderBulkScope();
             const words = plain($('topic-search').value.trim()).split(/\s+/).filter(Boolean);
             const level = currentLevel();
             const levels = [...new Set(TOPICS.map(x => x.level))];
@@ -1433,6 +1521,22 @@
 
         // ---------- Wiring ----------
         $('topic-back').addEventListener('click', () => showTopics(true));
+        function setTopicMenu(open) {
+            const btn = $('topic-menu-btn');
+            $('topic-side').hidden = !open;
+            if (btn) btn.setAttribute('aria-expanded', open);
+            if (open) {
+                const cur = $('topic-side').querySelector('[aria-current="page"]');
+                if (cur) { const box = cur.parentElement; box.scrollTop = Math.max(0, cur.offsetTop - box.offsetTop - box.clientHeight / 2); }
+            }
+        }
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('#topic-menu-btn')) { setTopicMenu($('topic-side').hidden); return; }
+            if (!$('topic-side').hidden && !e.target.closest('#topic-side')) setTopicMenu(false);
+        });
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !$('topic-side').hidden) { setTopicMenu(false); $('topic-menu-btn')?.focus(); }
+        });
         $('topic-search').addEventListener('input', renderTopics);
         $('topic-levels').addEventListener('click', (e) => {
             const b = e.target.closest('[data-level]');
@@ -1460,49 +1564,79 @@
         $('btn-hook-save').addEventListener('click', saveOwnHook);
         $('list-search').addEventListener('input', renderList);
         $('list-filter').addEventListener('change', renderList);
-        $('list-scope').addEventListener('change', renderList);
         $('btn-copy-list').addEventListener('click', copyList);
         $('deck-counts').addEventListener('click', (e) => {
             const b = e.target.closest('[data-count-filter]'); if (!b || !topic) return;
             $('list-filter').value = b.dataset.countFilter; $('list-search').value = '';
-            if (step !== 'learn') openTopic(topic.id, 'learn');
-            renderList();
-            $('learn-words').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            setStep('list', true);
         });
-        // Watch: a hands-free slideshow of the words shown (search and filter apply)
-        $('btn-watch').addEventListener('click', () => {
-            const r = deck && deck.rounds && deck.rounds[deck.round];
-            const all = !$('list-search').value.trim() && $('list-filter').value === 'all' && !wholeTopic();
-            WatchMode.open(shownWords(), {
-                title: topic ? topic.title + (r ? ` · Round ${deck.round + 1}` : '') : 'Words',
-                // the story plays after the words, when the whole round is shown
-                story: r && r.story && all ? r.story.map(([fr, en]) => [fr.replace(STORY_MARK, (m, text) => text), en]) : null
-            });
+        // Watch: a hands-free slideshow of the topic's words; a chapter's Watch adds its story at the end
+        $('btn-watch').addEventListener('click', () => WatchMode.open(deck.words, { title: topic ? topic.title : 'Words' }));
+        // Learn page: tiles, "Know" ticks, chapter contents, stories
+        $('learn-body').addEventListener('click', (e) => {
+            const byKey = (k) => deck.words.find(x => x.key === k);
+            const say = e.target.closest('[data-say]');
+            if (say) { const w = byKey(say.dataset.say); if (w) speakFrench(w.fr); return; }
+            const sw = e.target.closest('[data-story-word]');
+            if (sw) {
+                const w = byKey(sw.dataset.storyWord); if (!w) return;
+                speakFrench(w.fr, 0.9);
+                const g = $('learn-body').querySelector(`[data-gloss="${sw.dataset.line}"]`);
+                g.textContent = `${WordMemory.picture(w) ? WordMemory.picture(w) + ' ' : ''}${w.fr} = ${w.en}`;
+                g.classList.remove('hidden');
+                return;
+            }
+            const li = e.target.closest('[data-story-listen]');
+            if (li) {
+                if ('speechSynthesis' in window && speechSynthesis.speaking) { speechSynthesis.cancel(); return; }
+                speakFrench(deck.chapters[li.dataset.storyListen].story.map(([fr]) => storyPlain(fr)).join(' '), 0.85);
+                return;
+            }
+            const en = e.target.closest('[data-story-en]');
+            if (en) {
+                const on = en.getAttribute('aria-pressed') !== 'true';
+                en.setAttribute('aria-pressed', on);
+                en.textContent = on ? 'Hide English' : 'Show English';
+                $('learn-body').querySelectorAll(`[data-story="${en.dataset.storyEn}"] .story-en`).forEach(el => el.classList.toggle('hidden', !on));
+                return;
+            }
+            const wa = e.target.closest('[data-chapter-watch]');
+            if (wa) {
+                const i = Number(wa.dataset.chapterWatch), c = deck.chapters[i];
+                WatchMode.open(c.words, { title: `${topic.title} · Chapter ${i + 1}`, story: c.story ? c.story.map(([fr, en]) => [storyPlain(fr), en]) : null });
+            }
         });
-        $('round-list').addEventListener('click', (e) => { const b = e.target.closest('[data-round]'); if (b) openRound(Number(b.dataset.round)); });
-        $('btn-story-listen').addEventListener('click', () => {
-            if ('speechSynthesis' in window && speechSynthesis.speaking) { speechSynthesis.cancel(); return; }
-            speakFrench(storyText(), 0.85);
+        $('learn-body').addEventListener('change', (e) => {
+            const c = e.target.closest('[data-known]'); if (!c) return;
+            const w = deck.words.find(x => x.key === c.dataset.known); if (!w) return;
+            setKnown(w, c.checked);
+            renderProgress();
+            renderLearn();
         });
-        $('btn-story-en').addEventListener('click', () => {
-            const on = $('btn-story-en').getAttribute('aria-pressed') !== 'true';
-            $('btn-story-en').setAttribute('aria-pressed', on);
-            $('btn-story-en').textContent = on ? 'Hide English' : 'Show English';
-            $('story-body').querySelectorAll('.story-en').forEach(el => el.classList.toggle('hidden', !on));
+        $('chapter-nav').addEventListener('click', (e) => {
+            const a = e.target.closest('[data-chapter-jump]'); if (!a) return;
+            e.preventDefault();
+            $('chapter-' + (Number(a.dataset.chapterJump) + 1)).scrollIntoView({ behavior: 'smooth', block: 'start' });
         });
-        $('story-body').addEventListener('click', (e) => {
-            const b = e.target.closest('[data-story-word]'); if (!b) return;
-            const w = deck.all.find(x => x.key === b.dataset.storyWord); if (!w) return;
-            speakFrench(w.fr, 0.9);
-            const g = $('story-body').querySelector(`[data-gloss="${b.dataset.line}"]`);
-            g.textContent = `${WordMemory.picture(w) ? WordMemory.picture(w) + ' ' : ''}${w.fr} = ${w.en}`;
-            g.classList.remove('hidden');
+        // Word list step
+        $('word-list').addEventListener('click', (e) => {
+            const b = e.target.closest('[data-say]'); if (!b) return;
+            const w = listBase().find(x => x.key === b.dataset.say); if (w) speakFrench(w.fr);
+        });
+        $('word-list').addEventListener('change', (e) => {
+            const c = e.target.closest('[data-known]'); if (!c) return;
+            const w = deck.words.find(x => x.key === c.dataset.known); if (!w) return;
+            setKnown(w, c.checked);
+            renderProgress();
+            if ($('list-filter').value !== 'all') renderList();
         });
         $('easy-list').addEventListener('click', (e) => {
             const b = e.target.closest('[data-easy]'); if (!b) return;
             const w = (deck.easy || []).find(x => x.key === b.dataset.easy); if (w) speakFrench(w.fr, 0.9);
         });
         $('btn-download-list').addEventListener('click', downloadList);
+        $('bulk-download').addEventListener('click', () => bulkExport('download'));
+        $('bulk-copy').addEventListener('click', () => bulkExport('copy'));
         document.querySelectorAll('.quiz-type').forEach(b => b.addEventListener('click', () => startQuiz(b.dataset.quiz)));
         document.addEventListener('keydown', (e) => {
             if (step !== 'practise' || topic === null || !current || /input|textarea|select/i.test(e.target.tagName)) return;
