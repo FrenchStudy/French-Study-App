@@ -668,7 +668,7 @@
                 let html = '', at = 0;
                 fr.replace(STORY_MARK, (m, text, key, pos) => {
                     html += escapeHtml(fr.slice(at, pos));
-                    const w = byKey[key || text];
+                    const w = byKey[key || text] || byKey[(key || text).toLowerCase()];   // « Hier » marks hier
                     html += w ? `<button type="button" data-story-word="${escapeHtml(w.key)}" data-line="${ci}-${n}" class="font-bold underline decoration-2 underline-offset-4 ${genderClass(w)} hover:bg-amber-50 rounded">${escapeHtml(text)}</button>` : escapeHtml(text);
                     at = pos + m.length;
                     return m;
