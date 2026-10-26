@@ -42,19 +42,24 @@
                     <h1 class="text-2xl font-black text-slate-900">Vocabulary</h1>
                     <p class="text-sm text-slate-500 mt-1">Topics from A1 to C2, plus the 5,000 most common words. In each one: learn the words, practise them with flashcards, then test yourself.</p>
                 </div>
-                <div id="review-banner"></div>
                 <div class="flex flex-col md:flex-row md:items-center gap-3">
                     <div id="topic-levels" class="flex gap-1 p-1 bg-slate-200/70 rounded-xl overflow-x-auto" role="tablist" aria-label="Level"></div>
-                    <input id="topic-search" type="search" placeholder="Search topics, e.g. famille" class="md:ml-auto w-full md:w-72 text-base md:text-sm px-3 py-2.5 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                </div>
-                <div id="topic-banner"></div>
-                <!-- The word lists of many topics at once, for Excel or Google Sheets -->
-                <div class="flex flex-wrap items-center gap-2 bg-white border border-slate-200 rounded-2xl p-3">
-                    <span class="text-sm font-bold text-slate-700 px-1">📄 Word lists</span>
-                    <select id="bulk-scope" aria-label="Which words to get" class="flex-1 min-w-[12rem] text-base sm:text-sm px-3 py-2.5 bg-white border border-slate-200 rounded-xl"></select>
-                    <button id="bulk-download" type="button" class="min-h-[44px] px-4 bg-slate-900 hover:bg-slate-700 text-white font-bold rounded-xl text-sm">⬇️ Download (.csv)</button>
-                    <button id="bulk-copy" type="button" class="min-h-[44px] px-4 bg-white border border-slate-200 hover:border-indigo-400 font-semibold rounded-xl text-sm">📋 Copy</button>
-                    <p id="bulk-status" class="w-full text-sm text-emerald-700 px-1 empty:hidden" role="status" aria-live="polite"></p>
+                    <div class="md:ml-auto flex items-center gap-2">
+                        <input id="topic-search" type="search" placeholder="Search topics, e.g. famille" class="flex-1 min-w-0 md:w-64 text-base md:text-sm px-3 py-2.5 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <!-- The word lists of many topics at once, for Excel or Google Sheets -->
+                        <details id="bulk-menu" class="relative shrink-0">
+                            <summary class="list-none cursor-pointer inline-flex items-center gap-1.5 min-h-[44px] px-3.5 bg-white border border-slate-200 hover:border-indigo-400 rounded-xl text-sm font-semibold text-slate-700 [&::-webkit-details-marker]:hidden">⬇️ Word lists</summary>
+                            <div class="absolute right-0 z-20 mt-2 w-[min(20rem,calc(100vw-2rem))] bg-white border border-slate-200 rounded-2xl shadow-xl p-3 space-y-2">
+                                <p class="text-xs text-slate-500">All the words of several topics, for Excel or Google Sheets.</p>
+                                <select id="bulk-scope" aria-label="Which words to get" class="w-full text-base sm:text-sm px-3 py-2.5 bg-white border border-slate-200 rounded-xl"></select>
+                                <div class="flex gap-2">
+                                    <button id="bulk-download" type="button" class="flex-1 min-h-[44px] px-3 bg-slate-900 hover:bg-slate-700 text-white font-bold rounded-xl text-sm">Download (.csv)</button>
+                                    <button id="bulk-copy" type="button" class="min-h-[44px] px-3 bg-white border border-slate-200 hover:border-indigo-400 font-semibold rounded-xl text-sm">📋 Copy</button>
+                                </div>
+                                <p id="bulk-status" class="text-sm text-emerald-700 empty:hidden" role="status" aria-live="polite"></p>
+                            </div>
+                        </details>
+                    </div>
                 </div>
                 <div id="topic-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
             </div>
@@ -1091,7 +1096,7 @@
             const scope = $('bulk-scope').value, label = $('bulk-scope').selectedOptions[0].textContent.replace(/\s*\(.*\)$/, '');
             const btns = [$('bulk-download'), $('bulk-copy')];
             btns.forEach(b => { b.disabled = true; });
-            $('bulk-status').className = 'w-full text-sm text-indigo-700 px-1 empty:hidden';
+            $('bulk-status').className = 'text-sm text-indigo-700 empty:hidden';
             $('bulk-status').textContent = 'Getting the words…';
             try {
                 const rows = await bulkRows(scope);
@@ -1104,11 +1109,11 @@
                 } else {
                     msg = `Downloaded ${rows.length.toLocaleString('en')} words (${saveCsv(BULK_HEAD, rows, 'french-words-' + label)}).`;
                 }
-                $('bulk-status').className = 'w-full text-sm text-emerald-700 px-1 empty:hidden';
+                $('bulk-status').className = 'text-sm text-emerald-700 empty:hidden';
                 $('bulk-status').textContent = msg;
             } catch (err) {
                 console.error(err);
-                $('bulk-status').className = 'w-full text-sm text-rose-700 px-1 empty:hidden';
+                $('bulk-status').className = 'text-sm text-rose-700 empty:hidden';
                 $('bulk-status').textContent = err.message && !/fetch|network/i.test(err.message) ? err.message : 'Could not get the words. Check your connection and try again.';
             }
             btns.forEach(b => { b.disabled = false; });
@@ -1363,8 +1368,8 @@
             $('topic-view').classList.remove('hidden');
             const st = lvStyle(tp.level);
             $('topic-crumb').className = `text-xs font-bold px-2 py-1 rounded-full ${tp.level ? st[1] + ' ' + st[0] : 'bg-slate-100 text-slate-600'}`;
-            $('topic-back').textContent = tp.tcf ? '← Back to the theme' : '← All topics';
-            $('topic-crumb').textContent = tp.tcf ? 'Exam preparation · theme words' : tp.id === 'review' ? 'Words due today' : tp.freq ? `Most common words · Set ${tp.set || ''}` : `Vocab · ${tp.level}${tp.no ? ' · Topic ' + tp.no : ''}`;
+            $('topic-back').textContent = tp.tcf ? '← Exam prep questions' : '← All topics';
+            $('topic-crumb').textContent = tp.tcf ? 'Exam prep · theme words' : tp.id === 'review' ? 'Words due today' : tp.freq ? `Most common words · Set ${tp.set || ''}` : `Vocab · ${tp.level}${tp.no ? ' · Topic ' + tp.no : ''}`;
             $('deck-title').textContent = tp.lesson && !tp.n ? `${tp.emoji || ''} ${tp.title}`.trim() : tp.title;
             document.title = `${tp.title} - Vocabulary`;
             // The hands-on lesson, if this topic has one
@@ -1477,36 +1482,10 @@
                 return `<button type="button" role="tab" aria-selected="${on}" data-level="${lv}" class="shrink-0 px-3.5 py-1.5 rounded-lg text-sm font-bold transition ${on ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-800'}">
                     ${levelLabel(lv)}<span class="ml-1.5 text-xs font-semibold ${on ? lvStyle(lv)[0] : 'text-slate-400'}">${n}/${list.length}${lv === 'TOP' ? ' sets' : ''}</span></button>`;
             }).join('');
-            // Review banner
-            const due = dueWords().length;
-            $('review-banner').innerHTML = due ? `
-                <div class="flex items-center gap-3 bg-amber-50 border border-amber-200 rounded-2xl p-4">
-                    <span class="text-2xl" aria-hidden="true">🔁</span>
-                    <div class="flex-1 min-w-0"><div class="font-bold text-amber-900">${due} word${due === 1 ? '' : 's'} to review today</div>
-                    <div class="text-sm text-amber-800/80">Words from your topics, before you forget them.</div></div>
-                    <a href="${topicUrl('review', 'practise')}" data-topic="review" class="shrink-0 inline-flex items-center min-h-[44px] px-4 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-xl">Review</a>
-                </div>` : '';
             const list = words.length
                 ? TOPICS.filter(x => !x.freq && words.every(w => plain(x.title + ' ' + (x.lesson ? x.lesson.title : '')).includes(w)))
                 : TOPICS.filter(x => x.level === level);
             const nxt = words.length ? null : nextTopicIn(list);
-            const st = lvStyle(level);
-            const doneN = list.filter(x => topicState(x).done).length;
-            $('topic-banner').innerHTML = words.length ? '' : `
-                <div class="bg-white border border-slate-200 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center gap-4">
-                    <div class="sm:w-72 shrink-0">
-                        <div class="text-xs font-bold uppercase tracking-wide ${st[0]}">${level === 'TOP' ? 'Vocab · 5,000 most common words' : `Vocab · ${level} · ${LEVEL_NAMES[level] || ''}`}</div>
-                        <div class="mt-2 h-2 bg-slate-100 rounded-full overflow-hidden"><div class="h-full ${st[2]} rounded-full" style="width:${list.length ? Math.round(doneN / list.length * 100) : 0}%"></div></div>
-                        <div class="mt-1 text-xs font-semibold text-slate-500">${level === 'TOP'
-                            ? `${doneN} of ${list.length} sets done · ${list.reduce((a, x) => a + ((topicStats[x.id] || {}).known || 0), 0).toLocaleString('en')} of 5,000 words known`
-                            : `${doneN} of ${list.length} topics done`}</div>
-                    </div>
-                    ${nxt ? `<div class="flex-1 min-w-0 sm:border-l sm:border-slate-100 sm:pl-4">
-                        <div class="text-xs font-bold text-slate-500">Continue with</div>
-                        <div class="font-bold text-slate-900 truncate">${escapeHtml(nxt.title)}</div></div>
-                    <a href="${topicUrl(nxt.id)}" data-topic="${escapeHtml(nxt.id)}" class="topic-start shrink-0 inline-flex items-center justify-center min-h-[44px] px-5 rounded-xl ${st[5]} text-white font-bold hover:opacity-90">Start →</a>`
-                    : `<div class="flex-1 font-bold text-emerald-700">${level === 'TOP' ? 'All 5,000 words done' : 'Level ' + level + ' complete'}! 🎉</div>`}
-                </div>`;
             const bandHeading = (x) => {
                 if (!x.freq || words.length) return '';
                 const b = bandOf(x.start);
@@ -1535,7 +1514,10 @@
 
         // ---------- Wiring ----------
         $('topic-back').addEventListener('click', () => {
-            if (topic && topic.tcf) { location.href = `exam.html?theme=${encodeURIComponent(topic.tcf)}&tab=words`; return; }
+            if (topic && topic.tcf) {   // back to the exam prep questions it came from (Speaking or Writing)
+                const page = /speaking\.html/.test(document.referrer) ? 'speaking.html?mode=prep' : 'writing.html?tab=prep';
+                location.href = `${page}&theme=${encodeURIComponent(topic.tcf)}`; return;
+            }
             showTopics(true);
         });
         function setTopicMenu(open) {
@@ -1653,6 +1635,9 @@
         });
         $('btn-download-list').addEventListener('click', downloadList);
         $('bulk-download').addEventListener('click', () => bulkExport('download'));
+        // Close the Word lists menu when tapping elsewhere or pressing Escape
+        document.addEventListener('click', (e) => { const m = $('bulk-menu'); if (m.open && !m.contains(e.target)) m.open = false; });
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') $('bulk-menu').open = false; });
         $('bulk-copy').addEventListener('click', () => bulkExport('copy'));
         document.querySelectorAll('.quiz-type').forEach(b => b.addEventListener('click', () => startQuiz(b.dataset.quiz)));
         document.addEventListener('keydown', (e) => {

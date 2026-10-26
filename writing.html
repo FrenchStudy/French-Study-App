@@ -38,6 +38,13 @@
                     <h1 class="text-2xl font-black text-slate-900">Writing</h1>
                     <p class="text-sm text-slate-500 mt-1">Pick a subject and get a new question for your level, post your own question, or use a ready-made task. Then get your text corrected.</p>
                 </div>
+                <nav class="flex gap-1 sm:gap-6 text-sm font-semibold overflow-x-auto overflow-y-hidden shadow-[inset_0_-1px_0_#e2e8f0]" role="tablist" aria-label="Writing">
+                    <button data-tab="practice" role="tab" class="w-tab shrink-0 min-h-[44px] px-2 sm:px-0 border-b-2">✍️ Practice</button>
+                    <button data-tab="prep" role="tab" class="w-tab shrink-0 min-h-[44px] px-2 sm:px-0 border-b-2">🎓 Exam prep</button>
+                </nav>
+                <!-- Exam prep: the exam-style questions by task and theme (js/tcf.js) -->
+                <section id="tab-prep" class="hidden space-y-3"></section>
+                <div id="tab-practice" class="space-y-4">
                 <div id="levels" class="flex w-max max-w-full gap-1 p-1 bg-slate-200/70 rounded-xl overflow-x-auto" role="tablist" aria-label="Level"></div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] gap-3">
@@ -78,6 +85,7 @@
                     <h2 class="text-sm font-bold uppercase tracking-wide text-slate-500">Ready-made tasks</h2>
                     <div id="task-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
                 </section>
+                </div>
             </div>
 
             <!-- ===== ONE TASK ===== -->
@@ -240,8 +248,8 @@
             $('task-view').classList.remove('hidden');
             const st = LEVEL_STYLE[t.level];
             $('crumb').className = `text-xs font-bold px-2 py-1 rounded-full ${st[1]} ${st[0]}`;
-            $('crumb').textContent = t.tcf ? `Exam preparation · ${t.type} · ${t.subject}` : `Writing · ${t.level} · ${kindLabel(t)}${t.subject ? ' · ' + t.subject : ''}`;
-            $('back').textContent = t.tcf ? '← Back to the question' : '← All tasks';
+            $('crumb').textContent = t.tcf ? `Exam prep · ${t.type} · ${t.subject}` : `Writing · ${t.level} · ${kindLabel(t)}${t.subject ? ' · ' + t.subject : ''}`;
+            $('back').textContent = t.tcf ? '← Exam prep questions' : '← All tasks';
             $('task-title').textContent = t.title;
             document.title = `${t.title} - Writing`;
             $('task-fr').textContent = t.fr;
@@ -320,13 +328,21 @@
                 box.innerHTML = `
                     <div class="flex items-center justify-between gap-2">
                         <h2 class="text-sm font-bold uppercase tracking-wide text-amber-900">Sample answer (B2–C1)</h2>
-                        <button type="button" id="say-model" class="min-h-[36px] px-2.5 text-sm font-semibold text-amber-900 bg-white border border-amber-200 rounded-lg">🔊 Listen</button>
+                        <span class="flex gap-1.5">
+                            <button type="button" id="say-model" class="min-h-[36px] px-2.5 text-sm font-semibold text-amber-900 bg-white border border-amber-200 rounded-lg">🔊 Listen</button>
+                            ${(p.answer_en || []).length ? '<button type="button" id="model-en" class="min-h-[36px] px-2.5 text-sm font-semibold text-amber-900 bg-white border border-amber-200 rounded-lg">English</button>' : ''}
+                        </span>
                     </div>
                     ${tooEarly ? '<p class="text-sm text-amber-800">Tip: try writing your own text first, then compare.</p>' : ''}
                     <div lang="fr" class="space-y-3 text-base text-slate-900 leading-relaxed">${p.answer.map(x => `<p>${TCF.highlight(th, x)}</p>`).join('')}</div>
+                    ${TCF.answerEnHtml(p)}
                     ${TCF.answerWordsHtml(th, p)}`;
                 box.classList.remove('hidden');
                 $('say-model').onclick = () => speakFrench(task.model);
+                if ($('model-en')) $('model-en').onclick = () => {
+                    const en = box.querySelector('[data-tcf-en]'); en.hidden = !en.hidden;
+                    $('model-en').textContent = en.hidden ? 'English' : 'Hide English';
+                };
                 return;
             }
             const tooEarly = countWords($('text').value) < task.words[0] / 2;
@@ -604,7 +620,7 @@ Reply with JSON only:
         });
         $('text').addEventListener('input', () => { updateCount(); clearTimeout(saveTimer); saveTimer = setTimeout(saveDraft, 400); });
         $('back').addEventListener('click', () => {
-            if (task && task.tcf) { location.href = `exam.html?theme=${encodeURIComponent(task.tcf.theme)}&q=${encodeURIComponent(task.tcf.prompt)}`; return; }
+            if (task && task.tcf) { location.href = TCF.listHref(task.id); return; }
             showList(true);
         });
         TCF.wire($('model-box'), () => examTheme, (t) => speakFrench(t, 0.9));
@@ -633,8 +649,30 @@ Reply with JSON only:
             onGenerate($('btn-another'), showError, task.subject || task.title, task.format || DEFAULT_FORMAT[task.level], task.level);
         });
 
+        // ---------- Tabs: Practice / Exam prep ----------
+        let tab = store.get('writing_tab', 'practice'), prepReady = false;
+        function setTab(t, push) {
+            tab = t === 'prep' ? 'prep' : 'practice';
+            store.set('writing_tab', tab);
+            document.querySelectorAll('.w-tab').forEach(b => {
+                const on = b.dataset.tab === tab;
+                b.setAttribute('aria-selected', on);
+                b.className = `w-tab shrink-0 min-h-[44px] px-2 sm:px-0 border-b-2 ${on ? 'border-indigo-600 text-indigo-700' : 'border-transparent text-slate-500 hover:text-slate-800'}`;
+            });
+            $('tab-practice').classList.toggle('hidden', tab !== 'practice');
+            $('tab-prep').classList.toggle('hidden', tab !== 'prep');
+            if (push) history.replaceState({}, '', tab === 'prep' ? 'writing.html?tab=prep' : 'writing.html');
+            if (tab === 'prep' && !prepReady) {
+                prepReady = true;
+                TCF.browser($('tab-prep'), { kind: 'writing', href: (id) => `writing.html?task=${encodeURIComponent(id)}`, say: (t) => speakFrench(t, 0.9) });
+            }
+        }
+        document.querySelectorAll('.w-tab').forEach(b => b.addEventListener('click', () => setTab(b.dataset.tab, true)));
+
         async function route() {
-            const id = new URLSearchParams(location.search).get('task');
+            const q = new URLSearchParams(location.search);
+            if (q.get('tab')) setTab(q.get('tab'), false); else setTab(tab, false);
+            const id = q.get('task');
             if (id && !findTask(id) && TCF.parseId(id)) {
                 try { const t = await TCF.taskFromId(id); if (t) examTasks = [t, ...examTasks.filter(x => x.id !== t.id)]; } catch (e) { console.warn(e); }
             }

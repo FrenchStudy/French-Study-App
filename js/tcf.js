@@ -1,4 +1,4 @@
-// tcf.js - the exam preparation question bank (exam.html), shared with Writing, Speaking and Vocab.
+// tcf.js - the exam preparation question bank: shown in Writing and Speaking (TCF.browser), explained on exam.html.
 // The questions follow the TCF Canada tasks; several also match TEF Canada sections (TASKS[k].exams).
 // Content: content/tcf/index.json (the themes) and content/tcf/<slug>.json (one theme:
 // its words and its 40 prompts with sample answers, from the TCF theme packs).
@@ -109,6 +109,21 @@ function answerWordsHtml(t, p, tone = 'amber') {
         <div class="grid sm:grid-cols-2 gap-1.5">${glossHtml(list)}</div></div>`;
 }
 const answerText = (p) => p.answer.map(x => x.replace(/^- /, '• ')).join('\n');
+const answerTextEn = (p) => (p.answer_en || []).map(x => x.replace(/^- /, '• ')).join('\n');
+// The English of a sample answer, hidden until "English" is tapped (empty when there is none)
+function answerEnHtml(p, tone = 'amber') {
+    if (!(p.answer_en || []).length) return '';
+    const li = (x) => /^- /.test(x);
+    let html = '', inList = false;
+    p.answer_en.forEach(x => {
+        if (li(x) && !inList) { html += '<ul class="list-disc pl-5 space-y-0.5">'; inList = true; }
+        if (!li(x) && inList) { html += '</ul>'; inList = false; }
+        html += li(x) ? `<li>${esc(x.slice(2))}</li>` : `<p>${esc(x)}</p>`;
+    });
+    if (inList) html += '</ul>';
+    return `<div data-tcf-en hidden class="space-y-2 text-sm text-slate-600 leading-relaxed border-t border-${tone}-200 pt-3">${html}
+        ${p.followup_en ? `<p class="italic">${esc(p.followup_en)}</p>` : ''}</div>`;
+}
 
 // Task objects for the Writing and Speaking pages
 function taskBase(t, p) {
@@ -119,13 +134,15 @@ function taskBase(t, p) {
 function writingTask(t, p) {
     const T = TASKS[p.task];
     const fr = p.task === 'W3' ? `${p.prompt.join('\n')}\n\n${T.consigne}` : `${p.prompt.join('\n')}\n${T.consigne}`;
-    return Object.assign(taskBase(t, p), { fr, en: T.what, words: T.words.slice(), model: answerText(p) });
+    const en = (p.prompt_en || []).length ? `${p.prompt_en.join('\n')}\n\n${T.what}` : T.what;
+    return Object.assign(taskBase(t, p), { fr, en, words: T.words.slice(), model: answerText(p) });
 }
 function speakingTask(t, p) {
     const T = TASKS[p.task];
     const fr = p.task === 'S3' ? `${p.title}\n${T.consigne}` : `${p.prompt.join('\n')}\n${T.consigne}`;
-    return Object.assign(taskBase(t, p), { fr, en: T.what, kind: p.task === 'S2' ? 'interaction' : 'opinion', seconds: T.seconds.slice(),
-        sample: { fr: answerText(p), en: '' }, followup: p.followup || '' });
+    const en = p.task === 'S3' ? `${p.title_en || ''}\n\n${T.what}` : (p.prompt_en || []).length ? `${p.prompt_en.join('\n')}\n\n${T.what}` : T.what;
+    return Object.assign(taskBase(t, p), { fr, en: en.trim(), kind: p.task === 'S2' ? 'interaction' : 'opinion', seconds: T.seconds.slice(),
+        sample: { fr: answerText(p), en: answerTextEn(p) }, followup: p.followup || '' });
 }
 // "tcf-<slug>-<W2.1>" -> { slug, id }
 function parseId(id) {
@@ -169,5 +186,93 @@ function wire(root, getTheme, say) {
     });
 }
 
-window.TCF = { answerWordsHtml, TASKS, ORDER, index, theme, matches, highlight, wordsFor, glossHtml, writingTask, speakingTask, taskFromId, parseId, wire, injectCss, answerText };
+// ---------- The exam questions inside Writing and Speaking ----------
+// TCF.browser(root, { kind: 'writing' | 'speaking', href: (taskId) => url })
+// Pick a task type and a theme, see its questions (with English), open one. The choice is remembered.
+const BR_KEY = 'exam_browser';
+const readPick = () => { try { return JSON.parse(localStorage.getItem(BR_KEY)) || {}; } catch (e) { return {}; } };
+const savePick = (v) => { try { localStorage.setItem(BR_KEY, JSON.stringify(v)); } catch (e) {} };
+// Questions practised: a written text checked, or a speaking answer recorded (task ids "tcf-…")
+function practised() {
+    const ids = new Set();
+    ['writing_results', 'writing_drafts', 'speak_results'].forEach(k => {
+        try { Object.keys(JSON.parse(localStorage.getItem(k)) || {}).forEach(id => { if (id.startsWith('tcf-')) ids.add(id); }); } catch (e) {}
+    });
+    return ids;
+}
+const lengthOf = (T) => T.words ? `${T.words[0]}–${T.words[1]} words` : `${Math.round(T.seconds[0] / 60)}–${Math.round(T.seconds[1] / 60 * 2) / 2} min`;
+async function browser(root, opts) {
+    injectCss();
+    const kinds = ORDER.filter(k => TASKS[k].kind === opts.kind);
+    const all = readPick(), pick = all[opts.kind] || {};
+    let task = kinds.includes(pick.task) ? pick.task : kinds[0];
+    let slug = all.theme || null, showEn = !!all.en, cur = null;
+    const q = new URLSearchParams(location.search);
+    if (kinds.includes(q.get('t'))) task = q.get('t');
+    if (q.get('theme')) slug = q.get('theme');
+    root.innerHTML = '<p class="text-sm text-slate-400 animate-pulse">Loading the questions…</p>';
+    let ix;
+    try { ix = await index(); } catch (e) { root.innerHTML = `<p class="text-sm text-rose-700">${esc(e.message)}</p>`; return; }
+    if (!ix.themes.some(t => t.slug === slug)) slug = ix.themes[0].slug;
+    const save = () => { const a = readPick(); a[opts.kind] = { task }; a.theme = slug; a.en = showEn; savePick(a); };
+
+    const chip = (on) => `min-h-[40px] px-3 rounded-xl text-sm font-semibold border text-left transition ${on ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-white border-slate-200 text-slate-700 hover:border-indigo-300'}`;
+    async function draw() {
+        save();
+        const T = TASKS[task];
+        root.innerHTML = `
+            <div class="bg-white border border-slate-200 rounded-2xl p-4 space-y-3">
+                <div class="flex flex-wrap gap-2" role="tablist" aria-label="Task">${kinds.map(k => `<button type="button" data-br-task="${k}" role="tab" aria-selected="${k === task}" class="${chip(k === task)}">
+                    <span class="block leading-tight">${esc(TASKS[k].label)}</span><span class="block text-xs font-medium ${k === task ? 'text-indigo-100' : 'text-slate-400'}">${lengthOf(TASKS[k])}</span></button>`).join('')}</div>
+                <p class="text-sm text-slate-600">${esc(T.what)}</p>
+                <div class="flex flex-wrap items-center gap-2">
+                    <label class="text-sm font-semibold text-slate-700" for="br-theme">Theme</label>
+                    <select id="br-theme" class="flex-1 min-w-[12rem] max-w-md text-base sm:text-sm px-3 py-2.5 bg-white border border-slate-200 rounded-xl">${ix.themes.map(t => `<option value="${esc(t.slug)}" ${t.slug === slug ? 'selected' : ''}>${t.emoji} ${esc(t.fr)} · ${esc(t.en)}</option>`).join('')}</select>
+                    <button type="button" data-br-en aria-pressed="${showEn}" class="min-h-[40px] px-3 rounded-xl text-sm font-semibold border ${showEn ? 'bg-slate-900 border-slate-900 text-white' : 'bg-white border-slate-200 text-slate-700 hover:border-indigo-300'}">${showEn ? '✓ English shown' : 'Show English'}</button>
+                    <a href="exam.html" class="text-sm font-semibold text-indigo-600 hover:underline px-1">How the exam works</a>
+                </div>
+            </div>
+            <div id="br-list" class="grid grid-cols-1 md:grid-cols-2 gap-3"><p class="text-sm text-slate-400 animate-pulse">Loading…</p></div>
+            <details id="br-words" class="bg-white border border-slate-200 rounded-2xl group"></details>`;
+        let th;
+        try { th = cur && cur.slug === slug ? cur : await theme(slug); } catch (e) { root.querySelector('#br-list').innerHTML = `<p class="text-sm text-rose-700">${esc(e.message)}</p>`; return; }
+        cur = th;
+        const done = practised();
+        const list = th.prompts.filter(p => p.task === task);
+        root.querySelector('#br-list').innerHTML = list.map((p, i) => {
+            const id = `tcf-${th.slug}-${p.id}`;
+            const fr = p.task === 'S3' ? '' : p.prompt.join(' ');
+            const en = p.task === 'S3' ? '' : (p.prompt_en || []).join(' ');
+            return `<a href="${esc(opts.href(id))}" class="group flex flex-col gap-1 bg-white border border-slate-200 hover:border-indigo-400 hover:shadow-md transition rounded-2xl p-4">
+                <span class="flex items-center justify-between gap-2"><span class="text-[11px] font-bold uppercase tracking-wide text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-full">${esc(TASKS[task].short)} · ${i + 1}</span>
+                ${done.has(id) ? '<span class="shrink-0 text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">✓ Practised</span>' : ''}</span>
+                <span lang="fr" class="font-bold text-slate-900 leading-snug group-hover:text-indigo-700">${esc(p.title)}</span>
+                ${showEn && p.title_en ? `<span class="text-sm text-slate-500 leading-snug">${esc(p.title_en)}</span>` : ''}
+                ${fr ? `<span lang="fr" class="text-sm text-slate-600 leading-snug line-clamp-3">${esc(fr)}</span>` : ''}
+                ${showEn && en ? `<span class="text-sm text-slate-500 italic leading-snug line-clamp-3">${esc(en)}</span>` : ''}
+            </a>`;
+        }).join('') || '<p class="text-sm text-slate-500">No questions of this type for this theme yet.</p>';
+        root.querySelector('#br-words').innerHTML = `
+            <summary class="list-none cursor-pointer flex items-center justify-between gap-2 p-4 [&::-webkit-details-marker]:hidden">
+                <span class="font-bold text-slate-900">${th.emoji} Theme words <span class="font-semibold text-slate-400">(${th.words.length})</span></span>
+                <span class="text-sm font-semibold text-indigo-600 group-open:hidden">Show</span><span class="text-sm font-semibold text-indigo-600 hidden group-open:inline">Hide</span></summary>
+            <div class="px-4 pb-4 space-y-3">
+                <a href="vocab.html?topic=tcf:${encodeURIComponent(th.slug)}" class="inline-flex items-center min-h-[40px] px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold">🗂️ Learn them in Vocab</a>
+                <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-1.5">${glossHtml(th.words)}</div>
+            </div>`;
+    }
+    root.addEventListener('click', (e) => {
+        const b = e.target.closest('[data-br-task]');
+        if (b) { task = b.dataset.brTask; draw(); return; }
+        if (e.target.closest('[data-br-en]')) { showEn = !showEn; draw(); }
+    });
+    root.addEventListener('change', (e) => { if (e.target.id === 'br-theme') { slug = e.target.value; draw(); } });
+    if (opts.say) root.addEventListener('click', (e) => { const g = e.target.closest('[data-tcf-say]'); if (g) opts.say(g.dataset.tcfSay); });
+    await draw();
+}
+// Where a bank question lives: its page, and the list it belongs to
+const taskPage = (id) => { const r = parseId(id); return r && r.id[0] === 'S' ? 'speaking.html' : 'writing.html'; };
+const listHref = (id) => { const r = parseId(id); if (!r) return 'exam.html'; return r.id[0] === 'S' ? `speaking.html?mode=prep&t=${r.id.slice(0, 2)}&theme=${encodeURIComponent(r.slug)}` : `writing.html?tab=prep&t=${r.id.slice(0, 2)}&theme=${encodeURIComponent(r.slug)}`; };
+
+window.TCF = { browser, practised, listHref, taskPage, answerEnHtml, answerTextEn,  answerWordsHtml, TASKS, ORDER, index, theme, matches, highlight, wordsFor, glossHtml, writingTask, speakingTask, taskFromId, parseId, wire, injectCss, answerText };
 })();

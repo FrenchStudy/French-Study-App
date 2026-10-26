@@ -43,7 +43,7 @@
                 <nav class="flex gap-1 sm:gap-6 text-sm font-semibold overflow-x-auto overflow-y-hidden shadow-[inset_0_-1px_0_#e2e8f0]" role="tablist" aria-label="Speaking">
                     <button data-mode="conversation" role="tab" class="mode-tab shrink-0 min-h-[44px] px-2 sm:px-0 border-b-2">💬 Conversation</button>
                     <button data-mode="shadowing" role="tab" class="mode-tab shrink-0 min-h-[44px] px-2 sm:px-0 border-b-2">🔁 Shadowing</button>
-                    <button data-mode="exam" role="tab" class="mode-tab shrink-0 min-h-[44px] px-2 sm:px-0 border-b-2">🎤 Exam task</button>
+                    <button data-mode="exam" role="tab" class="mode-tab shrink-0 min-h-[44px] px-2 sm:px-0 border-b-2">🎓 Exam prep</button>
                 </nav>
                 <p id="mic-note" class="hidden text-sm text-amber-900 bg-amber-50 border border-amber-200 rounded-xl p-3">Your browser can't turn speech into text, so you can type instead of speaking. For the full experience, use Chrome or Edge.</p>
 
@@ -82,6 +82,9 @@
 
                 <!-- Exam task -->
                 <section id="mode-exam" class="hidden space-y-3">
+                    <!-- Exam-style questions by task and theme (js/tcf.js) -->
+                    <div id="exam-bank" class="space-y-3"></div>
+                    <h2 class="pt-3 text-sm font-bold uppercase tracking-wide text-slate-500">Or make your own task</h2>
                     <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] gap-3">
                         <section class="bg-white border border-slate-200 rounded-2xl p-4 space-y-3">
                             <h2 class="font-black text-slate-900">✨ A new speaking task</h2>
@@ -282,6 +285,7 @@
         }
         let mode = store.get('speak_mode', 'conversation');
         function setMode(m, push) {
+            if (m === 'prep') m = 'exam';
             mode = ['conversation', 'shadowing', 'exam'].includes(m) ? m : 'conversation';
             store.set('speak_mode', mode);
             document.querySelectorAll('.mode-tab').forEach(b => {
@@ -293,8 +297,14 @@
             ['conversation', 'shadowing', 'exam'].forEach(x => $('mode-' + x).classList.toggle('hidden', x !== mode));
             if (mode === 'conversation') renderScenes();
             if (mode === 'shadowing') renderTracks();
-            if (mode === 'exam') renderExamHome();
+            if (mode === 'exam') { renderExamHome(); initBank(); }
             if (push) history.pushState({}, '', 'speaking.html?mode=' + mode);
+        }
+        let bankReady = false;
+        function initBank() {
+            if (bankReady) return;
+            bankReady = true;
+            TCF.browser($('exam-bank'), { kind: 'speaking', href: (id) => `speaking.html?task=${encodeURIComponent(id)}`, say: (t) => speakFrench(t, 0.9) });
         }
         function showHome(push) {
             showView('home-view');
@@ -748,8 +758,8 @@ Reply with JSON only:
             if (push) history.pushState({}, '', `speaking.html?task=${encodeURIComponent(t.id)}`);
             showView('exam-view');
             document.title = `${t.title} - Speaking`;
-            $('exam-crumb').textContent = t.tcf ? `Exam preparation · ${t.kindLabel} · ${t.subject}` : `Exam task · ${t.level} · ${t.source === 'posted' ? 'Your question' : t.kindLabel}${t.subject ? ' · ' + t.subject : ''}`;
-            $('exam-back').textContent = t.tcf ? '← Back to the question' : '← All tasks';
+            $('exam-crumb').textContent = t.tcf ? `Exam prep · ${t.kindLabel} · ${t.subject}` : `Exam task · ${t.level} · ${t.source === 'posted' ? 'Your question' : t.kindLabel}${t.subject ? ' · ' + t.subject : ''}`;
+            $('exam-back').textContent = t.tcf ? '← Exam prep questions' : '← All tasks';
             $('exam-sample').textContent = t.tcf ? '📖 Sample answer' : '✨ Sample answer';
             $('exam-title').textContent = t.title;
             $('exam-fr').textContent = t.fr;
@@ -899,12 +909,20 @@ Only list real mistakes, at most 10, in order. "wrong" must be copied exactly fr
                 box.innerHTML = `
                     <div class="flex flex-wrap items-center justify-between gap-2">
                         <h2 class="text-sm font-bold uppercase tracking-wide text-amber-900">Sample answer (B2–C1)</h2>
-                        <button type="button" id="sample-say" class="min-h-[36px] px-2.5 text-sm font-semibold text-amber-900 bg-white border border-amber-200 rounded-lg">🔊 Listen</button>
+                        <span class="flex gap-1.5">
+                            <button type="button" id="sample-say" class="min-h-[36px] px-2.5 text-sm font-semibold text-amber-900 bg-white border border-amber-200 rounded-lg">🔊 Listen</button>
+                            ${(p.answer_en || []).length ? '<button type="button" id="sample-en-btn" class="min-h-[36px] px-2.5 text-sm font-semibold text-amber-900 bg-white border border-amber-200 rounded-lg">English</button>' : ''}
+                        </span>
                     </div>
                     <div lang="fr" class="space-y-3 text-base text-slate-900 leading-relaxed">${lines}</div>
                     ${p.followup ? `<div class="bg-white border border-amber-200 rounded-xl p-3 text-sm"><b class="block text-amber-900">${p.task === 'S1' ? 'The examiner may ask next' : 'The examiner may push back'}</b><span lang="fr">${TCF.highlight(th, p.followup)}</span></div>` : ''}
+                    ${TCF.answerEnHtml(p)}
                     ${TCF.answerWordsHtml(th, p)}`;
                 $('sample-say').onclick = () => speakFrench(TCF.answerText(p).replace(/•/g, ''));
+                if ($('sample-en-btn')) $('sample-en-btn').onclick = () => {
+                    const en = box.querySelector('[data-tcf-en]'); en.hidden = !en.hidden;
+                    $('sample-en-btn').textContent = en.hidden ? 'English' : 'Hide English';
+                };
                 return;
             }
             let s = !fresh && examSamples[exam.id];
@@ -953,7 +971,7 @@ Only list real mistakes, at most 10, in order. "wrong" must be copied exactly fr
             const say = e.target.closest('[data-say]');
             if (say) { speakFrench(say.dataset.say); return; }
             if (e.target.closest('[data-back]')) {
-                if (e.target.closest('#exam-back') && exam && exam.tcf) { location.href = `exam.html?theme=${encodeURIComponent(exam.tcf.theme)}&q=${encodeURIComponent(exam.tcf.prompt)}`; return; }
+                if (e.target.closest('#exam-back') && exam && exam.tcf) { location.href = TCF.listHref(exam.id); return; }
                 showHome(true); return;
             }
             const sc = e.target.closest('[data-scene]');
