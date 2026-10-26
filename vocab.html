@@ -19,6 +19,7 @@
     <script src="js/cheatsheet-data.js"></script>
     <script src="js/word-memory.js"></script>
     <script src="js/chapters-data.js"></script>
+    <script src="js/tcf.js"></script>
     <script src="js/palaces-data.js"></script>
     <script src="js/palaces-data-2.js"></script>
     <script src="js/memory-palace.js"></script>
@@ -547,6 +548,17 @@
                     const words = themeWords(id);
                     next = { id: `theme:${id}`, title: CS.blocks[id].title, words, themeId: id };
                     await enrichFromBank(words);
+                } else if (type === 'tcf') {
+                    // The words of an exam theme (exam.html), with its groups as chapters
+                    const th = await TCF.theme(raw);
+                    const POS = { n: '', v: 'verb', x: 'expression' };
+                    const words = th.words.map(w => ({
+                        key: w.key, fr: w.fr, en: w.en, pron: '', note: '', ipa: '', gender: w.g === 'm' || w.g === 'f' ? w.g : '',
+                        pos: w.pos === 'n' ? (w.g ? `noun (${w.g})` : 'noun') : POS[w.pos], register: '', exFr: w.ex || '', exEn: ''
+                    }));
+                    const groups = [...new Set(th.words.map(w => w.group))];
+                    next = { id: value, title: th.en, words, plan: groups.map(g => ({ title: g, en: '', story: null, keys: th.words.filter(w => w.group === g).map(w => w.key) })) };
+                    if (topic && topic.tcf === raw) { topic.title = `${th.en}: theme words`; $('deck-title').textContent = `${th.emoji} ${topic.title}`; document.title = `${topic.title} - Vocabulary`; }
                 } else if (type === 'review') {
                     next = { id: 'review', title: 'Review', words: dueWords() };
                 } else if (type === 'lesson') {
@@ -564,7 +576,7 @@
                 // Words the word bank has no example for get one from the built-in list
                 next.words.forEach(w => { const ex = !w.exFr && WordMemory.example(w); if (ex) { w.exFr = ex[0]; w.exEn = ex[1]; } });
                 cacheWords(next.words);
-                if (type === 'theme' || type === 'freq') splitDeck(next);
+                if (type === 'theme' || type === 'freq' || type === 'tcf') splitDeck(next);
             } catch (err) {
                 console.error(err);
                 next = { id: value, title: 'Deck', words: [] };
@@ -610,7 +622,7 @@
         function splitDeck(d) {
             d.easy = d.words.filter(w => WordMemory.easy(w));
             d.words = d.words.filter(w => !WordMemory.easy(w));
-            const plan = d.themeId && window.Chapters ? Chapters.for(d.themeId) : null;
+            const plan = d.plan || (d.themeId && window.Chapters ? Chapters.for(d.themeId) : null);
             if (!plan) return;
             const byKey = new Map(d.words.map(w => [w.key, w]));
             const used = new Set();
@@ -1336,6 +1348,7 @@
         }
         function resolveTopic(id) {
             if (id === 'review') return { id: 'review', title: 'Review', level: '' };
+            if (String(id).startsWith('tcf:')) return { id, tcf: String(id).slice(4), title: 'Exam theme words', level: '' };
             return topicById(id) || (String(id).startsWith('freq:') ? freqTopic(id) : null);
         }
         function openTopic(id, s, push) {
@@ -1350,7 +1363,8 @@
             $('topic-view').classList.remove('hidden');
             const st = lvStyle(tp.level);
             $('topic-crumb').className = `text-xs font-bold px-2 py-1 rounded-full ${tp.level ? st[1] + ' ' + st[0] : 'bg-slate-100 text-slate-600'}`;
-            $('topic-crumb').textContent = tp.id === 'review' ? 'Words due today' : tp.freq ? `Most common words · Set ${tp.set || ''}` : `Vocab · ${tp.level}${tp.no ? ' · Topic ' + tp.no : ''}`;
+            $('topic-back').textContent = tp.tcf ? '← Back to the theme' : '← All topics';
+            $('topic-crumb').textContent = tp.tcf ? 'Exam practice · theme words' : tp.id === 'review' ? 'Words due today' : tp.freq ? `Most common words · Set ${tp.set || ''}` : `Vocab · ${tp.level}${tp.no ? ' · Topic ' + tp.no : ''}`;
             $('deck-title').textContent = tp.lesson && !tp.n ? `${tp.emoji || ''} ${tp.title}`.trim() : tp.title;
             document.title = `${tp.title} - Vocabulary`;
             // The hands-on lesson, if this topic has one
@@ -1366,7 +1380,7 @@
             step = s || 'learn';
             $('learn-words').classList.add('hidden');
             $('topic-progress').classList.add('hidden');
-            loadDeck(tp.id === 'review' ? 'review' : tp.n ? `theme:${tp.n}` : tp.freq ? tp.id : `lesson:${l.id}`);
+            loadDeck(tp.id === 'review' ? 'review' : tp.n ? `theme:${tp.n}` : tp.freq || tp.tcf ? tp.id : `lesson:${l.id}`);
         }
         function showTopics(push) {
             topic = null;
@@ -1520,7 +1534,10 @@
         }
 
         // ---------- Wiring ----------
-        $('topic-back').addEventListener('click', () => showTopics(true));
+        $('topic-back').addEventListener('click', () => {
+            if (topic && topic.tcf) { location.href = `exam.html?theme=${encodeURIComponent(topic.tcf)}&tab=words`; return; }
+            showTopics(true);
+        });
         function setTopicMenu(open) {
             const btn = $('topic-menu-btn');
             $('topic-side').hidden = !open;

@@ -20,6 +20,7 @@
     <script src="js/cheatsheet-data.js"></script>
     <script src="js/scenes.js"></script>
     <script src="js/task-angles.js"></script>
+    <script src="js/tcf.js"></script>
     <style>
         .fix-del { text-decoration: line-through; text-decoration-thickness: 2px; }
         @keyframes pulse-ring { 0% { box-shadow: 0 0 0 0 rgba(244,63,94,.45); } 100% { box-shadow: 0 0 0 14px rgba(244,63,94,0); } }
@@ -172,7 +173,7 @@
 
             <!-- ===== EXAM TASK ===== -->
             <div id="exam-view" class="hidden space-y-4">
-                <button type="button" data-back class="min-h-[44px] px-1 text-sm font-semibold text-slate-600 hover:text-indigo-600">← All tasks</button>
+                <button type="button" data-back id="exam-back" class="min-h-[44px] px-1 text-sm font-semibold text-slate-600 hover:text-indigo-600">← All tasks</button>
                 <div class="flex flex-col sm:flex-row sm:items-end gap-3">
                     <div class="min-w-0 flex-1">
                         <span id="exam-crumb" class="text-xs font-bold px-2 py-1 rounded-full bg-indigo-50 text-indigo-700"></span>
@@ -190,7 +191,7 @@
                                     <button id="exam-en-btn" type="button" class="min-h-[36px] px-2.5 text-sm font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg">English</button>
                                 </div>
                             </div>
-                            <p id="exam-fr" lang="fr" class="text-base text-slate-900 leading-relaxed"></p>
+                            <p id="exam-fr" lang="fr" class="text-base text-slate-900 leading-relaxed whitespace-pre-line"></p>
                             <p id="exam-en" class="hidden text-sm text-slate-500 leading-relaxed border-t border-slate-100 pt-2"></p>
                         </section>
                         <section id="exam-include-box" class="bg-white border border-slate-200 rounded-2xl p-4 space-y-2">
@@ -653,6 +654,8 @@ Give at most 4 corrections, only for real mistakes (an empty list if there are n
         let examSamples = store.get('speak_samples', {});
         let pick = store.get('speak_pick', { subject: 'Yourself', kind: null });
         let exam = null;
+        let bankTasks = [], bankTheme = null;   // questions from the exam question bank (exam.html), opened by their id
+        const timeFor = (t) => t.seconds || SECONDS[t.level] || SECONDS.A1;
         const fmtTime = (s) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
         function renderExamHome() {
             const lv = myLevel();
@@ -739,13 +742,15 @@ Reply with JSON only:
         }
         let timer = null, seconds = 0;
         function openExam(id, push) {
-            const t = examTasks.find(x => x.id === id);
+            const t = examTasks.find(x => x.id === id) || bankTasks.find(x => x.id === id);
             if (!t) { showHome(false); return; }
             exam = t;
             if (push) history.pushState({}, '', `speaking.html?task=${encodeURIComponent(t.id)}`);
             showView('exam-view');
             document.title = `${t.title} - Speaking`;
-            $('exam-crumb').textContent = `Exam task · ${t.level} · ${t.source === 'posted' ? 'Your question' : t.kindLabel}${t.subject ? ' · ' + t.subject : ''}`;
+            $('exam-crumb').textContent = t.tcf ? `Exam practice · ${t.kindLabel} · ${t.subject}` : `Exam task · ${t.level} · ${t.source === 'posted' ? 'Your question' : t.kindLabel}${t.subject ? ' · ' + t.subject : ''}`;
+            $('exam-back').textContent = t.tcf ? '← Back to the question' : '← All tasks';
+            $('exam-sample').textContent = t.tcf ? '📖 Sample answer' : '✨ Sample answer';
             $('exam-title').textContent = t.title;
             $('exam-fr').textContent = t.fr;
             $('exam-en').textContent = t.en;
@@ -757,20 +762,20 @@ Reply with JSON only:
             $('exam-bank-box').classList.toggle('hidden', !t.bank.length);
             $('exam-bank').innerHTML = t.bank.map(([fr, en]) => `<button type="button" data-say="${escapeHtml(fr)}" class="w-full text-left px-3 py-2 rounded-xl bg-slate-50 hover:bg-indigo-50 border border-slate-100">
                 <span class="block text-sm font-semibold text-slate-900">🔊 ${escapeHtml(fr)}</span><span class="block text-xs text-slate-500">${escapeHtml(en)}</span></button>`).join('');
-            $('exam-another').classList.toggle('hidden', t.source === 'posted');
+            $('exam-another').classList.toggle('hidden', t.source === 'posted' || !!t.tcf);
             const r = examResults[t.id];
             $('exam-text').value = r ? r.text : '';
             $('exam-interim').textContent = '';
             $('exam-sample-box').classList.add('hidden');
             seconds = 0; updateTimer();
-            const [min, max] = SECONDS[t.level] || SECONDS.A1;
+            const [min, max] = timeFor(t);
             $('exam-target').textContent = `· aim for ${fmtTime(min)}–${fmtTime(max)}`;
             if (r && r.feedback) renderExamFeedback(r.feedback, r.text);
             else if (t.note) { $('exam-feedback').innerHTML = errorBox(`Your question is saved. ${t.note} Without AI there are no talking points for it.`); $('exam-feedback').classList.remove('hidden'); }
             else $('exam-feedback').classList.add('hidden');
         }
         function updateTimer() {
-            const [min, max] = SECONDS[exam.level] || SECONDS.A1;
+            const [min, max] = timeFor(exam);
             $('exam-timer').textContent = fmtTime(seconds);
             $('exam-bar').style.width = Math.min(100, Math.round(seconds / max * 100)) + '%';
             $('exam-bar').className = 'h-full rounded-full transition-all ' + (seconds > max ? 'bg-amber-400' : seconds >= min ? 'bg-emerald-500' : 'bg-indigo-400');
@@ -880,12 +885,34 @@ Only list real mistakes, at most 10, in order. "wrong" must be copied exactly fr
             const box = $('exam-sample-box');
             if (!fresh && !box.classList.contains('hidden')) { box.classList.add('hidden'); return; }
             box.classList.remove('hidden');
+            if (exam.tcf) {
+                const th = await TCF.theme(exam.tcf.theme), p = th.prompts.find(x => x.id === exam.tcf.prompt);
+                bankTheme = th;
+                let lines = '', inList = false;
+                p.answer.forEach(x => {
+                    const li = x.startsWith('- ');
+                    if (li && !inList) { lines += '<ul class="list-disc pl-6 space-y-1">'; inList = true; }
+                    if (!li && inList) { lines += '</ul>'; inList = false; }
+                    lines += li ? `<li>${TCF.highlight(th, x.slice(2))}</li>` : `<p>${TCF.highlight(th, x)}</p>`;
+                });
+                if (inList) lines += '</ul>';
+                box.innerHTML = `
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                        <h2 class="text-sm font-bold uppercase tracking-wide text-amber-900">Sample answer (B2–C1)</h2>
+                        <button type="button" id="sample-say" class="min-h-[36px] px-2.5 text-sm font-semibold text-amber-900 bg-white border border-amber-200 rounded-lg">🔊 Listen</button>
+                    </div>
+                    <div lang="fr" class="space-y-3 text-base text-slate-900 leading-relaxed">${lines}</div>
+                    ${p.followup ? `<div class="bg-white border border-amber-200 rounded-xl p-3 text-sm"><b class="block text-amber-900">The examiner may push back</b><span lang="fr">${TCF.highlight(th, p.followup)}</span></div>` : ''}
+                    ${TCF.answerWordsHtml(th, p)}`;
+                $('sample-say').onclick = () => speakFrench(TCF.answerText(p).replace(/•/g, ''));
+                return;
+            }
             let s = !fresh && examSamples[exam.id];
             if (!s) {
                 box.innerHTML = '<p class="text-sm text-amber-800 animate-pulse">Preparing a sample answer…</p>';
                 $('exam-sample').disabled = true;
                 try {
-                    const [min, max] = SECONDS[exam.level] || SECONDS.A1;
+                    const [min, max] = timeFor(exam);
                     const r = await askAI([
                         { role: 'system', content: `You write model spoken answers to French speaking tasks for CEFR level ${exam.level} learners. Write what a strong ${exam.level} student could say in about ${fmtTime(min)}–${fmtTime(max)} (natural spoken French, level-appropriate structures, covering every point). Reply with JSON only: {"fr": "the answer in French", "en": "an English translation"}` },
                         { role: 'user', content: `Task: ${exam.fr}${exam.include.length ? '\nPoints: ' + exam.include.join('; ') : ''}` }
@@ -925,7 +952,10 @@ Only list real mistakes, at most 10, in order. "wrong" must be copied exactly fr
         document.addEventListener('click', (e) => {
             const say = e.target.closest('[data-say]');
             if (say) { speakFrench(say.dataset.say); return; }
-            if (e.target.closest('[data-back]')) { showHome(true); return; }
+            if (e.target.closest('[data-back]')) {
+                if (e.target.closest('#exam-back') && exam && exam.tcf) { location.href = `exam.html?theme=${encodeURIComponent(exam.tcf.theme)}&q=${encodeURIComponent(exam.tcf.prompt)}`; return; }
+                showHome(true); return;
+            }
             const sc = e.target.closest('[data-scene]');
             if (sc) { e.preventDefault(); startScene(SCENES.find(s => s.id === sc.dataset.scene), true); return; }
             const tr = e.target.closest('[data-track]');
@@ -998,6 +1028,7 @@ Only list real mistakes, at most 10, in order. "wrong" must be copied exactly fr
         $('exam-mic').addEventListener('click', toggleExamMic);
         $('exam-check').addEventListener('click', checkExam);
         $('exam-sample').addEventListener('click', () => showExamSample(false));
+        TCF.wire($('exam-sample-box'), () => bankTheme, (t) => speakFrench(t, 0.9));
         $('exam-clear').addEventListener('click', () => {
             if ($('exam-text').value.trim() && !confirm('Clear what you said?')) return;
             stopListening(); $('exam-text').value = ''; seconds = 0; updateTimer(); setMicUi(false);
@@ -1011,6 +1042,15 @@ Only list real mistakes, at most 10, in order. "wrong" must be copied exactly fr
             if (s) { mode = 'conversation'; startScene(s, false); return; }
             if (p.get('track') && TRACKS.find(t => t.id === p.get('track'))) { mode = 'shadowing'; openTrack(p.get('track'), -1, false); return; }
             if (p.get('task') && examTasks.find(t => t.id === p.get('task'))) { mode = 'exam'; openExam(p.get('task'), false); return; }
+            if (p.get('task') && TCF.parseId(p.get('task'))) {
+                const id = p.get('task');
+                TCF.taskFromId(id).then(t => {
+                    if (!t) { showHome(false); return; }
+                    bankTasks = [t, ...bankTasks.filter(x => x.id !== t.id)];
+                    mode = 'exam'; openExam(id, false);
+                }).catch(() => showHome(false));
+                return;
+            }
             if (p.get('mode')) mode = p.get('mode');
             showHome(false);
         }
