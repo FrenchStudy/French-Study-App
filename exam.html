@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exam preparation - Apprendre le Français</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#4f46e5">
+    <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Français">
+    <link rel="stylesheet" href="css/app.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.104.0"></script>
+    <script>window.supabase || document.write('<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"><\/script>')</script>
+    <script src="config.js"></script>
+    <script src="js/ai.js"></script>
+    <script src="js/tcf.js"></script>
+</head>
+<body class="h-full bg-slate-100 flex flex-col overflow-hidden font-sans text-slate-800">
+
+    <header id="app-header" class="bg-white border-b border-slate-200 sticky top-0 z-50 shrink-0 h-14"></header>
+
+    <main id="scroller" class="flex-1 overflow-y-auto">
+        <div class="max-w-6xl mx-auto px-4 py-5 space-y-4">
+
+            <!-- ===== ALL THEMES ===== -->
+            <div id="themes-view" class="space-y-4">
+                <div>
+                    <h1 class="text-2xl font-black text-slate-900">Exam preparation</h1>
+                    <p class="text-sm text-slate-500 mt-1">Writing and speaking tasks for French exams such as the TCF and TEF, on 24 themes. Each has a B2–C1 sample answer and the theme's key words. Write or speak your answer to get it corrected.</p>
+                </div>
+                <div id="task-filter" class="flex gap-1 p-1 bg-slate-200/70 rounded-xl overflow-x-auto w-max max-w-full" role="tablist" aria-label="Task"></div>
+                <p id="filter-note" class="text-sm text-slate-600"></p>
+                <div id="theme-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+                <p id="load-error" class="hidden text-sm text-rose-700 bg-rose-50 rounded-xl p-3"></p>
+            </div>
+
+            <!-- ===== ONE THEME ===== -->
+            <div id="theme-view" class="hidden space-y-4">
+                <a href="exam.html" data-go="home" class="inline-flex items-center min-h-[44px] px-1 text-sm font-semibold text-slate-600 hover:text-indigo-600">← All themes</a>
+                <div class="flex items-center gap-3">
+                    <span id="theme-emoji" class="text-4xl" aria-hidden="true"></span>
+                    <div class="min-w-0">
+                        <h1 id="theme-title" class="text-2xl lg:text-3xl font-black text-slate-900 leading-tight"></h1>
+                        <p id="theme-fr" class="text-sm text-slate-500" lang="fr"></p>
+                    </div>
+                </div>
+                <nav class="flex gap-1 sm:gap-6 text-sm font-semibold overflow-x-auto shadow-[inset_0_-1px_0_#e2e8f0]" role="tablist" aria-label="Theme">
+                    <button data-tab="prompts" role="tab" class="theme-tab shrink-0 min-h-[44px] px-2 sm:px-0 border-b-2">Questions</button>
+                    <button data-tab="words" role="tab" class="theme-tab shrink-0 min-h-[44px] px-2 sm:px-0 border-b-2">Theme words</button>
+                </nav>
+                <section id="tab-prompts" class="space-y-6"></section>
+                <section id="tab-words" class="hidden space-y-4"></section>
+            </div>
+
+            <!-- ===== ONE QUESTION ===== -->
+            <div id="prompt-view" class="hidden space-y-4">
+                <a id="prompt-back" href="exam.html" class="inline-flex items-center min-h-[44px] px-1 text-sm font-semibold text-slate-600 hover:text-indigo-600">← Back</a>
+                <div>
+                    <span id="prompt-crumb" class="text-xs font-bold px-2 py-1 rounded-full bg-indigo-50 text-indigo-700"></span>
+                    <h1 id="prompt-title" class="text-2xl lg:text-3xl font-black text-slate-900 leading-tight mt-2" lang="fr"></h1>
+                </div>
+                <div class="lg:grid lg:grid-cols-[minmax(0,1fr)_22rem] lg:gap-6 space-y-4 lg:space-y-0">
+                    <div class="space-y-4 min-w-0">
+                        <section class="bg-white border border-slate-200 rounded-2xl p-4 sm:p-5 space-y-3">
+                            <div class="flex items-center justify-between gap-2">
+                                <h2 class="text-sm font-bold uppercase tracking-wide text-slate-500">The task</h2>
+                                <button id="say-task" type="button" class="min-h-[36px] px-2.5 text-sm font-semibold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 rounded-lg">🔊 Listen</button>
+                            </div>
+                            <div id="prompt-body" class="space-y-3 text-base text-slate-900 leading-relaxed" lang="fr"></div>
+                            <p id="prompt-what" class="text-sm text-slate-500 border-t border-slate-100 pt-3"></p>
+                        </section>
+                        <div class="flex flex-wrap gap-2">
+                            <a id="btn-do" href="#" class="inline-flex items-center min-h-[48px] px-5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl"></a>
+                            <button id="btn-answer" type="button" aria-expanded="false" class="min-h-[48px] px-4 bg-white border border-slate-200 hover:border-indigo-300 font-semibold rounded-xl">📖 Show the sample answer</button>
+                        </div>
+                        <p id="prompt-result" class="text-sm text-emerald-700 empty:hidden"></p>
+                        <section id="answer-box" class="hidden bg-amber-50 border border-amber-200 rounded-2xl p-4 sm:p-5 space-y-3">
+                            <div class="flex flex-wrap items-center justify-between gap-2">
+                                <h2 class="text-sm font-bold uppercase tracking-wide text-amber-900">Sample answer (B2–C1)</h2>
+                                <button id="say-answer" type="button" class="min-h-[36px] px-2.5 text-sm font-semibold text-amber-900 bg-white border border-amber-200 rounded-lg">🔊 Listen</button>
+                            </div>
+                            <p class="text-sm text-amber-900">Highlighted words are theme words: tap one to hear it and see its meaning.</p>
+                            <div id="answer-body" class="space-y-3 text-base text-slate-900 leading-relaxed" lang="fr"></div>
+                            <div id="answer-follow" class="hidden bg-white border border-amber-200 rounded-xl p-3 text-sm"></div>
+                            <div id="answer-words"></div>
+                        </section>
+                    </div>
+                    <aside class="space-y-4">
+                        <section class="bg-white border border-slate-200 rounded-2xl p-4 space-y-2">
+                            <h2 class="text-sm font-bold uppercase tracking-wide text-slate-500">What to do</h2>
+                            <ul id="prompt-checklist" class="space-y-1.5 text-sm text-slate-700"></ul>
+                        </section>
+                        <section class="bg-white border border-slate-200 rounded-2xl p-4 space-y-2">
+                            <h2 class="text-sm font-bold uppercase tracking-wide text-slate-500">Theme words for this question</h2>
+                            <p class="text-xs text-slate-500"><span class="inline-block w-2.5 h-2.5 rounded-sm bg-amber-200 align-middle"></span> used in this question or its answer · tap to hear</p>
+                            <div id="prompt-words" class="grid gap-1.5"></div>
+                        </section>
+                    </aside>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const $ = (id) => document.getElementById(id);
+        const store = {
+            get(k, d) { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch (e) { return d; } },
+            set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+        };
+        const T = TCF.TASKS;
+        const BANK_TASKS = TCF.ORDER;
+        let idx = null, theme = null, prompt = null, filter = store.get('exam_filter', 'all');
+
+        // Your results on the Writing and Speaking pages, by task id
+        function resultOf(id) {
+            const w = store.get('writing_results', {})[id], s = store.get('speak_results', {})[id];
+            return w || s || null;
+        }
+        const taskId = (slug, p) => `tcf-${slug}-${p.id}`;
+
+        // ---------- All themes ----------
+        function renderHome() {
+            const tabs = [['all', 'All tasks']].concat(BANK_TASKS.map(k => [k, T[k].short]));
+            $('task-filter').innerHTML = tabs.map(([k, label]) => `<button type="button" role="tab" data-filter="${k}" aria-selected="${k === filter}"
+                class="shrink-0 px-3 py-1.5 rounded-lg text-sm font-bold ${k === filter ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-800'}">${escapeHtml(label)}</button>`).join('');
+            $('filter-note').textContent = filter === 'all' ? '' : `${T[filter].label}: ${T[filter].what} Matches ${T[filter].exams}.`;
+            const done = store.get('exam_done', {});
+            $('theme-grid').innerHTML = idx.themes.map(t => {
+                const n = filter === 'all' ? Object.values(t.tasks).reduce((a, b) => a + b, 0) : (t.tasks[filter] || 0);
+                const tried = Object.keys(done).filter(k => k.startsWith(`tcf-${t.slug}-`) && (filter === 'all' || k.includes(`-${filter}.`))).length;
+                return `<a href="exam.html?theme=${encodeURIComponent(t.slug)}" data-theme="${escapeHtml(t.slug)}" class="group flex gap-3 bg-white border border-slate-200 hover:border-indigo-400 hover:shadow-md transition rounded-2xl p-4">
+                    <span class="shrink-0 w-12 h-12 rounded-xl bg-indigo-50 flex items-center justify-center text-2xl" aria-hidden="true">${t.emoji}</span>
+                    <span class="min-w-0 flex-1">
+                        <span class="block font-bold text-slate-900 leading-snug group-hover:text-indigo-700">${escapeHtml(t.en)}</span>
+                        <span class="block text-sm text-slate-500 truncate" lang="fr">${escapeHtml(t.fr)}</span>
+                        <span class="mt-2 flex items-center gap-2"><span class="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden"><span class="block h-full bg-emerald-500" style="width:${n ? Math.round(tried / n * 100) : 0}%"></span></span>
+                        <span class="text-xs text-slate-500 whitespace-nowrap">${tried}/${n} questions · ${t.words} words</span></span>
+                    </span></a>`;
+            }).join('');
+        }
+
+        // ---------- One theme ----------
+        function setTab(tab) {
+            document.querySelectorAll('.theme-tab').forEach(b => {
+                const on = b.dataset.tab === tab;
+                b.setAttribute('aria-selected', on);
+                b.className = `theme-tab shrink-0 min-h-[44px] px-2 sm:px-0 border-b-2 ${on ? 'border-indigo-600 text-indigo-700' : 'border-transparent text-slate-500 hover:text-slate-800'}`;
+            });
+            $('tab-prompts').classList.toggle('hidden', tab !== 'prompts');
+            $('tab-words').classList.toggle('hidden', tab !== 'words');
+            if (tab === 'words') renderWords();
+        }
+        function renderTheme() {
+            $('theme-emoji').textContent = theme.emoji;
+            $('theme-title').textContent = theme.en;
+            $('theme-fr').textContent = theme.fr;
+            document.querySelector('[data-tab="words"]').textContent = `Theme words (${theme.words.length})`;
+            const tasks = filter === 'all' ? BANK_TASKS : [filter];
+            $('tab-prompts').innerHTML = tasks.map(k => {
+                const list = theme.prompts.filter(p => p.task === k);
+                if (!list.length) return '';
+                return `<div class="space-y-2">
+                    <div><h2 class="text-lg font-black text-slate-900">${escapeHtml(T[k].label)}</h2><p class="text-sm text-slate-500">${escapeHtml(T[k].what)} <span class="text-slate-400">Matches ${escapeHtml(T[k].exams)}.</span></p></div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">${list.map(p => {
+                        const r = resultOf(taskId(theme.slug, p));
+                        return `<a href="exam.html?theme=${encodeURIComponent(theme.slug)}&q=${encodeURIComponent(p.id)}" data-prompt="${escapeHtml(p.id)}" class="group flex items-start gap-3 bg-white border border-slate-200 hover:border-indigo-400 rounded-2xl p-3">
+                            <span class="shrink-0 text-xs font-bold text-slate-400 w-10 pt-0.5">${escapeHtml(p.id)}</span>
+                            <span class="flex-1 min-w-0 font-semibold text-slate-900 leading-snug group-hover:text-indigo-700" lang="fr">${escapeHtml(p.title)}</span>
+                            ${r ? `<span class="shrink-0 text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">✓ ${r.score}/20</span>` : ''}</a>`;
+                    }).join('')}</div></div>`;
+            }).join('') + (filter !== 'all' ? `<button type="button" data-filter="all" class="text-sm font-semibold text-indigo-700 min-h-[44px]">Show all tasks</button>` : '');
+        }
+        // Theme words by group, with meaning, example and "I know it" (shared with Vocab)
+        function renderWords() {
+            const progress = store.get('vocab_progress', {});
+            const groups = [...new Set(theme.words.map(w => w.group))];
+            $('tab-words').innerHTML = `
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                    <p class="text-sm text-slate-600">Tap a word to hear it. Words you tick count as known in Vocab too.</p>
+                    <a href="vocab.html?topic=${encodeURIComponent('tcf:' + theme.slug)}&step=practise" class="inline-flex items-center min-h-[44px] px-4 bg-slate-900 hover:bg-slate-700 text-white font-bold rounded-xl text-sm">Practise these words as flashcards →</a>
+                </div>` + groups.map(g => `
+                <div class="space-y-2"><h2 class="text-sm font-black text-slate-900">${escapeHtml(g)}</h2>
+                <div class="bg-white border border-slate-200 rounded-2xl divide-y divide-slate-100">${theme.words.filter(w => w.group === g).map(w => {
+                    const known = (progress[w.key] || {}).box >= 4;
+                    return `<div class="flex items-start gap-3 p-3">
+                        <button type="button" data-tcf-say="${escapeHtml(w.fr)}" class="shrink-0 w-10 h-10 rounded-xl bg-indigo-50 hover:bg-indigo-100" aria-label="Listen: ${escapeHtml(w.fr)}">🔊</button>
+                        <div class="min-w-0 flex-1">
+                            <div class="font-bold ${w.g === 'm' ? 'text-sky-700' : w.g === 'f' ? 'text-rose-600' : 'text-slate-900'}" lang="fr">${escapeHtml(w.fr)}</div>
+                            <div class="text-sm text-slate-600">${escapeHtml(w.en)}</div>
+                            ${w.ex ? `<div class="text-sm text-slate-500 italic mt-1" lang="fr">${TCF.highlight(theme, w.ex)}</div>` : ''}
+                        </div>
+                        <label class="shrink-0 flex items-center gap-1.5 text-sm text-slate-600 min-h-[40px] cursor-pointer"><input type="checkbox" data-know="${escapeHtml(w.key)}" class="w-5 h-5 accent-emerald-600" ${known ? 'checked' : ''}> Know</label>
+                    </div>`;
+                }).join('')}</div></div>`).join('');
+        }
+
+        // ---------- One question ----------
+        function paraHtml(text) {
+            // "Document 1. …", "Synthèse. …", "Opinion. …": the label in bold
+            const m = /^(Document \d\.|Synthèse\.|Opinion\.)\s*/.exec(text);
+            const li = text.startsWith('- ');
+            const body = TCF.highlight(theme, m ? text.slice(m[0].length) : li ? text.slice(2) : text);
+            return li ? `<li>${body}</li>` : `<p>${m ? `<b class="text-slate-700">${m[1]}</b> ` : ''}${body}</p>`;
+        }
+        function paras(list) {
+            let html = '', inList = false;
+            list.forEach(x => {
+                const li = x.startsWith('- ');
+                if (li && !inList) { html += '<ul class="list-disc pl-6 space-y-1">'; inList = true; }
+                if (!li && inList) { html += '</ul>'; inList = false; }
+                html += paraHtml(x);
+            });
+            return html + (inList ? '</ul>' : '');
+        }
+        function renderPrompt() {
+            const p = prompt, k = T[p.task];
+            const id = taskId(theme.slug, p);
+            document.title = `${p.title} - Exam preparation`;
+            $('prompt-back').href = `exam.html?theme=${encodeURIComponent(theme.slug)}`;
+            $('prompt-back').textContent = `← ${theme.en}`;
+            $('prompt-crumb').textContent = `${theme.emoji} ${theme.en} · ${k.label} · ${p.id}`;
+            $('prompt-title').textContent = p.title;
+            const consigne = `<p class="font-semibold">${escapeHtml(k.consigne)}</p>`;
+            $('prompt-body').innerHTML = p.task === 'S3' ? `<p>${TCF.highlight(theme, p.title)}</p>${consigne}` : paras(p.prompt) + consigne;
+            $('prompt-what').textContent = `${k.what} Matches ${k.exams}.`;
+            $('prompt-checklist').innerHTML = k.include.map(x => `<li class="flex gap-2"><span class="text-indigo-500">•</span><span>${escapeHtml(x)}</span></li>`).join('');
+            $('prompt-words').innerHTML = TCF.glossHtml(TCF.wordsFor(theme, p, 12));
+            const page = k.kind === 'writing' ? 'writing.html' : 'speaking.html';
+            $('btn-do').href = `${page}?task=${encodeURIComponent(id)}`;
+            $('btn-do').textContent = k.kind === 'writing' ? '✍️ Write my answer' : '🎙️ Speak my answer';
+            const r = resultOf(id);
+            $('prompt-result').textContent = r ? `Your last score: ${r.score}/20.` : '';
+            $('answer-box').classList.add('hidden');
+            $('btn-answer').setAttribute('aria-expanded', 'false');
+            $('btn-answer').textContent = '📖 Show the sample answer';
+            $('answer-body').innerHTML = paras(p.answer);
+            $('answer-words').innerHTML = TCF.answerWordsHtml(theme, p);
+            $('answer-follow').classList.toggle('hidden', !p.followup);
+            $('answer-follow').innerHTML = p.followup ? `<b class="block text-amber-900">${p.task === 'S1' ? 'The examiner may ask next' : 'The examiner may push back'}</b><span lang="fr">${TCF.highlight(theme, p.followup)}</span>` : '';
+        }
+        function toggleAnswer() {
+            const open = $('answer-box').classList.toggle('hidden') === false;
+            $('btn-answer').setAttribute('aria-expanded', open);
+            $('btn-answer').textContent = open ? 'Hide the sample answer' : '📖 Show the sample answer';
+            if (open) {
+                const done = store.get('exam_done', {}); done[taskId(theme.slug, prompt)] = Date.now(); store.set('exam_done', done);
+                $('answer-box').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        }
+
+        // ---------- Views and routing: exam.html, ?theme=travail, ?theme=travail&q=W2.1 ----------
+        function show(view) {
+            ['themes-view', 'theme-view', 'prompt-view'].forEach(v => $(v).classList.toggle('hidden', v !== view));
+            $('scroller').scrollTop = 0;
+        }
+        async function route() {
+            const q = new URLSearchParams(location.search);
+            try {
+                idx = idx || await TCF.index();
+                const slug = q.get('theme');
+                if (!slug || !idx.themes.some(t => t.slug === slug)) { theme = null; document.title = 'Exam preparation - Apprendre le Français'; renderHome(); show('themes-view'); return; }
+                theme = await TCF.theme(slug);
+                const p = q.get('q') && theme.prompts.find(x => x.id === q.get('q'));
+                if (p) { prompt = p; renderPrompt(); show('prompt-view'); return; }
+                document.title = `${theme.en} - Exam preparation`;
+                renderTheme(); setTab(q.get('tab') === 'words' ? 'words' : 'prompts'); show('theme-view');
+            } catch (err) {
+                show('themes-view');
+                $('load-error').textContent = err.message + ' Check your connection and try again.';
+                $('load-error').classList.remove('hidden');
+            }
+        }
+        function go(url) { history.pushState({}, '', url); route(); }
+        window.addEventListener('popstate', route);
+        document.addEventListener('click', (e) => {
+            if (e.metaKey || e.ctrlKey || e.shiftKey) return;
+            const f = e.target.closest('[data-filter]');
+            if (f) { filter = f.dataset.filter; store.set('exam_filter', filter); if (theme && !$('theme-view').classList.contains('hidden')) renderTheme(); else renderHome(); return; }
+            const a = e.target.closest('a[data-theme], a[data-prompt], a[data-go], #prompt-back');
+            if (a) { e.preventDefault(); go(a.getAttribute('href')); return; }
+            const tab = e.target.closest('[data-tab]');
+            if (tab) { setTab(tab.dataset.tab); return; }
+        });
+        document.addEventListener('change', (e) => {
+            const c = e.target.closest('[data-know]'); if (!c) return;
+            const progress = store.get('vocab_progress', {});
+            if (c.checked) progress[c.dataset.know] = { box: 5, due: Date.now() + 21 * 86400000 }; else delete progress[c.dataset.know];
+            store.set('vocab_progress', progress);
+        });
+        TCF.wire(document.body, () => theme, (t) => speakFrench(t, 0.9));
+        $('btn-answer').addEventListener('click', toggleAnswer);
+        $('say-answer').addEventListener('click', () => speakFrench(TCF.answerText(prompt).replace(/•/g, ''), 0.95));
+        $('say-task').addEventListener('click', () => speakFrench(prompt.task === 'S3' ? prompt.title : prompt.prompt.join(' '), 0.95));
+        route();
+    </script>
+</body>
+</html>

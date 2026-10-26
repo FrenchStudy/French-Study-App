@@ -18,6 +18,7 @@
     <script src="js/ai.js"></script>
     <script src="js/writing-tasks.js"></script>
     <script src="js/task-angles.js"></script>
+    <script src="js/tcf.js"></script>
     <style>
         .fix-del { text-decoration: line-through; text-decoration-thickness: 2px; }
         details > summary { list-style: none; } details > summary::-webkit-details-marker { display: none; }
@@ -101,7 +102,7 @@
                                     <button id="toggle-en" type="button" class="min-h-[36px] px-2.5 text-sm font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg">English</button>
                                 </div>
                             </div>
-                            <p id="task-fr" class="text-base text-slate-900 leading-relaxed"></p>
+                            <p id="task-fr" class="text-base text-slate-900 leading-relaxed whitespace-pre-line"></p>
                             <p id="task-en" class="hidden text-sm text-slate-500 leading-relaxed border-t border-slate-100 pt-2"></p>
                         </section>
                         <section id="include-box" class="bg-white border border-slate-200 rounded-2xl p-4 space-y-2">
@@ -178,7 +179,8 @@
         const kindLabel = (t) => t.source === 'posted' ? 'Your question' : t.own ? 'AI question' : t.type;
         let task = null;
         const allTasks = () => [...window.WRITING_TASKS, ...ownTasks];
-        const findTask = (id) => allTasks().find(t => t.id === id);
+        let examTasks = [], examTheme = null;   // questions from the exam question bank (exam.html), opened by their id
+        const findTask = (id) => allTasks().find(t => t.id === id) || examTasks.find(t => t.id === id);
 
         // ---------- Task list ----------
         function currentLevel() {
@@ -238,7 +240,8 @@
             $('task-view').classList.remove('hidden');
             const st = LEVEL_STYLE[t.level];
             $('crumb').className = `text-xs font-bold px-2 py-1 rounded-full ${st[1]} ${st[0]}`;
-            $('crumb').textContent = `Writing · ${t.level} · ${kindLabel(t)}${t.subject ? ' · ' + t.subject : ''}`;
+            $('crumb').textContent = t.tcf ? `Exam preparation · ${t.type} · ${t.subject}` : `Writing · ${t.level} · ${kindLabel(t)}${t.subject ? ' · ' + t.subject : ''}`;
+            $('back').textContent = t.tcf ? '← Back to the question' : '← All tasks';
             $('task-title').textContent = t.title;
             document.title = `${t.title} - Writing`;
             $('task-fr').textContent = t.fr;
@@ -255,7 +258,7 @@
             $('btn-model').classList.toggle('hidden', !t.model && !(t.plan || []).length);
             $('text').value = drafts[t.id] || (results[t.id] && results[t.id].text) || '';
             $('saved').textContent = drafts[t.id] ? 'Draft saved on this device' : '';
-            $('btn-model').textContent = t.model ? '📖 Model answer' : '🗺️ See a plan';
+            $('btn-model').textContent = t.tcf ? '📖 Sample answer' : t.model ? '📖 Model answer' : '🗺️ See a plan';
             $('model-box').classList.add('hidden');
             updateCount();
             const r = results[t.id];
@@ -306,10 +309,26 @@
         }
 
         // ---------- Model answer / plan ----------
-        function toggleModel() {
+        async function toggleModel() {
             const box = $('model-box');
             if (!box.classList.contains('hidden') && box.dataset.kind === 'model') { box.classList.add('hidden'); return; }
             box.dataset.kind = 'model';
+            if (task.tcf) {
+                const th = await TCF.theme(task.tcf.theme), p = th.prompts.find(x => x.id === task.tcf.prompt);
+                examTheme = th;
+                const tooEarly = countWords($('text').value) < task.words[0] / 2;
+                box.innerHTML = `
+                    <div class="flex items-center justify-between gap-2">
+                        <h2 class="text-sm font-bold uppercase tracking-wide text-amber-900">Sample answer (B2–C1)</h2>
+                        <button type="button" id="say-model" class="min-h-[36px] px-2.5 text-sm font-semibold text-amber-900 bg-white border border-amber-200 rounded-lg">🔊 Listen</button>
+                    </div>
+                    ${tooEarly ? '<p class="text-sm text-amber-800">Tip: try writing your own text first, then compare.</p>' : ''}
+                    <div lang="fr" class="space-y-3 text-base text-slate-900 leading-relaxed">${p.answer.map(x => `<p>${TCF.highlight(th, x)}</p>`).join('')}</div>
+                    ${TCF.answerWordsHtml(th, p)}`;
+                box.classList.remove('hidden');
+                $('say-model').onclick = () => speakFrench(task.model);
+                return;
+            }
             const tooEarly = countWords($('text').value) < task.words[0] / 2;
             box.innerHTML = task.model ? `
                 <div class="flex items-center justify-between gap-2">
@@ -584,7 +603,11 @@ Reply with JSON only:
             if (fm) { pick.format = fm.dataset.format; store.set('writing_pick', pick); renderPicker(); }
         });
         $('text').addEventListener('input', () => { updateCount(); clearTimeout(saveTimer); saveTimer = setTimeout(saveDraft, 400); });
-        $('back').addEventListener('click', () => showList(true));
+        $('back').addEventListener('click', () => {
+            if (task && task.tcf) { location.href = `exam.html?theme=${encodeURIComponent(task.tcf.theme)}&q=${encodeURIComponent(task.tcf.prompt)}`; return; }
+            showList(true);
+        });
+        TCF.wire($('model-box'), () => examTheme, (t) => speakFrench(t, 0.9));
         $('say-task').addEventListener('click', () => speakFrench(task.fr));
         $('toggle-en').addEventListener('click', () => {
             const hidden = $('task-en').classList.toggle('hidden');
@@ -610,8 +633,11 @@ Reply with JSON only:
             onGenerate($('btn-another'), showError, task.subject || task.title, task.format || DEFAULT_FORMAT[task.level], task.level);
         });
 
-        function route() {
+        async function route() {
             const id = new URLSearchParams(location.search).get('task');
+            if (id && !findTask(id) && TCF.parseId(id)) {
+                try { const t = await TCF.taskFromId(id); if (t) examTasks = [t, ...examTasks.filter(x => x.id !== t.id)]; } catch (e) { console.warn(e); }
+            }
             if (id && findTask(id)) openTask(id, false); else showList(false);
         }
         window.addEventListener('popstate', route);

@@ -1,0 +1,382 @@
+{
+ "tasks": {
+  "W2": {
+   "heading": "Writing — Tâche 2 (120–150 words)",
+   "intro": "Narrate an experience or give advice: introduction, two or three developed points, conclusion."
+  },
+  "W3": {
+   "heading": "Writing — Tâche 3 (120–180 words)",
+   "intro": "Two short documents with opposing views. Part 1: a neutral summary in your own words (about 50 words). Part 2: your argued opinion (about 100 words)."
+  },
+  "S2": {
+   "heading": "Speaking — Tâche 2 (role-play: you ask the questions)",
+   "intro": "The examiner plays the other person. Greet and give context, vary question forms (est-ce que, inversion, question words), react to answers, and close politely."
+  },
+  "S3": {
+   "heading": "Speaking — Tâche 3 (giving and defending an opinion)",
+   "intro": "State your position first, give two arguments with examples, concede a point, then conclude. Each sample runs about 1.5–2 minutes spoken, followed by a likely examiner challenge to practise."
+  }
+ },
+ "themes": [
+  {
+   "slug": "sante",
+   "fr": "La santé et le bien-être",
+   "en": "Health & well-being",
+   "emoji": "🩺",
+   "words": 50,
+   "tasks": {
+    "W1": 10,
+    "W2": 10,
+    "W3": 10,
+    "S1": 10,
+    "S2": 10,
+    "S3": 10
+   }
+  },
+  {
+   "slug": "travail",
+   "fr": "Le travail et l'emploi",
+   "en": "Work & employment",
+   "emoji": "💼",
+   "words": 50,
+   "tasks": {
+    "W1": 10,
+    "W2": 10,
+    "W3": 10,
+    "S1": 10,
+    "S2": 10,
+    "S3": 10
+   }
+  },
+  {
+   "slug": "environnement",
+   "fr": "L'environnement",
+   "en": "The environment",
+   "emoji": "🌍",
+   "words": 40,
+   "tasks": {
+    "W1": 10,
+    "W2": 10,
+    "W3": 10,
+    "S1": 10,
+    "S2": 10,
+    "S3": 10
+   }
+  },
+  {
+   "slug": "voyages",
+   "fr": "Les voyages et la mobilité",
+   "en": "Travel & mobility",
+   "emoji": "✈️",
+   "words": 50,
+   "tasks": {
+    "W1": 10,
+    "W2": 10,
+    "W3": 10,
+    "S1": 10,
+    "S2": 10,
+    "S3": 10
+   }
+  },
+  {
+   "slug": "loisirs",
+   "fr": "Les loisirs et les passions",
+   "en": "Leisure & hobbies",
+   "emoji": "🎨",
+   "words": 50,
+   "tasks": {
+    "W1": 10,
+    "W2": 10,
+    "W3": 10,
+    "S1": 10,
+    "S2": 10,
+    "S3": 10
+   }
+  },
+  {
+   "slug": "technologie",
+   "fr": "La technologie et l'IA",
+   "en": "Technology & AI",
+   "emoji": "🤖",
+   "words": 50,
+   "tasks": {
+    "W1": 10,
+    "W2": 10,
+    "W3": 10,
+    "S1": 10,
+    "S2": 10,
+    "S3": 10
+   }
+  },
+  {
+   "slug": "logement",
+   "fr": "Le logement et l'urbanisme",
+   "en": "Housing & urban planning",
+   "emoji": "🏘️",
+   "words": 50,
+   "tasks": {
+    "W1": 10,
+    "W2": 10,
+    "W3": 10,
+    "S1": 10,
+    "S2": 10,
+    "S3": 10
+   }
+  },
+  {
+   "slug": "education",
+   "fr": "L'éducation et la formation",
+   "en": "Education & training",
+   "emoji": "🎓",
+   "words": 50,
+   "tasks": {
+    "W1": 10,
+    "W2": 10,
+    "W3": 10,
+    "S1": 10,
+    "S2": 10,
+    "S3": 10
+   }
+  },
+  {
+   "slug": "societe",
+   "fr": "La société et le civisme",
+   "en": "Society & civic life",
+   "emoji": "🏛️",
+   "words": 50,
+   "tasks": {
+    "W1": 10,
+    "W2": 10,
+    "W3": 10,
+    "S1": 10,
+    "S2": 10,
+    "S3": 10
+   }
+  },
+  {
+   "slug": "consommation",
+   "fr": "La consommation et les médias",
+   "en": "Consumption & media",
+   "emoji": "🛍️",
+   "words": 50,
+   "tasks": {
+    "W1": 10,
+    "W2": 10,
+    "W3": 10,
+    "S1": 10,
+    "S2": 10,
+    "S3": 10
+   }
+  },
+  {
+   "slug": "immigration",
+   "fr": "L'immigration et l'intégration",
+   "en": "Immigration & integration",
+   "emoji": "🧳",
+   "words": 50,
+   "tasks": {
+    "W1": 10,
+    "W2": 10,
+    "W3": 10,
+    "S1": 10,
+    "S2": 10,
+    "S3": 10
+   }
+  },
+  {
+   "slug": "agriculture",
+   "fr": "L'agriculture et l'alimentation",
+   "en": "Agriculture & food",
+   "emoji": "🌾",
+   "words": 50,
+   "tasks": {
+    "W1": 10,
+    "W2": 10,
+    "W3": 10,
+    "S1": 10,
+    "S2": 10,
+    "S3": 10
+   }
+  },
+  {
+   "slug": "culture",
+   "fr": "La culture et le patrimoine",
+   "en": "Culture & heritage",
+   "emoji": "🏺",
+   "words": 50,
+   "tasks": {
+    "W1": 10,
+    "W2": 10,
+    "W3": 10,
+    "S1": 10,
+    "S2": 10,
+    "S3": 10
+   }
+  },
+  {
+   "slug": "egalite",
+   "fr": "L'égalité et la diversité",
+   "en": "Equality & diversity",
+   "emoji": "🤝",
+   "words": 50,
+   "tasks": {
+    "W1": 10,
+    "W2": 10,
+    "W3": 10,
+    "S1": 10,
+    "S2": 10,
+    "S3": 10
+   }
+  },
+  {
+   "slug": "economie",
+   "fr": "L'économie et les finances",
+   "en": "Economy & finance",
+   "emoji": "📊",
+   "words": 50,
+   "tasks": {
+    "W1": 10,
+    "W2": 10,
+    "W3": 10,
+    "S1": 10,
+    "S2": 10,
+    "S3": 10
+   }
+  },
+  {
+   "slug": "temps",
+   "fr": "La gestion du temps",
+   "en": "Time management",
+   "emoji": "⏰",
+   "words": 50,
+   "tasks": {
+    "W1": 10,
+    "W2": 10,
+    "W3": 10,
+    "S1": 10,
+    "S2": 10,
+    "S3": 10
+   }
+  },
+  {
+   "slug": "innovation",
+   "fr": "Le changement et l'innovation",
+   "en": "Change & innovation",
+   "emoji": "🔄",
+   "words": 50,
+   "tasks": {
+    "W1": 10,
+    "W2": 10,
+    "W3": 10,
+    "S1": 10,
+    "S2": 10,
+    "S3": 10
+   }
+  },
+  {
+   "slug": "avenir",
+   "fr": "L'avenir et la durabilité",
+   "en": "The future & sustainability",
+   "emoji": "🔮",
+   "words": 50,
+   "tasks": {
+    "W1": 10,
+    "W2": 10,
+    "W3": 10,
+    "S1": 10,
+    "S2": 10,
+    "S3": 10
+   }
+  },
+  {
+   "slug": "psychologie",
+   "fr": "La psychologie et le comportement",
+   "en": "Psychology & behaviour",
+   "emoji": "🧠",
+   "words": 50,
+   "tasks": {
+    "W1": 10,
+    "W2": 10,
+    "W3": 10,
+    "S1": 10,
+    "S2": 10,
+    "S3": 10
+   }
+  },
+  {
+   "slug": "justice",
+   "fr": "La justice et les droits citoyens",
+   "en": "Justice & citizens' rights",
+   "emoji": "⚖️",
+   "words": 50,
+   "tasks": {
+    "W1": 10,
+    "W2": 10,
+    "W3": 10,
+    "S1": 10,
+    "S2": 10,
+    "S3": 10
+   }
+  },
+  {
+   "slug": "medias",
+   "fr": "Les médias et l'information",
+   "en": "Media & information",
+   "emoji": "📰",
+   "words": 50,
+   "tasks": {
+    "W1": 10,
+    "W2": 10,
+    "W3": 10,
+    "S1": 10,
+    "S2": 10,
+    "S3": 10
+   }
+  },
+  {
+   "slug": "politique",
+   "fr": "La politique et la gouvernance",
+   "en": "Politics & governance",
+   "emoji": "🗳️",
+   "words": 50,
+   "tasks": {
+    "W1": 10,
+    "W2": 10,
+    "W3": 10,
+    "S1": 10,
+    "S2": 10,
+    "S3": 10
+   }
+  },
+  {
+   "slug": "mondialisation",
+   "fr": "La mondialisation et les relations internationales",
+   "en": "Globalisation & international relations",
+   "emoji": "🌐",
+   "words": 50,
+   "tasks": {
+    "W1": 10,
+    "W2": 10,
+    "W3": 10,
+    "S1": 10,
+    "S2": 10,
+    "S3": 10
+   }
+  },
+  {
+   "slug": "cadre-de-vie",
+   "fr": "Le cadre de vie et l'urbanisme écologique",
+   "en": "Living environment & eco-urbanism",
+   "emoji": "🌿",
+   "words": 50,
+   "tasks": {
+    "W1": 10,
+    "W2": 10,
+    "W3": 10,
+    "S1": 10,
+    "S2": 10,
+    "S3": 10
+   }
+  }
+ ]
+}

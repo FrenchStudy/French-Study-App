@@ -193,7 +193,7 @@ const Activity = {
 const APP_NAV = [
     ['index.html', 'Home'], ['vocab.html', 'Vocab'], ['lesson.html', 'Grammar'], ['conjugations.html', 'Conjugations'],
     ['reading.html', 'Reading'], ['listening.html', 'Listening'], ['writing.html', 'Writing'],
-    ['speaking.html', 'Speaking'], ['translator.html', 'Translator']
+    ['speaking.html', 'Speaking'], ['exam.html', 'Exam'], ['translator.html', 'Translator']
 ];
 function renderAppHeader() {
     const header = document.getElementById('app-header');
