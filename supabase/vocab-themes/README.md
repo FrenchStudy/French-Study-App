@@ -20,6 +20,8 @@ Run them in order in the Supabase SQL editor. Each file is safe to run twice, an
 | `08_undo_names_and_address.sql` | Removes only those links | `links_left` = 0 |
 | `09_fix_topic_links.sql` | Points 28 topic words at the entry with the right meaning (for example *avant* = before, not *l'avant* = the front, in Frequency & Time Adverbs; *le dîner* = dinner, not *dîner* = to have dinner) | one row per word, each with the meaning that fits its topic |
 | `10_fix_word_list.sql` | Fixes 20 words found in a French review of the word list: articles (*le yaourt*, *le yoga*, *madame* with none), *otage* always masculine, *ouvrier* as the headword, and example sentences with a grammar slip or that used a different word. `06` and `07` already include these fixes, so run this only if you ran them before | 20 rows with the corrected values |
+| `11_environment_words.sql` | Grows Environment & Climate (theme 31) with the TCF environment words and the climate word list: 61 new entries (`source = 'topic'`, no `Rank`) and links to 16 words already in the list. Gives *émission* its "emission" meaning. The app studies the topic in 11 rounds of about 10 words (`js/rounds-data.js`) | `words_in_topic` = 126, `new_words` = 61 |
+| `11_undo_environment_words.sql` | Removes only what `11` added | `words_in_topic` = 49, `new_words` = 0 |
 | `99_undo.sql` | Removes the themes, the new entries and the new columns, and restores gender and article from the backup | `rows_now` = 5000 |
 
 Before running `05_new_themes.sql`, look through `05_new_themes_review.csv` (GitHub shows it as a table).
