@@ -82,7 +82,7 @@
         (function redirectOld() {
             const p = new URLSearchParams(location.search);
             const slug = p.get('theme'), q = p.get('q');
-            if (slug && q && /^[WS]\d\.\d+$/.test(q)) { location.replace(`${q[0] === 'S' ? 'speaking' : 'writing'}.html?task=${encodeURIComponent(`tcf-${slug}-${q}`)}`); }
+            if (slug && q && /^[WS]\d\.\d+$/.test(q)) { location.replace(`${q[0] === 'S' ? 'speaking' : 'writing'}.html?task=${encodeURIComponent(`tcf-${slug}-${q}`)}`); return; }
             if (slug) { location.replace(`writing.html?tab=prep&theme=${encodeURIComponent(slug)}`); }
         })();
 
