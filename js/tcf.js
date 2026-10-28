@@ -270,9 +270,147 @@ async function browser(root, opts) {
     if (opts.say) root.addEventListener('click', (e) => { const g = e.target.closest('[data-tcf-say]'); if (g) opts.say(g.dataset.tcfSay); });
     await draw();
 }
+// ---------- The question picker (Writing and Speaking) ----------
+// A "Type" row (the exam task types, then the page's own types such as Everyday or Mine) and, for the
+// exam types, a "Topic" row with the 24 themes. "All topics" shows one tile per theme with what you've done.
+//   const pk = await TCF.picker(root, { kind: 'writing', href: (id) => url, say, status: (id) => html,
+//        extra: [{ key, label, sub, count: () => n, note: () => html, html: () => cards }], askAI: (theme) => {} })
+//   pk.state() -> { type, slug }   pk.set(type, slug)   pk.redraw()
+const PK_KEY = 'question_picker';
+const shortTheme = (t) => { const s = t.en.split(' & ')[0].replace(/^The /, ''); return s.charAt(0).toUpperCase() + s.slice(1); };
+async function picker(root, opts) {
+    injectCss();
+    const kinds = ORDER.filter(k => TASKS[k].kind === opts.kind);
+    const extra = opts.extra || [];
+    const types = [...kinds, ...extra.map(x => x.key)];
+    const saved = (() => { try { return (JSON.parse(localStorage.getItem(PK_KEY)) || {})[opts.kind] || {}; } catch (e) { return {}; } })();
+    const old = readPick();   // the earlier list remembered its task and theme
+    let type = types.includes(saved.type) ? saved.type : kinds.includes((old[opts.kind] || {}).task) ? old[opts.kind].task : kinds[0];
+    let slug = saved.slug || old.theme || 'all';
+    let showEn = saved.en !== undefined ? !!saved.en : !!old.en;
+    const save = () => { try { const a = JSON.parse(localStorage.getItem(PK_KEY)) || {}; a[opts.kind] = { type, slug, en: showEn }; localStorage.setItem(PK_KEY, JSON.stringify(a)); } catch (e) {} };
+    let ix;
+    try { ix = await index(); } catch (e) { root.innerHTML = `<p class="text-sm text-rose-700">${esc(e.message)}</p>`; return null; }
+    if (slug !== 'all' && !ix.themes.some(t => t.slug === slug)) slug = 'all';
+    const chip = (on) => `shrink-0 min-h-[40px] px-3 rounded-xl text-sm font-semibold border whitespace-nowrap transition ${on ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-white border-slate-200 text-slate-700 hover:border-indigo-300'}`;
+    const label = 'text-xs font-bold uppercase tracking-wide text-slate-500';
+    root.innerHTML = `<div class="space-y-2">
+            <div class="${label}">Type</div>
+            <div data-pk-types class="flex gap-2 overflow-x-auto pb-1" role="tablist" aria-label="Type of question"></div>
+            <div data-pk-topicbox class="space-y-2 pt-1">
+                <div class="${label}">Topic</div>
+                <div data-pk-topics class="flex gap-2 overflow-x-auto pb-1" role="tablist" aria-label="Topic"></div>
+            </div>
+            <div data-pk-note class="text-sm text-slate-600 pt-1"></div>
+            <div data-pk-list class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+            <details data-pk-words class="hidden bg-white border border-slate-200 rounded-2xl group"></details>
+        </div>`;
+    const q = (s) => root.querySelector(s);
+    const isBank = () => kinds.includes(type);
+    function drawTypes() {
+        q('[data-pk-types]').innerHTML = kinds.map(k => `<button type="button" role="tab" aria-selected="${k === type}" data-pk-type="${k}" class="${chip(k === type)}">${esc(TASKS[k].short)} <span class="text-xs font-medium ${k === type ? 'text-indigo-100' : 'text-slate-400'}">${esc(TASKS[k].label.split(' · ')[1].toLowerCase())}</span></button>`).join('') +
+            extra.map(x => { const n = x.count ? x.count() : null; return (x.hide && x.hide()) ? '' : `<button type="button" role="tab" aria-selected="${x.key === type}" data-pk-type="${x.key}" class="${chip(x.key === type)}">${esc(x.label)}${x.sub || n !== null ? ` <span class="text-xs font-medium ${x.key === type ? 'text-indigo-100' : 'text-slate-400'}">${esc(x.sub || String(n))}</span>` : ''}</button>`; }).join('');
+    }
+    function drawTopics() {
+        q('[data-pk-topicbox]').classList.toggle('hidden', !isBank());
+        if (!isBank()) return;
+        q('[data-pk-topics]').innerHTML = `<button type="button" role="tab" aria-selected="${slug === 'all'}" data-pk-slug="all" class="${chip(slug === 'all')}">All topics</button>` +
+            ix.themes.map(t => `<button type="button" role="tab" aria-selected="${t.slug === slug}" data-pk-slug="${esc(t.slug)}" class="${chip(t.slug === slug)}" title="${esc(t.fr)}">${t.emoji} ${esc(shortTheme(t))}</button>`).join('');
+        const on = q('[data-pk-topics] [aria-selected="true"]');
+        if (on) on.scrollIntoView({ block: 'nearest', inline: 'center' });
+    }
+    const status = (id, done) => (opts.status && opts.status(id)) || (done.has(id) ? '<span class="shrink-0 text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">✓ Practised</span>' : '');
+    async function drawList() {
+        const list = q('[data-pk-list]'), note = q('[data-pk-note]'), words = q('[data-pk-words]');
+        words.classList.add('hidden');
+        if (!isBank()) {
+            const x = extra.find(e => e.key === type);
+            note.innerHTML = x.note ? x.note() : '';
+            list.innerHTML = x.html();
+            return;
+        }
+        const T = TASKS[type], done = practised();
+        if (slug === 'all') {
+            note.innerHTML = `${esc(T.label)} · ${esc(lengthOf(T))}. ${esc(T.what)} Pick a topic.`;
+            list.innerHTML = ix.themes.map(t => {
+                const total = (t.tasks || {})[type] || 0;
+                const n = [...done].filter(id => id.startsWith(`tcf-${t.slug}-${type}.`)).length;
+                return `<button type="button" data-pk-slug="${esc(t.slug)}" class="group text-left flex items-center gap-3 bg-white border border-slate-200 hover:border-indigo-400 hover:shadow-md transition rounded-2xl p-4">
+                    <span class="text-3xl leading-none" aria-hidden="true">${t.emoji}</span>
+                    <span class="min-w-0 flex-1"><span class="block font-bold text-slate-900 group-hover:text-indigo-700 leading-snug">${esc(t.en)}</span>
+                    <span lang="fr" class="block text-sm text-slate-500 leading-snug">${esc(t.fr)}</span></span>
+                    <span class="shrink-0 text-xs font-bold ${n ? 'text-emerald-700 bg-emerald-50' : 'text-slate-400 bg-slate-50'} px-2 py-0.5 rounded-full">${n}/${total}</span></button>`;
+            }).join('');
+            return;
+        }
+        const meta = ix.themes.find(t => t.slug === slug);
+        list.innerHTML = '<p class="text-sm text-slate-400 animate-pulse">Loading…</p>';
+        let th;
+        try { th = await theme(slug); } catch (e) { list.innerHTML = `<p class="text-sm text-rose-700">${esc(e.message)}</p>`; return; }
+        if (th.slug !== slug || !isBank()) return;   // the choice changed while loading
+        const items = th.prompts.filter(p => p.task === type);
+        note.innerHTML = `${esc(T.short)} · ${meta.emoji} ${esc(meta.en)} · ${items.length} questions, ${esc(lengthOf(T))}, each with a model answer.
+            <button type="button" data-pk-en aria-pressed="${showEn}" class="font-semibold text-indigo-700 hover:underline">${showEn ? 'Hide English' : 'Show English'}</button>
+            ${opts.askAI ? `<span class="text-slate-400">·</span> <button type="button" data-pk-ai class="font-semibold text-indigo-700 hover:underline">✨ Ask the AI for another ${esc(shortTheme(meta).toLowerCase())} question</button>` : ''}`;
+        list.innerHTML = items.map(p => {
+            const id = `tcf-${th.slug}-${p.id}`;
+            const fr = p.task === 'S3' ? '' : p.prompt.join(' ');
+            const en = p.task === 'S3' ? '' : (p.prompt_en || []).join(' ');
+            return `<a href="${esc(opts.href(id))}" data-pk-open="${esc(id)}" class="group flex flex-col gap-1 bg-white border border-slate-200 hover:border-indigo-400 hover:shadow-md transition rounded-2xl p-4">
+                <span class="flex items-center justify-between gap-2"><span class="text-[11px] font-bold uppercase tracking-wide text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-full">${esc(p.id)}</span>${status(id, done)}</span>
+                <span lang="fr" class="font-bold text-slate-900 leading-snug group-hover:text-indigo-700">${esc(p.title)}</span>
+                ${p.title_en ? `<span class="text-sm text-slate-500 leading-snug">${esc(p.title_en)}</span>` : ''}
+                ${fr ? `<span lang="fr" class="text-sm text-slate-600 leading-snug line-clamp-2">${esc(fr)}</span>` : ''}
+                ${showEn && en ? `<span class="text-sm text-slate-500 italic leading-snug line-clamp-3">${esc(en)}</span>` : ''}
+            </a>`;
+        }).join('') || '<p class="text-sm text-slate-500">No questions of this type for this topic yet.</p>';
+        words.classList.remove('hidden');
+        words.innerHTML = `
+            <summary class="list-none cursor-pointer flex items-center justify-between gap-2 p-4 [&::-webkit-details-marker]:hidden">
+                <span class="font-bold text-slate-900">${th.emoji} Theme words <span class="font-semibold text-slate-400">(${th.words.length})</span></span>
+                <span class="text-sm font-semibold text-indigo-600 group-open:hidden">Show</span><span class="text-sm font-semibold text-indigo-600 hidden group-open:inline">Hide</span></summary>
+            <div class="px-4 pb-4 space-y-3">
+                <a href="vocab.html?topic=tcf:${encodeURIComponent(th.slug)}" class="inline-flex items-center min-h-[40px] px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold">🗂️ Learn them in Vocab</a>
+                <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-1.5">${glossHtml(th.words)}</div>
+            </div>`;
+    }
+    function draw() { save(); drawTypes(); drawTopics(); return drawList(); }
+    root.addEventListener('click', (e) => {
+        const t = e.target.closest('[data-pk-type]');
+        if (t) { type = t.dataset.pkType; draw(); return; }
+        const s = e.target.closest('[data-pk-slug]');
+        if (s) { slug = s.dataset.pkSlug; draw(); if (!s.closest('[data-pk-topics]')) q('[data-pk-topics]').scrollIntoView({ block: 'nearest' }); return; }
+        if (e.target.closest('[data-pk-en]')) { showEn = !showEn; save(); drawList(); return; }
+        if (e.target.closest('[data-pk-ai]') && opts.askAI) { const m = ix.themes.find(x => x.slug === slug); opts.askAI(m); return; }
+        const g = e.target.closest('[data-tcf-say]');
+        if (g && opts.say) opts.say(g.dataset.tcfSay);
+    });
+    await draw();
+    return {
+        state: () => ({ type, slug, isBank: isBank() }),
+        set(t, s) { if (types.includes(t)) type = t; if (s && (s === 'all' || ix.themes.some(x => x.slug === s))) slug = s; return draw(); },
+        redraw: () => draw(),
+        themes: ix.themes
+    };
+}
+// A question not done yet, at random: from one topic, or from any topic (task: W1… S3)
+async function randomId(task, slug, skip) {
+    const ix = await index();
+    const pool = slug && slug !== 'all' ? ix.themes.filter(t => t.slug === slug) : ix.themes;
+    const done = skip || practised();
+    for (const t of shuffleArr(pool)) {
+        const th = await theme(t.slug);
+        const ids = th.prompts.filter(p => p.task === task).map(p => `tcf-${th.slug}-${p.id}`);
+        const fresh = ids.filter(id => !done.has(id));
+        if (fresh.length) return fresh[Math.floor(Math.random() * fresh.length)];
+        if (pool.length === 1 && ids.length) return ids[Math.floor(Math.random() * ids.length)];
+    }
+    return null;
+}
+const shuffleArr = (arr) => { const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 // Where a bank question lives: its page, and the list it belongs to
 const taskPage = (id) => { const r = parseId(id); return r && r.id[0] === 'S' ? 'speaking.html' : 'writing.html'; };
-const listHref = (id) => { const r = parseId(id); if (!r) return 'exam.html'; return r.id[0] === 'S' ? `speaking.html?mode=questions&t=${r.id.slice(0, 2)}&theme=${encodeURIComponent(r.slug)}` : `writing.html?view=task&t=${r.id.slice(0, 2)}&theme=${encodeURIComponent(r.slug)}`; };
+const listHref = (id) => { const r = parseId(id); if (!r) return 'exam.html'; return r.id[0] === 'S' ? `speaking.html?mode=questions&t=${r.id.slice(0, 2)}&theme=${encodeURIComponent(r.slug)}` : `writing.html?t=${r.id.slice(0, 2)}&theme=${encodeURIComponent(r.slug)}`; };
 
-window.TCF = { browser, practised, listHref, taskPage, answerEnHtml, answerTextEn,  answerWordsHtml, TASKS, ORDER, index, theme, matches, highlight, wordsFor, glossHtml, writingTask, speakingTask, taskFromId, parseId, wire, injectCss, answerText };
+window.TCF = { browser, picker, randomId, shortTheme, practised, listHref, taskPage, answerEnHtml, answerTextEn,  answerWordsHtml, TASKS, ORDER, index, theme, matches, highlight, wordsFor, glossHtml, writingTask, speakingTask, taskFromId, parseId, wire, injectCss, answerText };
 })();
