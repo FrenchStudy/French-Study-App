@@ -36,59 +36,62 @@
             <div id="list-view" class="space-y-4">
                 <div>
                     <h1 class="text-2xl font-black text-slate-900">Writing</h1>
-                    <p class="text-sm text-slate-500 mt-1">Get a new question from the AI, post your own, or choose one below. Then get your text corrected.</p>
+                    <p class="text-sm text-slate-500 mt-1">Choose a question, write, and get your text corrected.</p>
                 </div>
-                <div id="levels" class="flex w-max max-w-full gap-1 p-1 bg-slate-200/70 rounded-xl overflow-x-auto" role="tablist" aria-label="Level"></div>
+                <div class="flex flex-wrap gap-1.5 sm:gap-2">
+                    <button id="open-ai" type="button" class="min-h-[44px] px-3 sm:px-4 text-sm sm:text-base bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl">✨ New question</button>
+                    <button id="open-post" type="button" class="min-h-[44px] px-3 sm:px-4 text-sm sm:text-base bg-white border border-slate-200 hover:border-indigo-300 font-bold rounded-xl">📝 Paste<span class="hidden sm:inline"> your own</span></button>
+                    <button id="random-btn" type="button" class="min-h-[44px] px-3 sm:px-4 text-sm sm:text-base bg-white border border-slate-200 hover:border-indigo-300 disabled:opacity-50 font-bold rounded-xl">🎲 Random</button>
+                </div>
+                <p id="random-error" class="hidden text-sm text-rose-700"></p>
+                <!-- Your last unfinished text -->
+                <a id="continue" href="#" class="hidden flex items-center gap-3 bg-amber-50 border border-amber-200 hover:border-amber-400 rounded-2xl p-3">
+                    <span class="text-2xl" aria-hidden="true">✏️</span>
+                    <span class="min-w-0 flex-1"><span id="continue-title" class="block font-bold text-slate-900 truncate"></span><span id="continue-meta" class="block text-sm text-amber-800"></span></span>
+                    <span class="shrink-0 font-bold text-amber-700">Continue →</span>
+                </a>
+                <!-- After three good scores in a row: a suggestion to go up -->
+                <div id="nudge" class="hidden flex items-start gap-3 bg-emerald-50 border border-emerald-200 rounded-2xl p-3 text-sm text-emerald-900">
+                    <span class="text-xl" aria-hidden="true">🚀</span><span id="nudge-text" class="flex-1"></span>
+                    <button id="nudge-close" type="button" class="shrink-0 min-h-[32px] px-2 font-bold text-emerald-800 hover:text-emerald-950" aria-label="Hide this tip">✕</button>
+                </div>
+                <section class="space-y-2 pt-1">
+                    <h2 class="text-lg font-black text-slate-900">Choose a question</h2>
+                    <div id="picker"><p class="text-sm text-slate-400 animate-pulse">Loading the questions…</p></div>
+                </section>
+            </div>
 
-                <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] gap-3">
-                    <!-- A new question from the AI -->
-                    <section class="bg-white border border-slate-200 rounded-2xl p-4 space-y-3">
-                        <h2 class="font-black text-slate-900">✨ A new question</h2>
-                        <div>
-                            <div class="text-sm font-semibold text-slate-700 mb-1.5">Subject</div>
-                            <div id="subjects" class="flex flex-wrap gap-1.5"></div>
-                            <input id="subject-other" type="text" maxlength="80" placeholder="…or type any subject" class="mt-2 w-full text-base md:text-sm px-3 py-2 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                        </div>
-                        <div>
-                            <div class="text-sm font-semibold text-slate-700 mb-1.5">Format</div>
-                            <div id="formats" class="flex flex-wrap gap-1.5"></div>
-                        </div>
-                        <div class="flex items-center gap-3">
-                            <button id="gen-btn" type="button" class="whitespace-nowrap min-h-[48px] px-5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-bold rounded-xl">Write me a question</button>
-                            <span class="hidden sm:inline text-xs text-slate-400">A different question every time. Uses AI.</span>
+            <!-- New question (AI) and Your own question: a panel over the page (from the bottom on phones) -->
+            <div id="sheet" class="hidden fixed inset-0 z-50 flex items-end sm:items-start justify-center sm:pt-20 bg-slate-900/40" role="dialog" aria-modal="true" aria-labelledby="sheet-title">
+                <div class="w-full sm:max-w-lg bg-white rounded-t-2xl sm:rounded-2xl p-5 space-y-3 max-h-[90vh] overflow-y-auto shadow-xl">
+                    <div id="sheet-ai" class="space-y-3">
+                        <h2 id="sheet-title" class="text-lg font-black text-slate-900">✨ New question</h2>
+                        <p class="text-sm text-slate-500">The AI writes a new question for you. A different one every time.</p>
+                        <label class="block"><span class="block text-sm font-semibold text-slate-700 mb-1">Level</span>
+                            <select id="ai-level" class="w-full text-base px-3 py-2.5 bg-white border border-slate-200 rounded-xl"></select>
+                            <span id="ai-level-note" class="block text-xs text-slate-500 mt-1"></span></label>
+                        <label class="block"><span class="block text-sm font-semibold text-slate-700 mb-1">Subject</span>
+                            <select id="ai-subject" class="w-full text-base px-3 py-2.5 bg-white border border-slate-200 rounded-xl"></select></label>
+                        <input id="subject-other" type="text" maxlength="80" placeholder="…or type any subject" class="w-full text-base px-3 py-2.5 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <label class="block"><span class="block text-sm font-semibold text-slate-700 mb-1">Format</span>
+                            <select id="ai-format" class="w-full text-base px-3 py-2.5 bg-white border border-slate-200 rounded-xl"></select></label>
+                        <div class="flex flex-wrap gap-2 pt-1">
+                            <button id="gen-btn" type="button" class="min-h-[48px] px-5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-bold rounded-xl">Write me a question</button>
+                            <button type="button" data-sheet-close class="min-h-[48px] px-4 bg-white border border-slate-200 font-semibold rounded-xl">Cancel</button>
                         </div>
                         <p id="gen-error" class="hidden text-sm text-rose-700"></p>
-                    </section>
-
-                    <!-- Post your own question -->
-                    <section class="bg-white border border-slate-200 rounded-2xl p-4 space-y-3 flex flex-col">
-                        <h2 class="font-black text-slate-900">📝 Your own question</h2>
+                    </div>
+                    <div id="sheet-post" class="hidden space-y-3">
+                        <h2 class="text-lg font-black text-slate-900">📝 Your own question</h2>
                         <p class="text-sm text-slate-500">Paste a question from a book, an exam or your teacher, in French or English.</p>
-                        <textarea id="post-text" rows="4" maxlength="1200" placeholder="e.g. Vous avez passé un week-end chez des amis. Écrivez-leur pour les remercier…" class="flex-1 w-full text-base md:text-sm p-3 bg-white border border-slate-200 rounded-xl resize-y focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
-                        <button id="post-btn" type="button" class="self-start min-h-[44px] px-4 bg-slate-900 hover:bg-slate-800 disabled:opacity-50 text-white font-bold rounded-xl">Use my question</button>
-                        <p id="post-error" class="hidden text-sm text-rose-700"></p>
-                    </section>
-                </div>
-
-                <section id="mine-box" class="hidden space-y-2">
-                    <h2 class="text-sm font-bold uppercase tracking-wide text-slate-500">Your questions</h2>
-                    <div id="mine-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
-                </section>
-                <!-- Choose a question: ready-made tasks by level, or the exam-style questions by task type and theme (js/tcf.js) -->
-                <section class="space-y-3 pt-1">
-                    <div class="flex flex-wrap items-center justify-between gap-2">
-                        <h2 class="text-lg font-black text-slate-900">Choose a question</h2>
-                        <div id="views" class="flex gap-1 p-1 bg-slate-200/70 rounded-xl" role="tablist" aria-label="Show questions">
-                            <button type="button" role="tab" data-view="level" class="w-view min-h-[36px] px-3.5 rounded-lg text-sm font-bold">By level</button>
-                            <button type="button" role="tab" data-view="task" class="w-view min-h-[36px] px-3.5 rounded-lg text-sm font-bold">By task type</button>
+                        <textarea id="post-text" rows="5" maxlength="1200" placeholder="e.g. Vous avez passé un week-end chez des amis. Écrivez-leur pour les remercier…" class="w-full text-base p-3 bg-white border border-slate-200 rounded-xl resize-y focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
+                        <div class="flex flex-wrap gap-2">
+                            <button id="post-btn" type="button" class="min-h-[48px] px-5 bg-slate-900 hover:bg-slate-800 disabled:opacity-50 text-white font-bold rounded-xl">Use my question</button>
+                            <button type="button" data-sheet-close class="min-h-[48px] px-4 bg-white border border-slate-200 font-semibold rounded-xl">Cancel</button>
                         </div>
+                        <p id="post-error" class="hidden text-sm text-rose-700"></p>
                     </div>
-                    <div id="view-level" class="space-y-2">
-                        <p id="view-level-note" class="text-sm text-slate-500"></p>
-                        <div id="task-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
-                    </div>
-                    <div id="view-task" class="hidden space-y-3"></div>
-                </section>
+                </div>
             </div>
 
             <!-- ===== ONE TASK ===== -->
@@ -193,67 +196,117 @@
         let examTasks = [], examTheme = null;   // questions from the exam question bank (exam.html), opened by their id
         const findTask = (id) => allTasks().find(t => t.id === id) || examTasks.find(t => t.id === id);
 
-        // ---------- Task list ----------
-        function currentLevel() {
-            const saved = store.get('writing_level', null);
-            if (LEVELS.includes(saved)) return saved;
+        // ---------- Levels: no level is stored. Each question has its own; the AI estimates yours from each text ----------
+        const levelOf = (t) => t && LEVELS.includes(t.level) ? t.level : 'B1';
+        // The level to suggest for a new question: the one the AI estimated from your latest text
+        function suggestedLevel() {
+            const last = Object.values(results).filter(r => r && r.feedback && LEVELS.includes(r.feedback.level)).sort((a, b) => b.at - a.at)[0];
+            if (last) return last.feedback.level;
             const lv = (LocalStore.get('fs_profile', {}) || {}).level;
-            return LEVELS.includes(lv) ? lv : 'A1';
+            return LEVELS.includes(lv) ? lv : 'A2';
+        }
+        const lastEstimate = () => { const r = Object.values(results).filter(x => x && x.feedback && LEVELS.includes(x.feedback.level)).sort((a, b) => b.at - a.at)[0]; return r ? r.feedback.level : null; };
+
+        // ---------- Choose a question: Type (Writing 1–3, Everyday, Mine) and Topic (js/tcf.js picker) ----------
+        const badge = (cls, text) => `<span class="text-[11px] font-bold uppercase tracking-wide ${cls} px-2 py-0.5 rounded-full">${escapeHtml(text)}</span>`;
+        function statusHtml(id) {
+            const r = results[id];
+            if (r) return `<span class="shrink-0 text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">✓ ${r.score}/20</span>`;
+            if (drafts[id]) return '<span class="shrink-0 text-xs font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full">Draft</span>';
+            return '';
+        }
+        function card(t) {
+            const lv = levelOf(t), st = LEVEL_STYLE[lv];
+            const tag = t.own ? badge('text-violet-700 bg-violet-50', `${t.source === 'posted' ? 'Your question' : lv + ' · AI question'}`) : badge(`${st[0]} ${st[1]}`, `${lv} · ${t.type}`);
+            return `<a href="writing.html?task=${encodeURIComponent(t.id)}" data-task="${escapeHtml(t.id)}" class="group flex flex-col gap-1.5 bg-white border border-slate-200 hover:border-indigo-400 hover:shadow-md transition rounded-2xl p-4">
+                <span class="flex items-center justify-between gap-2">${tag}${statusHtml(t.id)}</span>
+                <span class="font-bold text-slate-900 leading-snug group-hover:text-indigo-700">${escapeHtml(t.title)}</span>
+                <span class="text-sm text-slate-500 leading-snug line-clamp-2">${escapeHtml(t.en || t.fr)}</span>
+                <span class="text-xs font-semibold text-slate-400 mt-auto pt-1">${t.subject ? escapeHtml(t.subject) + ' · ' : ''}${t.words[0]}–${t.words[1]} words</span>
+            </a>`;
+        }
+        const everyday = () => window.WRITING_TASKS.slice().sort((a, b) => LEVELS.indexOf(a.level) - LEVELS.indexOf(b.level));
+        const EXTRA = [
+            { key: 'everyday', label: 'Everyday', sub: 'A1–C2', note: () => 'Everyday writing: messages, postcards, descriptions and opinions, easiest first. Each card shows its level.', html: () => everyday().map(card).join('') },
+            { key: 'mine', label: 'Mine', count: () => ownTasks.length,
+              note: () => ownTasks.length ? 'Questions the AI wrote for you and questions you pasted, newest first.' : '',
+              html: () => ownTasks.length ? ownTasks.map(card).join('') : '<p class="text-sm text-slate-500 sm:col-span-2 lg:col-span-3">No questions yet. Tap <b>✨ New question</b> or <b>📝 Paste your own</b> above.</p>' }
+        ];
+        let picker = null;
+        async function initPicker(type, slug) {
+            if (picker) { if (type || slug) await picker.set(type, slug); else picker.redraw(); return; }
+            picker = await TCF.picker($('picker'), { kind: 'writing', extra: EXTRA, status: statusHtml,
+                href: (id) => `writing.html?task=${encodeURIComponent(id)}`, say: (t) => speakFrench(t, 0.9),
+                askAI: (th) => openSheet('ai', th.en) });
+            if (picker && (type || slug)) await picker.set(type, slug);
         }
         function renderList() {
-            const level = currentLevel();
-            $('levels').innerHTML = LEVELS.map(lv => {
-                const list = allTasks().filter(t => t.level === lv);
-                const n = list.filter(t => results[t.id]).length;
-                const on = lv === level;
-                return `<button type="button" role="tab" aria-selected="${on}" data-level="${lv}" class="shrink-0 px-3.5 py-1.5 rounded-lg text-sm font-bold transition ${on ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-800'}">
-                    ${lv}<span class="ml-1.5 text-xs font-semibold ${on ? LEVEL_STYLE[lv][0] : 'text-slate-400'}">${n}/${list.length}</span></button>`;
-            }).join('');
-            const st = LEVEL_STYLE[level];
-            const card = (t) => {
-                const r = results[t.id];
-                const status = r ? `<span class="shrink-0 text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">✓ ${r.score}/20</span>`
-                    : drafts[t.id] ? '<span class="shrink-0 text-xs font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full">Draft</span>' : '';
-                return `<a href="writing.html?task=${encodeURIComponent(t.id)}" data-task="${escapeHtml(t.id)}" class="group flex flex-col gap-1.5 bg-white border border-slate-200 hover:border-indigo-400 hover:shadow-md transition rounded-2xl p-4">
-                    <span class="flex items-center justify-between gap-2">
-                        <span class="text-[11px] font-bold uppercase tracking-wide ${t.own ? 'text-violet-700 bg-violet-50' : st[0] + ' ' + st[1]} px-2 py-0.5 rounded-full">${escapeHtml(kindLabel(t))}</span>${status}
-                    </span>
-                    <span class="font-bold text-slate-900 leading-snug group-hover:text-indigo-700">${escapeHtml(t.title)}</span>
-                    <span class="text-sm text-slate-500 leading-snug line-clamp-2">${escapeHtml(t.en || t.fr)}</span>
-                    <span class="text-xs font-semibold text-slate-400 mt-auto pt-1">${t.subject ? escapeHtml(t.subject) + ' · ' : ''}${t.words[0]}–${t.words[1]} words</span>
-                </a>`;
-            };
-            const mine = ownTasks.filter(t => t.level === level);
-            $('mine-box').classList.toggle('hidden', !mine.length);
-            $('mine-grid').innerHTML = mine.map(card).join('');
-            $('task-grid').innerHTML = window.WRITING_TASKS.filter(t => t.level === level).map(card).join('');
-            $('view-level-note').textContent = `Everyday writing tasks for ${level}: messages, emails, posts and opinions. Change the level at the top.`;
-            renderPicker();
+            if (picker) picker.redraw();
+            renderContinue();
+            renderNudge();
+        }
+        // Continue: the last text you started and haven't finished
+        async function renderContinue() {
+            const box = $('continue'), id = store.get('writing_last', null);
+            if (!id || !drafts[id] || results[id]) { box.classList.add('hidden'); return; }
+            let t = findTask(id);
+            if (!t && TCF.parseId(id)) { try { t = await TCF.taskFromId(id); if (t) examTasks = [t, ...examTasks.filter(x => x.id !== t.id)]; } catch (e) { t = null; } }
+            if (!t) { box.classList.add('hidden'); return; }
+            $('continue-title').textContent = `Continue: ${t.title}`;
+            $('continue-meta').textContent = `Draft · ${countWords(drafts[id])} of ${t.words[0]}–${t.words[1]} words · ${t.tcf ? t.type.split(' · ')[0] + ' · ' + t.subject : levelOf(t) + ' · ' + kindLabel(t)}`;
+            box.href = `writing.html?task=${encodeURIComponent(id)}`; box.dataset.task = id;
+            box.classList.remove('hidden');
+        }
+        // Three scores of 16/20 or more in a row: suggest something harder
+        function renderNudge() {
+            const recent = Object.entries(results).filter(([, r]) => r && Number.isFinite(r.score)).sort((a, b) => b[1].at - a[1].at).slice(0, 3);
+            const box = $('nudge');
+            if (recent.length < 3 || recent.some(([, r]) => r.score < 16) || store.get('writing_nudge_off', 0) >= recent[0][1].at) { box.classList.add('hidden'); return; }
+            const [id] = recent[0], m = /^tcf-.+-W(\d)\./.exec(id), lv = lastEstimate() || levelOf(findTask(id));
+            const next = LEVELS[Math.min(LEVELS.length - 1, LEVELS.indexOf(lv) + 1)];
+            $('nudge-text').innerHTML = m && m[1] !== '3'
+                ? `Three scores of 16/20 or more in a row! Try <button type="button" data-nudge-type="W${Number(m[1]) + 1}" class="font-bold underline">Writing ${Number(m[1]) + 1}</button>.`
+                : lv === 'C2' ? 'Three scores of 16/20 or more in a row: excellent work!'
+                : `Three scores of 16/20 or more in a row! Try a <b>${next}</b> question: pick it in <button type="button" data-nudge-ai="${next}" class="font-bold underline">✨ New question</button> or in <button type="button" data-nudge-type="everyday" class="font-bold underline">Everyday</button>.`;
+            box.classList.remove('hidden');
         }
 
-        // Subject and format chips
-        function renderPicker() {
-            const level = currentLevel();
-            const fmt = pick.format || DEFAULT_FORMAT[level];
-            const subjects = SUBJECTS;
-            const chip = (on) => `min-h-[36px] px-3 rounded-full text-sm font-semibold border transition ${on ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-white border-slate-200 text-slate-700 hover:border-indigo-300'}`;
-            $('subjects').innerHTML = subjects.map(s => `<button type="button" data-subject="${escapeHtml(s)}" class="${chip(s === pick.subject)}">${escapeHtml(s)}</button>`).join('');
-            $('formats').innerHTML = FORMATS.map(([k, label]) => `<button type="button" data-format="${k}" class="${chip(k === fmt)}">${escapeHtml(label)}</button>`).join('');
+        // ---------- The panel: New question (AI) and Your own question ----------
+        function openSheet(which, subject) {
+            $('sheet').classList.remove('hidden');
+            $('sheet-ai').classList.toggle('hidden', which !== 'ai');
+            $('sheet-post').classList.toggle('hidden', which !== 'post');
+            $('gen-error').classList.add('hidden'); $('post-error').classList.add('hidden');
+            if (which === 'ai') {
+                const lv = typeof subject === 'object' && subject && subject.level ? subject.level : suggestedLevel();
+                $('ai-level').innerHTML = LEVELS.map(l => `<option value="${l}" ${l === lv ? 'selected' : ''}>${l} · ${LEVEL_NAME[l]}</option>`).join('');
+                const est = lastEstimate();
+                $('ai-level-note').textContent = est ? `Your latest text was about ${est}.` : 'Not sure? Start here: after your first correction, the AI suggests your level.';
+                $('ai-subject').innerHTML = SUBJECTS.map(x => `<option ${x === pick.subject ? 'selected' : ''}>${escapeHtml(x)}</option>`).join('');
+                $('subject-other').value = typeof subject === 'string' ? subject : '';
+                drawFormats();
+                setTimeout(() => $('gen-btn').focus(), 0);
+            } else setTimeout(() => $('post-text').focus(), 0);
         }
+        const LEVEL_NAME = { A1: 'Beginner', A2: 'Elementary', B1: 'Intermediate', B2: 'Upper intermediate', C1: 'Advanced', C2: 'Mastery' };
+        function drawFormats() {
+            const fmt = pick.format || DEFAULT_FORMAT[$('ai-level').value];
+            $('ai-format').innerHTML = FORMATS.map(([k, label]) => `<option value="${k}" ${k === fmt ? 'selected' : ''}>${escapeHtml(label)}</option>`).join('');
+        }
+        const closeSheet = () => $('sheet').classList.add('hidden');
 
         // ---------- One task ----------
         function openTask(id, push) {
             const t = findTask(id);
             if (!t) { showList(false); return; }
             task = t;
-            store.set('writing_level', t.level);
             if (push) history.pushState({}, '', `writing.html?task=${encodeURIComponent(t.id)}`);
             $('list-view').classList.add('hidden');
             $('task-view').classList.remove('hidden');
-            const st = LEVEL_STYLE[t.level];
+            const st = LEVEL_STYLE[levelOf(t)];
             $('crumb').className = `text-xs font-bold px-2 py-1 rounded-full ${st[1]} ${st[0]}`;
-            $('crumb').textContent = t.tcf ? `Exam-style question · ${t.type} · ${t.subject}` : `Writing · ${t.level} · ${kindLabel(t)}${t.subject ? ' · ' + t.subject : ''}`;
-            $('back').textContent = t.tcf ? '← Questions by task type' : '← All questions';
+            $('crumb').textContent = t.tcf ? `Exam-style question · ${t.type} · ${t.subject}` : t.noLevel ? `Writing · ${kindLabel(t)}` : `Writing · ${t.level} · ${kindLabel(t)}${t.subject ? ' · ' + t.subject : ''}`;
+            $('back').textContent = '← All questions';
             $('task-title').textContent = t.title;
             document.title = `${t.title} - Writing`;
             $('task-fr').textContent = t.fr;
@@ -302,7 +355,7 @@
         let saveTimer = null;
         function saveDraft() {
             const v = $('text').value;
-            if (v.trim()) drafts[task.id] = v; else delete drafts[task.id];
+            if (v.trim()) { drafts[task.id] = v; store.set('writing_last', task.id); } else delete drafts[task.id];
             store.set('writing_drafts', drafts);
             $('saved').textContent = v.trim() ? 'Draft saved on this device' : '';
         }
@@ -415,10 +468,15 @@
             $('feedback').classList.remove('hidden');
             $('feedback').innerHTML = '<div class="bg-white border border-slate-200 rounded-2xl p-4 text-sm text-indigo-600 animate-pulse">Reading your text…</div>';
             try {
+                const open = task.tcf || task.noLevel;   // exam-style and pasted questions: no level is assumed
+                const who = task.tcf ? `This is an exam-style task (TCF/TEF, ${task.type}). Mark it as an examiner would, whatever the student's level.`
+                    : open ? 'The student pasted this question; nothing is assumed about their level.'
+                    : `The student is at CEFR level ${task.level}.`;
                 const fb = await askAI([
-                    { role: 'system', content: `You are a kind, precise French teacher. The student is at CEFR level ${task.level}. Correct their French text.
+                    { role: 'system', content: `You are a kind, precise French teacher. ${who} Correct their French text.
 Reply with JSON only:
-{"score": number 0-20 for a ${task.level} learner (task done, accuracy, range),
+{"score": number 0-20 ${open ? 'for this task (task done, accuracy, range), as in the TCF' : `for a ${task.level} learner (task done, accuracy, range)`},
+ "level": "the CEFR level this text shows: A1, A2, B1, B2, C1 or C2",
  "summary": "two short sentences in simple English: overall impression and the main thing to work on",
  "strengths": ["up to 3 short points in English"],
  "corrections": [{"wrong": "the exact words copied from the student's text", "right": "the corrected French", "why": "one short explanation in simple English", "type": "grammar|spelling|agreement|conjugation|vocabulary|punctuation|style"}],
@@ -430,6 +488,7 @@ Only list real mistakes, at most 12, in the order they appear. "wrong" must be c
                 const score = Math.max(0, Math.min(20, Math.round(Number(fb.score))));
                 if (!Number.isFinite(score)) throw new Error('The AI reply could not be read. Please try again.');
                 fb.score = score;
+                fb.level = LEVELS.includes(String(fb.level || '').toUpperCase()) ? String(fb.level).toUpperCase() : null;
                 results[task.id] = { score, at: Date.now(), text, feedback: fb };
                 store.set('writing_results', results);
                 delete drafts[task.id]; store.set('writing_drafts', drafts);
@@ -487,6 +546,7 @@ Only list real mistakes, at most 12, in the order they appear. "wrong" must be c
                     </div>
                     <div class="min-w-0 space-y-1">
                         <h2 class="font-black text-slate-900">Your feedback</h2>
+                        ${fb.level ? `<p class="text-sm font-semibold text-indigo-700">Your text is at about <b>${escapeHtml(fb.level)}</b> level.</p>` : ''}
                         <p class="text-sm text-slate-700">${escapeHtml(fb.summary || '')}</p>
                         ${(fb.strengths || []).length ? `<ul class="text-sm text-emerald-800 space-y-0.5">${fb.strengths.map(s => `<li>✓ ${escapeHtml(s)}</li>`).join('')}</ul>` : ''}
                     </div>
@@ -573,6 +633,7 @@ Reply with JSON only:
             btn.disabled = true; btn.textContent = 'Writing a question…';
             try {
                 const q = await generateQuestion(subject, format, level);
+                closeSheet();
                 openTask(q.id, true);
             } catch (err) {
                 showError(err.message + ' Meanwhile, the ready-made tasks work without AI.');
@@ -581,10 +642,10 @@ Reply with JSON only:
         async function postQuestion() {
             const text = $('post-text').value.trim();
             if (text.length < 10) { $('post-error').textContent = 'Type or paste the question first.'; $('post-error').classList.remove('hidden'); return; }
-            const level = currentLevel();
+            const level = suggestedLevel();   // only for the length; the correction doesn't assume a level
             $('post-error').classList.add('hidden');
             $('post-btn').disabled = true; $('post-btn').textContent = 'Reading your question…';
-            let q = { id: 'my-' + Date.now().toString(36), own: true, source: 'posted', level, type: 'Your question',
+            let q = { id: 'my-' + Date.now().toString(36), own: true, source: 'posted', noLevel: true, level, type: 'Your question',
                 title: text.split(/[.?!\n]/)[0].slice(0, 60) || 'My question', fr: text, en: '', words: WORDS[level], include: [], bank: [], plan: [] };
             try {
                 // Keep the student's question; the AI adds a translation, a checklist, a word bank and a sensible length
@@ -603,6 +664,7 @@ Reply with JSON only:
             saveOwn(q);
             $('post-text').value = '';
             $('post-btn').disabled = false; $('post-btn').textContent = 'Use my question';
+            closeSheet();
             openTask(q.id, true);
         }
 
@@ -615,12 +677,13 @@ Reply with JSON only:
             if (ins && task) { insertText(ins.dataset.insert); return; }
             const a = e.target.closest('[data-task]');
             if (a) { e.preventDefault(); openTask(a.dataset.task, true); return; }
-            const lv = e.target.closest('#levels [data-level]');
-            if (lv) { store.set('writing_level', lv.dataset.level); renderList(); return; }
-            const sj = e.target.closest('[data-subject]');
-            if (sj) { pick.subject = sj.dataset.subject; $('subject-other').value = ''; store.set('writing_pick', pick); renderPicker(); return; }
-            const fm = e.target.closest('[data-format]');
-            if (fm) { pick.format = fm.dataset.format; store.set('writing_pick', pick); renderPicker(); }
+            const pk = e.target.closest('[data-pk-open]');
+            if (pk) { e.preventDefault(); openAny(pk.dataset.pkOpen, true); return; }
+            if (e.target.closest('[data-sheet-close]') || e.target.id === 'sheet') { closeSheet(); return; }
+            const nt = e.target.closest('[data-nudge-type]');
+            if (nt && picker) { picker.set(nt.dataset.nudgeType); $('picker').scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
+            const na = e.target.closest('[data-nudge-ai]');
+            if (na) { openSheet('ai', { level: na.dataset.nudgeAi }); return; }
         });
         $('text').addEventListener('input', () => { updateCount(); clearTimeout(saveTimer); saveTimer = setTimeout(saveDraft, 400); });
         $('back').addEventListener('click', () => {
@@ -641,48 +704,68 @@ Reply with JSON only:
         });
         $('gen-btn').addEventListener('click', () => {
             const typed = $('subject-other').value.trim();
-            const level = currentLevel();
+            const level = $('ai-level').value, subject = $('ai-subject').value, format = $('ai-format').value;
+            pick = { subject, format }; store.set('writing_pick', pick);
             const showError = (m) => { $('gen-error').textContent = m; $('gen-error').classList.toggle('hidden', !m); };
-            onGenerate($('gen-btn'), showError, typed || pick.subject, pick.format || DEFAULT_FORMAT[level], level);
+            onGenerate($('gen-btn'), showError, typed || subject, format, level);
         });
+        $('ai-level').addEventListener('change', () => { if (!pick.format) drawFormats(); });
+        $('ai-subject').addEventListener('change', () => { $('subject-other').value = ''; });
+        $('open-ai').addEventListener('click', () => openSheet('ai'));
+        $('open-post').addEventListener('click', () => openSheet('post'));
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('sheet').classList.contains('hidden')) closeSheet(); });
+        $('nudge-close').addEventListener('click', () => {
+            const at = Math.max(0, ...Object.values(results).map(r => r.at || 0));
+            store.set('writing_nudge_off', at); $('nudge').classList.add('hidden');
+        });
+        // Random: a question you haven't done yet, from the type and topic you are looking at
+        $('random-btn').addEventListener('click', async () => {
+            const btn = $('random-btn'), err = $('random-error');
+            err.classList.add('hidden');
+            const st = picker ? picker.state() : { type: 'W1', slug: 'all', isBank: true };
+            try {
+                btn.disabled = true;
+                let id = null;
+                if (st.isBank) id = await TCF.randomId(st.type, st.slug);
+                else {
+                    const list = st.type === 'mine' ? ownTasks : everyday();
+                    const fresh = list.filter(t => !results[t.id]);
+                    const from = fresh.length ? fresh : list;
+                    id = from.length ? from[Math.floor(Math.random() * from.length)].id : null;
+                }
+                if (!id) throw new Error(st.type === 'mine' ? 'You have no questions of your own yet.' : 'No question found.');
+                await openAny(id, true);
+            } catch (e) { err.textContent = e.message; err.classList.remove('hidden'); }
+            finally { btn.disabled = false; }
+        });
+        // Open any question by its id, loading exam-style questions from the bank first
+        async function openAny(id, push) {
+            if (!findTask(id) && TCF.parseId(id)) {
+                const t = await TCF.taskFromId(id);
+                if (t) examTasks = [t, ...examTasks.filter(x => x.id !== t.id)];
+            }
+            if (findTask(id)) openTask(id, push);
+        }
         $('subject-other').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('gen-btn').click(); });
         $('post-btn').addEventListener('click', postQuestion);
+        $('continue').addEventListener('click', (e) => { e.preventDefault(); openAny($('continue').dataset.task, true); });
         $('btn-sample').addEventListener('click', () => showSample(false));
         $('btn-another').addEventListener('click', () => {
             const showError = (m) => { if (m) showErrorBox(m); };
             onGenerate($('btn-another'), showError, task.subject || task.title, task.format || DEFAULT_FORMAT[task.level], task.level);
         });
 
-        // ---------- Choose a question: by level (ready-made tasks) or by task type (exam-style questions) ----------
-        // Older links: ?tab=prep opened the exam-style questions, ?tab=practice the rest
-        let view = store.get('writing_view', store.get('writing_tab', 'practice') === 'prep' ? 'task' : 'level'), taskViewReady = false;
-        function setView(v, push) {
-            view = v === 'task' || v === 'prep' ? 'task' : 'level';
-            store.set('writing_view', view);
-            document.querySelectorAll('.w-view').forEach(b => {
-                const on = b.dataset.view === view;
-                b.setAttribute('aria-selected', on);
-                b.className = `w-view min-h-[36px] px-3.5 rounded-lg text-sm font-bold transition ${on ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-800'}`;
-            });
-            $('view-level').classList.toggle('hidden', view !== 'level');
-            $('view-task').classList.toggle('hidden', view !== 'task');
-            if (push) history.replaceState({}, '', view === 'task' ? 'writing.html?view=task' : 'writing.html');
-            if (view === 'task' && !taskViewReady) {
-                taskViewReady = true;
-                TCF.browser($('view-task'), { kind: 'writing', href: (id) => `writing.html?task=${encodeURIComponent(id)}`, say: (t) => speakFrench(t, 0.9) });
-            }
-        }
-        document.querySelectorAll('.w-view').forEach(b => b.addEventListener('click', () => setView(b.dataset.view, true)));
-
+        // ---------- Routing: ?task=…, ?t=W1&theme=sante (a list), older ?view=task / ?tab=prep / ?view=level ----------
         async function route() {
             const q = new URLSearchParams(location.search);
-            const v = q.get('view') || (q.get('tab') === 'prep' ? 'task' : q.get('tab') ? 'level' : null);
-            setView(v || view, false);
+            const old = q.get('view') === 'level' || q.get('tab') === 'practice' ? 'everyday' : null;
+            const type = q.get('t') || old || null, slug = q.get('theme') || null;
             const id = q.get('task');
             if (id && !findTask(id) && TCF.parseId(id)) {
                 try { const t = await TCF.taskFromId(id); if (t) examTasks = [t, ...examTasks.filter(x => x.id !== t.id)]; } catch (e) { console.warn(e); }
             }
             if (id && findTask(id)) openTask(id, false); else showList(false);
+            initPicker(type, slug);
         }
         window.addEventListener('popstate', route);
         route();
