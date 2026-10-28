@@ -38,12 +38,12 @@
             <div id="home-view" class="space-y-4">
                 <div>
                     <h1 class="text-2xl font-black text-slate-900">Speaking</h1>
-                    <p class="text-sm text-slate-500 mt-1">Talk with a character, repeat after native audio, or practise an exam task.</p>
+                    <p class="text-sm text-slate-500 mt-1">Talk with a character, repeat after native audio, or answer speaking questions.</p>
                 </div>
                 <nav class="flex gap-1 sm:gap-6 text-sm font-semibold overflow-x-auto overflow-y-hidden shadow-[inset_0_-1px_0_#e2e8f0]" role="tablist" aria-label="Speaking">
                     <button data-mode="conversation" role="tab" class="mode-tab shrink-0 min-h-[44px] px-2 sm:px-0 border-b-2">💬 Conversation</button>
                     <button data-mode="shadowing" role="tab" class="mode-tab shrink-0 min-h-[44px] px-2 sm:px-0 border-b-2">🔁 Shadowing</button>
-                    <button data-mode="exam" role="tab" class="mode-tab shrink-0 min-h-[44px] px-2 sm:px-0 border-b-2">🎓 Exam prep</button>
+                    <button data-mode="exam" role="tab" class="mode-tab shrink-0 min-h-[44px] px-2 sm:px-0 border-b-2">🎯 Questions</button>
                 </nav>
                 <p id="mic-note" class="hidden text-sm text-amber-900 bg-amber-50 border border-amber-200 rounded-xl p-3">Your browser can't turn speech into text, so you can type instead of speaking. For the full experience, use Chrome or Edge.</p>
 
@@ -80,11 +80,8 @@
                     <div id="track-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
                 </section>
 
-                <!-- Exam task -->
+                <!-- Questions: a new one from the AI, your own, then the exam-style questions (the mode is still called "exam" in the code) -->
                 <section id="mode-exam" class="hidden space-y-3">
-                    <!-- Exam-style questions by task and theme (js/tcf.js) -->
-                    <div id="exam-bank" class="space-y-3"></div>
-                    <h2 class="pt-3 text-sm font-bold uppercase tracking-wide text-slate-500">Or make your own task</h2>
                     <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] gap-3">
                         <section class="bg-white border border-slate-200 rounded-2xl p-4 space-y-3">
                             <h2 class="font-black text-slate-900">✨ A new speaking task</h2>
@@ -109,9 +106,12 @@
                         </section>
                     </div>
                     <section id="exam-mine-box" class="hidden space-y-2">
-                        <h2 class="text-sm font-bold uppercase tracking-wide text-slate-500">Your tasks</h2>
+                        <h2 class="text-sm font-bold uppercase tracking-wide text-slate-500">Your questions</h2>
                         <div id="exam-mine" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
                     </section>
+                    <!-- Exam-style questions by task type and theme (js/tcf.js) -->
+                    <h2 class="pt-1 text-lg font-black text-slate-900">Choose a question</h2>
+                    <div id="q-bank" class="space-y-3"></div>
                 </section>
             </div>
 
@@ -285,7 +285,7 @@
         }
         let mode = store.get('speak_mode', 'conversation');
         function setMode(m, push) {
-            if (m === 'prep') m = 'exam';
+            if (m === 'prep' || m === 'questions') m = 'exam';   // older links say prep; the tab is "Questions"
             mode = ['conversation', 'shadowing', 'exam'].includes(m) ? m : 'conversation';
             store.set('speak_mode', mode);
             document.querySelectorAll('.mode-tab').forEach(b => {
@@ -298,13 +298,13 @@
             if (mode === 'conversation') renderScenes();
             if (mode === 'shadowing') renderTracks();
             if (mode === 'exam') { renderExamHome(); initBank(); }
-            if (push) history.pushState({}, '', 'speaking.html?mode=' + mode);
+            if (push) history.pushState({}, '', 'speaking.html?mode=' + (mode === 'exam' ? 'questions' : mode));
         }
         let bankReady = false;
         function initBank() {
             if (bankReady) return;
             bankReady = true;
-            TCF.browser($('exam-bank'), { kind: 'speaking', href: (id) => `speaking.html?task=${encodeURIComponent(id)}`, say: (t) => speakFrench(t, 0.9) });
+            TCF.browser($('q-bank'), { kind: 'speaking', href: (id) => `speaking.html?task=${encodeURIComponent(id)}`, say: (t) => speakFrench(t, 0.9) });
         }
         function showHome(push) {
             showView('home-view');
@@ -758,8 +758,8 @@ Reply with JSON only:
             if (push) history.pushState({}, '', `speaking.html?task=${encodeURIComponent(t.id)}`);
             showView('exam-view');
             document.title = `${t.title} - Speaking`;
-            $('exam-crumb').textContent = t.tcf ? `Exam prep · ${t.kindLabel} · ${t.subject}` : `Exam task · ${t.level} · ${t.source === 'posted' ? 'Your question' : t.kindLabel}${t.subject ? ' · ' + t.subject : ''}`;
-            $('exam-back').textContent = t.tcf ? '← Exam prep questions' : '← All tasks';
+            $('exam-crumb').textContent = t.tcf ? `Exam-style question · ${t.kindLabel} · ${t.subject}` : `Speaking task · ${t.level} · ${t.source === 'posted' ? 'Your question' : t.kindLabel}${t.subject ? ' · ' + t.subject : ''}`;
+            $('exam-back').textContent = '← All questions';
             $('exam-sample').textContent = t.tcf ? '📖 Sample answer' : '✨ Sample answer';
             $('exam-title').textContent = t.title;
             $('exam-fr').textContent = t.fr;

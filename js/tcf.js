@@ -272,7 +272,7 @@ async function browser(root, opts) {
 }
 // Where a bank question lives: its page, and the list it belongs to
 const taskPage = (id) => { const r = parseId(id); return r && r.id[0] === 'S' ? 'speaking.html' : 'writing.html'; };
-const listHref = (id) => { const r = parseId(id); if (!r) return 'exam.html'; return r.id[0] === 'S' ? `speaking.html?mode=prep&t=${r.id.slice(0, 2)}&theme=${encodeURIComponent(r.slug)}` : `writing.html?tab=prep&t=${r.id.slice(0, 2)}&theme=${encodeURIComponent(r.slug)}`; };
+const listHref = (id) => { const r = parseId(id); if (!r) return 'exam.html'; return r.id[0] === 'S' ? `speaking.html?mode=questions&t=${r.id.slice(0, 2)}&theme=${encodeURIComponent(r.slug)}` : `writing.html?view=task&t=${r.id.slice(0, 2)}&theme=${encodeURIComponent(r.slug)}`; };
 
 window.TCF = { browser, practised, listHref, taskPage, answerEnHtml, answerTextEn,  answerWordsHtml, TASKS, ORDER, index, theme, matches, highlight, wordsFor, glossHtml, writingTask, speakingTask, taskFromId, parseId, wire, injectCss, answerText };
 })();

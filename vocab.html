@@ -1394,8 +1394,8 @@
             $('topic-view').classList.remove('hidden');
             const st = lvStyle(tp.level);
             $('topic-crumb').className = `text-xs font-bold px-2 py-1 rounded-full ${tp.level ? st[1] + ' ' + st[0] : 'bg-slate-100 text-slate-600'}`;
-            $('topic-back').textContent = tp.tcf ? '← Exam prep questions' : '← All topics';
-            $('topic-crumb').textContent = tp.tcf ? 'Exam prep · theme words' : tp.id === 'review' ? 'Words due today' : tp.freq ? `Most common words · Set ${tp.set || ''}` : `Vocab · ${tp.level}${tp.no ? ' · Topic ' + tp.no : ''}`;
+            $('topic-back').textContent = tp.tcf ? '← Back to the questions' : '← All topics';
+            $('topic-crumb').textContent = tp.tcf ? 'Exam-style questions · theme words' : tp.id === 'review' ? 'Words due today' : tp.freq ? `Most common words · Set ${tp.set || ''}` : `Vocab · ${tp.level}${tp.no ? ' · Topic ' + tp.no : ''}`;
             $('deck-title').textContent = tp.lesson && !tp.n ? `${tp.emoji || ''} ${tp.title}`.trim() : tp.title;
             document.title = `${tp.title} - Vocabulary`;
             // The hands-on lesson, if this topic has one
@@ -1540,8 +1540,8 @@
 
         // ---------- Wiring ----------
         $('topic-back').addEventListener('click', () => {
-            if (topic && topic.tcf) {   // back to the exam prep questions it came from (Speaking or Writing)
-                const page = /speaking\.html/.test(document.referrer) ? 'speaking.html?mode=prep' : 'writing.html?tab=prep';
+            if (topic && topic.tcf) {   // back to the exam-style questions it came from (Speaking or Writing)
+                const page = /speaking\.html/.test(document.referrer) ? 'speaking.html?mode=questions' : 'writing.html?view=task';
                 location.href = `${page}&theme=${encodeURIComponent(topic.tcf)}`; return;
             }
             showTopics(true);
