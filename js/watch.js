@@ -47,7 +47,7 @@ function speak(text, lang, rate, run) {
         if (!('speechSynthesis' in window)) return setTimeout(resolve, fallback);
         let done = false;
         const finish = () => { if (!done) { done = true; resolve(); } };
-        const u = new SpeechSynthesisUtterance(text);
+        const u = new SpeechSynthesisUtterance(lang.startsWith('fr') ? String(text).replace(/^\s*\d[\d\s]*\s*·\s*/, '').replace(/\s+\/\s+/g, ', ') : text);
         u.lang = lang; u.rate = rate;
         const v = voiceFor(lang); if (v) u.voice = v;
         u.onend = finish; u.onerror = finish;
