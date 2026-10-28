@@ -242,15 +242,11 @@
             <!-- (quiz) -->
             <section id="step-palace" class="hidden space-y-3"></section>
             <section id="mode-quiz" class="hidden space-y-3 max-w-2xl">
-                <h3 class="text-sm font-bold text-slate-500 uppercase tracking-wide">Quick tests</h3>
-                <div id="quiz-types" class="grid grid-cols-3 gap-2">
+                <div id="quiz-types" class="grid grid-cols-2 sm:grid-cols-3 gap-2">
                     <button data-quiz="meaning" class="quiz-type min-h-[56px] bg-white border border-slate-200 rounded-xl text-sm font-semibold">Pick the meaning</button>
                     <button data-quiz="type" class="quiz-type min-h-[56px] bg-white border border-slate-200 rounded-xl text-sm font-semibold">Type the French</button>
                     <button data-quiz="listen" class="quiz-type min-h-[56px] bg-white border border-slate-200 rounded-xl text-sm font-semibold">Listen and pick</button>
                     <button data-quiz="picture" id="quiz-picture-btn" class="quiz-type hidden min-h-[56px] bg-white border border-slate-200 rounded-xl text-sm font-semibold">🖼️ Picture game</button>
-                </div>
-                <h3 class="text-sm font-bold text-slate-500 uppercase tracking-wide pt-1">Games</h3>
-                <div id="game-types" class="grid grid-cols-2 sm:grid-cols-3 gap-2">
                     <button data-quiz="match" class="quiz-type min-h-[56px] bg-white border border-slate-200 rounded-xl text-sm font-semibold">🧩 Match pairs</button>
                     <button data-quiz="gender" class="quiz-type min-h-[56px] bg-white border border-slate-200 rounded-xl text-sm font-semibold">⚖️ Le or la?</button>
                     <button data-quiz="gap" class="quiz-type min-h-[56px] bg-white border border-slate-200 rounded-xl text-sm font-semibold">✏️ Fill the gap</button>
@@ -1206,8 +1202,13 @@
                 done: () => renderProgress()
             };
         }
+        // Number words are stored as "2 · deux": the digit would give the answer away in a quiz.
+        // Meanings lose their notes in brackets ("twenty-one (et only for 21…)") so they don't give hints either.
+        const quizFr = (w) => w.fr.replace(/^\s*\d[\d\s]*\s*·\s*/, '');
+        const quizEn = (w) => w.en.replace(/\s*\([^)]*\)/g, '').trim() || w.en;
         function choicesFor(w, field, pictured) {
-            let pool = deck.words.filter(o => o.key !== w.key && o[field] && o[field] !== w[field]);
+            const val = (x) => field === 'en' ? quizEn(x) : quizFr(x);
+            let pool = deck.words.filter(o => o.key !== w.key && o[field] && val(o) !== val(w));
             if (pictured && pool.filter(o => WordMemory.picture(o)).length >= 3) pool = pool.filter(o => WordMemory.picture(o));
             const others = shuffle(pool).slice(0, 3);
             return shuffle([w, ...others]);
@@ -1244,11 +1245,11 @@
                 const check = (giveUp) => {
                     if (quiz.answered) return;
                     const typed = $('quiz-input').value.trim();
-                    const answers = acceptedAnswers(w.fr).concat(acceptedAnswers(w.fr.replace(ARTICLE, '')));
+                    const answers = acceptedAnswers(quizFr(w)).concat(acceptedAnswers(quizFr(w).replace(ARTICLE, '')));
                     const ok = !giveUp && answers.includes(plain(typed.replace(/[…?!.]/g, '').trim()));
-                    const accentNote = ok && !w.fr.split(' / ').some(a => a.replace(/[…?!.]/g, '').trim().toLowerCase() === typed.toLowerCase() || a.replace(ARTICLE, '').replace(/[…?!.]/g, '').trim().toLowerCase() === typed.toLowerCase())
+                    const accentNote = ok && !quizFr(w).split(' / ').some(a => a.replace(/[…?!.]/g, '').trim().toLowerCase() === typed.toLowerCase() || a.replace(ARTICLE, '').replace(/[…?!.]/g, '').trim().toLowerCase() === typed.toLowerCase())
                         ? ' Check the accents.' : '';
-                    finishQuestion(w, ok, ok ? `Correct!${accentNote} ${w.fr}` : `The answer is: ${w.fr}`);
+                    finishQuestion(w, ok, ok ? `Correct!${accentNote} ${quizFr(w)}` : `The answer is: ${quizFr(w)}`);
                 };
                 $('quiz-check').addEventListener('click', () => check(false));
                 $('quiz-skip').addEventListener('click', () => check(true));
@@ -1267,9 +1268,9 @@
                     ? `<p class="text-base text-slate-600">Listen and pick the word you hear.</p>
                        <button id="quiz-play" class="min-h-[56px] px-6 bg-indigo-600 text-white text-lg font-bold rounded-xl">🔊 Play again</button>`
                     : `<p class="text-base text-slate-600">What does this mean?</p>
-                       <p class="text-3xl font-black break-words ${genderClass(w)}">${escapeHtml(w.fr)}</p>`}
+                       <p class="text-3xl font-black break-words ${genderClass(w)}">${escapeHtml(quizFr(w))}</p>`}
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    ${options.map((o, idx) => `<button data-opt="${idx}" class="quiz-opt min-h-[52px] text-left text-base px-4 py-2 bg-white border border-slate-200 hover:border-indigo-400 rounded-xl">${escapeHtml(listen || picture ? o.fr : o.en)}</button>`).join('')}
+                    ${options.map((o, idx) => `<button data-opt="${idx}" class="quiz-opt min-h-[52px] text-left text-base px-4 py-2 bg-white border border-slate-200 hover:border-indigo-400 rounded-xl">${escapeHtml(listen || picture ? quizFr(o) : quizEn(o))}</button>`).join('')}
                 </div>
                 <div id="quiz-feedback"></div>`;
             if (listen) {
@@ -1286,7 +1287,7 @@
                     $('quiz-box').querySelector(`[data-opt="${right}"]`).classList.add('bg-emerald-100', 'border-emerald-500');
                 }
                 if (picture) speakFrench(w.fr, 0.9);
-                finishQuestion(w, ok, ok ? 'Correct!' : `It was: ${listen || picture ? w.fr : w.en}`);
+                finishQuestion(w, ok, ok ? 'Correct!' : `It was: ${listen || picture ? quizFr(w) : quizEn(w)}`);
             }));
         }
         function finishQuestion(w, ok, message) {
@@ -1361,10 +1362,9 @@
             $('quiz-box').innerHTML = `<p class="text-base text-slate-600">Choose a test or a game above. ${deck.chapters ? 'Questions use the words you have studied so far, the ones you don\'t know yet first.' : 'Questions use the words you don\'t know yet first.'}</p>`;
             const pictured = deck.words.filter(w => WordMemory.picture(w)).length >= 4;
             $('quiz-picture-btn').classList.toggle('hidden', !pictured);
-            $('quiz-types').className = 'grid gap-2 ' + (pictured ? 'grid-cols-2 sm:grid-cols-4' : 'grid-cols-3');
             if (window.VocabGames) {
                 const ctx = gameCtx();
-                document.querySelectorAll('#game-types [data-quiz]').forEach(b => b.classList.toggle('hidden', VocabGames.hidden(b.dataset.quiz, ctx)));
+                document.querySelectorAll('#quiz-types [data-quiz]').forEach(b => { if (VocabGames.has(b.dataset.quiz)) b.classList.toggle('hidden', VocabGames.hidden(b.dataset.quiz, ctx)); });
             }
             $('learn-words').classList.toggle('hidden', !deck.words.length);
             $('topic-progress').classList.toggle('hidden', !deck.words.length);

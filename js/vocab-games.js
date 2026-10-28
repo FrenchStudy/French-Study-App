@@ -23,6 +23,9 @@ const STYLE = `
 .vg-chip:hover{border-color:#6366f1}
 .vg-chip.used{visibility:hidden}
 .vg-line .vg-chip{background:#eef2ff;border-color:#a5b4fc}
+.vg-line .vg-chip.at{border-color:#4f46e5;box-shadow:0 0 0 2px #c7d2fe}
+.vg-caret{width:3px;align-self:stretch;min-height:36px;background:#4f46e5;border-radius:2px;animation:vg-blink 1s steps(1) infinite}
+@keyframes vg-blink{50%{opacity:.2}}
 .vg-big{min-height:64px;font-size:18px;font-weight:800;border-radius:14px;cursor:pointer;border:2px solid transparent}
 .vg-m{background:#e0f2fe;color:#075985;border-color:#7dd3fc}.vg-m:hover{background:#bae6fd}
 .vg-f{background:#ffe4e6;color:#9f1239;border-color:#fda4af}.vg-f:hover{background:#fecdd3}
@@ -30,16 +33,35 @@ const STYLE = `
 .vg-mic.on{background:#e11d48;animation:vg-pulse 1s infinite}
 @keyframes vg-pulse{50%{box-shadow:0 0 0 8px rgba(225,29,72,.2)}}
 .vg-tile:focus-visible,.vg-chip:focus-visible,.vg-big:focus-visible,.vg-mic:focus-visible{outline:3px solid #a5b4fc;outline-offset:2px}
-@media (prefers-reduced-motion:reduce){.vg-tile.bad,.vg-mic.on{animation:none}}
+@media (prefers-reduced-motion:reduce){.vg-tile.bad,.vg-mic.on,.vg-caret{animation:none}}
 `;
 let cssDone = false;
 const injectCss = () => { if (cssDone) return; cssDone = true; const s = document.createElement('style'); s.textContent = STYLE; document.head.appendChild(s); };
 
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const plain = (s) => String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[’]/g, "'");
-const bare = (s) => plain(s).replace(/[«»"“”…?!.,;:()]/g, ' ').replace(/\s+/g, ' ').trim();
+const bare = (s) => plain(s).replace(/[«»"“”…?!.,;:()\-]/g, ' ').replace(/\s+/g, ' ').trim();
 const ARTICLE = /^(le |la |les |l['’]|un |une |des )/i;
-const noArticle = (fr) => fr.split(' / ')[0].replace(ARTICLE, '').trim();
+// Number words are stored as "7 · sept": the digit would give the answer away, so games show the word only.
+// Meanings lose their notes in brackets ("one (m / f)") for the same reason.
+const NUM = /^\s*(\d[\d\s]*)\s*·\s*/;
+const frOf = (w) => w.fr.replace(NUM, '');
+const enOf = (w) => w.en.replace(/\s*\([^)]*\)/g, '').trim() || w.en;
+const noArticle = (fr) => fr.replace(NUM, '').split(' / ')[0].replace(ARTICLE, '').trim();
+// Speech recognition writes "sept" as "7": turn digits back into French words before comparing
+const UNITS = ['zéro', 'un', 'deux', 'trois', 'quatre', 'cinq', 'six', 'sept', 'huit', 'neuf', 'dix', 'onze', 'douze', 'treize', 'quatorze', 'quinze', 'seize'];
+const TENS = { 20: 'vingt', 30: 'trente', 40: 'quarante', 50: 'cinquante', 60: 'soixante' };
+function numWords(n) {
+    if (n < 17) return UNITS[n];
+    if (n < 20) return 'dix-' + UNITS[n - 10];
+    if (n < 70) { const t = n - n % 10, u = n % 10; return TENS[t] + (u === 0 ? '' : u === 1 ? ' et un' : '-' + UNITS[u]); }
+    if (n < 80) return n === 71 ? 'soixante et onze' : 'soixante-' + numWords(n - 60);
+    if (n < 100) return n === 80 ? 'quatre-vingts' : 'quatre-vingt-' + numWords(n - 80);
+    if (n < 1000) { const h = Math.floor(n / 100), r = n % 100; return (h === 1 ? 'cent' : UNITS[h] + ' cent' + (r ? '' : 's')) + (r ? ' ' + numWords(r) : ''); }
+    if (n < 1000000) { const t = Math.floor(n / 1000), r = n % 1000; return (t === 1 ? 'mille' : numWords(t) + ' mille') + (r ? ' ' + numWords(r) : ''); }
+    return String(n);
+}
+const digitsToWords = (s) => String(s).replace(/\d+(?:[\s\u202f]\d{3})*/g, d => numWords(Number(d.replace(/\D/g, ''))));
 const shuffle = (arr) => { const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 const uniqBy = (arr, f) => { const seen = new Set(); return arr.filter(x => { const k = f(x); if (seen.has(k)) return false; seen.add(k); return true; }); };
 const STORY_MARK = /\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/g;
@@ -81,7 +103,7 @@ function sentences(ctx) {
 const rank = (ctx) => { const r = new Map(); ctx.pool.forEach((w, i) => r.set(w.key, i)); return (w) => r.has(w.key) ? r.get(w.key) : 1e6; };
 
 // ---------- Match pairs: join each French word to its meaning, against the clock ----------
-function matchWords(ctx) { return uniqBy(uniqBy(ctx.pool, w => plain(w.fr)), w => plain(w.en)); }
+function matchWords(ctx) { return uniqBy(uniqBy(ctx.pool, w => plain(frOf(w))), w => plain(enOf(w))); }
 function match(box, ctx) {
     const words = matchWords(ctx).slice(0, 6);
     const left = shuffle(words), right = shuffle(words);
@@ -89,8 +111,8 @@ function match(box, ctx) {
     const t0 = Date.now();
     box.innerHTML = `<div class="flex items-center justify-between text-sm text-slate-500"><span>Tap a French word, then its meaning.</span><span data-vg-time aria-live="off">0:00</span></div>
         <div class="vg-board">
-            <div class="vg-col">${left.map(w => `<button type="button" class="vg-tile font-bold ${ctx.genderClass(w)}" data-l="${esc(w.key)}">${esc(w.fr)}</button>`).join('')}</div>
-            <div class="vg-col">${right.map(w => `<button type="button" class="vg-tile" data-r="${esc(w.key)}">${esc(w.en)}</button>`).join('')}</div>
+            <div class="vg-col">${left.map(w => `<button type="button" class="vg-tile font-bold ${ctx.genderClass(w)}" data-l="${esc(w.key)}">${esc(frOf(w))}</button>`).join('')}</div>
+            <div class="vg-col">${right.map(w => `<button type="button" class="vg-tile" data-r="${esc(w.key)}">${esc(enOf(w))}</button>`).join('')}</div>
         </div><p class="text-sm text-slate-500" data-vg-status aria-live="polite"></p>`;
     const timeEl = box.querySelector('[data-vg-time]');
     const clock = () => { const s = Math.round((Date.now() - t0) / 1000); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; };
@@ -102,8 +124,8 @@ function match(box, ctx) {
         if (selL === selR) {
             const w = words.find(x => x.key === selL);
             [a, b].forEach(x => { x.classList.remove('sel'); x.classList.add('ok'); x.disabled = true; });
-            ctx.speak(w.fr, 0.9); found += 1;
-            box.querySelector('[data-vg-status]').textContent = `${w.fr} = ${w.en}`;
+            ctx.speak(frOf(w), 0.9); found += 1;
+            box.querySelector('[data-vg-status]').textContent = `${frOf(w)} = ${w.en}`;
         } else {
             mistakes += 1; missed.add(selL);
             [a, b].forEach(x => { x.classList.remove('sel'); x.classList.add('bad'); setTimeout(() => x.classList.remove('bad'), 450); });
@@ -118,7 +140,7 @@ function match(box, ctx) {
     };
     box.querySelectorAll('[data-l]').forEach(b => b.addEventListener('click', () => {
         box.querySelectorAll('[data-l]').forEach(x => x.classList.remove('sel'));
-        selL = b.dataset.l; b.classList.add('sel'); ctx.speak(words.find(x => x.key === selL).fr, 0.9); check();
+        selL = b.dataset.l; b.classList.add('sel'); ctx.speak(frOf(words.find(x => x.key === selL)), 0.9); check();
     }));
     box.querySelectorAll('[data-r]').forEach(b => b.addEventListener('click', () => {
         box.querySelectorAll('[data-r]').forEach(x => x.classList.remove('sel'));
@@ -226,24 +248,39 @@ function build(box, ctx) {
             <p class="text-base text-slate-600">Put the words in order to say:</p>
             <p class="text-lg font-bold text-slate-900">${esc(it.en)}</p>
             <div class="vg-line" data-vg-line aria-label="Your sentence"></div>
+            <p class="text-sm text-slate-500" data-vg-tip>Tap a word in your sentence to add words before it. Tap it again to send it back.</p>
             <div class="vg-chips" data-vg-chips>${order.map(n => `<button type="button" class="vg-chip" data-chip="${n}" lang="fr">${esc(it.words[n])}</button>`).join('')}</div>
             <div class="flex flex-wrap gap-2">
                 <button type="button" data-vg-check class="${BTN} bg-indigo-600 hover:bg-indigo-700 text-white">Check</button>
                 <button type="button" data-vg-clear class="${BTN} bg-slate-100 text-slate-700 font-semibold">Start over</button>
             </div><div data-vg-fb></div>`;
         const line = box.querySelector('[data-vg-line]');
+        let at = null;   // the next word goes before placed[at]; null: at the end
         const draw = () => {
-            line.innerHTML = placed.map((n, k) => `<button type="button" class="vg-chip" data-back="${k}" lang="fr">${esc(it.words[n])}</button>`).join('') + (placed.length ? `<span class="text-lg">${esc(it.end)}</span>` : '<span class="text-sm text-slate-400 px-2">Tap the words below</span>');
+            line.innerHTML = placed.map((n, k) => (k === at ? '<span class="vg-caret" aria-hidden="true"></span>' : '') +
+                `<button type="button" class="vg-chip${k === at ? ' at' : ''}" data-back="${k}" lang="fr" aria-pressed="${k === at}">${esc(it.words[n])}</button>`).join('') +
+                (placed.length ? `<span class="text-lg">${esc(it.end)}</span>` : '<span class="text-sm text-slate-400 px-2">Tap the words below</span>');
             box.querySelectorAll('[data-chip]').forEach(c => c.classList.toggle('used', placed.includes(Number(c.dataset.chip))));
-            line.querySelectorAll('[data-back]').forEach(c => c.addEventListener('click', () => { if (done) return; placed.splice(Number(c.dataset.back), 1); draw(); }));
+            line.querySelectorAll('[data-back]').forEach(c => c.addEventListener('click', () => {
+                if (done) return;
+                const k = Number(c.dataset.back);
+                if (at === k) { placed.splice(k, 1); at = null; } else at = k;   // first tap: add before it; second tap: send it back
+                draw();
+            }));
         };
         let done = false;
-        box.querySelectorAll('[data-chip]').forEach(c => c.addEventListener('click', () => { if (done) return; const n = Number(c.dataset.chip); if (!placed.includes(n)) { placed.push(n); draw(); } }));
-        box.querySelector('[data-vg-clear]').addEventListener('click', () => { if (done) return; placed.length = 0; draw(); });
+        box.querySelectorAll('[data-chip]').forEach(c => c.addEventListener('click', () => {
+            if (done) return;
+            const n = Number(c.dataset.chip);
+            if (placed.includes(n)) return;
+            if (at === null) placed.push(n); else { placed.splice(at, 0, n); at += 1; }
+            draw();
+        }));
+        box.querySelector('[data-vg-clear]').addEventListener('click', () => { if (done) return; placed.length = 0; at = null; draw(); });
         box.querySelector('[data-vg-check]').addEventListener('click', () => {
             if (done) return;
             if (placed.length < it.words.length) { box.querySelector('[data-vg-fb]').innerHTML = '<p class="text-sm text-slate-600">Use all the words first.</p>'; return; }
-            done = true;
+            done = true; at = null; draw(); box.querySelector('[data-vg-tip]')?.remove();
             // Two identical words (e.g. "de … de") can swap places: compare the text, not the positions
             const ok = placed.map(n => it.words[n]).join(' ') === it.words.join(' ');
             if (ok) score += 1;
@@ -260,10 +297,10 @@ function build(box, ctx) {
 
 // ---------- Say it: see the meaning, say the French word; the browser's speech recognition checks it ----------
 const Rec = () => window.SpeechRecognition || window.webkitSpeechRecognition;
-function sayWords(ctx) { return uniqBy(ctx.pool.filter(w => w.en && noArticle(w.fr).length > 1), w => plain(w.en)); }
+function sayWords(ctx) { return uniqBy(ctx.pool.filter(w => w.en && noArticle(w.fr).length > 1), w => plain(enOf(w))); }
 function heardOk(w, alts) {
-    const forms = w.fr.split(' / ').flatMap(f => [bare(f), bare(f.replace(ARTICLE, ''))]).filter(Boolean);
-    return alts.some(a => { const h = ` ${bare(a)} `; return forms.some(f => h.includes(` ${f} `)); });
+    const forms = frOf(w).split(' / ').flatMap(f => [bare(f), bare(f.replace(ARTICLE, ''))]).filter(Boolean);
+    return alts.some(a => { const h = ` ${bare(digitsToWords(a))} `; return forms.some(f => h.includes(` ${f} `)); });
 }
 function say(box, ctx) {
     const items = shuffle(sayWords(ctx).slice(0, 16)).slice(0, 8);
@@ -275,7 +312,7 @@ function say(box, ctx) {
         box.innerHTML = `${head(i, items.length, score)}
             <p class="text-base text-slate-600">Say this in French:</p>
             ${pic ? `<p class="text-6xl leading-none" aria-hidden="true">${pic}</p>` : ''}
-            <p class="text-2xl font-black text-slate-900">${esc(w.en)}</p>
+            <p class="text-2xl font-black text-slate-900">${esc(enOf(w))}</p>
             <div class="flex flex-wrap items-center gap-2">
                 <button type="button" class="vg-mic" data-vg-mic>🎤 Tap and speak</button>
                 <button type="button" data-vg-skip class="${BTN} bg-slate-100 text-slate-700 font-semibold">I don't know</button>
@@ -286,11 +323,11 @@ function say(box, ctx) {
             if (settled) return; settled = true;
             if (ok) score += 1;
             ctx.grade(w, ok);
-            ctx.speak(w.fr, 0.9);
+            ctx.speak(frOf(w), 0.9);
             box.querySelector('[data-vg-skip]')?.remove(); mic.remove();
-            box.querySelector('[data-vg-fb]').innerHTML = feedback(ok, `${ok ? 'Correct!' : 'The word is:'} <b class="${ctx.genderClass(w)}">${esc(w.fr)}</b>
+            box.querySelector('[data-vg-fb]').innerHTML = feedback(ok, `${ok ? 'Correct!' : 'The word is:'} <b class="${ctx.genderClass(w)}">${esc(frOf(w))}</b>
                 <button type="button" data-vg-hear class="ml-2 text-sm font-semibold text-indigo-700 hover:underline">🔊 Hear it again</button>`) + nextBtn();
-            box.querySelector('[data-vg-hear]').addEventListener('click', () => ctx.speak(w.fr, 0.8));
+            box.querySelector('[data-vg-hear]').addEventListener('click', () => ctx.speak(frOf(w), 0.8));
             box.querySelector('[data-vg-next]').addEventListener('click', () => { i += 1; show(); });
             box.querySelector('[data-vg-next]').focus();
         };
