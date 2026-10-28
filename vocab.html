@@ -25,6 +25,7 @@
     <script src="js/memory-palace.js"></script>
     <script src="js/clock.js"></script>
     <script src="js/watch.js"></script>
+    <script src="js/vocab-games.js"></script>
     <script src="js/vocab-tools.js"></script>
     <script src="js/nationalites.js"></script>
     <script src="js/lesson-kit.js"></script>
@@ -40,7 +41,7 @@
             <div id="topics-view" class="space-y-4">
                 <div>
                     <h1 class="text-2xl font-black text-slate-900">Vocabulary</h1>
-                    <p class="text-sm text-slate-500 mt-1">Topics from A1 to C2, plus the 5,000 most common words. In each one: learn the words, practise them with flashcards, then test yourself.</p>
+                    <p class="text-sm text-slate-500 mt-1">Topics from A1 to C2, plus the 5,000 most common words. In each one: learn the words, practise them with flashcards, then play games to test yourself.</p>
                 </div>
                 <div class="flex flex-col md:flex-row md:items-center gap-3">
                     <div id="topic-levels" class="flex gap-1 p-1 bg-slate-200/70 rounded-xl overflow-x-auto" role="tablist" aria-label="Level"></div>
@@ -96,12 +97,12 @@
                     </div>
                 </div>
 
-                <nav id="step-tabs" class="flex gap-1 sm:gap-6 text-sm font-semibold overflow-x-auto overflow-y-hidden shadow-[inset_0_-1px_0_#e2e8f0]" role="tablist" aria-label="Steps">
-                    <button data-step="learn" role="tab" class="step-tab shrink-0 min-h-[44px] px-2 sm:px-0 border-b-2"><span class="step-num">1</span> Learn</button>
-                    <button data-step="palace" role="tab" class="step-tab shrink-0 min-h-[44px] px-2 sm:px-0 border-b-2 hidden"><span class="step-num">2</span> <span class="step-name">Memory palace</span></button>
-                    <button data-step="practise" role="tab" class="step-tab shrink-0 min-h-[44px] px-2 sm:px-0 border-b-2"><span class="step-num">2</span> Practise</button>
-                    <button data-step="test" role="tab" class="step-tab shrink-0 min-h-[44px] px-2 sm:px-0 border-b-2"><span class="step-num">3</span> Test</button>
-                    <button data-step="list" role="tab" class="step-tab shrink-0 min-h-[44px] px-2 sm:px-0 border-b-2"><span class="step-num">4</span> List</button>
+                <nav id="step-tabs" class="flex gap-0.5 sm:gap-6 text-sm font-semibold overflow-x-auto overflow-y-hidden shadow-[inset_0_-1px_0_#e2e8f0]" role="tablist" aria-label="Steps">
+                    <button data-step="learn" role="tab" class="step-tab shrink-0 min-h-[44px] px-1.5 sm:px-0 border-b-2"><span class="step-num">1</span> Learn</button>
+                    <button data-step="palace" role="tab" class="step-tab shrink-0 min-h-[44px] px-1.5 sm:px-0 border-b-2 hidden"><span class="step-num">2</span> <span class="step-name">Memory palace</span></button>
+                    <button data-step="practise" role="tab" class="step-tab shrink-0 min-h-[44px] px-1.5 sm:px-0 border-b-2"><span class="step-num">2</span> Flashcards</button>
+                    <button data-step="test" role="tab" class="step-tab shrink-0 min-h-[44px] px-1.5 sm:px-0 border-b-2"><span class="step-num">3</span> Games</button>
+                    <button data-step="list" role="tab" class="step-tab shrink-0 min-h-[44px] px-1.5 sm:px-0 border-b-2"><span class="step-num">4</span> List</button>
                 </nav>
 
                 <div id="loading" class="hidden text-sm text-indigo-600 animate-pulse">Loading words…</div>
@@ -130,7 +131,7 @@
                         <summary class="min-h-[52px] px-4 py-3 flex items-center gap-3 cursor-pointer list-none">
                             <span class="text-xl" aria-hidden="true">✅</span>
                             <span class="flex-1 min-w-0"><span id="easy-title" class="block font-bold text-slate-900"></span>
-                            <span class="block text-sm text-slate-500">Same as in English, so they stay out of the flashcards and the test. Mind the gender.</span></span>
+                            <span class="block text-sm text-slate-500">Same as in English, so they stay out of the flashcards and the games. Mind the gender.</span></span>
                             <span class="text-slate-400 group-open:rotate-180 transition" aria-hidden="true">▾</span>
                         </summary>
                         <div id="easy-list" class="flex flex-wrap gap-2 px-4 pb-4"></div>
@@ -241,14 +242,23 @@
             <!-- (quiz) -->
             <section id="step-palace" class="hidden space-y-3"></section>
             <section id="mode-quiz" class="hidden space-y-3 max-w-2xl">
+                <h3 class="text-sm font-bold text-slate-500 uppercase tracking-wide">Quick tests</h3>
                 <div id="quiz-types" class="grid grid-cols-3 gap-2">
                     <button data-quiz="meaning" class="quiz-type min-h-[56px] bg-white border border-slate-200 rounded-xl text-sm font-semibold">Pick the meaning</button>
                     <button data-quiz="type" class="quiz-type min-h-[56px] bg-white border border-slate-200 rounded-xl text-sm font-semibold">Type the French</button>
                     <button data-quiz="listen" class="quiz-type min-h-[56px] bg-white border border-slate-200 rounded-xl text-sm font-semibold">Listen and pick</button>
                     <button data-quiz="picture" id="quiz-picture-btn" class="quiz-type hidden min-h-[56px] bg-white border border-slate-200 rounded-xl text-sm font-semibold">🖼️ Picture game</button>
                 </div>
+                <h3 class="text-sm font-bold text-slate-500 uppercase tracking-wide pt-1">Games</h3>
+                <div id="game-types" class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                    <button data-quiz="match" class="quiz-type min-h-[56px] bg-white border border-slate-200 rounded-xl text-sm font-semibold">🧩 Match pairs</button>
+                    <button data-quiz="gender" class="quiz-type min-h-[56px] bg-white border border-slate-200 rounded-xl text-sm font-semibold">⚖️ Le or la?</button>
+                    <button data-quiz="gap" class="quiz-type min-h-[56px] bg-white border border-slate-200 rounded-xl text-sm font-semibold">✏️ Fill the gap</button>
+                    <button data-quiz="build" class="quiz-type min-h-[56px] bg-white border border-slate-200 rounded-xl text-sm font-semibold">🔀 Build the sentence</button>
+                    <button data-quiz="say" class="quiz-type min-h-[56px] bg-white border border-slate-200 rounded-xl text-sm font-semibold">🎤 Say it</button>
+                </div>
                 <div id="quiz-box" class="bg-white border border-slate-200 rounded-2xl p-5 space-y-4">
-                    <p class="text-base text-slate-600">Choose a quiz above. Questions use the words you don't know yet first.</p>
+                    <p class="text-base text-slate-600">Choose a test or a game above. Questions use the words you don't know yet first.</p>
                 </div>
             </section>
                 <div id="step-next" class="pt-2"></div>
@@ -805,7 +815,7 @@
             if (done) {
                 const known = deck.words.filter(w => statusOf(w) === 'known').length;
                 $('card-done-text').textContent = deck.words.length
-                    ? `${known} of ${deck.words.length} words known.` + (skipped ? ` ${skipped} ${skipped === 1 ? 'word was' : 'words were'} not graded: ${skipped === 1 ? 'it comes' : 'they come'} back next time.` : '') + ' Come back tomorrow for your reviews, or take the test.'
+                    ? `${known} of ${deck.words.length} words known.` + (skipped ? ` ${skipped} ${skipped === 1 ? 'word was' : 'words were'} not graded: ${skipped === 1 ? 'it comes' : 'they come'} back next time.` : '') + ' Come back tomorrow for your reviews, or play the games.'
                     : 'This deck has no words yet.';
                 $('session-info').textContent = '';
                 renderProgress();
@@ -1172,6 +1182,9 @@
                 b.classList.toggle('bg-indigo-600', on); b.classList.toggle('text-white', on); b.classList.toggle('border-indigo-600', on);
                 b.classList.toggle('bg-white', !on);
             });
+            // On phones the questions start below the buttons: bring them into view
+            requestAnimationFrame(() => { const r = $('quiz-box').getBoundingClientRect(); if (r.top > innerHeight * 0.55) $('quiz-box').scrollIntoView({ block: 'start', behavior: 'smooth' }); });
+            if (window.VocabGames && VocabGames.has(type)) { quiz = null; VocabGames.start(type, $('quiz-box'), gameCtx()); return; }
             if (deck.words.length < 4) {
                 $('quiz-box').innerHTML = '<p class="text-base text-slate-600">This deck needs at least 4 words for a quiz.</p>';
                 return;
@@ -1183,6 +1196,15 @@
             }
             quiz = { type, items: pool.slice(0, 10), i: 0, score: 0, answered: false };
             renderQuestion();
+        }
+        // What the games (js/vocab-games.js) need from the topic; answers count like the tests
+        function gameCtx() {
+            return {
+                pool: quizPool(), all: deck.words, chapters: deck.chapters || null,
+                speak: (t, r) => speakFrench(t, r || 0.9), picture: (w) => WordMemory.picture(w), genderClass,
+                grade: (w, ok) => { const p = progress[w.key] || { box: 0 }; grade(w, ok ? (p.box === 0 ? 'learning' : 'know') : 'dontknow'); },
+                done: () => renderProgress()
+            };
         }
         function choicesFor(w, field, pictured) {
             let pool = deck.words.filter(o => o.key !== w.key && o[field] && o[field] !== w[field]);
@@ -1283,7 +1305,7 @@
         // ---------- Steps: Learn, Practise, Test ----------
         const STEPS = ['learn', 'palace', 'practise', 'test', 'list'];
         const STEP_BOX = { learn: 'step-learn', palace: 'step-palace', practise: 'mode-cards', test: 'mode-quiz', list: 'step-list' };
-        const STEP_LABEL = { palace: 'Walk the memory palace', practise: 'Practise with flashcards', test: 'Take the test', list: 'See the word list' };
+        const STEP_LABEL = { palace: 'Walk the memory palace', practise: 'Practise with flashcards', test: 'Play the games', list: 'See the word list' };
         // Topics about rules rather than things (numbers, calendar, telling time, colours) get a
         // hands-on tool (js/vocab-tools.js, js/clock.js, js/nationalites.js) in the place where others have a memory palace
         const toolFor = (tp) => (tp && tp.n && window.VocabTools && VocabTools[tp.n] && VocabTools[tp.n].mount) ? VocabTools[tp.n] : null;
@@ -1336,10 +1358,14 @@
         function renderAll() {
             renderProgress();
             quiz = null;
-            $('quiz-box').innerHTML = `<p class="text-base text-slate-600">Choose a quiz above. ${deck.chapters ? 'Questions use the words you have studied so far, the ones you don\'t know yet first.' : 'Questions use the words you don\'t know yet first.'}</p>`;
+            $('quiz-box').innerHTML = `<p class="text-base text-slate-600">Choose a test or a game above. ${deck.chapters ? 'Questions use the words you have studied so far, the ones you don\'t know yet first.' : 'Questions use the words you don\'t know yet first.'}</p>`;
             const pictured = deck.words.filter(w => WordMemory.picture(w)).length >= 4;
             $('quiz-picture-btn').classList.toggle('hidden', !pictured);
             $('quiz-types').className = 'grid gap-2 ' + (pictured ? 'grid-cols-2 sm:grid-cols-4' : 'grid-cols-3');
+            if (window.VocabGames) {
+                const ctx = gameCtx();
+                document.querySelectorAll('#game-types [data-quiz]').forEach(b => b.classList.toggle('hidden', VocabGames.hidden(b.dataset.quiz, ctx)));
+            }
             $('learn-words').classList.toggle('hidden', !deck.words.length);
             $('topic-progress').classList.toggle('hidden', !deck.words.length);
             setStep(step, false);
@@ -1655,6 +1681,7 @@
         function route() {
             const p = new URLSearchParams(location.search);
             let id = p.get('topic'), s = p.get('step') || 'learn';
+            s = { flashcards: 'practise', games: 'test' }[s] || s;   // new names for the old step ids
             if (!id && p.get('deck')) { id = p.get('deck'); }                       // old: ?deck=theme:9
             if (!id && p.get('review')) { id = 'review'; s = 'practise'; }
             // Lessons folded into a topic: Noms et prénoms went into Greetings, L'adresse into Numbers
