@@ -26,7 +26,7 @@
         <div class="max-w-5xl mx-auto px-4 py-5 space-y-5">
             <div>
                 <h1 class="text-2xl font-black text-slate-900">Exam prep</h1>
-                <p class="text-sm text-slate-500 mt-1">How a French exam is built, and where to practise each part. The questions live in each skill's page: open Writing or Speaking and pick the <b>🎓 Exam prep</b> tab.</p>
+                <p class="text-sm text-slate-500 mt-1">How a French exam is built, and where to practise each part. The questions live in each skill's page: in Writing, choose <b>By task type</b>; in Speaking, open the <b>🎯 Questions</b> tab.</p>
             </div>
 
             <!-- Your progress -->
@@ -37,8 +37,8 @@
                     <div id="prog-text" class="mt-1 text-sm text-slate-600"></div>
                 </div>
                 <div class="flex gap-2">
-                    <a href="writing.html?tab=prep" class="inline-flex items-center min-h-[44px] px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl">✍️ Writing</a>
-                    <a href="speaking.html?mode=prep" class="inline-flex items-center min-h-[44px] px-4 bg-slate-900 hover:bg-slate-700 text-white font-bold rounded-xl">🗣️ Speaking</a>
+                    <a href="writing.html?view=task" class="inline-flex items-center min-h-[44px] px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl">✍️ Writing</a>
+                    <a href="speaking.html?mode=questions" class="inline-flex items-center min-h-[44px] px-4 bg-slate-900 hover:bg-slate-700 text-white font-bold rounded-xl">🗣️ Speaking</a>
                 </div>
             </section>
 
@@ -83,12 +83,12 @@
             const p = new URLSearchParams(location.search);
             const slug = p.get('theme'), q = p.get('q');
             if (slug && q && /^[WS]\d\.\d+$/.test(q)) { location.replace(`${q[0] === 'S' ? 'speaking' : 'writing'}.html?task=${encodeURIComponent(`tcf-${slug}-${q}`)}`); return; }
-            if (slug) { location.replace(`writing.html?tab=prep&theme=${encodeURIComponent(slug)}`); }
+            if (slug) { location.replace(`writing.html?view=task&theme=${encodeURIComponent(slug)}`); }
         })();
 
         const len = (t) => t.words ? `${t.words[0]}–${t.words[1]} words` : `about ${Math.round(t.seconds[1] / 60)} min`;
         const taskRow = (k) => {
-            const t = T[k], page = t.kind === 'writing' ? `writing.html?tab=prep&t=${k}` : `speaking.html?mode=prep&t=${k}`;
+            const t = T[k], page = t.kind === 'writing' ? `writing.html?view=task&t=${k}` : `speaking.html?mode=questions&t=${k}`;
             return `<a href="${page}" class="group flex items-start gap-3 rounded-xl px-3 py-2.5 bg-slate-50 hover:bg-indigo-50 border border-slate-100 hover:border-indigo-200">
                 <span class="min-w-0 flex-1"><span class="flex flex-wrap items-baseline gap-x-2"><b class="text-slate-900 group-hover:text-indigo-700">${escapeHtml(t.label)}</b><span class="text-xs font-semibold text-slate-400">${len(t)}</span></span>
                 <span class="block text-sm text-slate-600 leading-snug">${escapeHtml(t.what)}</span></span>
@@ -109,7 +109,7 @@
             const total = ix.themes.length * 60, n = TCF.practised().size;
             $('prog-bar').style.width = Math.min(100, n / total * 100).toFixed(1) + '%';
             $('prog-text').textContent = n ? `${n} of ${total.toLocaleString('en')} questions practised` : `${total.toLocaleString('en')} questions to practise. Start with any task below.`;
-            $('themes').innerHTML = ix.themes.map(t => `<a href="writing.html?tab=prep&theme=${encodeURIComponent(t.slug)}" class="inline-flex items-center gap-1.5 min-h-[40px] px-3 rounded-xl bg-white border border-slate-200 hover:border-indigo-400 text-sm">
+            $('themes').innerHTML = ix.themes.map(t => `<a href="writing.html?view=task&theme=${encodeURIComponent(t.slug)}" class="inline-flex items-center gap-1.5 min-h-[40px] px-3 rounded-xl bg-white border border-slate-200 hover:border-indigo-400 text-sm">
                 <span aria-hidden="true">${t.emoji}</span><span class="font-semibold text-slate-900" lang="fr">${escapeHtml(t.fr)}</span><span class="text-slate-400">${escapeHtml(t.en)}</span></a>`).join('');
         }).catch(e => { $('prog-text').textContent = e.message; });
     </script>
