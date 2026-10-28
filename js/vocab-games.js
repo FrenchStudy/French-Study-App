@@ -19,7 +19,10 @@ const STYLE = `
 .vg-gap.ok{border-color:#10b981;color:#047857}.vg-gap.bad{border-color:#f43f5e;color:#be123c}
 .vg-line{min-height:60px;padding:8px;border:2px dashed #cbd5e1;border-radius:14px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
 .vg-chips{display:flex;flex-wrap:wrap;gap:6px}
-.vg-chip{min-height:44px;padding:6px 12px;border:1px solid #cbd5e1;background:#fff;border-radius:10px;font-size:17px;cursor:pointer}
+.vg-chip{min-height:44px;padding:6px 12px;border:1px solid #cbd5e1;background:#fff;border-radius:10px;font-size:17px;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none}
+.vg-chip.lift{opacity:.3}
+.vg-ghost{position:fixed;z-index:80;pointer-events:none;transform:translate(-50%,-60%) rotate(-2deg);box-shadow:0 8px 20px rgba(15,23,42,.25);background:#eef2ff;border-color:#6366f1;cursor:grabbing}
+.vg-line.drop{border-color:#6366f1;background:rgba(238,242,255,.6)}
 .vg-chip:hover{border-color:#6366f1}
 .vg-chip.used{visibility:hidden}
 .vg-line .vg-chip{background:#eef2ff;border-color:#a5b4fc}
@@ -248,7 +251,7 @@ function build(box, ctx) {
             <p class="text-base text-slate-600">Put the words in order to say:</p>
             <p class="text-lg font-bold text-slate-900">${esc(it.en)}</p>
             <div class="vg-line" data-vg-line aria-label="Your sentence"></div>
-            <p class="text-sm text-slate-500" data-vg-tip>Tap a word in your sentence to add words before it. Tap it again to send it back.</p>
+            <p class="text-sm text-slate-500" data-vg-tip>Drag the words into place, or tap them. To put a word between two others, drag it there, or tap the word it should go before. Drag a word out to send it back.</p>
             <div class="vg-chips" data-vg-chips>${order.map(n => `<button type="button" class="vg-chip" data-chip="${n}" lang="fr">${esc(it.words[n])}</button>`).join('')}</div>
             <div class="flex flex-wrap gap-2">
                 <button type="button" data-vg-check class="${BTN} bg-indigo-600 hover:bg-indigo-700 text-white">Check</button>
@@ -262,21 +265,82 @@ function build(box, ctx) {
                 (placed.length ? `<span class="text-lg">${esc(it.end)}</span>` : '<span class="text-sm text-slate-400 px-2">Tap the words below</span>');
             box.querySelectorAll('[data-chip]').forEach(c => c.classList.toggle('used', placed.includes(Number(c.dataset.chip))));
             line.querySelectorAll('[data-back]').forEach(c => c.addEventListener('click', () => {
-                if (done) return;
+                if (done || justDragged(c)) return;
                 const k = Number(c.dataset.back);
                 if (at === k) { placed.splice(k, 1); at = null; } else at = k;   // first tap: add before it; second tap: send it back
                 draw();
             }));
         };
-        let done = false;
+        // The browser also sends a click to the word you just dragged: ignore that one
+        let done = false, dropped = { el: null, t: 0 };
+        const justDragged = (el) => dropped.el === el && Date.now() - dropped.t < 500;
         box.querySelectorAll('[data-chip]').forEach(c => c.addEventListener('click', () => {
-            if (done) return;
+            if (done || justDragged(c)) return;
             const n = Number(c.dataset.chip);
             if (placed.includes(n)) return;
             if (at === null) placed.push(n); else { placed.splice(at, 0, n); at += 1; }
             draw();
         }));
         box.querySelector('[data-vg-clear]').addEventListener('click', () => { if (done) return; placed.length = 0; at = null; draw(); });
+
+        // Drag and drop (mouse, finger or pen): drag a word into the sentence at any place, move it, or drag it out
+        let drag = null;
+        const lineChips = () => [...line.querySelectorAll('[data-back]')].filter(c => !drag || c !== drag.chip);
+        const overLine = (x, y) => { const r = line.getBoundingClientRect(); return x >= r.left - 16 && x <= r.right + 16 && y >= r.top - 16 && y <= r.bottom + 16; };
+        const dropIndex = (x, y) => {
+            const chips = lineChips();
+            for (let j = 0; j < chips.length; j++) {
+                const r = chips[j].getBoundingClientRect();
+                if (y < r.top || (y <= r.bottom && x < r.left + r.width / 2)) return j;
+            }
+            return chips.length;
+        };
+        const showMarker = (idx) => {
+            line.querySelectorAll('.vg-caret').forEach(m => m.remove());
+            if (idx === null) return;
+            const m = document.createElement('span'); m.className = 'vg-caret'; m.setAttribute('aria-hidden', 'true');
+            const chips = lineChips();
+            line.insertBefore(m, chips[idx] || line.querySelector('[data-back]:last-of-type')?.nextSibling || line.firstChild);
+        };
+        const onMove = (e) => {
+            if (!drag || e.pointerId !== drag.id) return;
+            if (!drag.on) {
+                if (Math.hypot(e.clientX - drag.x0, e.clientY - drag.y0) < 6) return;
+                drag.on = true; at = null;
+                line.querySelectorAll('.vg-chip.at').forEach(c => c.classList.remove('at'));
+                drag.ghost = drag.chip.cloneNode(true); drag.ghost.classList.add('vg-ghost'); drag.ghost.removeAttribute('data-back'); drag.ghost.removeAttribute('data-chip');
+                document.body.appendChild(drag.ghost); drag.chip.classList.add('lift');
+            }
+            e.preventDefault();
+            drag.ghost.style.left = e.clientX + 'px'; drag.ghost.style.top = e.clientY + 'px';
+            const over = overLine(e.clientX, e.clientY);
+            line.classList.toggle('drop', over);
+            showMarker(over ? dropIndex(e.clientX, e.clientY) : null);
+        };
+        const onUp = (e) => {
+            if (!drag || e.pointerId !== drag.id) return;
+            document.removeEventListener('pointermove', onMove); document.removeEventListener('pointerup', onUp); document.removeEventListener('pointercancel', onUp);
+            const d = drag; drag = null;
+            if (!d.on) return;   // a tap: the click handlers do the work
+            d.ghost.remove(); line.classList.remove('drop'); dropped = { el: d.chip, t: Date.now() };
+            const arr = placed.slice();
+            if (d.fromLine) arr.splice(d.k, 1);
+            if (e.type === 'pointerup' && overLine(e.clientX, e.clientY)) arr.splice(dropIndex(e.clientX, e.clientY), 0, d.n);
+            placed.splice(0, placed.length, ...arr);
+            draw();
+        };
+        // Listen on this question's own elements (the box itself is reused by the next game)
+        const onDown = (e) => {
+            if (done || drag || (e.pointerType === 'mouse' && e.button !== 0)) return;
+            const chip = e.target.closest('.vg-chip');
+            if (!chip || chip.classList.contains('used') || !box.contains(chip)) return;
+            const fromLine = chip.hasAttribute('data-back');
+            const k = fromLine ? Number(chip.dataset.back) : null;
+            drag = { chip, fromLine, k, n: fromLine ? placed[k] : Number(chip.dataset.chip), x0: e.clientX, y0: e.clientY, on: false, ghost: null, id: e.pointerId };
+            document.addEventListener('pointermove', onMove, { passive: false }); document.addEventListener('pointerup', onUp); document.addEventListener('pointercancel', onUp);
+        };
+        line.addEventListener('pointerdown', onDown);
+        box.querySelector('[data-vg-chips]').addEventListener('pointerdown', onDown);
         box.querySelector('[data-vg-check]').addEventListener('click', () => {
             if (done) return;
             if (placed.length < it.words.length) { box.querySelector('[data-vg-fb]').innerHTML = '<p class="text-sm text-slate-600">Use all the words first.</p>'; return; }
