@@ -73,8 +73,11 @@ function escapeHtml(value) {
 }
 
 // Speak French text with the best available French voice.
+// "2 · deux" is shown with its digit: say only the word. "un / une" is read as "un, une".
+const sayable = (text) => String(text).replace(/^\s*\d[\d\s]*\s*·\s*/, '').replace(/\s+\/\s+/g, ', ');
 function speakFrench(text, rate = 1) {
     if (!('speechSynthesis' in window) || !text) return;
+    text = sayable(text);
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = 'fr-FR';
