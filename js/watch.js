@@ -13,7 +13,7 @@ const CSS = `
 .wm-bar{height:6px;background:#1e293b;border-radius:99px;overflow:hidden;margin-top:10px}
 .wm-bar>div{height:100%;background:#818cf8;width:0;transition:width .3s}
 .wm-stage{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:14px;min-height:0;padding:12px 0}
-.wm-pic{font-size:clamp(72px,18vw,140px);line-height:1;min-height:1em}
+.wm-pic{font-size:clamp(72px,18vw,140px);line-height:1;min-height:1em}.wm-pic svg{width:min(72vw,340px);height:auto;display:inline-block}
 .wm-fr{font-size:clamp(34px,7vw,64px);font-weight:900;line-height:1.1;overflow-wrap:anywhere}
 .wm-fr.m{color:#7dd3fc}.wm-fr.f{color:#fda4af}
 .wm-en{font-size:clamp(20px,4vw,30px);font-weight:700;color:#6ee7b7;min-height:1.3em;transition:opacity .25s}
@@ -93,7 +93,8 @@ function open(words, opts = {}) {
     try { navigator.wakeLock && navigator.wakeLock.request('screen').then(l => { lock = l; }).catch(() => {}); } catch (e) { /* not allowed */ }
 
     function show(w, phase) {
-        q('.wm-pic').textContent = (window.WordMemory && WordMemory.picture(w)) || '';
+        if (window.WordAnim && WordAnim.has(w.key)) q('.wm-pic').innerHTML = WordAnim.svg(w.key);   // a moving picture
+        else q('.wm-pic').textContent = (window.WordMemory && WordMemory.picture(w)) || '';
         const fr = q('.wm-fr'); fr.textContent = w.fr; fr.className = 'wm-fr ' + (w.gender === 'm' ? 'm' : w.gender === 'f' ? 'f' : '');
         q('.wm-en').textContent = w.en || '';
         q('.wm-en').classList.toggle('wm-hide', phase < 1);
