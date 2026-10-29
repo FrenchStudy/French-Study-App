@@ -361,7 +361,7 @@
         };
         function sceneLevel() { return String(scene.level).split('–')[0]; }
         function systemPrompt() {
-            return `You are ${scene.persona}
+            return `${window.FRANCE_FR || ''} You are ${scene.persona}
 You are role-playing this scene with a learner of French (CEFR ${scene.level}): ${scene.scene}.
 The learner's goal: ${scene.goal}
 Rules:
@@ -501,7 +501,7 @@ Return a JSON object:
             const fixesSoFar = chat.filter(m => m.fix).map(m => ({ you_said: m.text, better: m.fix.better, why: m.fix.why }));
             try {
                 const r = await askAI([
-                    { role: 'system', content: `You are a warm, encouraging French teacher. A learner at CEFR ${scene.level} just did a role-play (${scene.scene}). Review ONLY the learner's lines. Their lines may come from speech recognition, so ignore missing punctuation and capitals. Return a JSON object:
+                    { role: 'system', content: `${window.FRANCE_FR_CHECK || ''} You are a warm, encouraging French teacher. A learner at CEFR ${scene.level} just did a role-play (${scene.scene}). Review ONLY the learner's lines. Their lines may come from speech recognition, so ignore missing punctuation and capitals. Return a JSON object:
 {"summary": "one encouraging sentence in English", "went_well": ["up to 3 short points in English"],
  "corrections": [{"you_said": "learner's words", "better": "correct natural French", "why": "short English explanation"}],
  "new_words": [{"fr": "useful French word or phrase from this scene", "en": "English"}]}
@@ -739,7 +739,7 @@ Give at most 4 corrections, only for real mistakes (an empty list if there are n
             const angle = pickTaskAngle(subject, level, earlier.map(x => x.angle).filter(Boolean));
             const topic = angle ? `${subject}, and more precisely: ${angle}` : subject;
             const messages = [
-                { role: 'system', content: `You write French speaking tasks in the style of the DELF and TCF oral exams, for CEFR level ${level}.
+                { role: 'system', content: `${window.FRANCE_FR || ''} You write French speaking tasks in the style of the DELF and TCF oral exams, for CEFR level ${level}.
 The task must be clearly and specifically about the topic given, never a general question about the subject.
 - "Talk about a topic": ask the learner about their own experience of this exact topic, with 2 or 3 precise questions (when, where, who, what happened, how they felt).
 - "Role-play: get information": set a precise scene linked to the topic (where, who the learner talks to, what they need to find out or arrange).
@@ -867,7 +867,7 @@ Reply with JSON only:
             $('exam-feedback').innerHTML = '<div class="bg-white border border-slate-200 rounded-2xl p-4 text-sm text-indigo-600 animate-pulse">Reading what you said…</div>';
             try {
                 const fb = await askAI([
-                    { role: 'system', content: `You are a kind, precise French oral examiner. The learner is at CEFR level ${exam.level}. Their answer was spoken and turned into text by speech recognition: ignore punctuation, capitals and obvious recognition slips; judge what they said.
+                    { role: 'system', content: `${window.FRANCE_FR_CHECK || ''} You are a kind, precise French oral examiner. The learner is at CEFR level ${exam.level}. Their answer was spoken and turned into text by speech recognition: ignore punctuation, capitals and obvious recognition slips; judge what they said.
 Reply with JSON only:
 {"score": number 0-20 for a ${exam.level} learner (task done, range, accuracy, coherence),
  "summary": "two short sentences in simple English: overall impression and the main thing to work on",
@@ -977,7 +977,7 @@ Only list real mistakes, at most 10, in order. "wrong" must be copied exactly fr
                 try {
                     const [min, max] = timeFor(exam);
                     const r = await askAI([
-                        { role: 'system', content: `You write model spoken answers to French speaking tasks for CEFR level ${exam.level} learners. Write what a strong ${exam.level} student could say in about ${fmtTime(min)}–${fmtTime(max)} (natural spoken French, level-appropriate structures, covering every point). Reply with JSON only: {"fr": "the answer in French", "en": "an English translation"}` },
+                        { role: 'system', content: `${window.FRANCE_FR || ''} You write model spoken answers to French speaking tasks for CEFR level ${exam.level} learners. Write what a strong ${exam.level} student could say in about ${fmtTime(min)}–${fmtTime(max)} (natural spoken French, level-appropriate structures, covering every point). Reply with JSON only: {"fr": "the answer in French", "en": "an English translation"}` },
                         { role: 'user', content: `Task: ${exam.fr}${exam.include.length ? '\nPoints: ' + exam.include.join('; ') : ''}` }
                     ], { json: true, temperature: 0.7, feature: 'speaking-sample' });
                     if (!r.fr) throw new Error('The AI reply could not be read. Please try again.');

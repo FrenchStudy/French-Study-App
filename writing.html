@@ -430,7 +430,7 @@
                 $('btn-sample').disabled = true;
                 try {
                     const r = await askAI([
-                        { role: 'system', content: `You write model answers to French writing tasks for CEFR level ${task.level} learners. Write a natural, correct reply of ${task.words[0]}-${task.words[1]} words that a strong ${task.level} student could write: use structures and vocabulary of that level, and cover every point of the task. Reply with JSON only: {"fr": "the reply in French (use \\n between paragraphs)", "en": "an English translation"}` },
+                        { role: 'system', content: `${window.FRANCE_FR || ''} You write model answers to French writing tasks for CEFR level ${task.level} learners. Write a natural, correct reply of ${task.words[0]}-${task.words[1]} words that a strong ${task.level} student could write: use structures and vocabulary of that level, and cover every point of the task. Reply with JSON only: {"fr": "the reply in French (use \\n between paragraphs)", "en": "an English translation"}` },
                         { role: 'user', content: `Task: ${task.fr}${task.include.length ? '\nInclude: ' + task.include.join('; ') : ''}` }
                     ], { json: true, temperature: 0.7, feature: 'writing-sample' });
                     if (!r.fr) throw new Error('The AI reply could not be read. Please try again.');
@@ -473,7 +473,7 @@
                     : open ? 'The student pasted this question; nothing is assumed about their level.'
                     : `The student is at CEFR level ${task.level}.`;
                 const fb = await askAI([
-                    { role: 'system', content: `You are a kind, precise French teacher. ${who} Correct their French text.
+                    { role: 'system', content: `${window.FRANCE_FR_CHECK || ''} You are a kind, precise French teacher. ${who} Correct their French text.
 Reply with JSON only:
 {"score": number 0-20 ${open ? 'for this task (task done, accuracy, range), as in the TCF' : `for a ${task.level} learner (task done, accuracy, range)`},
  "level": "the CEFR level this text shows: A1, A2, B1, B2, C1 or C2",
@@ -597,7 +597,7 @@ Only list real mistakes, at most 12, in the order they appear. "wrong" must be c
             const angle = pickTaskAngle(subject, level, earlier.map(x => x.angle).filter(Boolean));
             const topic = angle ? `${subject}, and more precisely: ${angle}` : subject;
             const messages = [
-                { role: 'system', content: `You write French writing tasks in the style of the DELF and TCF exams, for CEFR level ${level}.
+                { role: 'system', content: `${window.FRANCE_FR || ''} You write French writing tasks in the style of the DELF and TCF exams, for CEFR level ${level}.
 The task must be clearly and specifically about the topic given, never a general question about the subject. Set a concrete situation: who the learner is writing to, why, and what happened.
 - Messages, emails and letters: a precise reason to write linked to the topic (inviting, complaining, asking for information, apologising, thanking…).
 - Stories and articles: a precise event or experience linked to the topic.

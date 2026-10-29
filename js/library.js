@@ -164,7 +164,7 @@ window.LIB = (function () {
     async function generate({ subject, kind, level, purpose }) {
         const recent = mine().filter(x => x.subject === subject).slice(0, 5).map(x => x.title);
         const t = await askAI([
-            { role: 'system', content: `You write original French ${purpose === 'listening' ? 'listening scripts (written to be read aloud: natural spoken French, short sentences)' : 'reading texts'} for CEFR level ${level} learners, in the style of TV5Monde and DELF exams.
+            { role: 'system', content: `${window.FRANCE_FR || ''} You write original French ${purpose === 'listening' ? 'listening scripts (written to be read aloud: natural spoken French, short sentences)' : 'reading texts'} for CEFR level ${level} learners, in the style of TV5Monde and DELF exams.
 Write about ${LENGTH[level] || '120-160'} words, at ${level} level (vocabulary and grammar of that level), with a concrete situation and real details.
 Then write 4 multiple-choice comprehension questions, each with 3 options, in ${['A1', 'A2'].includes(level) ? 'simple English' : 'French'}. Put the correct option FIRST (answer: 0); the app shuffles them.
 Reply with JSON only: {"title": "a short French title", "kind": "the type of text in one or two English words, e.g. Dialogue, Announcement", "fr": "the text (use \\n between paragraphs or speakers)", "en": "an English translation",
