@@ -84,6 +84,10 @@ const MEDIA_ICON = {
 };
 window.MEDIA_ICON = MEDIA_ICON;
 // "2 · deux" is shown with its digit: say only the word. "un / une" is read as "un, une".
+// French for the app's own content: France French (the exam bank was switched too), not Québec French
+const FRANCE_FR = 'Write standard French as used in France (un e-mail, le week-end, le déjeuner at lunchtime and le dîner in the evening, un portable), not Québec French.';
+const FRANCE_FR_CHECK = 'Use France French as the reference, but do not count Québec words as mistakes; you may mention the France French word.';
+window.FRANCE_FR = FRANCE_FR; window.FRANCE_FR_CHECK = FRANCE_FR_CHECK;
 const sayable = (text) => String(text).replace(/^\s*\d[\d\s]*\s*·\s*/, '').replace(/\s+\/\s+/g, ', ');
 function speakFrench(text, rate = 1) {
     if (!('speechSynthesis' in window) || !text) return;

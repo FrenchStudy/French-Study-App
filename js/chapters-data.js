@@ -689,7 +689,7 @@ const CHAPTERS = {
           story: [
             ["Au petit-déjeuner, je mange du [[pain]] avec du [[beurre]] et de la [[confiture]].", "For breakfast I eat bread with butter and jam."],
             ["Le dimanche, nous faisons des [[œufs]] au [[jambon]] et une assiette de [[fromage]].", "On Sundays we make eggs with ham and a cheese plate."],
-            ["Pour le souper, je cuisine du [[poulet]], du [[bœuf]] ou du [[porc]].", "For dinner I cook chicken, beef or pork."],
+            ["Pour le dîner, je cuisine du [[poulet]], du [[bœuf]] ou du [[porc]].", "For dinner I cook chicken, beef or pork."],
             ["Le vendredi, c'est [[poisson]] !", "On Fridays, it's fish!"],
             ["« Tu peux me passer le [[sel et le poivre|sel / le poivre]], s'il te plaît ? »", "\"Can you pass me the salt and pepper, please?\""],
           ] },
@@ -748,7 +748,7 @@ const CHAPTERS = {
             ["Dans la [[cabine d'essayage]], je vois que la [[taille]] est [[trop grande|trop grand / trop petit]].", "In the fitting room, I see that the size is too big."],
             ["J'essaie un petit : « Ah, [[ça me va bien.|ça me va bien.]] » Je vais le [[porter|porter / mettre]] ce soir !", "I try a small: \"Ah, it fits me well.\" I'll wear it tonight!"],
           ] },
-        { title: "Faire du magasinage", en: "Going shopping",
+        { title: "Faire les magasins", en: "Going shopping",
           keys: ["magasin", "centre commercial", "rayon", "je cherche…", "je regarde seulement, merci.", "vous avez ça en bleu ?", "soldes", "en solde", "réduction", "c'est combien ?", "c'est trop cher."],
           story: [
             ["Samedi, je vais au [[centre commercial]]. Dans un [[magasin]], une vendeuse me demande si j'ai besoin d'aide.", "On Saturday I go to the shopping centre. In a shop, a saleswoman asks if I need help."],
@@ -917,7 +917,7 @@ const CHAPTERS = {
           story: [
             ["À la réception : « Bonsoir, [[j'ai réservé une chambre au nom de|j'ai réservé une chambre au nom de…]] Martin. »", "At reception: \"Good evening, I booked a room under the name Martin.\""],
             ["« Bienvenue ! Nous demandons une [[caution]] de cent dollars. »", "\"Welcome! We ask for a hundred-dollar deposit.\""],
-            ["« [[Le petit-déjeuner est compris|petit-déjeuner compris]] ? — Oui, et la [[demi-pension]] est possible pour le souper. »", "\"Is breakfast included?\" \"Yes, and half board is possible for dinner.\""],
+            ["« [[Le petit-déjeuner est compris|petit-déjeuner compris]] ? — Oui, et la [[demi-pension]] est possible pour le dîner. »", "\"Is breakfast included?\" \"Yes, and half board is possible for dinner.\""],
             ["« [[À quelle heure est le petit-déjeuner ?|à quelle heure est le petit-déjeuner ?]] — De sept à dix heures. L'[[arrivée|arrivée / le départ]] est à quinze heures et le départ avant midi. »", "\"What time is breakfast?\" \"From seven to ten. Check-in is at three and check-out before noon.\""],
           ] },
         { title: "Dans la chambre", en: "In the room",
@@ -1141,7 +1141,7 @@ const CHAPTERS = {
             ["Je lui écris de l'ordinateur : « [[Je t'appelle plus tard.|je t'appelle plus tard.]] »", "I write to her from the computer: \"I'll call you later.\""],
             ["Mon ami m'écrit : « [[Rappelle-moi, s'il te plaît.|rappelle-moi, s'il te plaît.]] Sinon, [[peux-tu m'envoyer un message ?|peux-tu m'envoyer un message ?]] »", "My friend writes to me: \"Call me back, please. Otherwise, can you send me a message?\""],
           ] },
-        { title: "Donner une adresse courriel", en: "Giving an email address",
+        { title: "Donner une adresse e-mail", en: "Giving an email address",
           keys: ["@", ".", "-", "_", "jean point martin arobase gmail point com"],
           story: [
             ["Au téléphone, je donne mon adresse : « [[jean point martin arobase gmail point com|jean point martin arobase gmail point com]] ».", "On the phone I give my address: \"jean dot martin at gmail dot com\"."],
