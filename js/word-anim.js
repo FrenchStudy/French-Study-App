@@ -1,4 +1,4 @@
-// word-anim.js - small moving pictures for words a still picture can't show (directions, places).
+// word-anim.js - small moving pictures for words a still picture can't show (directions, time, how often).
 //   WordAnim.has(key)        -> true when the word has one
 //   WordAnim.svg(key, cls)   -> an <svg> string that plays on its own (loops), or ''
 // Shown in Learn (the word tile), in the flashcard and in Watch. They are drawn in code: no files to download.
@@ -19,7 +19,56 @@ const head = (x, y, angle, color = C.me) => `<path d="M0 -9 L9 0 L0 9" transform
 const roadH = (y, x1 = 0, x2 = 200) => `<rect x="${x1}" y="${y - 14}" width="${x2 - x1}" height="28" fill="${C.road}"/><line x1="${x1}" y1="${y}" x2="${x2}" y2="${y}" stroke="${C.line}" stroke-width="3" stroke-dasharray="10 8"/>`;
 const roadV = (x, y1 = 0, y2 = 140) => `<rect x="${x - 14}" y="${y1}" width="28" height="${y2 - y1}" fill="${C.road}"/><line x1="${x}" y1="${y1}" x2="${x}" y2="${y2}" stroke="${C.line}" stroke-width="3" stroke-dasharray="10 8"/>`;
 
+// A week: n days light up one after the other (L M M J V S D)
+const DAYS = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
+const week = (lit, label) => DAYS.map((d, i) => {
+    const x = 9 + i * 26, on = lit.includes(i), t = (0.08 + i * 0.09).toFixed(2);
+    const fill = on ? `<animate attributeName="fill" values="#fff;#fff;${C.goal};${C.goal}" keyTimes="0;${t};${(+t + 0.01).toFixed(2)};1" dur="3s" repeatCount="indefinite"/>` : '';
+    return `<rect x="${x}" y="46" width="22" height="30" rx="5" fill="#fff" stroke="${C.house}" stroke-width="2">${fill}</rect><text x="${x + 11}" y="94" text-anchor="middle" font-size="11" font-weight="700" fill="${C.ink}">${d}</text>`;
+}).join('') + `<text x="100" y="28" text-anchor="middle" font-size="15" font-weight="800" fill="${C.ink}">${label}</text>`;
+// A time line with "now" in the middle; the event is the orange dot
+const NOW = 100;
+const timeline = (extra = '') => `<line x1="14" y1="86" x2="186" y2="86" stroke="${C.house}" stroke-width="4" stroke-linecap="round"/>` +
+    `<path d="M180 80 L188 86 L180 92" fill="none" stroke="${C.house}" stroke-width="4" stroke-linecap="round"/>` +
+    `<line x1="${NOW}" y1="66" x2="${NOW}" y2="106" stroke="${C.me}" stroke-width="3"/><text x="${NOW}" y="122" text-anchor="middle" font-size="12" font-weight="800" fill="${C.me}">maintenant</text>` +
+    `<text x="20" y="122" font-size="11" fill="${C.ink}">hier</text><text x="180" y="122" text-anchor="end" font-size="11" fill="${C.ink}">demain</text>` + extra;
+const dot = (x, anim = '') => `<circle cx="${x}" cy="86" r="9" fill="${C.goal}" stroke="#fff" stroke-width="2.5">${anim}</circle>`;
+const pulse = '<animate attributeName="r" values="8;12;8" dur="1.2s" repeatCount="indefinite"/>';
+const icon = (x, y, t, size = 20) => `<text x="${x}" y="${y}" text-anchor="middle" font-size="${size}">${t}</text>`;
+const span = (x1, x2, dur = '2.6s', color = C.goal) => `<rect x="${x1}" y="80" height="12" rx="6" fill="${color}" width="0"><animate attributeName="width" values="0;${x2 - x1};${x2 - x1}" keyTimes="0;.75;1" dur="${dur}" repeatCount="indefinite"/></rect>`;
+
 const SCENES = {
+    // ---------- 7 Frequency & Time Adverbs: how often (a week) ----------
+    'toujours': () => week([0, 1, 2, 3, 4, 5, 6], '7 / 7 jours'),
+    'tout le temps': () => week([0, 1, 2, 3, 4, 5, 6], 'tout le temps'),
+    "d'habitude": () => week([0, 1, 2, 3, 4, 5], '6 / 7 : d\'habitude'),
+    'normalement': () => week([0, 1, 2, 3, 4, 5], '6 / 7 : normalement'),
+    'souvent': () => week([0, 1, 2, 3, 4], '5 / 7 jours'),
+    'parfois': () => week([0, 2, 4], '3 / 7 jours'),
+    'quelquefois': () => week([1, 3, 5], '3 / 7 jours'),
+    'de temps en temps': () => week([1, 5], '2 / 7 jours'),
+    'jamais': () => week([], '0 / 7 jours') + `<path d="M40 40 L160 82 M160 40 L40 82" stroke="#e11d48" stroke-width="7" stroke-linecap="round" opacity="0"><animate attributeName="opacity" values="0;0;1;1" keyTimes="0;.4;.45;1" dur="3s" repeatCount="indefinite"/></path>`,
+    'tôt / tard': () => `<rect x="0" y="100" width="200" height="40" fill="#bbf7d0"/>` +
+        `<circle cx="50" cy="110" r="16" fill="${C.goal}"><animate attributeName="cy" values="98;50;50" keyTimes="0;.6;1" dur="3s" repeatCount="indefinite"/></circle>` + icon(50, 132, '6 h', 13) +
+        `<circle cx="150" cy="50" r="14" fill="#cbd5e1"/><circle cx="156" cy="45" r="12" fill="${C.bg}"/>` + icon(150, 132, '23 h', 13),
+
+    // ---------- when: a time line around "now" ----------
+    'maintenant': () => timeline(dot(NOW, pulse)),
+    'en ce moment': () => timeline(dot(NOW, pulse) + icon(NOW, 52, '⏳', 18)),
+    'tout de suite': () => timeline(dot(180, '<animate attributeName="cx" values="180;106;106" keyTimes="0;.2;1" dur="2.6s" repeatCount="indefinite"/>') + icon(150, 56, '⚡', 20)),
+    'bientôt': () => timeline(arrow('M104 64 H124') + head(128, 64, 0) + dot(130, pulse)),
+    "tout à l'heure": () => timeline(dot(132, pulse) + icon(132, 58, '🕒', 16)),
+    'déjà': () => timeline(dot(56) + icon(56, 60, '✅', 18)),
+    'pas encore': () => timeline(`<circle cx="148" cy="86" r="9" fill="#fff" stroke="${C.goal}" stroke-width="3" stroke-dasharray="4 3"/>` + icon(148, 60, '⌛', 18)),
+    'encore': () => timeline(dot(20, '<animate attributeName="cx" values="20;180;20;180" dur="2.6s" repeatCount="indefinite"/>') + icon(NOW, 50, '↻', 22)),
+    'récemment': () => timeline(dot(80, pulse)),
+    'autrefois': () => timeline(dot(28, pulse) + icon(28, 58, '🏰', 18)),
+    'avant': () => timeline(arrow('M96 64 H48') + head(44, 64, 180) + dot(40)),
+    'après': () => timeline(arrow('M104 64 H152') + head(156, 64, 0) + dot(160)),
+    'pendant': () => timeline(span(26, 84) + icon(55, 60, '⏱️', 18)),
+    'depuis': () => timeline(span(36, NOW) + icon(36, 62, '🚩', 16)),
+    'longtemps': () => timeline(span(16, 184, '4s') + icon(100, 58, '🐢', 20)),
+
     // ---------- 21 Directions: chapter 1, where things are ----------
     'à gauche': () => roadH(84) + arrow('M100 60 H40') + head(36, 60, 180) + walker(100, 84, 'M0 0 H-62'),
     'à droite': () => roadH(84) + arrow('M100 60 H160') + head(164, 60, 0) + walker(100, 84, 'M0 0 H62'),
