@@ -20,6 +20,7 @@
     <script src="js/word-memory.js"></script>
     <script src="js/chapters-data.js"></script>
     <script src="js/tcf.js"></script>
+    <script src="js/word-anim.js"></script>
     <script src="js/clock.js"></script>
     <script src="js/watch.js"></script>
     <script src="js/vocab-games.js"></script>
@@ -655,7 +656,7 @@
             const edge = w.gender === 'm' ? 'border-b-sky-500' : w.gender === 'f' ? 'border-b-rose-500' : 'border-b-slate-300';
             return `<div class="flex flex-col bg-white border border-slate-200 border-b-4 ${edge} rounded-2xl overflow-hidden">
                 <button type="button" data-say="${escapeHtml(w.key)}" aria-label="Listen: ${escapeHtml(w.fr)}" class="flex-1 flex flex-col items-center text-center gap-1 px-2 pt-3 pb-2 hover:bg-emerald-50/60">
-                    <span class="${pic ? 'text-4xl' : 'text-2xl opacity-60'} leading-tight" aria-hidden="true">${pic || '🔊'}</span>
+                    ${window.WordAnim && WordAnim.has(w.key) ? WordAnim.svg(w.key, 'w-24 h-auto') : `<span class="${pic ? 'text-4xl' : 'text-2xl opacity-60'} leading-tight" aria-hidden="true">${pic || '🔊'}</span>`}
                     <span class="text-base font-bold leading-snug break-words ${genderClass(w)}">${escapeHtml(w.fr)}</span>
                     <span class="text-xs text-slate-500 break-words">${escapeHtml(w.en)}</span>
                 </button>
@@ -897,10 +898,11 @@
             // Words you have graded keep it for the back, so you recall the meaning yourself.
             const pic = WordMemory.picture(current);
             const picFront = !!pic && statusOf(current) === 'new';
-            $('card-front-pic').firstElementChild.textContent = picFront ? pic : '';
+            const anim = window.WordAnim && WordAnim.has(current.key) ? WordAnim.svg(current.key, 'w-40 h-auto inline-block') : '';
+            if (anim && picFront) $('card-front-pic').firstElementChild.innerHTML = anim; else $('card-front-pic').firstElementChild.textContent = picFront ? pic : '';
             $('card-front-pic').classList.toggle('hidden', !picFront);
             $('card-front-pic').classList.remove('vc-pop'); void $('card-front-pic').offsetWidth; $('card-front-pic').classList.add('vc-pop');
-            $('card-pic').textContent = pic;
+            if (anim) $('card-pic').innerHTML = anim; else $('card-pic').textContent = pic;
             $('card-pic').classList.toggle('hidden', !pic || picFront);
             renderCardExtras(current);
             $('card-pron').textContent = [current.pron && `Say: ${current.pron}`, current.ipa && `/${current.ipa}/`].filter(Boolean).join(' · ');
