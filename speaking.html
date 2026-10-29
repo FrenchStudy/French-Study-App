@@ -82,36 +82,48 @@
 
                 <!-- Questions: a new one from the AI, your own, then the exam-style questions (the mode is still called "exam" in the code) -->
                 <section id="mode-exam" class="hidden space-y-3">
-                    <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] gap-3">
-                        <section class="bg-white border border-slate-200 rounded-2xl p-4 space-y-3">
-                            <h2 class="font-black text-slate-900">✨ A new speaking task</h2>
-                            <div>
-                                <div class="text-sm font-semibold text-slate-700 mb-1.5">Subject</div>
-                                <div id="subjects" class="flex flex-wrap gap-1.5"></div>
-                                <input id="subject-other" type="text" maxlength="80" placeholder="…or type any subject" class="mt-2 w-full text-base md:text-sm px-3 py-2 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                            </div>
-                            <div>
-                                <div class="text-sm font-semibold text-slate-700 mb-1.5">Type of task</div>
-                                <div id="kinds" class="flex flex-wrap gap-1.5"></div>
-                            </div>
-                            <button id="gen-btn" type="button" class="whitespace-nowrap min-h-[48px] px-5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-bold rounded-xl">Give me a task</button>
-                            <p id="gen-error" class="hidden text-sm text-rose-700"></p>
-                        </section>
-                        <section class="bg-white border border-slate-200 rounded-2xl p-4 space-y-3 flex flex-col">
-                            <h2 class="font-black text-slate-900">📝 Your own question</h2>
-                            <p class="text-sm text-slate-500">Paste a speaking question from a book, an exam or your teacher.</p>
-                            <textarea id="post-text" rows="4" maxlength="1200" placeholder="e.g. Parlez de votre ville et de ce que vous aimez y faire." class="flex-1 w-full text-base md:text-sm p-3 bg-white border border-slate-200 rounded-xl resize-y focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
-                            <button id="post-btn" type="button" class="self-start min-h-[44px] px-4 bg-slate-900 hover:bg-slate-800 disabled:opacity-50 text-white font-bold rounded-xl">Use my question</button>
-                            <p id="post-error" class="hidden text-sm text-rose-700"></p>
-                        </section>
+                    <div class="flex flex-wrap gap-1.5 sm:gap-2">
+                        <button id="open-ai" type="button" class="min-h-[44px] px-3 sm:px-4 text-sm sm:text-base bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl">✨ New task</button>
+                        <button id="open-post" type="button" class="min-h-[44px] px-3 sm:px-4 text-sm sm:text-base bg-white border border-slate-200 hover:border-indigo-300 disabled:opacity-50 font-bold rounded-xl">📝 Paste<span class="hidden sm:inline"> your own</span></button>
+                        <button id="random-btn" type="button" class="min-h-[44px] px-3 sm:px-4 text-sm sm:text-base bg-white border border-slate-200 hover:border-indigo-300 disabled:opacity-50 font-bold rounded-xl">🎲 Random</button>
                     </div>
-                    <section id="exam-mine-box" class="hidden space-y-2">
-                        <h2 class="text-sm font-bold uppercase tracking-wide text-slate-500">Your questions</h2>
-                        <div id="exam-mine" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+                    <p id="random-error" class="hidden text-sm text-rose-700"></p>
+                    <section class="space-y-2 pt-1">
+                        <h2 class="text-lg font-black text-slate-900">Choose a question</h2>
+                        <div id="q-bank"><p class="text-sm text-slate-400 animate-pulse">Loading the questions…</p></div>
                     </section>
-                    <!-- Exam-style questions by task type and theme (js/tcf.js) -->
-                    <h2 class="pt-1 text-lg font-black text-slate-900">Choose a question</h2>
-                    <div id="q-bank" class="space-y-3"></div>
+
+                    <!-- New task (AI) and Your own question: a panel over the page (from the bottom on phones) -->
+                    <div id="sheet" class="hidden fixed inset-0 z-[60] flex items-end sm:items-start justify-center sm:pt-20 bg-slate-900/40" role="dialog" aria-modal="true" aria-labelledby="sheet-title">
+                        <div class="w-full sm:max-w-lg bg-white rounded-t-2xl sm:rounded-2xl p-5 space-y-3 max-h-[90vh] overflow-y-auto shadow-xl">
+                            <div id="sheet-ai" class="space-y-3">
+                                <h2 id="sheet-title" class="text-lg font-black text-slate-900">✨ New speaking task</h2>
+                                <p class="text-sm text-slate-500">The AI writes a new task for you, with points to cover and useful phrases. A different one every time.</p>
+                                <label class="block"><span class="block text-sm font-semibold text-slate-700 mb-1">Level</span>
+                                    <select id="ai-level" class="w-full text-base px-3 py-2.5 bg-white border border-slate-200 rounded-xl"></select></label>
+                                <label class="block"><span class="block text-sm font-semibold text-slate-700 mb-1">Subject</span>
+                                    <select id="ai-subject" class="w-full text-base px-3 py-2.5 bg-white border border-slate-200 rounded-xl"></select></label>
+                                <input id="subject-other" type="text" maxlength="80" placeholder="…or type any subject" class="w-full text-base px-3 py-2.5 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                <label class="block"><span class="block text-sm font-semibold text-slate-700 mb-1">Type of task</span>
+                                    <select id="ai-kind" class="w-full text-base px-3 py-2.5 bg-white border border-slate-200 rounded-xl"></select></label>
+                                <div class="flex flex-wrap gap-2 pt-1">
+                                    <button id="gen-btn" type="button" class="min-h-[48px] px-5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-bold rounded-xl">Give me a task</button>
+                                    <button type="button" data-sheet-close class="min-h-[48px] px-4 bg-white border border-slate-200 font-semibold rounded-xl">Cancel</button>
+                                </div>
+                                <p id="gen-error" class="hidden text-sm text-rose-700"></p>
+                            </div>
+                            <div id="sheet-post" class="hidden space-y-3">
+                                <h2 class="text-lg font-black text-slate-900">📝 Your own question</h2>
+                                <p class="text-sm text-slate-500">Paste a speaking question from a book, an exam or your teacher, in French or English.</p>
+                                <textarea id="post-text" rows="5" maxlength="1200" placeholder="e.g. Parlez de votre ville et de ce que vous aimez y faire." class="w-full text-base p-3 bg-white border border-slate-200 rounded-xl resize-y focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
+                                <div class="flex flex-wrap gap-2">
+                                    <button id="post-btn" type="button" class="min-h-[48px] px-5 bg-slate-900 hover:bg-slate-800 disabled:opacity-50 text-white font-bold rounded-xl">Use my question</button>
+                                    <button type="button" data-sheet-close class="min-h-[48px] px-4 bg-white border border-slate-200 font-semibold rounded-xl">Cancel</button>
+                                </div>
+                                <p id="post-error" class="hidden text-sm text-rose-700"></p>
+                            </div>
+                        </div>
+                    </div>
                 </section>
             </div>
 
@@ -300,11 +312,15 @@
             if (mode === 'exam') { renderExamHome(); initBank(); }
             if (push) history.pushState({}, '', 'speaking.html?mode=' + (mode === 'exam' ? 'questions' : mode));
         }
-        let bankReady = false;
+        let bankReady = false, picker = null;
         function initBank() {
             if (bankReady) return;
             bankReady = true;
-            TCF.browser($('q-bank'), { kind: 'speaking', href: (id) => `speaking.html?task=${encodeURIComponent(id)}`, say: (t) => speakFrench(t, 0.9) });
+            const q = new URLSearchParams(location.search);
+            TCF.picker($('q-bank'), { kind: 'speaking', extra: EXTRA, status: statusHtml,
+                href: (id) => `speaking.html?task=${encodeURIComponent(id)}`, say: (t) => speakFrench(t, 0.9),
+                askAI: (th) => openSheet('ai', th.en) })
+                .then(p => { picker = p; if (p && (q.get('t') || q.get('theme'))) p.set(q.get('t'), q.get('theme')); });
         }
         function showHome(push) {
             showView('home-view');
@@ -667,21 +683,50 @@ Give at most 4 corrections, only for real mistakes (an empty list if there are n
         let bankTasks = [], bankTheme = null;   // questions from the exam question bank (exam.html), opened by their id
         const timeFor = (t) => t.seconds || SECONDS[t.level] || SECONDS.A1;
         const fmtTime = (s) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
-        function renderExamHome() {
-            const lv = myLevel();
-            const kind = pick.kind || DEFAULT_KIND[lv];
-            const chip = (on) => `min-h-[36px] px-3 rounded-full text-sm font-semibold border transition ${on ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-white border-slate-200 text-slate-700 hover:border-indigo-300'}`;
-            $('subjects').innerHTML = SUBJECTS.map(s => `<button type="button" data-subject="${escapeHtml(s)}" class="${chip(s === pick.subject)}">${escapeHtml(s)}</button>`).join('');
-            $('kinds').innerHTML = KINDS.map(([k, label]) => `<button type="button" data-kind="${k}" class="${chip(k === kind)}">${escapeHtml(label)}</button>`).join('');
-            $('exam-mine-box').classList.toggle('hidden', !examTasks.length);
-            $('exam-mine').innerHTML = examTasks.map(t => {
-                const r = examResults[t.id];
-                return `<a href="speaking.html?task=${encodeURIComponent(t.id)}" data-task="${escapeHtml(t.id)}" class="group flex flex-col gap-1.5 bg-white border border-slate-200 hover:border-indigo-400 hover:shadow-md transition rounded-2xl p-4">
-                    <span class="flex items-center justify-between gap-2"><span class="text-[11px] font-bold uppercase tracking-wide text-violet-700 bg-violet-50 px-2 py-0.5 rounded-full">${escapeHtml(t.level)} · ${escapeHtml(t.source === 'posted' ? 'Your question' : t.kindLabel)}</span>
-                    ${r ? `<span class="text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">✓ ${r.score}/20</span>` : ''}</span>
-                    <span class="font-bold text-slate-900 leading-snug group-hover:text-indigo-700">${escapeHtml(t.title)}</span>
-                    <span class="text-sm text-slate-500 line-clamp-2">${escapeHtml(t.en || t.fr)}</span></a>`;
-            }).join('');
+        function renderExamHome() { if (picker) picker.redraw(); }
+        const LEVEL_NAME = { A1: 'Beginner', A2: 'Elementary', B1: 'Intermediate', B2: 'Upper intermediate', C1: 'Advanced', C2: 'Mastery' };
+        function statusHtml(id) {
+            const r = examResults[id];
+            return r ? `<span class="shrink-0 text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">✓ ${r.score}/20</span>` : '';
+        }
+        function mineCard(t) {
+            return `<a href="speaking.html?task=${encodeURIComponent(t.id)}" data-task="${escapeHtml(t.id)}" class="group flex flex-col gap-1.5 bg-white border border-slate-200 hover:border-indigo-400 hover:shadow-md transition rounded-2xl p-4">
+                <span class="flex items-center justify-between gap-2"><span class="text-[11px] font-bold uppercase tracking-wide text-violet-700 bg-violet-50 px-2 py-0.5 rounded-full">${escapeHtml(t.level)} · ${escapeHtml(t.source === 'posted' ? 'Your question' : t.kindLabel)}</span>${statusHtml(t.id)}</span>
+                <span class="font-bold text-slate-900 leading-snug group-hover:text-indigo-700">${escapeHtml(t.title)}</span>
+                <span class="text-sm text-slate-500 line-clamp-2">${escapeHtml(t.en || t.fr)}</span></a>`;
+        }
+        const EXTRA = [
+            { key: 'mine', label: 'Mine', count: () => examTasks.length,
+              note: () => examTasks.length ? 'Tasks the AI wrote for you and questions you pasted, newest first.' : '',
+              html: () => examTasks.length ? examTasks.map(mineCard).join('') : '<p class="text-sm text-slate-500 sm:col-span-2 lg:col-span-3">No tasks yet. Tap <b>✨ New task</b> or <b>📝 Paste your own</b> above.</p>' }
+        ];
+        // ---------- The panel: New task (AI) and Your own question ----------
+        function openSheet(which, subject) {
+            $('sheet').classList.remove('hidden');
+            $('sheet-ai').classList.toggle('hidden', which !== 'ai');
+            $('sheet-post').classList.toggle('hidden', which !== 'post');
+            $('gen-error').classList.add('hidden'); $('post-error').classList.add('hidden');
+            if (which === 'ai') {
+                const lv = LEVELS.includes(pick.level) ? pick.level : myLevel();
+                $('ai-level').innerHTML = LEVELS.map(l => `<option value="${l}" ${l === lv ? 'selected' : ''}>${l} · ${LEVEL_NAME[l]}</option>`).join('');
+                $('ai-subject').innerHTML = SUBJECTS.map(x => `<option ${x === pick.subject ? 'selected' : ''}>${escapeHtml(x)}</option>`).join('');
+                $('subject-other').value = typeof subject === 'string' ? subject : '';
+                drawKinds();
+                setTimeout(() => $('gen-btn').focus(), 0);
+            } else setTimeout(() => $('post-text').focus(), 0);
+        }
+        function drawKinds() {
+            const kind = pick.kind || DEFAULT_KIND[$('ai-level').value];
+            $('ai-kind').innerHTML = KINDS.map(([k, label]) => `<option value="${k}" ${k === kind ? 'selected' : ''}>${escapeHtml(label)}</option>`).join('');
+        }
+        const closeSheet = () => $('sheet').classList.add('hidden');
+        // Open a question by its id: your own, or one from the exam-style bank
+        async function openAnyTask(id, push) {
+            if (!examTasks.find(t => t.id === id) && !bankTasks.find(t => t.id === id) && TCF.parseId(id)) {
+                const t = await TCF.taskFromId(id);
+                if (t) bankTasks = [t, ...bankTasks.filter(x => x.id !== t.id)];
+            }
+            openExam(id, push);
         }
         const cleanLists = (t) => ({
             include: (t.include || []).map(String).filter(Boolean).slice(0, 5),
@@ -725,14 +770,14 @@ Reply with JSON only:
             showError('');
             const label = btn.textContent;
             btn.disabled = true; btn.textContent = 'Preparing a task…';
-            try { openExam((await generateTask(subject, kind, level)).id, true); }
+            try { const t = await generateTask(subject, kind, level); closeSheet(); openExam(t.id, true); }
             catch (err) { showError(err.message + ' Meanwhile, Shadowing works without AI.'); }
             finally { btn.disabled = false; btn.textContent = label; }
         }
         async function postQuestion() {
             const text = $('post-text').value.trim();
             if (text.length < 10) { $('post-error').textContent = 'Type or paste the question first.'; $('post-error').classList.remove('hidden'); return; }
-            const level = myLevel();
+            const level = LEVELS.includes(pick.level) ? pick.level : myLevel();
             $('post-error').classList.add('hidden');
             $('post-btn').disabled = true; $('post-btn').textContent = 'Reading your question…';
             let task = { id: 'spq-' + Date.now().toString(36), source: 'posted', level, kindLabel: 'Your question', title: text.split(/[.?!\n]/)[0].slice(0, 60) || 'My question', fr: text, en: '', include: [], bank: [] };
@@ -746,7 +791,7 @@ Reply with JSON only:
                 task = { ...task, title: String(t.title || task.title), fr: String(t.fr || text), en: String(t.en || ''), ...cleanLists(t) };
             } catch (err) { task.note = err.message; }
             saveTask(task);
-            $('post-text').value = '';
+            $('post-text').value = ''; closeSheet();
             $('post-btn').disabled = false; $('post-btn').textContent = 'Use my question';
             openExam(task.id, true);
         }
@@ -986,10 +1031,9 @@ Only list real mistakes, at most 10, in order. "wrong" must be copied exactly fr
             if (en) { const p = document.querySelector(`[data-en="${en.dataset.showEn}"]`); const h = p.classList.toggle('hidden'); en.textContent = h ? 'English' : 'Hide English'; return; }
             const use = e.target.closest('[data-use]');
             if (use) { $('msg-input').value = use.dataset.use; $('suggestions').classList.add('hidden'); $('msg-input').focus(); return; }
-            const sj = e.target.closest('[data-subject]');
-            if (sj) { pick.subject = sj.dataset.subject; $('subject-other').value = ''; store.set('speak_pick', pick); renderExamHome(); return; }
-            const kd = e.target.closest('[data-kind]');
-            if (kd) { pick.kind = kd.dataset.kind; store.set('speak_pick', pick); renderExamHome(); }
+            const pk = e.target.closest('[data-pk-open]');
+            if (pk && !e.metaKey && !e.ctrlKey) { e.preventDefault(); openAnyTask(pk.dataset.pkOpen, true).catch(() => { location.href = pk.href; }); return; }
+            if (e.target.closest('[data-sheet-close]') || e.target.id === 'sheet') { closeSheet(); return; }
         });
         // Conversation
         $('msg-form').addEventListener('submit', (e) => { e.preventDefault(); sendMessage($('msg-input').value); });
@@ -1031,9 +1075,34 @@ Only list real mistakes, at most 10, in order. "wrong" must be copied exactly fr
         $('sh-next').addEventListener('click', () => { if (idx < track.items.length - 1) { idx++; renderPhrase(); } });
         // Exam task
         $('gen-btn').addEventListener('click', () => {
-            const lv = myLevel();
+            const lv = $('ai-level').value;
             const showError = (m) => { $('gen-error').textContent = m; $('gen-error').classList.toggle('hidden', !m); };
-            onGenerate($('gen-btn'), showError, $('subject-other').value.trim() || pick.subject, pick.kind || DEFAULT_KIND[lv], lv);
+            onGenerate($('gen-btn'), showError, $('subject-other').value.trim() || $('ai-subject').value, $('ai-kind').value || DEFAULT_KIND[lv], lv);
+        });
+        $('open-ai').addEventListener('click', () => openSheet('ai'));
+        $('open-post').addEventListener('click', () => openSheet('post'));
+        $('ai-level').addEventListener('change', () => { pick.level = $('ai-level').value; store.set('speak_pick', pick); drawKinds(); });
+        $('ai-subject').addEventListener('change', () => { pick.subject = $('ai-subject').value; $('subject-other').value = ''; store.set('speak_pick', pick); });
+        $('ai-kind').addEventListener('change', () => { pick.kind = $('ai-kind').value; store.set('speak_pick', pick); });
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('sheet').classList.contains('hidden')) closeSheet(); });
+        // 🎲 Random: a question you have not practised yet, of the type and topic you are looking at
+        $('random-btn').addEventListener('click', async () => {
+            const btn = $('random-btn'), err = $('random-error');
+            err.classList.add('hidden');
+            const st = picker ? picker.state() : { type: 'S1', slug: 'all', isBank: true };
+            try {
+                btn.disabled = true;
+                let id = null;
+                if (st.isBank) id = await TCF.randomId(st.type, st.slug);
+                else {
+                    const fresh = examTasks.filter(t => !examResults[t.id]);
+                    const from = fresh.length ? fresh : examTasks;
+                    id = from.length ? from[Math.floor(Math.random() * from.length)].id : null;
+                }
+                if (!id) throw new Error(st.type === 'mine' ? 'You have no tasks of your own yet.' : 'No question found.');
+                await openAnyTask(id, true);
+            } catch (e) { err.textContent = e.message; err.classList.remove('hidden'); }
+            finally { btn.disabled = false; }
         });
         $('subject-other').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('gen-btn').click(); });
         $('post-btn').addEventListener('click', postQuestion);
