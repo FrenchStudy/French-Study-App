@@ -87,12 +87,15 @@ RULES = [
     (r"\bSalut la gang\b", "Salut tout le monde"),
     (r"\bun médecin de famille\b", "un médecin traitant"), (r"\bmédecin de famille\b", "médecin traitant"),
 ]
+ALREADY = re.compile(r"\bdéjeuner\b")   # lunch already changed in this text
 COMPILED = [(re.compile(p), r) for p, r in RULES]
 used = Counter()
 
 def fix(s, slug, idx):
     if idx is not None and (slug, idx) in LUNCH:
-        s2 = re.sub(r"\bdîner\b", "déjeuner", s)
+        # only where the text still says "souper" for the evening meal or has no "souper" at all
+        # (once "souper" is changed, the "dîner" left is the evening meal: running this again changes nothing)
+        s2 = re.sub(r"\bdîner\b", "déjeuner", s) if not ALREADY.search(s) else s
         if s2 != s: used['dîner→déjeuner (lunch)'] += 1; s = s2
     keep = idx is not None and (slug, idx) in KEEP_GARDERIE
     for rx, rep in COMPILED:
