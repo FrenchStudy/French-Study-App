@@ -217,9 +217,9 @@
                 const lessons = course[lv] || [], lDone = lessons.filter(([id]) => done[lessonKey(id)]).length;
                 const mine = lv === level;
                 return `<div class="rounded-xl p-2.5 border ${mine ? 'border-indigo-300 bg-indigo-50/50' : 'border-slate-100 bg-slate-50'} space-y-1.5" title="${lv} · ${LEVEL_NAMES[lv]}">
-                    <div class="flex items-baseline justify-between gap-1"><b class="text-sm text-slate-900">${lv}</b>${mine ? '<span class="text-[10px] font-bold uppercase text-indigo-700">You</span>' : ''}</div>
-                    <a href="vocab.html" class="block text-[11px] text-slate-500 hover:text-indigo-700">${bar(tDone, topics.length, 'bg-emerald-500')}<span class="block mt-0.5">${tDone}/${topics.length} topics</span></a>
-                    <a href="lesson.html" class="block text-[11px] text-slate-500 hover:text-indigo-700">${bar(lDone, lessons.length, 'bg-sky-500')}<span class="block mt-0.5">${lDone}/${lessons.length} lessons</span></a>
+                    <div class="flex items-baseline justify-between gap-1"><b class="text-sm text-slate-900">${lv}</b>${mine ? '<span class="text-[11px] font-bold uppercase text-indigo-700">You</span>' : ''}</div>
+                    <a href="vocab.html" class="block py-1 text-xs text-slate-500 hover:text-indigo-700">${bar(tDone, topics.length, 'bg-emerald-500')}<span class="block mt-0.5">${tDone}/${topics.length} topics</span></a>
+                    <a href="lesson.html" class="block py-1 text-xs text-slate-500 hover:text-indigo-700">${bar(lDone, lessons.length, 'bg-sky-500')}<span class="block mt-0.5">${lDone}/${lessons.length} lessons</span></a>
                 </div>`;
             }).join('');
         }

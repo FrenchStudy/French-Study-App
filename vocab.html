@@ -835,7 +835,7 @@
             const due = deck.words.filter(isDue).length;
             const fresh = total - known - learning;
             // Each count opens the word list filtered to those words
-            const chip = (n, label, f, cls) => `<button type="button" data-count-filter="${f}" class="underline decoration-dotted underline-offset-2 hover:text-indigo-700 ${n ? cls : ''}">${n} ${label}</button>`;
+            const chip = (n, label, f, cls) => `<button type="button" data-count-filter="${f}" class="inline-flex items-center min-h-[32px] underline decoration-dotted underline-offset-2 hover:text-indigo-700 ${n ? cls : ''}">${n} ${label}</button>`;
             $('deck-counts').innerHTML = total ? [chip(known, 'known', 'known', 'text-emerald-700'), chip(learning, 'learning', 'learning', 'text-amber-700'),
                 chip(due, 'to review', 'review', 'text-rose-700 font-semibold'), chip(fresh, 'new', 'new', '')].join('') : '';
             $('deck-counts').title = total ? `Known: ${known} · Learning: ${learning} (${due} of them due for review now) · New: ${fresh}` : '';
