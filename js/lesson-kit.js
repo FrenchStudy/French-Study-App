@@ -50,9 +50,11 @@ const LessonKit = (function () {
         ['v10', 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 'v17', 25, 26, 27, 28, 29, 30, 31],
         [32, 33, 34, 35, 'v25', 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46],
         [47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 'v33'],
-        ['v34', 'v35', 61, 62, 63, 64, 65, 66, 67, 'v39', 68, 'v36', 'v37', 'v38', 69, 70, 'v40'],
+        ['v34', 'v35', 61, 64, 65, 67, 'v39', 68, 'v36', 'v37', 'v38', 69, 70, 'v40'],
         [71, 'v43', 72, 73, 'v41', 74, 75, 76, 77, 'v42', 'v44', 78]
     ];
+    // C1 lessons that repeated a B2 one now live inside it, as its "Going further" part
+    const MERGED_INTO = { 62: 55, 63: 51, 66: 57 };
     const COURSE_LEVELS = ORDER.map((ids, i) => [(L.grammarLevels[i] || [`Level ${i + 1}`])[0], ids]);
     const COURSE_IDS = ORDER.flat();
     const isVerbId = (id) => typeof id === 'string' && /^v\d+$/.test(id);
@@ -74,7 +76,7 @@ const LessonKit = (function () {
         if (t) { t.n = COURSE_IDS.indexOf(id) + 1; courseCache[id] = t; }
         return t;
     }
-    const courseIdOf = (raw) => /^v\d+$/.test(String(raw)) ? String(raw) : Number(raw);
+    const courseIdOf = (raw) => /^v\d+$/.test(String(raw)) ? String(raw) : (MERGED_INTO[Number(raw)] || Number(raw));
 
     // Where each kind of lesson lives
     const URLS = {
@@ -201,7 +203,7 @@ const LessonKit = (function () {
                 const a = Number(m[2]), z = m[3] ? Number(m[3]) : a;
                 for (let n = a; n <= z; n++) {
                     if (kind === 'v') out.themes.push(n);
-                    else out.lessons.push(kind === 'c' ? CONJ_HOME[n] : n);
+                    else out.lessons.push(kind === 'c' ? CONJ_HOME[n] : (MERGED_INTO[n] || n));
                 }
             }
             const note = clause.trim().replace(/\.$/, '');
@@ -299,13 +301,9 @@ const LessonKit = (function () {
     }
 
     // Grammar topics 2, 3, 10 and 28 have a hand-built practice page shown inside them
-    function embeddedPractice(section, id) {
-        if (section !== 'grammar') return '';
-        return INTERACTIVE.filter(x => (x.embedIn || []).includes(id)).map(x =>
-            card(`▶️ Interactive practice: ${escapeHtml(x.title)}`,
-                `<div data-interactive="${x.id}" class="text-base"><p class="text-sm text-indigo-600 animate-pulse">Loading…</p></div>`,
-                'border-emerald-200')).join('');
-    }
+    // Lessons 2, 3, 10 and 28 used to show an old reference page here; it repeated the lesson
+    // (and lesson 27 for countries) without any exercises, so it is no longer shown.
+    function embeddedPractice() { return ''; }
 
     function lessonParts(t, ruleTitle) {
         const parts = [];
