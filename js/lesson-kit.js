@@ -255,6 +255,9 @@ const LessonKit = (function () {
         });
         if (forms.includes(said)) return 'right';
         if (forms.some(f => noAccents(f) === noAccents(said))) return 'accents';
+        // The noun right but without its article ("prix" for "les prix"): counted, with a reminder
+        const ART = /^(?:de la |de l'|les |le |la |l'|une |un |des |du )/;
+        if (forms.some(f => ART.test(f) && noAccents(f.replace(ART, '')) === noAccents(said))) return 'article';
         return 'wrong';
     }
     function drillBlock(drill) {
@@ -277,12 +280,12 @@ const LessonKit = (function () {
         const ans = li.querySelector('template[data-answer]').innerHTML;
         const said = li.querySelector('input').value.trim();
         const box = li.querySelector('[data-drill-result]');
-        const ok = verdict === 'right' || verdict === 'accents' || verdict === 'self';
+        const ok = verdict === 'right' || verdict === 'accents' || verdict === 'self' || verdict === 'article';
         li.dataset.result = ok ? 'right' : 'wrong';
         li.querySelector('input').readOnly = true;
         li.querySelectorAll('form button').forEach(b => b.classList.add('hidden'));
         li.className = `border rounded-xl p-3 space-y-2 ${ok ? 'border-emerald-300 bg-emerald-50/50' : 'border-rose-300 bg-rose-50/50'}`;
-        const head = { right: '✓ Right!', accents: '✓ Right, but watch the accents.', self: '✓ Counted as right.', wrong: '✗ Not quite.', shown: 'The answer:' }[verdict];
+        const head = { right: '✓ Right!', accents: '✓ Right, but watch the accents.', article: '✓ Right! Learn it with its article:', self: '✓ Counted as right.', wrong: '✗ Not quite.', shown: 'The answer:' }[verdict];
         box.innerHTML = `<div class="font-bold ${ok ? 'text-emerald-800' : 'text-rose-800'}">${head}</div>
             ${verdict === 'right' ? '' : `<div class="mt-1 font-semibold text-slate-900">${ans} <button type="button" data-say="${escapeHtml(toText(ans))}" class="ml-1 text-indigo-600 text-sm" aria-label="Listen">🔊</button></div>`}
             ${verdict === 'wrong' && said ? `<button type="button" data-drill-mine class="mt-2 min-h-[40px] px-3 text-sm font-semibold text-slate-700 bg-white border border-slate-200 hover:border-emerald-400 rounded-lg">My answer means the same: I was right</button>` : ''}`;
@@ -700,7 +703,7 @@ const LessonKit = (function () {
             const passed = right / items.length >= PASS;
             box.className = `lk-drill-score rounded-2xl p-4 text-center space-y-2 ${passed ? 'bg-emerald-50 text-emerald-900' : 'bg-amber-50 text-amber-900'}`;
             box.innerHTML = `<div class="text-lg font-black">${passed ? '🎉' : '💪'} ${right} out of ${items.length} right</div>
-                <div class="text-sm">${passed ? 'Lesson complete: it is marked as done.' : `Get ${Math.ceil(items.length * PASS)} right to complete the lesson.`}</div>
+                <div class="text-sm">${passed ? 'Lesson complete: it is marked as done.' : `Get ${Math.ceil(items.length * PASS)} right and the lesson is marked as done for you, or tap "Mark as done" below.`}</div>
                 ${right < items.length ? '<button type="button" data-drill-retry class="min-h-[44px] px-4 text-sm font-bold bg-white border border-slate-200 hover:border-indigo-400 rounded-xl text-slate-800">Try the ones I missed again</button>' : ''}`;
             if (passed && !isDone(section, current)) setDone(section, current, true).then(renderFooter);
         }

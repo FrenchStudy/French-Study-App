@@ -393,6 +393,8 @@ Reply with JSON only: {"title": "a short French title", "kind": "the type of tex
         pop.onclickWord = { raw, sentence, show, textId };
     }
     document.addEventListener('click', async (e) => {
+        // A tap anywhere else (an answer, a button, the page) closes the word card so it doesn't cover the page
+        if (pop && !pop.classList.contains('hidden') && !pop.contains(e.target) && !e.target.closest('.w')) closeWord();
         const b = e.target.closest('[data-pop]');
         if (!b || !pop || !pop.contains(b)) return;
         const act = b.dataset.pop;

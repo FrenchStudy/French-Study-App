@@ -648,7 +648,7 @@ Give at most 4 corrections, only for real mistakes (an empty list if there are n
                 onText: (fin, interim) => { if (fin) heard += ' ' + fin; $('shadow-result').innerHTML = `<p class="text-base text-slate-400 italic">${escapeHtml((heard + ' ' + interim).trim() || 'Listening…')}</p>`; },
                 onEnd: () => { btn.classList.remove('mic-on'); btn.textContent = '🎙️ Say it'; if (heard.trim()) showHeard(heard.trim()); else $('shadow-result').innerHTML = '<p class="text-sm text-slate-500">Nothing heard. Tap Say it and speak after the beep of your browser.</p>'; }
             });
-            if (started) { btn.classList.add('mic-on'); btn.textContent = '⏹ Stop'; $('shadow-result').innerHTML = '<p class="text-base text-slate-400 italic">Listening…</p>'; }
+            if (started) { btn.classList.add('mic-on'); btn.innerHTML = `${MEDIA_ICON.stop(14)} Stop`; $('shadow-result').innerHTML = '<p class="text-base text-slate-400 italic">Listening…</p>'; }
         }
 
         // =====================================================================
@@ -792,7 +792,7 @@ Reply with JSON only:
         }
         function setMicUi(on) {
             $('exam-mic').classList.toggle('mic-on', on);
-            $('exam-mic').textContent = on ? '⏹' : '🎙️';
+            $('exam-mic').innerHTML = on ? MEDIA_ICON.stop(20) : '🎙️';
             $('exam-mic-label').textContent = on ? 'Listening… tap to stop' : (seconds ? 'Tap to continue speaking' : 'Tap to start speaking');
         }
         function toggleExamMic() {
@@ -1002,7 +1002,7 @@ Only list real mistakes, at most 10, in order. "wrong" must be copied exactly fr
                 onText: (fin, interim) => { if (fin) said += ' ' + fin; $('msg-input').value = (base + ' ' + said + ' ' + interim).replace(/\s+/g, ' ').trim(); },
                 onEnd: () => { $('msg-mic').classList.remove('mic-on', 'bg-rose-500', 'text-white'); $('msg-mic').textContent = '🎙️'; $('msg-input').focus(); }
             });
-            if (started) { $('msg-mic').classList.add('mic-on', 'bg-rose-500', 'text-white'); $('msg-mic').textContent = '⏹'; }
+            if (started) { $('msg-mic').classList.add('mic-on', 'bg-rose-500', 'text-white'); $('msg-mic').innerHTML = MEDIA_ICON.stop(18); }
         });
         $('auto-speak').addEventListener('change', () => store.set('speak_auto', $('auto-speak').checked));
         $('btn-hints').addEventListener('click', showHints);

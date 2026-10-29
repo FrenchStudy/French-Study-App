@@ -291,7 +291,7 @@ window.Nationalites = (function () {
             card.innerHTML = countryHtml(n) + (walking ? `<div class="mp-row">
                     <button type="button" class="mp-btn" data-a="prev" ${i === 0 ? 'disabled' : ''}>← Back</button>
                     <button type="button" class="mp-btn pri" data-a="next">${i === order.length - 1 ? 'Finish' : 'Next →'}</button>
-                    <button type="button" class="mp-btn" data-a="auto" aria-pressed="${auto}">${auto ? '⏸ Pause' : '▶ Play the walk'}</button></div>
+                    <button type="button" class="mp-btn" data-a="auto" aria-pressed="${auto}">${auto ? (window.MEDIA_ICON ? MEDIA_ICON.pause(16) + ' Pause' : 'Pause') : (window.MEDIA_ICON ? MEDIA_ICON.play(16) + ' Play the walk' : '▶ Play the walk')}</button></div>
                 <p class="mp-muted">Stop ${i + 1} of ${order.length}${auto ? ' · moving on by itself' : ''}</p>` : '');
             say(full(BY[n]));
             if (!walking) return;
