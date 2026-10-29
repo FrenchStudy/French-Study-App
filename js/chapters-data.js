@@ -201,7 +201,7 @@ const CHAPTERS = {
           story: [
             ["Au Québec, [[janvier]] et [[février]] sont très froids.", "In Quebec, January and February are very cold."],
             ["[[En janvier|en janvier / au mois de janvier]], il fait souvent moins vingt degrés !", "In January, it's often minus twenty degrees!"],
-            ["En [[mars]] et en [[avril]], la neige fond et on va à la cabane à sucre.", "In March and April, the snow melts and people go to the sugar shack."],
+            ["En [[mars]] et en [[avril]], il fait plus doux et les premières fleurs apparaissent.", "In March and April, it gets milder and the first flowers appear."],
             ["Le [[premier mai]], c'est la fête du Travail en France ; ici, [[mai]] est le mois des tulipes.", "The first of May is Labour Day in France; here, May is the month of tulips."],
             ["En [[juin]], l'école se termine, et en [[juillet]] et en [[août]], tout le monde part en vacances.", "In June school ends, and in July and August everyone goes on holiday."],
             ["Le [[mois]] que je préfère, c'est octobre, pour les couleurs des arbres.", "My favourite month is October, for the colours of the trees."],

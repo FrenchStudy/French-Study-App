@@ -22,6 +22,7 @@ Run them in order in the Supabase SQL editor. Each file is safe to run twice, an
 | `10_fix_word_list.sql` | Fixes 20 words found in a French review of the word list: articles (*le yaourt*, *le yoga*, *madame* with none), *otage* always masculine, *ouvrier* as the headword, and example sentences with a grammar slip or that used a different word. `06` and `07` already include these fixes, so run this only if you ran them before | 20 rows with the corrected values |
 | `11_emission_meaning.sql` | Gives *émission* its environment meaning ("emission; programme (TV, radio)") and an example about CO₂ | one row with the new meaning |
 | `12_france_french_examples.sql` | France French: three examples say *par e-mail* instead of *par courriel*, and *courriel* gets a note in its meaning | the four rows with the new text |
+| `13_remove_quebec_words.sql` | Removes the Québec-only words *dépanneur, bleuet, tuque, cégep* (a copy is kept for undo) and adds *myrtille* in place of *bleuet* | 0 still in the list, 4 kept in the backup |
 | `99_undo.sql` | Removes the themes, the new entries and the new columns, and restores gender and article from the backup | `rows_now` = 5000 |
 
 Before running `05_new_themes.sql`, look through `05_new_themes_review.csv` (GitHub shows it as a table).

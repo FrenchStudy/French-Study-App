@@ -86,9 +86,63 @@ RULES = [
     (r"\bc'est le temps de la famille\b", "place à la famille"),
     (r"\bSalut la gang\b", "Salut tout le monde"),
     (r"\bun médecin de famille\b", "un médecin traitant"), (r"\bmédecin de famille\b", "médecin traitant"),
+    # ---- second pass (no Québec words at all): schools, safety, bins, money, health
+    (r"\bLe journal de votre cégep\b", "Le journal de votre université"),
+    (r"\bpour le journal de votre cégep\b", "pour le journal de votre université"),
+    (r"\bAu cégep, le comité\b", "À l'université, le comité"),
+    (r"\bau programme de soins infirmiers du cégep de Saint-Jérôme\b", "en formation de soins infirmiers à Saint-Jérôme"),
+    (r"\bmon professeur de philosophie au cégep\b", "mon professeur de philosophie au lycée"),
+    (r"\bvoter par anticipation ou au cégep\b", "voter par anticipation ou à l'université"),
+    (r"\bune station près de mon cégep\b", "une station près de mon université"),
+    (r"\bconseillère d'orientation au cégep\b", "conseillère d'orientation au lycée"),
+    (r"\bVous appelez le cégep qui la propose\b", "Vous appelez l'organisme de formation qui la propose"),
+    (r"\bplus sécuritaire qu'avant\b", "plus sûr qu'avant"),
+    (r"\bPour une traverse sécuritaire devant l'école\b", "Pour un passage piéton sécurisé devant l'école"),
+    (r"\bpeu sécuritaire\b", "peu sûr"),
+    (r"\bcorridors sécuritaires\b", "couloirs sécurisés"),
+    (r"\bvraiment sécuritaire\b", "vraiment sécurisée"),
+    (r"\bpratiques, sécuritaires et\b", "pratiques, sûrs et"),
+    (r"\bun bac brun pour les résidus alimentaires\b", "un bac à compost pour les restes alimentaires"),
+    (r"\bbac brun\b", "bac à compost"),
+    (r"\ble service 311 de votre ville\b", "le service propreté de votre mairie"),
+    (r"\bdans le bac bleu\b", "dans la poubelle de tri"),
+    (r"\bla taxe de bienvenue\b", "les droits de mutation"),
+    (r"\bLe CLSC de ton secteur\b", "Le centre de santé de ton quartier"),
+    (r"\bune annonce pour un 4 ½", "une annonce pour un trois-pièces"),
+    (r"\ble crédit pour la TPS, l'allocation pour enfants ou la solidarité sociale\b", "la prime d'activité, les allocations familiales ou le RSA"),
+    (r"\bun CELI et un REER\b", "un livret A et un plan d'épargne retraite"),
+    (r"\bun compte d'épargne libre d'impôt \(CELI\)", "un livret A"),
+    (r"\bdans mon CELI\b", "sur mon livret A"),
+    (r"\bdans un CELI\b", "sur un livret A"),
+    (r"\ble CELIAPP pour aider les premiers acheteurs\b", "le prêt à taux zéro pour aider les premiers acheteurs"),
+]
+# The English that goes with the second pass (only *_en fields)
+EN_RULES = [
+    (r"\bYour CEGEP newspaper\b", "Your university newspaper"),
+    (r"\byour CEGEP newspaper\b", "your university newspaper"),
+    (r"\bAt the CEGEP, the environment committee\b", "At university, the environment committee"),
+    (r"\bmy philosophy teacher at cégep\b", "my philosophy teacher at secondary school"),
+    (r"\bor at the CEGEP\b", "or at the university"),
+    (r"\ba station near my CEGEP\b", "a station near my university"),
+    (r"\bmy guidance counsellor at CEGEP\b", "my guidance counsellor at secondary school"),
+    (r"\bYou call the college that offers it\b", "You call the training centre that offers it"),
+    (r"\binto the nursing programme at the Cégep de Saint-Jérôme\b", "into nursing training in Saint-Jérôme"),
+    (r"\bbrown bin\b", "compost bin"),
+    (r"\byour city's 311 service\b", "your town hall's waste service"),
+    (r"\bin the blue bin\b", "in the recycling bin"),
+    (r"\bthe land transfer tax\b", "the transfer duties"), (r"\bland transfer tax\b", "transfer duties"),
+    (r"\bYour local community health centre \(CLSC\)", "Your local health centre"),
+    (r'\ba two-bedroom flat \(a "4½"\)', "a two-bedroom flat"),
+    (r"\bthe GST credit, the child benefit or social assistance\b", "the in-work benefit, family allowances or income support"),
+    (r"\ba TFSA and an RRSP\b", "a Livret A savings account and a retirement savings plan"),
+    (r"\ba tax-free savings account \(TFSA\)", "a Livret A savings account"),
+    (r"\bin my TFSA\b", "in my Livret A"), (r"\bin a TFSA\b", "in a Livret A savings account"),
+    (r"\bthe FHSA to help first-time buyers\b", "the zero-interest loan to help first-time buyers"),
+    (r"\bthe low-cost daycare network\b", "the low-cost nursery network"),
 ]
 ALREADY = re.compile(r"\bdéjeuner\b")   # lunch already changed in this text
 COMPILED = [(re.compile(p), r) for p, r in RULES]
+EN_COMPILED = [(re.compile(p), r) for p, r in EN_RULES]
 used = Counter()
 
 def fix(s, slug, idx):
@@ -104,9 +158,15 @@ def fix(s, slug, idx):
         if n: used[rx.pattern] += n; s = s2
     return s
 
+def fix_en(s):
+    for rx, rep in EN_COMPILED:
+        s2, n = rx.subn(rep, s)
+        if n: used['en: ' + rx.pattern] += n; s = s2
+    return s
+
 def walk(x, slug, path, idx):
     if isinstance(x, str):
-        return x if EN.search(path) else fix(x, slug, idx)
+        return fix_en(x) if EN.search(path) else fix(x, slug, idx)
     if isinstance(x, list):
         return [walk(v, slug, f'{path}[{i}]', idx) for i, v in enumerate(x)]
     if isinstance(x, dict):

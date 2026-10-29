@@ -51,10 +51,10 @@ const LessonKit = (function () {
         [32, 33, 34, 35, 'v25', 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46],
         [47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 'v33'],
         ['v34', 'v35', 61, 64, 65, 67, 'v39', 68, 'v36', 'v37', 'v38', 69, 70, 'v40'],
-        [71, 'v43', 72, 73, 'v41', 74, 75, 76, 77, 'v42', 'v44', 78]
+        [71, 'v43', 72, 73, 'v41', 74, 75, 76, 'v42', 'v44', 78]
     ];
     // C1 lessons that repeated a B2 one now live inside it, as its "Going further" part
-    const MERGED_INTO = { 62: 55, 63: 51, 66: 57 };
+    const MERGED_INTO = { 62: 55, 63: 51, 66: 57, 77: 69 };   // 77 (Quebec French) was removed: the app teaches France French
     const COURSE_LEVELS = ORDER.map((ids, i) => [(L.grammarLevels[i] || [`Level ${i + 1}`])[0], ids]);
     const COURSE_IDS = ORDER.flat();
     const isVerbId = (id) => typeof id === 'string' && /^v\d+$/.test(id);
