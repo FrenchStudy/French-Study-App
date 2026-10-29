@@ -20,9 +20,6 @@
     <script src="js/word-memory.js"></script>
     <script src="js/chapters-data.js"></script>
     <script src="js/tcf.js"></script>
-    <script src="js/palaces-data.js"></script>
-    <script src="js/palaces-data-2.js"></script>
-    <script src="js/memory-palace.js"></script>
     <script src="js/clock.js"></script>
     <script src="js/watch.js"></script>
     <script src="js/vocab-games.js"></script>
@@ -1375,7 +1372,17 @@
         // Topics about rules rather than things (numbers, calendar, telling time, colours) get a
         // hands-on tool (js/vocab-tools.js, js/clock.js, js/nationalites.js) in the place where others have a memory palace
         const toolFor = (tp) => (tp && tp.n && window.VocabTools && VocabTools[tp.n] && VocabTools[tp.n].mount) ? VocabTools[tp.n] : null;
-        const hasPalace = (tp) => !!toolFor(tp) || !!(tp && tp.n && window.MemoryPalace && MemoryPalace.has(tp.n));
+        // The memory palaces (about 120 KB) load only when one is opened. Topics that have one
+        // (the keys of PALACES in js/memory-palace.js and js/palaces-data*.js: keep in step when adding a palace)
+        const PALACE_THEMES = new Set([8, 9, 11, 15, 18, 19, 20, 21, 22, 23, 24, 26, 27, 28, 29, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 45, 46, 47, 48, 49, 51, 56]);
+        const hasPalace = (tp) => !!toolFor(tp) || !!(tp && tp.n && (window.MemoryPalace ? MemoryPalace.has(tp.n) : PALACE_THEMES.has(Number(tp.n))));
+        let palaceLoading = null;
+        function loadPalaces() {
+            if (window.MemoryPalace) return Promise.resolve();
+            const one = (src) => new Promise((ok, fail) => { const el = document.createElement('script'); el.src = src; el.onload = ok; el.onerror = () => fail(new Error('Could not load ' + src)); document.head.appendChild(el); });
+            palaceLoading = palaceLoading || one('js/palaces-data.js').then(() => one('js/palaces-data-2.js')).then(() => one('js/memory-palace.js')).catch(e => { palaceLoading = null; throw e; });
+            return palaceLoading;
+        }
         function stepsFor(tp) {
             if (!tp) return STEPS.filter(x => x !== 'palace');
             if (tp.id === 'review') return ['practise'];
@@ -1415,8 +1422,15 @@
                 ? `<button type="button" data-goto-step="${nx[0]}" class="min-h-[48px] px-5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl">Next: ${nx[1]} →</button>`
                 : '';
             // the palace needs the full width: hide the topic list beside it while it is open
-            if (s === 'palace' && toolFor(topic)) toolFor(topic).mount($('step-palace'), { say: (t) => speakFrench(t, 0.9) });
-            else if (s === 'palace') MemoryPalace.mount($('step-palace'), topic.n, palaceWords(), { say: (t) => speakFrench(t, 0.9), grade: palaceGrade });
+            if (s === 'palace') {
+                const tp = topic, box = $('step-palace');
+                if (!window.MemoryPalace) box.innerHTML = '<p class="text-sm text-slate-400 animate-pulse p-4">Loading…</p>';
+                loadPalaces().then(() => {
+                    if (topic !== tp || step !== 'palace') return;   // moved on while loading
+                    if (toolFor(tp)) toolFor(tp).mount(box, { say: (t) => speakFrench(t, 0.9) });
+                    else MemoryPalace.mount(box, tp.n, palaceWords(), { say: (t) => speakFrench(t, 0.9), grade: palaceGrade });
+                }).catch(e => { box.innerHTML = `<p class="text-sm text-rose-700 p-4">${escapeHtml(e.message)}. Check your connection and try again.</p>`; });
+            }
             if (s === 'practise') startCards();
             if (s === 'learn') renderLearn();
             if (s === 'list') renderList();
@@ -1440,7 +1454,8 @@
         // ---------- Opening a topic ----------
         const topicUrl = (id, s) => `vocab.html?topic=${encodeURIComponent(id)}${s && s !== 'learn' ? '&step=' + s : ''}`;
         function freqTopic(id) {
-            const n = Number(id.split(':')[1]) || 1;
+            const n = Number(id.split(':')[1]);
+            if (!Number.isInteger(n) || n < 1 || n > FREQ_TOTAL || (n - 1) % FREQ_DECK_SIZE) return null;   // a bad link shows the topic list
             return { id: `freq:${n}`, title: `Most common words ${n}–${n + FREQ_DECK_SIZE - 1}`, level: '', freq: true };
         }
         function resolveTopic(id) {

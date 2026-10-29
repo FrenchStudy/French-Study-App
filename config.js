@@ -23,15 +23,11 @@ if (!window.mySupabase && window.supabase) {
 
 // AI settings saved from admin.html
 const CONFIG = {
-    getApiKey() {
-        return localStorage.getItem('ai_api_key') || '';
-    },
-    getModelName() {
-        return localStorage.getItem('ai_model_name') || 'openai/gpt-oss-120b';
-    },
-    getApiUrl() {
-        return localStorage.getItem('ai_api_url') || 'https://api.groq.com/openai/v1/chat/completions';
-    }
+    // Blocked storage (some private modes) throws: then nothing is saved here
+    read(k) { try { return localStorage.getItem(k) || ''; } catch (e) { return ''; } },
+    getApiKey() { return this.read('ai_api_key'); },
+    getModelName() { return this.read('ai_model_name') || 'openai/gpt-oss-120b'; },
+    getApiUrl() { return this.read('ai_api_url') || 'https://api.groq.com/openai/v1/chat/completions'; }
 };
 
 // ---------- AI through the server ----------
@@ -199,17 +195,33 @@ function renderAppHeader() {
     const header = document.getElementById('app-header');
     if (!header) return;
     let page = location.pathname.split('/').pop() || 'index.html';
+    const current = APP_NAV.find(([href]) => href === page);
     const flag = '<span class="inline-flex overflow-hidden rounded-[3px] shadow-sm shrink-0" style="width:1.5rem;height:1rem" aria-hidden="true"><span class="flex-1" style="background:#0055a4"></span><span class="flex-1" style="background:#ffffff"></span><span class="flex-1" style="background:#ef4135"></span></span>';
     header.className = 'bg-white border-b border-slate-200 sticky top-0 z-50 shrink-0';
     header.innerHTML = `
         <div class="max-w-6xl mx-auto px-4 h-14 flex items-center gap-3">
-            <a href="index.html" aria-label="Home: Apprendre le Français" class="shrink-0 flex items-center gap-2 font-black text-slate-900 mr-2">${flag}<span class="hidden 2xl:inline">Apprendre le Français</span></a>
-            <nav class="flex-1 min-w-0 flex items-center gap-1 overflow-x-auto text-sm font-semibold" style="scrollbar-width:none" aria-label="Main">
+            <a href="index.html" aria-label="Home: Apprendre le Français" class="shrink-0 flex items-center gap-2 min-h-[44px] min-w-[44px] font-black text-slate-900">${flag}<span class="hidden 2xl:inline">Apprendre le Français</span></a>
+            <button id="nav-menu-btn" type="button" aria-expanded="false" aria-controls="nav-menu" class="lg:hidden flex-1 min-w-0 flex items-center gap-1.5 min-h-[44px] text-left font-bold text-slate-900">
+                <span class="truncate">${current ? current[1] : 'Menu'}</span>
+                <svg class="shrink-0 w-4 h-4 text-slate-500" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.06l3.71-3.83a.75.75 0 111.08 1.04l-4.25 4.39a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
+            </button>
+            <nav class="hidden lg:flex flex-1 min-w-0 items-center gap-1 overflow-x-auto text-sm font-semibold" style="scrollbar-width:none" aria-label="Main">
                 ${APP_NAV.map(([href, label]) => `<a href="${href}" class="shrink-0 px-3 py-1.5 rounded-lg ${href === page ? 'bg-indigo-50 text-indigo-700' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'}"${href === page ? ' aria-current="page"' : ''}>${label}</a>`).join('')}
             </nav>
             <a href="admin.html" class="shrink-0 text-sm font-semibold px-2 py-1.5 rounded-lg ${page === 'admin.html' ? 'bg-indigo-50 text-indigo-700' : 'text-slate-600 hover:text-indigo-700 hover:bg-slate-100'}"${page === 'admin.html' ? ' aria-current="page"' : ''} style="display:none">Admin</a>
-            <button id="logoutBtn" type="button" class="shrink-0 text-sm font-semibold text-slate-600 hover:text-rose-600 px-2 py-1.5 rounded-lg hover:bg-slate-100">Log out</button>
-        </div>`;
+            <button id="logoutBtn" type="button" class="shrink-0 min-h-[44px] text-sm font-semibold text-slate-600 hover:text-rose-600 px-2 rounded-lg hover:bg-slate-100">Log out</button>
+        </div>
+        <nav id="nav-menu" class="hidden lg:hidden absolute left-0 right-0 top-full bg-white border-b border-slate-200 shadow-lg" aria-label="Main">
+            <div class="max-w-6xl mx-auto p-3 grid grid-cols-2 sm:grid-cols-3 gap-2">
+                ${APP_NAV.map(([href, label]) => `<a href="${href}" class="flex items-center min-h-[48px] px-3 rounded-xl text-base font-semibold ${href === page ? 'bg-indigo-50 text-indigo-700' : 'bg-slate-50 text-slate-700 hover:bg-slate-100'}"${href === page ? ' aria-current="page"' : ''}>${label}</a>`).join('')}
+            </div>
+        </nav>`;
+    // Phones and tablets: one button with the page name opens the full menu
+    const menuBtn = header.querySelector('#nav-menu-btn'), menu = header.querySelector('#nav-menu');
+    const setMenu = (open) => { menu.classList.toggle('hidden', !open); menuBtn.setAttribute('aria-expanded', open); };
+    menuBtn.addEventListener('click', () => setMenu(menu.classList.contains('hidden')));
+    document.addEventListener('click', (e) => { if (!menu.classList.contains('hidden') && !e.target.closest('#nav-menu, #nav-menu-btn')) setMenu(false); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !menu.classList.contains('hidden')) { setMenu(false); menuBtn.focus(); } });
     // Keyboard users: a "Skip to content" link, shown when it gets focus
     const main = document.querySelector('main');
     if (main && !document.getElementById('skip-link')) {
@@ -221,18 +233,12 @@ function renderAppHeader() {
         skip.className = 'sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[60] focus:bg-white focus:text-indigo-700 focus:font-bold focus:px-4 focus:py-2 focus:rounded-lg focus:shadow-lg';
         header.before(skip);
     }
-    // Small screens: the menu scrolls sideways, so fade its edge and show the current page
+    // Tabs that scroll sideways: no scrollbar
     if (!document.getElementById('app-header-style')) {
         const st = document.createElement('style');
         st.id = 'app-header-style';
-        st.textContent = '[role=tablist]{scrollbar-width:none}[role=tablist]::-webkit-scrollbar{display:none}#app-header nav::-webkit-scrollbar{display:none}@media (max-width:1023px){#app-header nav{-webkit-mask-image:linear-gradient(to right,#000 82%,transparent);mask-image:linear-gradient(to right,#000 82%,transparent)}}';
+        st.textContent = '[role=tablist]{scrollbar-width:none}[role=tablist]::-webkit-scrollbar{display:none}#app-header nav::-webkit-scrollbar{display:none}';
         document.head.appendChild(st);
-    }
-    const nav = header.querySelector('nav');
-    const active = nav.querySelector('[aria-current="page"]');
-    if (active) {
-        const left = active.getBoundingClientRect().left - nav.getBoundingClientRect().left;
-        if (left + active.offsetWidth > nav.clientWidth) nav.scrollLeft = left - 8;
     }
 }
 
@@ -280,9 +286,9 @@ const SiteInfo = {
         f.id = 'site-footer';
         f.className = 'max-w-6xl mx-auto w-full px-4 py-6 text-xs text-slate-500 flex flex-wrap items-center justify-center gap-x-4 gap-y-2';
         f.innerHTML = `<span>© ${new Date().getFullYear()} ${SITE.brand}</span>
-            <a href="terms.html" class="hover:text-indigo-700 underline-offset-2 hover:underline">Terms</a>
-            <a href="privacy.html" class="hover:text-indigo-700 underline-offset-2 hover:underline">Privacy</a>
-            <a href="${contactHref()}" class="hover:text-indigo-700 underline-offset-2 hover:underline">Contact</a>`;
+            <a href="terms.html" class="inline-flex items-center min-h-[40px] px-1 hover:text-indigo-700 underline-offset-2 hover:underline">Terms</a>
+            <a href="privacy.html" class="inline-flex items-center min-h-[40px] px-1 hover:text-indigo-700 underline-offset-2 hover:underline">Privacy</a>
+            <a href="${contactHref()}" class="inline-flex items-center min-h-[40px] px-1 hover:text-indigo-700 underline-offset-2 hover:underline">Contact</a>`;
         host.appendChild(f);
     }
 };
@@ -323,7 +329,7 @@ const GuestBanner = {
         if (out) {
             const a = document.createElement('a');
             a.href = 'login.html'; a.textContent = 'Sign in';
-            a.className = 'shrink-0 text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 px-3 py-1.5 rounded-lg';
+            a.className = 'shrink-0 inline-flex items-center min-h-[44px] text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 px-4 rounded-xl';
             out.replaceWith(a);
         }
         if (['terms.html', 'privacy.html', 'contact.html'].includes(page)) return;   // legal and contact pages: Sign in button, no banner
@@ -337,9 +343,9 @@ const GuestBanner = {
         bar.className = 'shrink-0 bg-indigo-50 border-b border-indigo-100 text-indigo-900 text-sm';
         bar.innerHTML = `<div class="max-w-6xl mx-auto px-4 py-2 flex flex-wrap items-center gap-x-3 gap-y-1">
             <span class="flex-1 min-w-[14rem]">👋 You're trying the app as a guest. Lessons, flashcards and verb tables are free. <b>Sign in to save your progress</b> and to get 5 free AI uses.</span>
-            <a href="login.html?mode=signup" class="font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg px-3 py-1.5">Create a free account</a>
-            <a href="login.html" class="font-semibold text-indigo-700 hover:underline">Sign in</a>
-            <button type="button" class="w-8 h-8 rounded-lg text-indigo-400 hover:bg-indigo-100 hover:text-indigo-700" aria-label="Hide this message">✕</button></div>`;
+            <a href="login.html?mode=signup" class="inline-flex items-center min-h-[40px] font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg px-3">Create a free account</a>
+            <a href="login.html" class="inline-flex items-center min-h-[40px] px-1 font-semibold text-indigo-700 hover:underline">Sign in</a>
+            <button type="button" class="w-10 h-10 rounded-lg text-indigo-400 hover:bg-indigo-100 hover:text-indigo-700" aria-label="Hide this message">✕</button></div>`;
         bar.querySelector('button').addEventListener('click', () => { bar.remove(); try { sessionStorage.setItem('fs_guest_banner', 'hidden'); } catch (e) {} });
         header.insertAdjacentElement('afterend', bar);
     }
