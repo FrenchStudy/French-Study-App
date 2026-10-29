@@ -73,6 +73,16 @@ function escapeHtml(value) {
 }
 
 // Speak French text with the best available French voice.
+// Media icons drawn in SVG: the ⏮ ⏸ ⏹ ⏭ characters show as coloured emoji on many phones
+const svgIcon = (d, size = 18) => `<svg viewBox="0 0 24 24" width="${size}" height="${size}" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.15em">${d}</svg>`;
+const MEDIA_ICON = {
+    play: (s) => svgIcon('<path d="M7 4.5v15a1 1 0 0 0 1.5.86l12-7.5a1 1 0 0 0 0-1.72l-12-7.5A1 1 0 0 0 7 4.5z"/>', s),
+    pause: (s) => svgIcon('<rect x="6" y="4" width="4.5" height="16" rx="1.2"/><rect x="13.5" y="4" width="4.5" height="16" rx="1.2"/>', s),
+    stop: (s) => svgIcon('<rect x="5" y="5" width="14" height="14" rx="2"/>', s),
+    prev: (s) => svgIcon('<rect x="4" y="5" width="3" height="14" rx="1"/><path d="M20 5.5v13a1 1 0 0 1-1.55.83L9 13a1.2 1.2 0 0 1 0-2l9.45-6.33A1 1 0 0 1 20 5.5z"/>', s),
+    next: (s) => svgIcon('<rect x="17" y="5" width="3" height="14" rx="1"/><path d="M4 5.5v13a1 1 0 0 0 1.55.83L15 13a1.2 1.2 0 0 0 0-2L5.55 4.67A1 1 0 0 0 4 5.5z"/>', s)
+};
+window.MEDIA_ICON = MEDIA_ICON;
 // "2 · deux" is shown with its digit: say only the word. "un / une" is read as "un, une".
 const sayable = (text) => String(text).replace(/^\s*\d[\d\s]*\s*·\s*/, '').replace(/\s+\/\s+/g, ', ');
 function speakFrench(text, rate = 1) {

@@ -245,7 +245,7 @@
                     <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm flex flex-col">
                         <div class="bg-slate-50 border-b border-slate-200 px-3 py-2 text-center">
                             <div class="font-bold text-xs text-slate-700 uppercase tracking-wider">${escapeHtml(t.name)}</div>
-                            <div class="text-xs text-slate-500">${escapeHtml(t.en)}</div>
+                            <div class="text-xs text-slate-500">${escapeHtml(C.english ? C.english(v, t.key) : t.en)}</div>
                         </div>
                         <table class="w-full text-sm text-left"><tbody class="divide-y divide-slate-100">${body}</tbody></table>
                     </div>`;
@@ -344,7 +344,7 @@
             const v = pr.verb, t = C.tenses.find(x => x.key === pr.tense);
             const rows = C.forms(v, pr.tense);
             pr.checked = false;
-            $('pr-tense-name').textContent = `${t.name} · ${t.en}`;
+            $('pr-tense-name').textContent = `${t.name} · ${C.english ? C.english(v, pr.tense) : t.en}`;
             $('pr-verb').textContent = v.disp;
             $('pr-gloss').textContent = [v.gloss, GROUP_LABELS[verbGroup(v)]].filter(Boolean).join(' · ');
             $('pr-rows').innerHTML = rows.map((r, i) => `

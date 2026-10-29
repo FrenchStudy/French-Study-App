@@ -30,6 +30,7 @@ const CSS = `
 .wm-count{font-size:13px;color:#94a3b8;text-align:center;margin-top:6px;font-variant-numeric:tabular-nums}
 @media (prefers-reduced-motion:reduce){.wm-en,.wm-ex,.wm-bar>div{transition:none}}
 `;
+const ic = (k) => (window.MEDIA_ICON ? window.MEDIA_ICON[k](20) : '');
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const store = { get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
                 set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* private mode */ } } };
@@ -78,9 +79,9 @@ function open(words, opts = {}) {
             <div class="wm-ex"></div>
         </div>
         <div class="wm-ctl">
-            <button type="button" data-a="prev" aria-label="Previous word">⏮</button>
-            <button type="button" class="wm-play" data-a="play">⏸ Pause</button>
-            <button type="button" data-a="next" aria-label="Next word">⏭</button>
+            <button type="button" data-a="prev" aria-label="Previous word">${ic('prev')}</button>
+            <button type="button" class="wm-play" data-a="play">${ic('pause')} Pause</button>
+            <button type="button" data-a="next" aria-label="Next word">${ic('next')}</button>
             <button type="button" data-a="slow" aria-pressed="${settings.slow}">🐢 Slow</button>
             <button type="button" data-a="english" aria-pressed="${settings.english}">🇬🇧 English voice</button>
             ${words.some(w => w.exFr) ? `<button type="button" data-a="examples" aria-pressed="${settings.examples}">💬 Examples</button>` : ''}
@@ -134,10 +135,10 @@ function open(words, opts = {}) {
         }
         i = words.length - 1;
         playing = false; setPlayBtn();
-        q('.wm-count').textContent = `All ${words.length} words done. ⏮ to watch again.`;
+        q('.wm-count').textContent = `All ${words.length} words done. Tap back to watch again.`;
     }
     function stopSpeech() { run.id++; try { speechSynthesis.cancel(); } catch (e) {} if (run.cancel) run.cancel(); }
-    function setPlayBtn() { q('[data-a="play"]').textContent = playing ? '⏸ Pause' : '▶ Play'; }
+    function setPlayBtn() { q('[data-a="play"]').innerHTML = playing ? `${ic('pause')} Pause` : `${ic('play')} Play`; }
     function go(n) { stopSpeech(); i = Math.max(0, Math.min(words.length - 1, n)); if (playing) playFrom(i); else show(words[i], 2); }
     function toggle() {
         playing = !playing; setPlayBtn();

@@ -469,7 +469,7 @@ function mount(root, themeId, deckWords, opts = {}) {
             <button type="button" class="mp-btn" data-a="say">🔊 Listen</button>
             ${walking ? `<button type="button" class="mp-btn" data-a="prev" ${i === 0 ? 'disabled' : ''}>← Back</button>
                          <button type="button" class="mp-btn pri" data-a="next">${i === order.length - 1 ? 'Finish' : 'Next →'}</button>` : ''}
-            </div>${walking ? `<div class="mp-row"><button type="button" class="mp-btn" data-a="auto" aria-pressed="${auto}">${auto ? '⏸ Pause' : '▶ Play the walk'}</button></div>
+            </div>${walking ? `<div class="mp-row"><button type="button" class="mp-btn" data-a="auto" aria-pressed="${auto}">${auto ? (window.MEDIA_ICON ? MEDIA_ICON.pause(16) + ' Pause' : 'Pause') : (window.MEDIA_ICON ? MEDIA_ICON.play(16) + ' Play the walk' : '▶ Play the walk')}</button></div>
             <p class="mp-muted">Stop ${i + 1} of ${order.length}${auto ? ' · moving on by itself' : ''}</p>` : ''}`;
         card.querySelector('[data-a="say"]').addEventListener('click', () => say(it.w.fr));
         if (walking) {

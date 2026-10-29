@@ -198,11 +198,14 @@ Give 2 to 6 notes about the most useful French words or grammar points. The text
                 if (!last.translation) throw new Error('The AI reply could not be read. Please try again.');
                 showResult(last);
                 saveRecent(last);
+                // On phones the translation is below the screen: bring it into view
+                $('output').scrollIntoView({ block: 'nearest', behavior: 'smooth' });
                 if (typeof Activity !== 'undefined') Activity.record();
                 if (!chat.length) $('chat').innerHTML = '<p class="text-sm text-slate-500">Ask anything about this text.</p>';
             } catch (err) {
                 last = null; showResult(null);
                 showError(err.code === 'quota' ? err.message : err.code === 'signin' ? 'Please sign in to use the Translator.' : err.message);
+                $('error').scrollIntoView({ block: 'center', behavior: 'smooth' });
             }
             busy = false;
             $('translate').disabled = false; $('translate').textContent = 'Translate';
@@ -254,7 +257,7 @@ Give 2 to 6 notes about the most useful French words or grammar points. The text
             rec.onresult = (e) => { $('source').value = (($('source').value.trim() + ' ') + e.results[0][0].transcript).trim(); updateCount(); };
             rec.onerror = (e) => { if (e.error === 'not-allowed') showError('The microphone is blocked. Allow it in your browser settings, or type instead.'); };
             rec.onend = () => { rec = null; $('mic').textContent = '🎙️ Speak'; $('mic').classList.remove('mic-on', 'bg-rose-500', 'text-white'); };
-            try { rec.start(); $('mic').textContent = '⏹ Stop'; $('mic').classList.add('mic-on', 'bg-rose-500', 'text-white'); } catch (e) { rec = null; }
+            try { rec.start(); $('mic').innerHTML = `${MEDIA_ICON.stop(14)} Stop`; $('mic').classList.add('mic-on', 'bg-rose-500', 'text-white'); } catch (e) { rec = null; }
         });
 
         // ---------- Recent translations (this device, no AI needed) ----------

@@ -7,6 +7,7 @@
 //   .forms(verb, key)  [{ cp: pronoun, cf: form, say: text to speak }]
 //   .highlight(verb, key, i, form)  HTML with the regular ending marked
 //   .notes(verb)       short usage notes
+//   .english(verb, key) the tense in English for this verb ("I was, I have been")
 (function () {
 'use strict';
 
@@ -143,6 +144,67 @@ const CJ_TENSES = [
   ["sp", "Subjonctif passé", "that I have gone", "exam"],
   ["imp", "Impératif", "go!", "extra"]
 ];
+/* English for a tense, built from the verb's own meaning ("to be" -> "I was, I have been"), so the
+   tables don't show "I go" for every verb. British spellings; irregular verbs from a small table. */
+const EN_IRR = { be: ["was", "been"], become: ["became", "become"], begin: ["began", "begun"], bite: ["bit", "bitten"], break: ["broke", "broken"],
+  bring: ["brought", "brought"], build: ["built", "built"], buy: ["bought", "bought"], catch: ["caught", "caught"], choose: ["chose", "chosen"],
+  come: ["came", "come"], cost: ["cost", "cost"], cut: ["cut", "cut"], do: ["did", "done"], draw: ["drew", "drawn"], dream: ["dreamt", "dreamt"],
+  drink: ["drank", "drunk"], drive: ["drove", "driven"], eat: ["ate", "eaten"], fall: ["fell", "fallen"], feed: ["fed", "fed"], feel: ["felt", "felt"],
+  find: ["found", "found"], forget: ["forgot", "forgotten"], freeze: ["froze", "frozen"], get: ["got", "got"], give: ["gave", "given"], go: ["went", "gone"],
+  grow: ["grew", "grown"], have: ["had", "had"], hear: ["heard", "heard"], hide: ["hid", "hidden"], hold: ["held", "held"], keep: ["kept", "kept"],
+  know: ["knew", "known"], lead: ["led", "led"], learn: ["learnt", "learnt"], leave: ["left", "left"], lend: ["lent", "lent"], lose: ["lost", "lost"],
+  make: ["made", "made"], meet: ["met", "met"], pay: ["paid", "paid"], put: ["put", "put"], read: ["read", "read"], reread: ["reread", "reread"],
+  ring: ["rang", "rung"], run: ["ran", "run"], say: ["said", "said"], see: ["saw", "seen"], sell: ["sold", "sold"], send: ["sent", "sent"],
+  show: ["showed", "shown"], sing: ["sang", "sung"], sleep: ["slept", "slept"], speak: ["spoke", "spoken"], spell: ["spelt", "spelt"],
+  spread: ["spread", "spread"], swim: ["swam", "swum"], take: ["took", "taken"], teach: ["taught", "taught"], tell: ["told", "told"],
+  think: ["thought", "thought"], throw: ["threw", "thrown"], understand: ["understood", "understood"], undertake: ["undertook", "undertaken"],
+  wake: ["woke", "woken"], win: ["won", "won"], write: ["wrote", "written"] };
+const EN_DOUBLE = new Set(["enrol", "admit", "commit", "submit", "stop", "plan", "travel", "prefer", "swim", "run", "get", "begin", "cut", "put", "win", "forget", "shop", "rob"]);
+// Verbs that don't take "-ing" for a state: "I knew", not "I was knowing"
+const EN_STATIVE = new Set(["be", "have", "know", "want", "like", "love", "hate", "prefer", "believe", "belong", "contain", "cost", "seem", "understand", "own", "need", "remember", "wish", "weigh", "suit", "mean", "recognise", "fear", "depend", "see", "hear"]);
+function enEd(w) {
+  if (EN_IRR[w]) return EN_IRR[w][0];
+  if (EN_DOUBLE.has(w)) return w + w.slice(-1) + "ed";
+  if (/e$/.test(w)) return w + "d";
+  if (/[^aeiou]y$/.test(w)) return w.slice(0, -1) + "ied";
+  return w + "ed";
+}
+const enPp = (w) => EN_IRR[w] ? EN_IRR[w][1] : enEd(w);
+function enIng(w) {
+  if (w === "be" || w === "see") return w + "ing";
+  if (/ie$/.test(w)) return w.slice(0, -2) + "ying";
+  if (EN_DOUBLE.has(w)) return w + w.slice(-1) + "ing";
+  if (/[^e]e$/.test(w)) return w.slice(0, -1) + "ing";
+  return w + "ing";
+}
+function cjEnglish(s, key) {
+  const t = CJ_TENSES.find(x => x[0] === key);
+  const gloss = String(s && s.gloss || "").replace(/\([^)]*\)/g, "").split(/[,;\/]/)[0].replace(/^\s*to\s+/i, "").replace(/\s+/g, " ").trim();
+  if (!gloss) return t ? t[2] : "";
+  const [w, ...restArr] = gloss.split(/\s+/);
+  const rest = restArr.length ? " " + restArr.join(" ").replace(/\boneself\b/g, "myself").replace(/\bone's\b/g, "my") : "";
+  const restYou = restArr.length ? " " + restArr.join(" ").replace(/\boneself\b/g, "yourself").replace(/\bone's\b/g, "your") : "";
+  const base = w.toLowerCase(), past = enEd(base), pp = enPp(base), ing = enIng(base);
+  const we = /each other/.test(rest);   // se rencontrer: "we met each other"
+  const I = we ? "we" : "I", am = we ? "are" : "am", was = we ? "were" : "was";
+  const pres = base === "be" ? am : base, pastF = base === "be" ? was : past;
+  const B = base + rest;
+  switch (key) {
+    case "pres": return `${I} ${pres}${rest}`;
+    case "pc": return `${I} ${pastF}${rest}, ${I} have ${pp}${rest}`;
+    case "impf": return EN_STATIVE.has(base) ? `${I} ${pastF}${rest}, ${I} used to ${B}` : `${I} ${was} ${ing}${rest}, ${I} used to ${B}`;
+    case "pqp": return `${I} had ${pp}${rest}`;
+    case "fut": return `${I} will ${B}`;
+    case "fa": return `${I} will have ${pp}${rest}`;
+    case "fp": return `${I} ${am} going to ${B}`;
+    case "cond": return `${I} would ${B}`;
+    case "cp": return `${I} would have ${pp}${rest}`;
+    case "subj": return `that ${I} ${base}${rest}`;
+    case "sp": return `that ${I} have ${pp}${rest}`;
+    case "imp": return `${base}${restYou}!`;
+    default: return t ? t[2] : "";
+  }
+}
 function cjAux(s) { return (s.aux === "être" || s.refl) ? CJ["être"] : CJ["avoir"]; }
 function cjSimple(s, t) {
   if (t === "pres") return s.pres;
@@ -331,6 +393,7 @@ function cjAssume(raw) {
 
 window.Conjugator = {
     tenses: CJ_TENSES.map(([key, name, en, group]) => ({ key, name, en, group })),
+    english: cjEnglish,
     verbs: CJ_LIST,
     models: CJ_MODEL,
     find(text) {
