@@ -141,17 +141,17 @@ const LessonKit = (function () {
 
     function dataTable(t) {
         const fr = new Set(t.fr || []);
-        const head = t.head && t.head.some(h => h) ? `<thead><tr>${t.head.map(h => `<th class="text-left px-3 py-2 font-semibold text-slate-600 bg-slate-50">${h}</th>`).join('')}</tr></thead>` : '';
+        const head = t.head && t.head.some(h => h) ? `<thead><tr>${t.head.map(h => `<th class="text-left px-2 sm:px-3 py-2 font-semibold text-slate-600 bg-slate-50">${h}</th>`).join('')}</tr></thead>` : '';
         const body = t.rows.map(r => `<tr class="border-t border-slate-100">${r.map((cell, i) => {
             const isFr = fr.has(i) && String(cell).trim();
-            const nowrap = i === 0 && toText(cell).length <= 16 ? ' whitespace-nowrap' : '';
+            const nowrap = i === 0 && toText(cell).length <= 10 ? ' whitespace-nowrap' : '';
             return isFr
-                ? `<td class="px-3 py-2 align-top${nowrap}"><button type="button" data-say="${escapeHtml(toText(cell))}" class="text-left font-semibold text-slate-900 hover:text-indigo-700">${cell}</button></td>`
-                : `<td class="px-3 py-2 align-top text-slate-600${nowrap}">${cell}</td>`;
+                ? `<td class="px-2 sm:px-3 py-2 align-top${nowrap}"><button type="button" data-say="${escapeHtml(toText(cell))}" class="text-left font-semibold text-slate-900 hover:text-indigo-700">${cell}</button></td>`
+                : `<td class="px-2 sm:px-3 py-2 align-top text-slate-600${nowrap}">${cell}</td>`;
         }).join('')}</tr>`).join('');
         return `<figure class="space-y-1">
             ${t.cap ? `<figcaption class="text-sm font-bold text-slate-800">${escapeHtml(t.cap)}</figcaption>` : ''}
-            <div class="overflow-x-auto border border-slate-200 rounded-xl"><table class="w-full text-sm">${head}<tbody>${body}</tbody></table></div>
+            <div class="overflow-x-auto border border-slate-200 rounded-xl"><table class="w-full text-[13px] sm:text-sm">${head}<tbody>${body}</tbody></table></div>
         </figure>`;
     }
 
@@ -166,9 +166,15 @@ const LessonKit = (function () {
                 const r = col[i];
                 return r ? `<td class="px-3 py-2 whitespace-nowrap"><button type="button" data-say="${escapeHtml(r.say)}" class="text-left font-semibold text-slate-900 hover:text-indigo-700">${C.highlight(verbs[j], t.tense, i, r.cf)}</button></td>` : '<td></td>';
             }).join('')}</tr>`).join('');
+        // Phones: one small card per verb, side by side when they fit, so nothing scrolls sideways
+        const cards = verbs.length < 2 ? '' : `<div class="sm:hidden grid grid-cols-[repeat(auto-fill,minmax(9.5rem,1fr))] gap-2">${verbs.map((v, j) => `
+            <div class="border border-slate-200 rounded-xl overflow-hidden">
+                <a class="block px-2.5 py-1.5 bg-slate-50 text-sm font-semibold text-slate-600 hover:text-indigo-700" href="${URLS.verb(v.disp)}">${escapeHtml(v.disp)}</a>
+                <ul class="text-sm divide-y divide-slate-100">${cols[j].map((r, i) => r ? `<li class="px-2.5 py-1.5"><button type="button" data-say="${escapeHtml(r.say)}" class="text-left hover:text-indigo-700"><span class="text-slate-500">${escapeHtml(rows[i] ? rows[i].cp : '')}</span> <span class="font-semibold text-slate-900">${C.highlight(v, t.tense, i, r.cf)}</span></button></li>` : '').join('')}</ul>
+            </div>`).join('')}</div>`;
         return `<figure class="space-y-1">
             <figcaption class="text-sm font-bold text-slate-800">${escapeHtml(t.cap || '')}${tense ? ` <span class="font-normal text-slate-500">· ${escapeHtml(tense.name)}</span>` : ''}</figcaption>
-            <div class="overflow-x-auto border border-slate-200 rounded-xl"><table class="w-full text-sm">
+            ${cards}<div class="${cards ? 'hidden sm:block ' : ''}overflow-x-auto border border-slate-200 rounded-xl"><table class="w-full text-sm">
                 <thead><tr><th class="bg-slate-50"></th>${verbs.map(v => `<th class="text-left px-3 py-2 font-semibold text-slate-600 bg-slate-50"><a class="hover:text-indigo-700" href="${URLS.verb(v.disp)}">${escapeHtml(v.disp)}</a></th>`).join('')}</tr></thead>
                 <tbody>${body}</tbody></table></div>
         </figure>`;
