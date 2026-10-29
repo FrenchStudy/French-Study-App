@@ -276,11 +276,25 @@ function layout(P, items) {
         its.forEach((it, i) => {
             const r = Math.floor(i / cols), inRow = Math.min(cols, its.length - r * cols), c = i % cols;
             const step = z.w / inRow;
-            pos[it.k] = [z.x + step * (c + 0.5), z.y + (z.shop ? 76 : 64) + r * 108];
+            pos[it.k] = [z.x + step * (c + 0.5), z.y + (z.shop ? 76 : 64) + r * 108, step];
         });
         z._rows = rows;
     });
     return pos;
+}
+
+// A word or phrase on at most two lines that fit the object's space (the full phrase shows when tapped)
+function wrapLabel(text, max) {
+    if (text.length <= max || !text.includes(' ')) return [text];
+    const lines = [''];
+    text.split(' ').forEach(w => {
+        const cur = lines[lines.length - 1];
+        if (!cur || (cur + ' ' + w).length <= max) lines[lines.length - 1] = cur ? cur + ' ' + w : w;
+        else lines.push(w);
+    });
+    if (lines.length <= 2) return lines;
+    const rest = lines.slice(1).join(' ');
+    return [lines[0], rest.length <= max ? rest : rest.slice(0, max - 1).trimEnd() + '…'];
 }
 
 // ---------- the step ----------
@@ -374,7 +388,7 @@ function mount(root, themeId, deckWords, opts = {}) {
         mk('circle', { cx: x, cy: y, r: 26, class: 'd' }, g);
         mk('text', { x, y: y + 1, class: 'em' }, g).textContent = it.e;
         mk('text', { x, y: y + 42, class: 'ar' }, g).textContent = art;
-        const parts = word.length > 12 && word.includes(' ') ? [word.slice(0, word.indexOf(' ')), word.slice(word.indexOf(' ') + 1)] : [word];
+        const parts = wrapLabel(word, Math.max(12, Math.floor((pos[it.k][2] || 90) / 7.2)));
         parts.forEach((p, i) => mk('text', { x, y: y + 57 + i * 14, class: 'wd ' + gc(w) }, g).textContent = p);
         hookUp(g, it);
     });
