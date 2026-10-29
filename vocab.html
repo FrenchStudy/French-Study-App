@@ -685,11 +685,74 @@
                     return m;
                 });
                 html += escapeHtml(fr.slice(at));
-                return `<p><span class="block">${html}</span>
+                return `<p class="flex items-start gap-2 -mx-2 px-2 py-1 rounded-xl transition-colors" data-story-line="${ci}-${n}">
+                    <button type="button" data-story-from="${ci}-${n}" class="shrink-0 mt-1 w-8 h-8 inline-flex items-center justify-center rounded-full border border-emerald-200 bg-white/70 hover:bg-emerald-50 text-emerald-700" aria-label="Play from sentence ${n + 1}" title="Play from here">${ICON.small}</button>
+                    <span class="min-w-0 flex-1"><span class="block">${html}</span>
                     <span class="hidden block text-sm font-semibold text-amber-800 bg-amber-50 rounded-lg px-2 py-1 mt-1" data-gloss="${ci}-${n}"></span>
-                    <span class="story-en hidden block text-base text-slate-500">${escapeHtml(en)}</span></p>`;
+                    <span class="story-en hidden block text-base text-slate-500">${escapeHtml(en)}</span></span></p>`;
             }).join('');
         }
+
+        // ---------- Story player: sentence by sentence, with play / pause / stop and "play from this sentence" ----------
+        // Pause stops after cancelling the current sentence and remembers it, so play starts that sentence again
+        // (speechSynthesis.pause() is unreliable, especially on phones).
+        const ICON = {
+            play: '<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12-7.5a1 1 0 0 0 0-1.72l-12-7.5A1 1 0 0 0 7 4.5z"/></svg>',
+            pause: '<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><rect x="6" y="4" width="4.5" height="16" rx="1.2"/><rect x="13.5" y="4" width="4.5" height="16" rx="1.2"/></svg>',
+            stop: '<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><rect x="5" y="5" width="14" height="14" rx="2"/></svg>',
+            small: '<svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12-7.5a1 1 0 0 0 0-1.72l-12-7.5A1 1 0 0 0 7 4.5z"/></svg>'
+        };
+        const Story = (() => {
+            let ci = null, n = 0, playing = false, token = 0;
+            const lines = () => (deck && deck.chapters && deck.chapters[ci] && deck.chapters[ci].story) || [];
+            const el = (sel) => $('learn-body').querySelector(sel);
+            function paint() {
+                $('learn-body').querySelectorAll('[data-story-line]').forEach(p => {
+                    const on = ci !== null && p.dataset.storyLine === `${ci}-${n}`;
+                    p.classList.toggle('bg-amber-50', on);
+                    p.classList.toggle('ring-1', on); p.classList.toggle('ring-amber-200', on);
+                });
+                $('learn-body').querySelectorAll('[data-story-play]').forEach(b => {
+                    const on = playing && Number(b.dataset.storyPlay) === ci;
+                    b.innerHTML = on ? ICON.pause : ICON.play;
+                    b.setAttribute('aria-label', on ? 'Pause' : ci !== null && Number(b.dataset.storyPlay) === ci ? 'Resume the story' : 'Play the story');
+                    b.title = on ? 'Pause' : 'Play';
+                });
+            }
+            function speakLine() {
+                const list = lines();
+                if (!playing || n >= list.length) { playing = false; if (n >= list.length) { ci = null; n = 0; } paint(); return; }
+                const my = ++token;
+                const u = new SpeechSynthesisUtterance(sayable(storyPlain(list[n][0])));
+                u.lang = 'fr-FR'; u.rate = 0.85;
+                const voices = speechSynthesis.getVoices ? speechSynthesis.getVoices() : [];
+                const v = voices.find(x => x.lang === 'fr-FR') || voices.find(x => (x.lang || '').startsWith('fr'));
+                if (v) u.voice = v;
+                u.onend = () => { if (my !== token || !playing) return; n += 1; speakLine(); };
+                u.onerror = () => { if (my !== token) return; playing = false; paint(); };   // cancelled from elsewhere: pause here
+                paint();
+                const p = el(`[data-story-line="${ci}-${n}"]`);
+                if (p) p.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+                speechSynthesis.speak(u);
+            }
+            const halt = () => { token += 1; if ('speechSynthesis' in window) speechSynthesis.cancel(); };
+            return {
+                play(c, from) {
+                    if (!('speechSynthesis' in window)) return;
+                    halt();
+                    ci = c; n = from || 0; playing = true;
+                    speakLine();
+                },
+                toggle(c) {
+                    if (playing && ci === c) { this.pause(); return; }
+                    this.play(c, ci === c ? n : 0);   // resume the sentence you paused on, or start the story
+                },
+                pause() { if (!playing) return; playing = false; halt(); paint(); },
+                stop() { playing = false; halt(); ci = null; n = 0; paint(); },
+                repaint: () => paint(),
+                active: () => ci !== null
+            };
+        })();
 
         // ---------- Learn: every chapter (story + words), or the words as tiles ----------
         function renderLearn() {
@@ -721,11 +784,12 @@
                     </div>
                     ${c.story ? `<div class="vc-stage border border-emerald-100 rounded-2xl p-4 sm:p-5 space-y-3">
                         <div class="flex flex-wrap items-center justify-between gap-2">
-                            <p class="text-sm text-slate-600">📖 Story · tap a coloured word to hear it and see what it means.</p>
+                            <p class="text-sm text-slate-600">📖 Story · tap a coloured word to hear it, or the ▸ beside a sentence to listen from there.</p>
                             <div class="flex flex-wrap gap-2">
-                                <button type="button" data-story-listen="${i}" class="min-h-[40px] px-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-sm">🔊 Listen</button>
+                                <button type="button" data-story-play="${i}" class="min-h-[40px] min-w-[44px] px-3 inline-flex items-center justify-center bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl" aria-label="Play the story" title="Play">${ICON.play}</button>
+                                <button type="button" data-story-stop="${i}" class="min-h-[40px] min-w-[44px] px-3 inline-flex items-center justify-center bg-white border border-slate-200 hover:border-emerald-400 text-slate-700 rounded-xl" aria-label="Stop" title="Stop">${ICON.stop}</button>
                                 <button type="button" data-story-en="${i}" aria-pressed="false" class="min-h-[40px] px-3 bg-white border border-slate-200 hover:border-emerald-400 font-semibold rounded-xl text-sm">Show English</button>
-                                <button type="button" data-chapter-watch="${i}" class="min-h-[40px] px-3 bg-slate-900 hover:bg-slate-700 text-white font-bold rounded-xl text-sm">▶ Watch</button>
+                                <button type="button" data-chapter-watch="${i}" class="min-h-[40px] px-3 bg-slate-900 hover:bg-slate-700 text-white font-bold rounded-xl text-sm">🎬 Watch</button>
                             </div>
                         </div>
                         <div data-story="${i}" class="space-y-3 text-lg leading-relaxed text-slate-800">${storyHtml(c.story, i, byKey)}</div>
@@ -733,6 +797,7 @@
                     <div class="${TILE_GRID}">${c.words.map(w => tileHtml(w, false)).join('')}</div>
                 </section>`).join('');
             renderEasy();
+            Story.repaint();   // a story that is playing keeps its highlight after the page is redrawn
         }
 
         function renderEasy() {
@@ -1325,6 +1390,7 @@
         }
         const palaceWords = () => deck.words;
         function setStep(s, push) {
+            if (s !== 'learn' && Story.active()) Story.stop();
             const allowed = stepsFor(topic);
             if (!allowed.includes(s)) s = allowed[0];
             step = s;
@@ -1605,18 +1671,19 @@
             const sw = e.target.closest('[data-story-word]');
             if (sw) {
                 const w = byKey(sw.dataset.storyWord); if (!w) return;
+                Story.pause();
                 speakFrench(w.fr, 0.9);
                 const g = $('learn-body').querySelector(`[data-gloss="${sw.dataset.line}"]`);
                 g.textContent = `${WordMemory.picture(w) ? WordMemory.picture(w) + ' ' : ''}${w.fr} = ${w.en}`;
                 g.classList.remove('hidden');
                 return;
             }
-            const li = e.target.closest('[data-story-listen]');
-            if (li) {
-                if ('speechSynthesis' in window && speechSynthesis.speaking) { speechSynthesis.cancel(); return; }
-                speakFrench(deck.chapters[li.dataset.storyListen].story.map(([fr]) => storyPlain(fr)).join(' '), 0.85);
-                return;
-            }
+            const pl = e.target.closest('[data-story-play]');
+            if (pl) { Story.toggle(Number(pl.dataset.storyPlay)); return; }
+            const sp = e.target.closest('[data-story-stop]');
+            if (sp) { Story.stop(); return; }
+            const fr = e.target.closest('[data-story-from]');
+            if (fr) { const [ci, n] = fr.dataset.storyFrom.split('-').map(Number); Story.play(ci, n); return; }
             const en = e.target.closest('[data-story-en]');
             if (en) {
                 const on = en.getAttribute('aria-pressed') !== 'true';
