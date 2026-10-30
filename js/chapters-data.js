@@ -314,7 +314,7 @@ const CHAPTERS = {
           keys: ["il pleut.", "parapluie", "pluie", "il neige.", "neige", "il gèle.", "il y a un orage.", "orage", "nuage", "ciel", "vent", "soleil"],
           story: [
             ["Ce matin, [[il pleut.|il pleut.]] J'ai oublié mon [[parapluie]] et la [[pluie]] tombe fort !", "This morning it's raining. I forgot my umbrella and the rain is falling hard!"],
-            ["Cet hiver, [[il neige.|il neige.]] souvent, et la [[neige]] reste jusqu'en avril.", "This winter it often snows, and the snow stays until April."],
+            ["Cet hiver, [[il neige|il neige.]] souvent, et la [[neige]] reste jusqu'en avril.", "This winter it often snows, and the snow stays until April."],
             ["La nuit, [[il gèle.|il gèle.]] Attention aux trottoirs !", "At night it's freezing. Watch out on the pavements!"],
             ["L'été, parfois, [[il y a un orage.|il y a un orage.]] Le chien a peur de l'[[orage]].", "In summer, sometimes there's a storm. The dog is afraid of storms."],
             ["Un gros [[nuage]] noir cache le [[ciel]], puis le [[vent]] l'emporte, et le [[soleil]] revient.", "A big black cloud hides the sky, then the wind blows it away, and the sun comes back."],
