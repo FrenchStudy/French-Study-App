@@ -5,29 +5,6 @@ const S = (id, k, fr, en, x, y, w, h, shop, cols) => ({ id, k, fr, en, x, y, w, 
 const R = (id, k, fr, en, x, y, w, h, cols) => ({ id, k, fr, en, x, y, w, h, cols });
 
 window.PALACE_DATA = {
-// ---------------- 8 La Météo & Les Saisons ----------------
-8: {
-    title: 'Les quatre saisons au parc', w: 1160, h: 520,
-    backdrop: { street: 430, streetName: 'Parc Montsouris', sky: '#f0f9ff', streetColor: '#bbf7d0', noDashes: true },
-    zones: [
-        S('tv', 'météo', 'la météo', 'weather forecast', 10, 10, 1140, 145, '#0f172a'),
-        S('pr', 'printemps', 'le printemps', 'spring', 10, 160, 280, 250, '#16a34a', 2),
-        S('et', 'été', "l'été", 'summer', 300, 160, 280, 250, '#f59e0b', 2),
-        S('au', 'automne', "l'automne", 'autumn', 590, 160, 280, 250, '#c2410c', 2),
-        S('hi', 'hiver', "l'hiver", 'winter', 880, 160, 270, 250, '#0369a1', 2),
-    ],
-    items: [
-        ['ciel', '🌤️', 'tv', 'The forecaster points at the sky: the ceiling of the world.'],
-        ['nuage', '☁️', 'pr', 'Spring clouds: a nuance of grey drifting by.'],
-        ['pluie', '🌧️', 'pr', 'April showers: plu-ie, it is pouring.'],
-        ['soleil', '☀️', 'et', 'Solar: the summer sun.'],
-        ['orage', '⛈️', 'et', 'A summer storm full of rage.'],
-        ['vent', '💨', 'au', 'The wind blows through the vents and takes the leaves.'],
-        ['parapluie', '☂️', 'au', 'Para (against) + pluie (rain): the umbrella.'],
-        ['neige', '❄️', 'hi', 'Snow in the park: think of the snowy Sierra Nevada.'],
-    ],
-},
-
 // ---------------- 9 La Famille ----------------
 9: {
     title: "L'arbre de la famille Martin", w: 1160, h: 750,
