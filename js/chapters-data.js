@@ -263,12 +263,13 @@ const CHAPTERS = {
     // ---------------- 7 Frequency & Time Adverbs ----------------
     7: [
         { title: "Souvent ou jamais ?", en: "Often or never?",
-          keys: ["toujours", "tout le temps", "d'habitude", "normalement", "souvent", "parfois", "quelquefois", "de temps en temps", "jamais", "tôt / tard"],
+          keys: ["toujours", "tout le temps", "d'habitude", "normalement", "souvent", "parfois", "quelquefois", "de temps en temps", "rarement", "jamais", "tôt / tard"],
           story: [
             ["Mon grand-père se lève [[toujours]] [[tôt|tôt / tard]], et il parle [[tout le temps]] de son jardin.", "My grandfather always gets up early, and he talks all the time about his garden."],
             ["[[D'habitude|d'habitude]], il prend un café, et [[normalement]], il lit le journal.", "Usually he has a coffee, and normally he reads the newspaper."],
             ["Il va [[souvent]] au marché, et [[parfois]] au cinéma avec ma grand-mère.", "He often goes to the market, and sometimes to the cinema with my grandmother."],
             ["[[Quelquefois]], il joue aux cartes avec ses amis, et [[de temps en temps]], il vient dîner chez nous.", "Sometimes he plays cards with his friends, and from time to time he comes to dinner at our place."],
+            ["Il prend [[rarement]] la voiture : il préfère marcher.", "He rarely takes the car: he prefers to walk."],
             ["Mais il ne regarde [[jamais]] la télévision !", "But he never watches television!"],
           ] },
         { title: "Maintenant ou bientôt ?", en: "Now or soon?",
