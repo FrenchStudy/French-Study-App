@@ -15,51 +15,6 @@
 // Words that are not in the deck are skipped, so a palace never shows a word the topic lacks.
 (function () {
 const PALACES = {
-    // ---------------- La Maison & Les Pièces ----------------
-    15: {
-        title: 'La maison des Martin', w: 1160, h: 790,
-        backdrop: { roof: [190, 950, 112], ground: 640, sign: 'Maison Martin', block: [962, 1150, 318] },
-        zones: [
-            { id: 'grenier', k: 'grenier', fr: 'le grenier', en: 'attic', x: 330, y: 114, w: 500, h: 128 },
-            { id: 'chambre', k: 'chambre', fr: 'la chambre', en: 'bedroom', x: 190, y: 250, w: 340, h: 150 },
-            { id: 'sdb', k: 'salle de bains', fr: 'la salle de bains', en: 'bathroom', x: 540, y: 250, w: 410, h: 150 },
-            { id: 'entree', k: 'entrée', fr: "l'entrée", en: 'hall', x: 190, y: 410, w: 150, h: 150, cols: 2 },
-            { id: 'salon', k: 'salon', fr: 'le salon', en: 'living room', x: 350, y: 410, w: 250, h: 150 },
-            { id: 'cuisine', k: 'cuisine', fr: 'la cuisine', en: 'kitchen', x: 610, y: 410, w: 340, h: 150 },
-            { id: 'sous', k: 'sous-sol', fr: 'le sous-sol', en: 'basement', x: 190, y: 652, w: 760, h: 128 },
-            { id: 'immeuble', k: 'immeuble', fr: "l'immeuble", en: 'block of flats', x: 962, y: 328, w: 188, h: 302, cols: 2 },
-            { id: 'jardin', k: 'jardin', fr: 'le jardin', en: 'garden', x: 0, y: 404, w: 180, h: 236, cols: 1 },
-        ],
-        items: [
-            { k: 'toit', e: '🏠', z: 'grenier', l: 'Right above the attic: the roof, where the pigeons sit.' },
-            { k: 'grenier', e: '📦', z: 'grenier', l: 'Old boxes of toys under the roof: the attic. Grain (grain) was once kept here, hence grenier.' },
-            { k: 'lit', e: '🛏️', z: 'chambre', l: 'The bed in the bedroom: you lie in your lit.' },
-            { k: 'armoire', e: '👗', z: 'chambre', l: 'Knights kept their armour in it: today it holds your clothes.' },
-            { k: 'lampe', e: '💡', z: 'chambre', l: 'The bedside lamp: almost the same word.' },
-            { k: 'fenêtre', e: '🪟', z: 'chambre', l: 'To defenestrate is to throw someone out of a window.' },
-            { k: 'douche', e: '🚿', z: 'sdb', l: 'A douche of cold water: the shower.' },
-            { k: 'baignoire', e: '🛁', z: 'sdb', l: 'Where you take a bain (bath): the bathtub.' },
-            { k: 'toilettes', e: '🚽', z: 'sdb', l: 'Toilettes, always plural in French.' },
-            { k: 'porte', e: '🚪', z: 'entree', l: 'The front door: a portal into the house.' },
-            { k: 'escalier', e: '🪜', z: 'entree', l: 'The stairs go up from the hall. An escalator is a moving escalier.' },
-            { k: 'canapé', e: '🛋️', z: 'salon', l: 'The sofa: a canapé is also a snack served on a little "sofa" of bread.' },
-            { k: 'fauteuil', e: '💺', z: 'salon', l: 'The armchair by the fire, with a footstool.' },
-            { k: 'mur', e: '🧱', z: 'salon', l: 'A mural is painted on a mur: the wall.' },
-            { k: 'frigo', e: '🧊', z: 'cuisine', l: 'Frigid cold inside: the fridge.' },
-            { k: 'table', e: '🍽️', z: 'cuisine', l: 'The kitchen table, set for dinner.' },
-            { k: 'chaise', e: '🪑', z: 'cuisine', l: 'A chaise longue is a long chair; this one is short.' },
-            { k: 'placard', e: '🗄️', z: 'cuisine', l: 'Stick a placard on the cupboard door.' },
-            { k: 'cave', e: '🍷', z: 'sous', l: 'Not a cave: a cellar full of wine bottles.' },
-            { k: 'garage', e: '🚗', z: 'sous', l: 'The car sleeps in the garage, down in the basement.' },
-            { k: 'appartement', e: '🏢', z: 'immeuble', l: 'Next door: flats stacked on top of each other.' },
-            { k: 'studio', e: '1️⃣', z: 'immeuble', l: 'One room for everything: a studio flat.' },
-            { k: 'ascenseur', e: '🛗', z: 'immeuble', l: 'It ascends: the lift.' },
-            { k: 'balcon', e: '🌿', z: 'immeuble', l: 'Plants on the balcony of the third floor.' },
-            { k: 'piscine', e: '🏊', z: 'jardin', l: 'Pisces is the fish sign: swim like a fish in the pool.' },
-            { k: 'terrasse', e: '☀️', z: 'jardin', l: 'Breakfast in the sun on the terrace.' },
-        ],
-    },
-
     // ---------------- Transport & Travel ----------------
     22: {
         title: 'Gare, aéroport et route', w: 1160, h: 720,
