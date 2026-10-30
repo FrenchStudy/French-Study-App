@@ -3,7 +3,7 @@
 //   4  Numbers & Scale Units  -> Number builder
 //   5  The Calendar & Timeline -> Calendar
 //   14 Les Couleurs            -> Colour dresser
-// (6, Telling Time, has the clock in clock.js, and 10, Nationalités, has the World map in nationalites.js;
+// (6, Telling Time, has the clock in clock.js, 7, Frequency & Time Adverbs, has the Time line in time-line.js, and 10, Nationalités, has the World map in nationalites.js;
 //  both register themselves here too.)
 //   VocabTools[themeId] = { name, next, mount(el, { say }) }
 //   VocabTools.numberFr(n) -> French words for 0 <= n < 1 000 000 000 (traditional spelling)
