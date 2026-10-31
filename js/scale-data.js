@@ -291,4 +291,223 @@ window.SCALE_DATA = {
     ] },
   ] },
 ] },
+// ---------------- 26 Hobbies & Free Time ----------------
+26: { name: 'Rule chart', next: 'Faire du or jouer au?', tabs: [
+  { type: 'groups', title: 'Faire ou jouer ?', hint: 'The big rule of hobbies. Tap a phrase to hear it.', ask: 'Faire du, jouer au or jouer du?', groups: [
+    { name: 'faire du / de la', en: 'sports and activities', color: '#059669', rule: 'faire + de: du sport, de la natation, de l\'escalade, des courses', words: [
+      { key: 'faire du sport', fr: 'faire du sport', en: 'to do sport', ex: ['Je fais du sport le samedi.', 'I do sport on Saturdays.'] },
+      { key: 'faire de la natation', fr: 'faire de la natation', en: 'to swim (as a sport)', ex: ['Elle fait de la natation.', 'She swims.'] },
+      { key: 'faire de la randonnée', fr: 'faire de la randonnée', en: 'to go hiking', ex: ['On fait de la randonnée en montagne.', 'We go hiking in the mountains.'] },
+      { key: 'faire du vélo', fr: 'faire du vélo', en: 'to cycle', ex: ['Je fais du vélo le dimanche.', 'I cycle on Sundays.'] },
+      { key: 'ski', fr: 'faire du ski', en: 'to ski', ex: ['En hiver, on fait du ski.', 'In winter we ski.'] },
+      { key: 'gym', fr: 'faire de la gym', en: 'to do gym, to work out', ex: ['Il fait de la gym deux fois par semaine.', 'He works out twice a week.'] },
+      { key: 'faire la cuisine', fr: 'faire la cuisine', en: 'to cook', ex: ['Ce soir, je fais la cuisine.', 'Tonight I am cooking.'], note: 'Careful: faire LA cuisine (not de la).' },
+      { key: 'faire une promenade', fr: 'faire une promenade', en: 'to go for a walk', ex: ['On fait une promenade au parc ?', 'Shall we go for a walk in the park?'] },
+    ] },
+    { name: 'jouer au / à la', en: 'games and ball sports', color: '#4f46e5', rule: 'jouer + à: à + le = au, à + les = aux', words: [
+      { key: 'jouer au foot / au tennis', fr: 'jouer au foot', en: 'to play football', ex: ['Les enfants jouent au foot.', 'The children are playing football.'] },
+      { key: 'jouer au foot / au tennis', fr: 'jouer au tennis', en: 'to play tennis', ex: ['Tu joues au tennis ?', 'Do you play tennis?'] },
+      { key: 'basket', fr: 'jouer au basket', en: 'to play basketball', ex: ['Il joue au basket au lycée.', 'He plays basketball at school.'] },
+      { key: 'jeu / les jeux vidéo', fr: 'jouer aux jeux vidéo', en: 'to play video games', ex: ['Mon frère joue aux jeux vidéo.', 'My brother plays video games.'] },
+      { fr: 'jouer aux cartes', en: 'to play cards', ex: ['Le soir, on joue aux cartes.', 'In the evening we play cards.'] },
+    ] },
+    { name: 'jouer du / de la', en: 'musical instruments', color: '#d97706', rule: 'jouer + de: de + le = du', words: [
+      { key: 'jouer du piano / de la guitare', fr: 'jouer du piano', en: 'to play the piano', ex: ['Ma fille joue du piano.', 'My daughter plays the piano.'] },
+      { key: 'jouer du piano / de la guitare', fr: 'jouer de la guitare', en: 'to play the guitar', ex: ['Il joue de la guitare.', 'He plays the guitar.'] },
+      { fr: 'jouer du violon', en: 'to play the violin', ex: ['Elle joue du violon depuis dix ans.', 'She has played the violin for ten years.'] },
+    ] },
+  ] },
+  { type: 'pairs', title: 'Le verbe et le nom', hint: 'Slide from the verb to the noun.', mid: false, oneWay: true, ask: 'Le nom pour « {w} » ?', pairs: [
+    { key: 'nager', a: ['nager', 'to swim', 'J\'aime nager.', 'I like swimming.'], b: ['la natation', 'swimming', 'La natation est un bon sport.', 'Swimming is a good sport.'], keyB: 'natation' },
+    { key: 'courir', a: ['courir', 'to run', 'Je cours tous les matins.', 'I run every morning.'], b: ['la course à pied', 'running', 'La course à pied, c\'est bon pour la santé.', 'Running is good for your health.'], keyB: 'course à pied' },
+    { key: 'se promener', a: ['se promener', 'to go for a walk', 'On se promène au bord de la mer.', 'We walk by the sea.'], b: ['la promenade', 'walk', 'Une petite promenade ?', 'A little walk?'] },
+    { key: 'cuisiner', a: ['cuisiner', 'to cook', 'Il adore cuisiner.', 'He loves cooking.'], b: ['la cuisine', 'cooking', 'La cuisine, c\'est ma passion.', 'Cooking is my passion.'] },
+    { key: 'voyager', a: ['voyager', 'to travel', 'J\'aime voyager.', 'I like travelling.'], b: ['le voyage', 'trip, journey', 'Bon voyage !', 'Have a good trip!'] },
+    { key: 'jardinage', a: ['jardiner', 'to garden', 'Mon père jardine le week-end.', 'My father gardens at weekends.'], b: ['le jardinage', 'gardening', 'Le jardinage, c\'est relaxant.', 'Gardening is relaxing.'] },
+    { key: 'lire', a: ['lire', 'to read', 'Je lis le soir.', 'I read in the evening.'], b: ['le livre · la lecture', 'book · reading', 'Ce livre est passionnant.', 'This book is gripping.'], keyB: 'livre' },
+    { key: 'dessiner', a: ['dessiner', 'to draw', 'Elle dessine bien.', 'She draws well.'], b: ['le dessin', 'drawing', 'J\'ai fait un dessin.', 'I made a drawing.'] },
+    { key: 'danser', a: ['danser', 'to dance', 'On danse ?', 'Shall we dance?'], b: ['la danse', 'dance', 'Elle fait de la danse.', 'She does dance.'] },
+    { key: 'jouer', a: ['jouer', 'to play', 'Les enfants jouent dehors.', 'The children are playing outside.'], b: ['le jeu', 'game', 'C\'est un jeu facile.', 'It is an easy game.'], keyB: 'jeu / les jeux vidéo' },
+  ] },
+  { type: 'groups', title: 'Inviter, accepter, refuser', hint: 'What to say when friends ask you out.', ask: 'Invite, accept or refuse?', groups: [
+    { name: 'Inviter', en: 'to invite', color: '#4f46e5', words: [
+      { key: 'qu\'est-ce que tu fais pendant ton temps libre ?', fr: 'Qu\'est-ce que tu fais pendant ton temps libre ?', en: 'What do you do in your free time?', ex: ['Qu\'est-ce que tu fais pendant ton temps libre ? — Je lis.', 'What do you do in your free time? — I read.'] },
+      { key: 'ça te dit d\'aller au cinéma ?', fr: 'Ça te dit d\'aller au cinéma ?', en: 'Do you fancy going to the cinema?', ex: ['Ça te dit d\'aller au cinéma samedi ?', 'Do you fancy the cinema on Saturday?'] },
+      { key: 'on y va ?', fr: 'On y va ?', en: 'Shall we go?', ex: ['Il est huit heures. On y va ?', 'It is eight o\'clock. Shall we go?'] },
+    ] },
+    { name: 'Accepter', en: 'to say yes', color: '#059669', words: [
+      { key: 'avec plaisir !', fr: 'Avec plaisir !', en: 'With pleasure!', ex: ['Un café ? — Avec plaisir !', 'A coffee? — With pleasure!'] },
+      { key: 'pourquoi pas ?', fr: 'Pourquoi pas ?', en: 'Why not?', ex: ['On va à la plage ? — Pourquoi pas ?', 'Shall we go to the beach? — Why not?'] },
+    ] },
+    { name: 'Refuser', en: 'to say no (politely)', color: '#e11d48', words: [
+      { key: 'je suis occupé / occupée ce soir.', fr: 'Je suis occupé ce soir.', en: 'I am busy tonight.', ex: ['Désolée, je suis occupée ce soir.', 'Sorry, I am busy tonight.'] },
+      { key: 'désolé, je ne peux pas.', fr: 'Désolé, je ne peux pas.', en: 'Sorry, I can\'t.', ex: ['Désolé, je ne peux pas, je travaille.', 'Sorry, I can\'t, I am working.'] },
+    ] },
+  ] },
+] },
+
+// ---------------- 2 Question Words ----------------
+2: { name: 'Rule chart', next: 'Which question word?', tabs: [
+  { type: 'groups', title: 'Qui ? Où ? Quand ?', hint: 'Each question word asks for one kind of answer. Tap to hear.', ask: 'What does it ask about?', groups: [
+    { name: 'Une personne', en: 'a person', color: '#4f46e5', rule: '— C\'est ma sœur.', words: [
+      { key: 'qui', fr: 'qui ?', en: 'who?', ex: ['Qui est-ce ? — C\'est mon frère.', 'Who is it? — It is my brother.'] },
+    ] },
+    { name: 'Une chose', en: 'a thing, an action', color: '#0891b2', rule: '— C\'est un livre. / — Je travaille.', words: [
+      { key: 'que / qu\'', fr: 'que ?', en: 'what?', ex: ['Que faites-vous ?', 'What are you doing?'], note: 'Que at the start; quoi at the end (tu fais quoi ?).' },
+      { key: 'quoi', fr: 'quoi ?', en: 'what? (spoken, at the end)', ex: ['Tu fais quoi ce soir ?', 'What are you doing tonight?'] },
+      { key: 'qu\'est-ce que c\'est ?', fr: 'Qu\'est-ce que c\'est ?', en: 'What is it?', ex: ['Qu\'est-ce que c\'est ? — C\'est un cadeau.', 'What is it? — It is a present.'] },
+      { key: 'c\'est quoi ?', fr: 'C\'est quoi ?', en: 'What is it? (spoken)', ex: ['C\'est quoi, ce bruit ?', 'What is that noise?'] },
+      { key: 'qu\'est-ce que vous faites ?', fr: 'Qu\'est-ce que vous faites ?', en: 'What do you do?', ex: ['Qu\'est-ce que vous faites dans la vie ?', 'What do you do for a living?'] },
+    ] },
+    { name: 'Un lieu', en: 'a place', color: '#059669', rule: '— À Paris. / — Dans la cuisine.', words: [
+      { key: 'où', fr: 'où ?', en: 'where?', ex: ['Où habites-tu ? — À Lyon.', 'Where do you live? — In Lyon.'] },
+      { key: 'où est… ?', fr: 'Où est… ?', en: 'Where is…?', ex: ['Où est la gare, s\'il vous plaît ?', 'Where is the station, please?'] },
+    ] },
+    { name: 'Un moment', en: 'a time', color: '#d97706', rule: '— Demain. / — À huit heures.', words: [
+      { key: 'quand', fr: 'quand ?', en: 'when?', ex: ['Quand pars-tu ? — Demain.', 'When are you leaving? — Tomorrow.'] },
+      { key: 'quand est-ce que… ?', fr: 'Quand est-ce que… ?', en: 'When…?', ex: ['Quand est-ce que le cours commence ?', 'When does the class start?'] },
+      { key: 'à quelle heure… ?', fr: 'À quelle heure… ?', en: 'At what time…?', ex: ['À quelle heure part le train ?', 'What time does the train leave?'] },
+      { key: 'quelle heure est-il ?', fr: 'Quelle heure est-il ?', en: 'What time is it?', ex: ['Quelle heure est-il ? — Il est midi.', 'What time is it? — It is noon.'] },
+    ] },
+    { name: 'Une raison', en: 'a reason', color: '#e11d48', rule: '— Parce que…', words: [
+      { key: 'pourquoi', fr: 'pourquoi ?', en: 'why?', ex: ['Pourquoi tu ris ? — Parce que c\'est drôle !', 'Why are you laughing? — Because it is funny!'] },
+    ] },
+    { name: 'Une manière', en: 'how', color: '#7c3aed', rule: '— En bus. / — Bien, merci.', words: [
+      { key: 'comment', fr: 'comment ?', en: 'how?', ex: ['Comment vas-tu au travail ? — En bus.', 'How do you get to work? — By bus.'], note: 'Also: Comment ? = Pardon? (I did not hear).' },
+    ] },
+    { name: 'Un nombre', en: 'how many, how much', color: '#0f766e', rule: '— Trois. / — Dix euros.', words: [
+      { key: 'combien', fr: 'combien ?', en: 'how much? how many?', ex: ['Combien de frères as-tu ? — Deux.', 'How many brothers do you have? — Two.'] },
+      { key: 'combien ça coûte ?', fr: 'Combien ça coûte ?', en: 'How much is it?', ex: ['Combien ça coûte ? — Douze euros.', 'How much is it? — Twelve euros.'] },
+    ] },
+    { name: 'Un choix', en: 'which (+ noun)', color: '#be185d', rule: 'quel + noun: quel âge, quelle couleur', words: [
+      { key: 'quel / quelle', fr: 'quel ? quelle ?', en: 'which? what?', ex: ['Quelle couleur préfères-tu ?', 'Which colour do you prefer?'] },
+      { key: 'quel âge avez-vous ?', fr: 'Quel âge avez-vous ?', en: 'How old are you?', ex: ['Quel âge avez-vous ? — J\'ai trente ans.', 'How old are you? — I am thirty.'], note: 'Avoir: j\'ai trente ans (not « je suis »).' },
+    ] },
+  ] },
+  { type: 'groups', title: 'Quel, quelle, quels, quelles ?', hint: 'Quel agrees with the noun after it. Tap to hear.', ask: 'Quel, quelle, quels or quelles?', groups: [
+    { name: 'quel', en: 'masculine', color: '#0369a1', rule: 'quel + le … (one)', words: [
+      { key: 'quel / quelle', fr: 'Quel jour ?', en: 'Which day?', ex: ['Quel jour sommes-nous ?', 'What day is it?'] },
+      { key: 'quel âge avez-vous ?', fr: 'Quel âge ?', en: 'How old?', ex: ['Quel âge a ton fils ?', 'How old is your son?'] },
+      { fr: 'Quel temps ?', en: 'What weather?', ex: ['Quel temps fait-il ?', 'What is the weather like?'] },
+    ] },
+    { name: 'quelle', en: 'feminine', color: '#e11d48', rule: 'quelle + la … (one)', words: [
+      { key: 'quelle heure est-il ?', fr: 'Quelle heure ?', en: 'What time?', ex: ['Quelle heure est-il ?', 'What time is it?'] },
+      { key: 'quel / quelle', fr: 'Quelle couleur ?', en: 'Which colour?', ex: ['Quelle couleur aimes-tu ?', 'Which colour do you like?'] },
+    ] },
+    { name: 'quels', en: 'masculine plural', color: '#1d4ed8', rule: 'quels + les … (several)', words: [
+      { key: 'quels / quelles', fr: 'Quels films ?', en: 'Which films?', ex: ['Quels films as-tu vus ?', 'Which films have you seen?'] },
+      { fr: 'Quels sports ?', en: 'Which sports?', ex: ['Quels sports pratiques-tu ?', 'Which sports do you do?'] },
+    ] },
+    { name: 'quelles', en: 'feminine plural', color: '#be185d', rule: 'quelles + les … (several)', words: [
+      { key: 'quels / quelles', fr: 'Quelles chaussures ?', en: 'Which shoes?', ex: ['Quelles chaussures tu mets ?', 'Which shoes are you wearing?'] },
+      { fr: 'Quelles langues ?', en: 'Which languages?', ex: ['Quelles langues parlez-vous ?', 'Which languages do you speak?'] },
+    ] },
+  ] },
+] },
+
+// ---------------- 3 Connectors & Small Words ----------------
+3: { name: 'Rule chart', next: 'What does each small word do?', tabs: [
+  { type: 'groups', title: 'Relier', hint: 'Small words that join ideas, sorted by what they do. Tap to hear.', ask: 'What does it do?', groups: [
+    { name: 'Ajouter', en: 'and, also', color: '#059669', words: [
+      { key: 'et', fr: 'et', en: 'and', ex: ['J\'ai un frère et une sœur.', 'I have a brother and a sister.'] },
+      { key: 'aussi', fr: 'aussi', en: 'also, too', ex: ['Moi aussi !', 'Me too!'] },
+    ] },
+    { name: 'Opposer', en: 'but', color: '#e11d48', words: [
+      { key: 'mais', fr: 'mais', en: 'but', ex: ['C\'est cher, mais c\'est bon.', 'It is expensive, but it is good.'] },
+    ] },
+    { name: 'Choisir', en: 'or', color: '#7c3aed', words: [
+      { key: 'ou', fr: 'ou', en: 'or', ex: ['Thé ou café ?', 'Tea or coffee?'], note: 'Ou (or) has no accent; où (where) has one.' },
+    ] },
+    { name: 'Expliquer', en: 'because', color: '#d97706', words: [
+      { key: 'parce que / parce qu\'', fr: 'parce que', en: 'because', ex: ['Je reste ici parce qu\'il pleut.', 'I am staying here because it is raining.'] },
+      { key: 'car', fr: 'car', en: 'because, for (written)', ex: ['Le magasin est fermé, car c\'est dimanche.', 'The shop is closed, as it is Sunday.'], note: 'Car never starts a sentence; parce que can answer « pourquoi ? ».' },
+    ] },
+    { name: 'Conclure', en: 'so', color: '#0369a1', words: [
+      { key: 'donc', fr: 'donc', en: 'so, therefore', ex: ['Il est malade, donc il reste à la maison.', 'He is ill, so he is staying at home.'] },
+      { key: 'alors', fr: 'alors', en: 'so, then', ex: ['Il fait beau, alors on sort.', 'The weather is nice, so we are going out.'] },
+    ] },
+    { name: 'Condition', en: 'if', color: '#0f766e', words: [
+      { key: 'si', fr: 'si', en: 'if', ex: ['Si tu veux, on va au cinéma.', 'If you want, we can go to the cinema.'], note: 'Si + il = s\'il (s\'il pleut).' },
+    ] },
+    { name: 'Dans l\'ordre', en: 'first, then, finally', color: '#475569', words: [
+      { key: 'd\'abord', fr: 'd\'abord', en: 'first', ex: ['D\'abord, je prends une douche.', 'First, I have a shower.'] },
+      { key: 'ensuite', fr: 'ensuite', en: 'next', ex: ['Ensuite, je prends le petit-déjeuner.', 'Next, I have breakfast.'] },
+      { key: 'puis', fr: 'puis', en: 'then', ex: ['Puis je pars au travail.', 'Then I leave for work.'] },
+      { key: 'après', fr: 'après', en: 'after, afterwards', ex: ['Après, on va au parc.', 'Afterwards, we go to the park.'] },
+      { key: 'enfin', fr: 'enfin', en: 'finally', ex: ['Enfin, je me couche.', 'Finally, I go to bed.'] },
+    ] },
+  ] },
+  { type: 'scale', title: 'Combien ?', hint: 'From a little (left) to too much (right).', left: 'peu', right: 'trop', color: '#d97706', ask: 'Which one is more?', stops: [
+    { p: 0, key: 'peu', fr: 'peu', en: 'not much, little', ex: ['Il mange peu.', 'He does not eat much.'] },
+    { p: 33, key: 'assez', fr: 'assez', en: 'enough; quite', ex: ['J\'ai assez d\'argent.', 'I have enough money.'] },
+    { p: 66, key: 'beaucoup', fr: 'beaucoup', en: 'a lot', ex: ['Merci beaucoup !', 'Thank you very much!'], note: 'Beaucoup de + noun: beaucoup de gens (never « très de »).' },
+    { p: 100, key: 'trop', fr: 'trop', en: 'too, too much', ex: ['C\'est trop cher !', 'It is too expensive!'], note: 'Trop = more than you want: a problem.' },
+  ] },
+  { type: 'groups', title: 'Petits mots', hint: 'Where? With whom? How much? Tap to hear.', ask: 'What does it say?', groups: [
+    { name: 'Où ?', en: 'place', color: '#059669', words: [
+      { key: 'sur', fr: 'sur', en: 'on', ex: ['Le livre est sur la table.', 'The book is on the table.'] },
+      { key: 'sous', fr: 'sous', en: 'under', ex: ['Le chat est sous le lit.', 'The cat is under the bed.'] },
+      { key: 'dans', fr: 'dans', en: 'in', ex: ['Les clés sont dans mon sac.', 'The keys are in my bag.'] },
+      { key: 'chez', fr: 'chez', en: 'at (someone\'s home)', ex: ['Je suis chez moi.', 'I am at home.'] },
+    ] },
+    { name: 'Avec qui, pour quoi ?', en: 'with, without, for', color: '#4f46e5', words: [
+      { key: 'avec', fr: 'avec', en: 'with', ex: ['Je pars avec mes amis.', 'I am going with my friends.'] },
+      { key: 'sans', fr: 'sans', en: 'without', ex: ['Un café sans sucre, s\'il vous plaît.', 'A coffee without sugar, please.'] },
+      { key: 'pour', fr: 'pour', en: 'for, in order to', ex: ['C\'est pour toi.', 'It is for you.'] },
+    ] },
+    { name: 'Plus ou moins fort', en: 'how much, how sure', color: '#d97706', words: [
+      { key: 'très', fr: 'très', en: 'very', ex: ['Il est très gentil.', 'He is very kind.'] },
+      { key: 'vraiment', fr: 'vraiment', en: 'really', ex: ['C\'est vraiment bon !', 'It is really good!'] },
+      { key: 'plus', fr: 'plus', en: 'more', ex: ['Paris est plus grand que Lyon.', 'Paris is bigger than Lyon.'] },
+      { key: 'moins', fr: 'moins', en: 'less', ex: ['C\'est moins cher ici.', 'It is cheaper here.'] },
+      { key: 'seulement', fr: 'seulement', en: 'only', ex: ['J\'ai seulement dix euros.', 'I only have ten euros.'] },
+      { key: 'peut-être', fr: 'peut-être', en: 'maybe', ex: ['Il va peut-être pleuvoir.', 'It may rain.'] },
+    ] },
+  ] },
+] },
+
+// ---------------- 50 Arguing & Debating ----------------
+50: { name: 'Rule chart', next: 'Build an argument', tabs: [
+  { type: 'scale', title: 'Le fil de l\'argument', hint: 'The order of a TCF / TEF essay: from the first view (left) to the conclusion (right).', left: 'introduction', right: 'conclusion', color: '#4f46e5', ask: 'Which comes later in an essay?', stops: [
+    { p: 0, key: 'à première vue', fr: 'à première vue', en: 'at first sight', ex: ['À première vue, le projet semble utile.', 'At first sight the project seems useful.'] },
+    { p: 17, key: 'certes', fr: 'certes', en: 'admittedly', ex: ['Certes, il coûte cher…', 'Admittedly, it is expensive…'] },
+    { p: 33, key: 'néanmoins', fr: 'néanmoins', en: 'nevertheless', ex: ['…néanmoins, il crée des emplois.', '…nevertheless, it creates jobs.'] },
+    { p: 50, key: 'd\'ailleurs', fr: 'd\'ailleurs', en: 'besides, moreover', ex: ['D\'ailleurs, la ville l\'a déjà approuvé.', 'Besides, the town has already approved it.'] },
+    { p: 66, key: 'or', fr: 'or', en: 'yet, now (a new fact)', ex: ['Or, les habitants n\'ont pas été consultés.', 'Yet the residents were not consulted.'], note: 'Or brings in a fact that changes the reasoning. Not « gold » here.' },
+    { p: 83, key: 'par conséquent', fr: 'par conséquent', en: 'consequently', ex: ['Par conséquent, il faut un référendum.', 'Consequently, a referendum is needed.'] },
+    { p: 100, key: 'en somme', fr: 'en somme', en: 'in short', ex: ['En somme, le projet doit être revu.', 'In short, the project must be reviewed.'] },
+  ] },
+  { type: 'groups', title: 'Les mots du débat', hint: 'Sorted by what they do in an argument. Tap to hear.', ask: 'What does it do?', groups: [
+    { name: 'Prendre position', en: 'state your view', color: '#4f46e5', words: [
+      { key: 'point de vue', fr: 'le point de vue', en: 'point of view', ex: ['De mon point de vue, c\'est une erreur.', 'From my point of view, it is a mistake.'] },
+      { key: 'thèse', fr: 'la thèse', en: 'thesis, position', ex: ['Je défendrai la thèse suivante.', 'I shall defend the following position.'] },
+      { key: 'prendre position', fr: 'prendre position', en: 'to take a stand', ex: ['Il refuse de prendre position.', 'He refuses to take a stand.'] },
+      { key: 'soutenir', fr: 'soutenir', en: 'to argue, to maintain', ex: ['Je soutiens que c\'est injuste.', 'I maintain that it is unfair.'] },
+      { key: 'enjeu', fr: 'l\'enjeu', en: 'what is at stake', ex: ['L\'enjeu est l\'avenir de la ville.', 'What is at stake is the future of the town.'] },
+    ] },
+    { name: 'Insister', en: 'add weight', color: '#059669', words: [
+      { key: 'souligner', fr: 'souligner', en: 'to stress', ex: ['Il faut souligner un point essentiel.', 'One essential point must be stressed.'] },
+      { key: 'd\'ailleurs', fr: 'd\'ailleurs', en: 'besides', ex: ['D\'ailleurs, ce n\'est pas la première fois.', 'Besides, it is not the first time.'] },
+      { key: 'compte tenu de', fr: 'compte tenu de', en: 'given, considering', ex: ['Compte tenu de la situation, il faut agir.', 'Given the situation, we must act.'] },
+    ] },
+    { name: 'Concéder', en: 'admit the other side', color: '#d97706', words: [
+      { key: 'certes', fr: 'certes … mais', en: 'admittedly … but', ex: ['Certes, c\'est cher, mais c\'est utile.', 'Admittedly it is expensive, but it is useful.'] },
+      { key: 'bien que', fr: 'bien que', en: 'although (+ subjunctive)', ex: ['Bien qu\'il soit tard, je continue.', 'Although it is late, I carry on.'] },
+      { key: 'quand bien même', fr: 'quand bien même', en: 'even if (+ conditional)', ex: ['Quand bien même il aurait raison, il faudrait l\'écouter poliment.', 'Even if he were right, he should be listened to politely.'] },
+      { key: 'il n\'en demeure pas moins que', fr: 'il n\'en demeure pas moins que', en: 'the fact remains that', ex: ['Il n\'en demeure pas moins que le risque existe.', 'The fact remains that the risk exists.'] },
+    ] },
+    { name: 'Opposer', en: 'disagree, contrast', color: '#e11d48', words: [
+      { key: 'néanmoins', fr: 'néanmoins', en: 'nevertheless', ex: ['C\'est difficile ; néanmoins, c\'est possible.', 'It is difficult; nevertheless, it is possible.'] },
+      { key: 'en revanche', fr: 'en revanche', en: 'on the other hand', ex: ['Le centre est cher ; en revanche, la banlieue est abordable.', 'The centre is expensive; on the other hand, the suburbs are affordable.'] },
+      { key: 'remettre en cause', fr: 'remettre en cause', en: 'to call into question', ex: ['Cette étude remet en cause nos idées.', 'This study calls our ideas into question.'] },
+      { key: 'contredire', fr: 'contredire', en: 'to contradict', ex: ['Les faits contredisent cette thèse.', 'The facts contradict this position.'] },
+    ] },
+    { name: 'Nuancer et conclure', en: 'refine, sum up', color: '#0369a1', words: [
+      { key: 'nuance', fr: 'la nuance', en: 'nuance', ex: ['Il faut apporter une nuance.', 'A nuance must be added.'] },
+      { key: 'nuancer', fr: 'nuancer', en: 'to qualify (an opinion)', ex: ['Je voudrais nuancer cette idée.', 'I would like to qualify this idea.'] },
+      { key: 'par conséquent', fr: 'par conséquent', en: 'consequently', ex: ['Par conséquent, nous devons changer.', 'Consequently, we must change.'] },
+      { key: 'en somme', fr: 'en somme', en: 'in short', ex: ['En somme, les avantages l\'emportent.', 'In short, the advantages win out.'] },
+    ] },
+  ] },
+] },
 };
