@@ -14,53 +14,7 @@
 // A zone with k is itself a word (la cuisine): its name tag can be tapped too.
 // Words that are not in the deck are skipped, so a palace never shows a word the topic lacks.
 (function () {
-const PALACES = {
-    // ---------------- Transport & Travel ----------------
-    22: {
-        title: 'Gare, aéroport et route', w: 1160, h: 720,
-        backdrop: { roof: [190, 760, 104], arch: true, ground: 670, sign: 'Gare de Lyon', tower: [770, 1150] },
-        zones: [
-            { id: 'port', fr: 'Le port', en: 'Harbour', x: 0, y: 122, w: 180, h: 346, cols: 1 },
-            { id: 'gare', fr: 'La gare', en: 'Station', x: 190, y: 122, w: 570, h: 346 },
-            { id: 'aero', k: 'aéroport', fr: "l'aéroport", en: 'airport', x: 770, y: 122, w: 380, h: 346 },
-            { id: 'route', k: 'route', fr: 'la route', en: 'road', x: 0, y: 478, w: 1150, h: 180 },
-        ],
-        items: [
-            { k: 'bateau', e: '⛴️', z: 'port', l: 'The ferry waits at the quay: le bateau.' },
-            { k: 'horaire', e: '🕒', z: 'gare', l: 'The big board with the hours of every train: the timetable.' },
-            { k: 'départ', e: '🛫', z: 'gare', l: 'Departures on the left of the board.' },
-            { k: 'arrivée', e: '🛬', z: 'gare', l: 'Arrivals on the right.' },
-            { k: 'retard', e: '⏰', z: 'gare', l: 'Tardy: your train is late again.' },
-            { k: 'annulation', e: '❌', z: 'gare', l: 'Annulled: a red cross over the 8:15 train.' },
-            { k: 'correspondance', e: '🔁', z: 'gare', l: 'A connection: change trains here, like letters corresponding.' },
-            { k: 'voie', e: '🛤️', z: 'gare', l: 'The way, the track: "voie 5" is platform 5.' },
-            { k: 'terminus', e: '🏁', z: 'gare', l: 'The end of the line: everybody off.' },
-            { k: 'contrôleur', e: '🎫', z: 'gare', l: 'The inspector controls your ticket.' },
-            { k: 'composter', e: '🎟️', z: 'gare', l: 'Punch your ticket in the yellow machine, or it is not valid.' },
-            { k: 'monter', e: '⬆️', z: 'gare', l: 'Mount the steps: get on the train.' },
-            { k: 'descendre', e: '⬇️', z: 'gare', l: 'Descend the steps: get off.' },
-            { k: 'changer', e: '🔄', z: 'gare', l: 'Change trains at Lyon.' },
-            { k: 'place', e: '💺', z: 'gare', l: 'Your seat: "place 42".' },
-            { k: 'réserver', e: '📅', z: 'gare', l: 'Reserve your seat before you travel.' },
-            { k: 'avion', e: '✈️', z: 'aero', l: 'Aviation: the plane on the runway.' },
-            { k: 'vol', e: '🛩️', z: 'aero', l: 'The flight takes off (and a thief also vole: steals).' },
-            { k: 'enregistrement', e: '🏷️', z: 'aero', l: 'Check-in: they register your name and tag your bag.' },
-            { k: 'bagage', e: '🧳', z: 'aero', l: 'Your baggage on the belt.' },
-            { k: "porte d'embarquement", e: '🚪', z: 'aero', l: 'The door (porte) where you embark: the boarding gate.' },
-            { k: 'douane', e: '🛃', z: 'aero', l: 'Customs: pay your duty (douane) on what you bring back.' },
-            { k: 'voiture', e: '🚗', z: 'route', l: 'Hop in the car, we are going on a tour (voi-TOUR).' },
-            { k: 'taxi', e: '🚕', z: 'route', l: 'The yellow taxi at the station door.' },
-            { k: 'moto', e: '🏍️', z: 'route', l: 'A motorbike zooms past.' },
-            { k: 'vélo', e: '🚲', z: 'route', l: 'Velocity on a bike: le vélo.' },
-            { k: 'tram', e: '🚊', z: 'route', l: 'The tram rings its bell.' },
-            { k: 'autoroute', e: '🛣️', z: 'route', l: 'Auto (car) + route (road): the motorway.' },
-            { k: 'station-service', e: '⛽', z: 'route', l: 'Fill up at the petrol station.' },
-            { k: 'essence', e: '🛢️', z: 'route', l: 'Petrol: the essence that makes the engine run.' },
-            { k: 'parking', e: '🅿️', z: 'route', l: 'Park in le parking.' },
-            { k: 'location de voiture', e: '🔑', z: 'route', l: 'Rent a car: they hand you the keys. Location = renting!' },
-        ],
-    },
-};
+const PALACES = {};   // the palaces are in palaces-data.js and palaces-data-2.js
 
 // ---------- small helpers ----------
 const NS = 'http://www.w3.org/2000/svg';
