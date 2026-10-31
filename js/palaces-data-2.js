@@ -804,39 +804,5 @@ window.PALACE_DATA = Object.assign(window.PALACE_DATA || {}, {
     ],
 },
 
-// ---------------- 56 Everyday Slang (C2) ----------------
-56: {
-    title: 'Le quartier des potes', w: 1160, h: 680,
-    backdrop: { street: 590, streetName: 'Rue du Parler Jeune' },
-    zones: [
-        S('bou', 'boulot', 'le boulot', 'job', 10, 20, 560, 270, '#475569', 3),
-        S('caf', 'bouffer', 'bouffer', 'to eat', 580, 20, 570, 270, '#c2410c', 3),
-        S('pot', 'pote', 'le pote', 'mate', 10, 300, 760, 270, '#7c3aed', 4),
-        S('gar', 'bagnole', 'la bagnole', 'car', 780, 300, 370, 270, '#0f766e', 3),
-    ],
-    items: [
-        ['bosser', '💻', 'bou', 'Work: the boss is watching.'],
-        ['galérer', '😩', 'bou', 'Struggle: row like a galley slave.'],
-        ['crevé', '😵', 'bou', 'Knackered: burst like a tyre.'],
-        ['se planter', '🪴', 'bou', 'Get it wrong: plant yourself face-first.'],
-        ['avoir la flemme', '🦥', 'bou', "Can't be bothered."],
-        ['relou', '🪨', 'bou', 'Annoying: verlan of lourd (heavy).'],
-        ['kiffer', '😍', 'caf', 'Love it.'],
-        ['ouf', '🤯', 'caf', 'Crazy: verlan of fou.'],
-        ['grave', '💯', 'caf', 'Totally.'],
-        ['carrément', '✅', 'caf', 'Totally, squarely (carré).'],
-        ['chelou', '🤨', 'caf', 'Dodgy: verlan of louche.'],
-        ['mec', '🧔', 'pot', 'A guy.'],
-        ['nana', '👩', 'pot', 'A girl, a woman.'],
-        ['se casser', '🏃', 'pot', 'Clear off: break away.'],
-        ['laisse tomber', '🤷', 'pot', 'Forget it: let it drop.'],
-        ['ça me saoule', '🙄', 'pot', "It's doing my head in."],
-        ['boulet', '⛓️', 'pot', 'A pain: the ball and chain.'],
-        ['flipper', '😱', 'pot', 'Freak out: flip out.'],
-        ['fric', '💸', 'gar', 'Cash.'],
-        ['fringues', '👕', 'gar', 'Clothes.'],
-        ['truc', '🔧', 'gar', 'A thing, a trick.'],
-    ],
-},
 });
 })();
