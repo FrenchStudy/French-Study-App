@@ -88,46 +88,6 @@ window.PALACE_DATA = {
     ],
 },
 
-// ---------------- 24 Money & Banking ----------------
-24: {
-    title: 'La banque et le marché', w: 1160, h: 760,
-    backdrop: { street: 660, streetName: "Rue de l'Argent" },
-    zones: [
-        S('ban', 'banque', 'la banque', 'bank', 10, 20, 760, 250, '#1e3a8a'),
-        S('chg', 'bureau de change', 'le bureau de change', 'currency exchange', 780, 20, 370, 250, '#0f766e'),
-        S('por', null, 'Mon porte-monnaie', 'My purse', 10, 290, 370, 160, '#a16207'),
-        S('mag', null, 'Au magasin', 'In the shop', 390, 290, 760, 160, '#be123c'),
-        S('eco', null, 'Mes économies', 'My savings', 10, 470, 1140, 160, '#15803d'),
-    ],
-    items: [
-        ['compte', '📒', 'ban', 'Count your money in your account.'],
-        ['solde', '⚖️', 'ban', 'The balance of your account.'],
-        ['retirer', '🏧', 'ban', 'Withdraw cash: retire it from the machine.'],
-        ['déposer', '📥', 'ban', 'Deposit a cheque.'],
-        ['virement', '💸', 'ban', 'A bank transfer: the money veers off to another account.'],
-        ['virer', '➡️', 'ban', 'To transfer: veer the money across.'],
-        ['code', '🔢', 'ban', 'Your PIN code.'],
-        ['frais', '📃', 'ban', 'Fees and charges.'],
-        ['changer de l\'argent', '💱', 'chg', 'Change money.'],
-        ['taux de change', '📈', 'chg', 'The exchange rate.'],
-        ['dollar', '💵', 'chg', 'Dollars.'],
-        ['euro', '💶', 'chg', 'Euros.'],
-        ['pièce', '🪙', 'por', 'A coin (une pièce de 2 euros).'],
-        ['billet', '💴', 'por', 'A banknote.'],
-        ['centime', '🟤', 'por', 'A cent.'],
-        ['tarif', '🏷️', 'mag', 'The price list: a tariff.'],
-        ['tva', '🧾', 'mag', 'VAT, sales tax: "té-vé-a".'],
-        ['gratuit', '🆓', 'mag', 'Gratis: free.'],
-        ['sans contact', '📲', 'mag', 'Without contact: tap to pay.'],
-        ['pourboire', '☕', 'mag', '"Pour boire": a tip, for a drink.'],
-        ['dépenser', '🛍️', 'mag', 'Dispense money: spend.'],
-        ['économiser', '🐷', 'eco', 'Economise: into the piggy bank.'],
-        ['emprunter', '🙏', 'eco', 'Borrow from a friend.'],
-        ['prêter', '🤲', 'eco', 'Lend: "Here, take it."'],
-        ['prêt', '🤝', 'eco', 'A loan from the bank.'],
-    ],
-},
-
 // ---------------- 27 Work & School ----------------
 27: {
     title: 'De l\'école au bureau', w: 1160, h: 860,
