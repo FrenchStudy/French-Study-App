@@ -5,6 +5,8 @@
 //            pairs [{ key, a: [fr, en, ex fr, ex en], b: [...], note }]
 //   groups   words sorted into groups (j'ai… or je suis… ?): groups [{ name, en, color, words: [{ key, fr, en, ex: [fr, en] }] }]
 //   register the same idea said three ways: familier · courant · soutenu: sets [{ key, en, w: [[fr, ex fr, ex en] or null x 3] }]
+//   cards    a word and what it is NOT (false friends: label1 = looks like) or word for word (idioms), and what it really means:
+//            items [{ key, fr, trap, means, ex: [fr, en], note }]
 // key = the word as it is in the topic list (so answers count in reviews); a word without key is extra help.
 window.SCALE_DATA = {
 
@@ -507,6 +509,225 @@ window.SCALE_DATA = {
       { key: 'nuancer', fr: 'nuancer', en: 'to qualify (an opinion)', ex: ['Je voudrais nuancer cette idée.', 'I would like to qualify this idea.'] },
       { key: 'par conséquent', fr: 'par conséquent', en: 'consequently', ex: ['Par conséquent, nous devons changer.', 'Consequently, we must change.'] },
       { key: 'en somme', fr: 'en somme', en: 'in short', ex: ['En somme, les avantages l\'emportent.', 'In short, the advantages win out.'] },
+    ] },
+  ] },
+] },
+// ---------------- 30 Common False Friends ----------------
+30: { name: 'False friends', next: 'Looks like… really means…', tabs: [
+  { type: 'cards', title: 'Les faux amis', hint: 'Tap a word: what it looks like in English, and what it really means.', label1: 'Not', label2: 'Means', ask: 'means…', items: [
+    { key: 'librairie', fr: 'la librairie', trap: 'library', means: 'bookshop', ex: ['J\'achète un roman à la librairie.', 'I buy a novel at the bookshop.'], note: 'A library is une bibliothèque.' },
+    { key: 'bibliothèque', fr: 'la bibliothèque', trap: 'bookshop', means: 'library; bookcase', ex: ['J\'emprunte des livres à la bibliothèque.', 'I borrow books from the library.'] },
+    { key: 'costume', fr: 'le costume', trap: 'fancy dress', means: 'suit', ex: ['Il porte un costume pour le mariage.', 'He is wearing a suit for the wedding.'], note: 'Fancy dress is un déguisement.' },
+    { key: 'coin', fr: 'le coin', trap: 'coin', means: 'corner', ex: ['La boulangerie est au coin de la rue.', 'The bakery is on the corner of the street.'], note: 'A coin is une pièce.' },
+    { key: 'location', fr: 'la location', trap: 'location', means: 'rental, renting', ex: ['La location de la voiture coûte 40 euros.', 'The car rental costs 40 euros.'], note: 'A location is un endroit, un lieu.' },
+    { key: 'monnaie', fr: 'la monnaie', trap: 'money', means: 'change, coins; currency', ex: ['Vous avez de la monnaie ?', 'Do you have any change?'], note: 'Money is l\'argent.' },
+    { key: 'fabrique', fr: 'la fabrique', trap: 'fabric', means: 'factory, works', ex: ['C\'est une ancienne fabrique de chocolat.', 'It is an old chocolate factory.'], note: 'Fabric is le tissu.' },
+    { key: 'pain', fr: 'le pain', trap: 'pain', means: 'bread', ex: ['Je vais acheter du pain.', 'I am going to buy some bread.'], note: 'Pain is la douleur.' },
+    { key: 'chair', fr: 'la chair', trap: 'chair', means: 'flesh', ex: ['La chair de ce poisson est blanche.', 'The flesh of this fish is white.'], note: 'A chair is une chaise.' },
+    { key: 'cave', fr: 'la cave', trap: 'cave', means: 'cellar', ex: ['Le vin est dans la cave.', 'The wine is in the cellar.'], note: 'A cave is une grotte.' },
+    { key: 'entrée', fr: 'l\'entrée', trap: 'main course', means: 'starter; entrance', ex: ['En entrée, je prends une salade.', 'For a starter I will have a salad.'], note: 'The main course is le plat principal.' },
+    { key: 'journée', fr: 'la journée', trap: 'journey', means: 'day (the whole day)', ex: ['Bonne journée !', 'Have a nice day!'], note: 'A journey is un voyage, un trajet.' },
+    { key: 'agenda', fr: 'l\'agenda', trap: 'agenda (of a meeting)', means: 'diary, planner', ex: ['Je note le rendez-vous dans mon agenda.', 'I write the appointment in my diary.'], note: 'The agenda of a meeting is l\'ordre du jour.' },
+    { key: 'crayon', fr: 'le crayon', trap: 'crayon', means: 'pencil', ex: ['Tu as un crayon et une gomme ?', 'Do you have a pencil and a rubber?'], note: 'A crayon is un crayon de couleur or une craie grasse.' },
+    { key: 'lecture', fr: 'la lecture', trap: 'lecture', means: 'reading', ex: ['La lecture est mon loisir préféré.', 'Reading is my favourite hobby.'], note: 'A lecture is un cours magistral, une conférence.' },
+    { key: 'phrase', fr: 'la phrase', trap: 'phrase', means: 'sentence', ex: ['Écrivez une phrase complète.', 'Write a full sentence.'], note: 'A phrase is une expression.' },
+    { key: 'bras', fr: 'le bras', trap: 'bra', means: 'arm', ex: ['Il s\'est cassé le bras.', 'He broke his arm.'], note: 'A bra is un soutien-gorge.' },
+    { key: 'blessé', fr: 'blessé', trap: 'blessed', means: 'injured, hurt', ex: ['Il y a deux blessés dans l\'accident.', 'Two people were injured in the accident.'], note: 'Blessed is béni.' },
+    { key: 'injure', fr: 'l\'injure', trap: 'injury', means: 'insult', ex: ['Il a crié des injures.', 'He shouted insults.'], note: 'An injury is une blessure.' },
+    { key: 'déçu', fr: 'déçu', trap: 'deceived', means: 'disappointed', ex: ['Je suis déçu par mes notes.', 'I am disappointed with my marks.'], note: 'Deceived is trompé.' },
+    { key: 'énervé', fr: 'énervé', trap: 'nervous', means: 'annoyed, wound up', ex: ['Il est énervé à cause des bouchons.', 'He is annoyed because of the traffic jams.'], note: 'Nervous is nerveux, stressé.' },
+    { key: 'sensible', fr: 'sensible', trap: 'sensible', means: 'sensitive', ex: ['Elle est très sensible.', 'She is very sensitive.'], note: 'Sensible is raisonnable.' },
+    { key: 'sympathique / sympa', fr: 'sympathique', trap: 'sympathetic', means: 'nice, friendly', ex: ['Ton collègue est sympathique.', 'Your colleague is nice.'], note: 'Sympathetic is compatissant.' },
+    { key: 'gentil', fr: 'gentil', trap: 'gentle', means: 'kind, nice', ex: ['Merci, c\'est gentil !', 'Thank you, that is kind!'], note: 'Gentle is doux.' },
+    { key: 'formidable', fr: 'formidable', trap: 'fearsome', means: 'great, wonderful', ex: ['Le concert était formidable !', 'The concert was great!'] },
+    { key: 'demander', fr: 'demander', trap: 'to demand', means: 'to ask (for)', ex: ['Je vais demander le chemin.', 'I am going to ask the way.'], note: 'To demand is exiger.' },
+    { key: 'attendre', fr: 'attendre', trap: 'to attend', means: 'to wait (for)', ex: ['J\'attends le bus.', 'I am waiting for the bus.'], note: 'To attend is assister à.' },
+    { key: 'assister à', fr: 'assister à', trap: 'to assist', means: 'to attend', ex: ['J\'ai assisté à la réunion.', 'I attended the meeting.'], note: 'To assist is aider.' },
+    { key: 'rester', fr: 'rester', trap: 'to rest', means: 'to stay', ex: ['Je reste à la maison ce soir.', 'I am staying at home tonight.'], note: 'To rest is se reposer.' },
+    { key: 'passer un examen', fr: 'passer un examen', trap: 'to pass an exam', means: 'to take, to sit an exam', ex: ['Je passe le TCF en juin.', 'I am taking the TCF in June.'], note: 'To pass an exam is réussir un examen.' },
+    { key: 'prétendre', fr: 'prétendre', trap: 'to pretend', means: 'to claim', ex: ['Il prétend qu\'il est malade.', 'He claims he is ill.'], note: 'To pretend is faire semblant.' },
+    { key: 'ignorer', fr: 'ignorer', trap: 'to ignore', means: 'not to know', ex: ['J\'ignore la réponse.', 'I do not know the answer.'], note: 'Ignorer quelqu\'un (to ignore someone) is also used today.' },
+    { key: 'supporter', fr: 'supporter', trap: 'to support', means: 'to put up with, to stand', ex: ['Je ne supporte pas le bruit.', 'I can\'t stand noise.'], note: 'To support is soutenir.' },
+    { key: 'préservatif', fr: 'le préservatif', trap: 'preservative', means: 'condom', ex: ['Le préservatif protège des maladies.', 'Condoms protect against diseases.'], note: 'A preservative is un conservateur.' },
+    { key: 'actuellement', fr: 'actuellement', trap: 'actually', means: 'currently, at the moment', ex: ['Actuellement, je travaille à Lyon.', 'At the moment I work in Lyon.'], note: 'Actually is en fait.' },
+    { key: 'éventuellement', fr: 'éventuellement', trap: 'eventually', means: 'possibly, if need be', ex: ['On pourrait éventuellement partir plus tôt.', 'We could possibly leave earlier.'], note: 'Eventually is finalement.' },
+    { key: 'large', fr: 'large', trap: 'large (big)', means: 'wide', ex: ['Cette rue est très large.', 'This street is very wide.'], note: 'Large (big) is grand.' },
+  ] },
+] },
+
+// ---------------- 53 Idioms & Expressions ----------------
+53: { name: 'Idiom cards', next: 'Word for word, then what it means', tabs: [
+  { type: 'cards', title: 'Les expressions', hint: 'Tap an idiom: first word for word, then what it really means.', label1: 'Word for word', label2: 'Means', ask: 'means…', items: [
+    { key: 'avoir le cafard', fr: 'avoir le cafard', trap: 'to have the cockroach', means: 'to feel down', ex: ['Le dimanche soir, j\'ai le cafard.', 'On Sunday evenings I feel down.'] },
+    { key: 'ne pas être dans son assiette', fr: 'ne pas être dans son assiette', trap: 'not to be in one\'s plate', means: 'to feel unwell, off', ex: ['Je ne suis pas dans mon assiette aujourd\'hui.', 'I am feeling off today.'] },
+    { key: 'être au bout du rouleau', fr: 'être au bout du rouleau', trap: 'to be at the end of the roll', means: 'to be worn out, at the end of one\'s tether', ex: ['Après ce mois, je suis au bout du rouleau.', 'After this month I am worn out.'] },
+    { key: 'en avoir ras le bol', fr: 'en avoir ras le bol', trap: 'to have it up to the brim of the bowl', means: 'to be fed up', ex: ['J\'en ai ras le bol de ce bruit !', 'I am fed up with this noise!'] },
+    { key: 'casser les pieds', fr: 'casser les pieds', trap: 'to break someone\'s feet', means: 'to annoy, to bore', ex: ['Il me casse les pieds avec ses histoires.', 'He bores me stiff with his stories.'] },
+    { key: 'avoir un poil dans la main', fr: 'avoir un poil dans la main', trap: 'to have a hair in one\'s hand', means: 'to be lazy', ex: ['Mon colocataire a un poil dans la main.', 'My flatmate is bone idle.'] },
+    { key: 'poser un lapin', fr: 'poser un lapin', trap: 'to put down a rabbit', means: 'to stand someone up', ex: ['Elle m\'a posé un lapin hier soir.', 'She stood me up last night.'] },
+    { key: 'avoir la tête dans les nuages', fr: 'avoir la tête dans les nuages', trap: 'to have one\'s head in the clouds', means: 'to daydream', ex: ['En classe, il a la tête dans les nuages.', 'In class he daydreams.'], note: 'The same picture as in English.' },
+    { key: 'raconter des salades', fr: 'raconter des salades', trap: 'to tell salads', means: 'to tell tall stories, lies', ex: ['Arrête de raconter des salades !', 'Stop telling tall stories!'] },
+    { key: 'tirer les vers du nez', fr: 'tirer les vers du nez', trap: 'to pull worms out of someone\'s nose', means: 'to worm information out of someone', ex: ['Elle a fini par me tirer les vers du nez.', 'She ended up getting it out of me.'] },
+    { key: 'mettre la puce à l\'oreille', fr: 'mettre la puce à l\'oreille', trap: 'to put a flea in someone\'s ear', means: 'to make someone suspicious', ex: ['Son silence m\'a mis la puce à l\'oreille.', 'His silence made me suspicious.'] },
+    { key: 'mettre son grain de sel', fr: 'mettre son grain de sel', trap: 'to put in one\'s grain of salt', means: 'to butt in, to add one\'s two cents', ex: ['Il faut toujours qu\'il mette son grain de sel.', 'He always has to butt in.'] },
+    { key: 'appeler un chat un chat', fr: 'appeler un chat un chat', trap: 'to call a cat a cat', means: 'to call a spade a spade', ex: ['Appelons un chat un chat : c\'est un échec.', 'Let\'s call a spade a spade: it is a failure.'] },
+    { key: 'tourner autour du pot', fr: 'tourner autour du pot', trap: 'to go round the pot', means: 'to beat around the bush', ex: ['Arrête de tourner autour du pot !', 'Stop beating around the bush!'] },
+    { key: 'revenir à ses moutons', fr: 'revenir à ses moutons', trap: 'to come back to one\'s sheep', means: 'to get back to the point', ex: ['Bon, revenons à nos moutons.', 'Right, let\'s get back to the point.'] },
+    { key: 'se mettre le doigt dans l\'œil', fr: 'se mettre le doigt dans l\'œil', trap: 'to put one\'s finger in one\'s eye', means: 'to be completely wrong', ex: ['Si tu crois ça, tu te mets le doigt dans l\'œil.', 'If you believe that, you are totally wrong.'] },
+    { key: 'faire la grasse matinée', fr: 'faire la grasse matinée', trap: 'to do the fat morning', means: 'to have a lie-in', ex: ['Le dimanche, je fais la grasse matinée.', 'On Sundays I have a lie-in.'] },
+    { key: 'coûter les yeux de la tête', fr: 'coûter les yeux de la tête', trap: 'to cost the eyes of the head', means: 'to cost an arm and a leg', ex: ['Cet appartement coûte les yeux de la tête.', 'This flat costs an arm and a leg.'] },
+    { key: 'tomber dans les pommes', fr: 'tomber dans les pommes', trap: 'to fall into the apples', means: 'to faint', ex: ['Il faisait si chaud qu\'elle est tombée dans les pommes.', 'It was so hot that she fainted.'] },
+    { key: 'avoir d\'autres chats à fouetter', fr: 'avoir d\'autres chats à fouetter', trap: 'to have other cats to whip', means: 'to have other fish to fry', ex: ['Désolé, j\'ai d\'autres chats à fouetter.', 'Sorry, I have other fish to fry.'] },
+    { key: 'prendre le taureau par les cornes', fr: 'prendre le taureau par les cornes', trap: 'to take the bull by the horns', means: 'to tackle a problem head-on', ex: ['Il faut prendre le taureau par les cornes.', 'We must take the bull by the horns.'], note: 'The same picture as in English.' },
+    { key: 'faire d\'une pierre deux coups', fr: 'faire d\'une pierre deux coups', trap: 'to make two blows with one stone', means: 'to kill two birds with one stone', ex: ['En allant à Paris, je fais d\'une pierre deux coups.', 'By going to Paris I kill two birds with one stone.'] },
+    { key: 'avoir le coup de foudre', fr: 'avoir le coup de foudre', trap: 'to be struck by lightning', means: 'to fall in love at first sight', ex: ['Ils ont eu le coup de foudre.', 'It was love at first sight.'] },
+    { key: 'c\'est la goutte d\'eau qui fait déborder le vase', fr: 'c\'est la goutte d\'eau qui fait déborder le vase', trap: 'it is the drop that makes the vase overflow', means: 'it is the last straw', ex: ['Encore un retard ? C\'est la goutte d\'eau qui fait déborder le vase !', 'Late again? That is the last straw!'] },
+    { key: 'il ne faut pas vendre la peau de l\'ours avant de l\'avoir tué', fr: 'il ne faut pas vendre la peau de l\'ours avant de l\'avoir tué', trap: 'don\'t sell the bear\'s skin before you have killed it', means: 'don\'t count your chickens before they hatch', ex: ['On n\'a pas encore gagné : il ne faut pas vendre la peau de l\'ours avant de l\'avoir tué.', 'We have not won yet: don\'t count your chickens.'] },
+  ] },
+] },
+
+// ---------------- 34 Relationships & Social Life ----------------
+34: { name: 'Life line', next: 'Follow a story from meeting to family', tabs: [
+  { type: 'scale', title: 'Une histoire d\'amour', hint: 'A love story, from the first meeting (left) to a family (right).', left: 'la rencontre', right: 'la famille', color: '#db2777', ask: 'Which comes later in the story?', stops: [
+    { p: 0, key: 'rencontrer', fr: 'rencontrer · la rencontre', en: 'to meet · meeting', ex: ['J\'ai rencontré Paul à une soirée.', 'I met Paul at a party.'] },
+    { p: 14, key: 'rendez-vous', fr: 'le rendez-vous', en: 'date, appointment', ex: ['On a rendez-vous samedi au café.', 'We have a date on Saturday at the café.'] },
+    { p: 28, key: 'sortir', fr: 'sortir (avec)', en: 'to go out (with)', ex: ['Elle sort avec Paul depuis un mois.', 'She has been going out with Paul for a month.'] },
+    { p: 42, key: 'embrasser', fr: 'embrasser', en: 'to kiss', ex: ['Il l\'a embrassée sous la pluie.', 'He kissed her in the rain.'] },
+    { p: 56, key: 'amour', fr: 'l\'amour · aimer', en: 'love · to love', ex: ['C\'est le grand amour !', 'It is true love!'] },
+    { p: 70, key: 'promettre', fr: 'promettre · la promesse', en: 'to promise · promise', ex: ['Je te promets de rester fidèle.', 'I promise to stay faithful to you.'] },
+    { p: 84, key: 'marier', fr: 'se marier · le mari, la femme', en: 'to get married · husband, wife', ex: ['Ils se marient en juin.', 'They are getting married in June.'], note: 'Se marier avec quelqu\'un. Formal: l\'époux, l\'épouse.' },
+    { p: 100, key: 'famille', fr: 'la famille · l\'enfant', en: 'family · child', ex: ['Ils ont fondé une famille.', 'They started a family.'] },
+  ] },
+  { type: 'scale', title: 'Seul ou ensemble ?', hint: 'From alone (left) to together (right).', left: 'seul', right: 'ensemble', color: '#4f46e5', ask: 'Which one is closer to you?', stops: [
+    { p: 0, key: 'solitude', fr: 'la solitude · seul', en: 'loneliness · alone', ex: ['Il souffre de la solitude.', 'He suffers from loneliness.'] },
+    { p: 25, key: 'voisin', fr: 'le voisin · la voisine', en: 'neighbour', ex: ['Mon voisin est très discret.', 'My neighbour keeps to himself.'] },
+    { p: 50, key: 'copain', fr: 'le copain · la copine', en: 'friend, mate', ex: ['Je vais au cinéma avec des copains.', 'I am going to the cinema with some mates.'], note: 'Mon copain / ma copine can also mean my boyfriend / girlfriend.' },
+    { p: 75, key: 'ami', fr: 'l\'ami · l\'amie', en: 'friend', ex: ['C\'est mon meilleur ami.', 'He is my best friend.'] },
+    { p: 100, key: 'ensemble', fr: 'ensemble', en: 'together', ex: ['On fait tout ensemble.', 'We do everything together.'] },
+  ] },
+  { type: 'groups', title: 'Les liens', hint: 'What makes a relationship work, and what breaks it. Tap to hear.', ask: 'Which group?', groups: [
+    { name: 'Ce qui unit', en: 'what brings people together', color: '#059669', words: [
+      { key: 'amitié', fr: 'l\'amitié', en: 'friendship', ex: ['Notre amitié dure depuis vingt ans.', 'Our friendship has lasted twenty years.'] },
+      { key: 'confiance', fr: 'la confiance', en: 'trust', ex: ['J\'ai confiance en toi.', 'I trust you.'] },
+      { key: 'fidèle', fr: 'fidèle', en: 'faithful, loyal', ex: ['C\'est un ami fidèle.', 'He is a loyal friend.'] },
+      { key: 'partager', fr: 'partager', en: 'to share', ex: ['On partage un appartement.', 'We share a flat.'] },
+      { key: 'lien', fr: 'le lien', en: 'bond, link', ex: ['Il y a un lien fort entre eux.', 'There is a strong bond between them.'] },
+      { key: 'relation', fr: 'la relation', en: 'relationship', ex: ['Ils ont une bonne relation.', 'They have a good relationship.'] },
+      { key: 'sentiment', fr: 'le sentiment', en: 'feeling', ex: ['Il cache ses sentiments.', 'He hides his feelings.'] },
+      { key: 'émotion', fr: 'l\'émotion', en: 'emotion', ex: ['Elle parle avec émotion.', 'She speaks with emotion.'] },
+    ] },
+    { name: 'Recevoir', en: 'having people round', color: '#d97706', words: [
+      { key: 'accueillir', fr: 'accueillir · l\'accueil', en: 'to welcome · welcome', ex: ['Merci pour votre accueil !', 'Thank you for having us!'] },
+      { key: 'fête', fr: 'la fête', en: 'party', ex: ['On fait une fête samedi.', 'We are having a party on Saturday.'] },
+      { key: 'soirée', fr: 'la soirée', en: 'evening; party', ex: ['C\'était une bonne soirée.', 'It was a nice evening.'] },
+      { key: 'compagnie', fr: 'la compagnie', en: 'company', ex: ['J\'aime sa compagnie.', 'I enjoy his company.'] },
+    ] },
+    { name: 'Ce qui sépare', en: 'what breaks, and mending it', color: '#e11d48', words: [
+      { key: 'trahir', fr: 'trahir', en: 'to betray', ex: ['Il a trahi sa promesse.', 'He broke his promise.'] },
+      { key: 'pardonner', fr: 'pardonner · le pardon', en: 'to forgive · forgiveness', ex: ['Je te pardonne.', 'I forgive you.'] },
+    ] },
+  ] },
+] },
+
+// ---------------- 36 Festivals & Traditions ----------------
+36: { name: 'Year of festivals', next: 'Slide through the French year', tabs: [
+  { type: 'scale', title: 'L\'année des fêtes', hint: 'The French year, from January (left) to December (right).', left: 'janvier', right: 'décembre', color: '#d97706', ask: 'Which comes later in the year?', stops: [
+    { p: 0, lab: 'Nouvel An', key: 'vœu', fr: 'le Nouvel An · les vœux', en: '1 January: New Year, best wishes', ex: ['Bonne année ! Meilleurs vœux !', 'Happy New Year! Best wishes!'], note: 'You can send your vœux all January.' },
+    { p: 10, lab: 'galette', key: 'gâteau', fr: 'la galette des rois', en: 'January: Epiphany cake', ex: ['Celui qui trouve la fève est le roi.', 'Whoever finds the charm is king.'] },
+    { p: 20, lab: 'Chandeleur', fr: 'la Chandeleur', en: '2 February: pancake day', ex: ['À la Chandeleur, on mange des crêpes.', 'At Candlemas we eat pancakes.'] },
+    { p: 30, lab: 'carnaval', key: 'masque', fr: 'le carnaval · le masque', en: 'Mardi gras: carnival, mask', ex: ['Au carnaval, on porte un masque et un costume.', 'At carnival people wear a mask and fancy dress.'] },
+    { p: 40, lab: 'Pâques', key: 'coutume', fr: 'Pâques', en: 'Easter', ex: ['C\'est une coutume : on cache des œufs en chocolat.', 'It is a custom: we hide chocolate eggs.'] },
+    { p: 50, lab: '1er mai', fr: 'le 1er mai · le muguet', en: '1 May: Labour Day, lily of the valley', ex: ['Le 1er mai, on offre du muguet.', 'On 1 May people give lily of the valley.'] },
+    { p: 60, lab: 'musique', key: 'chanson', fr: 'la Fête de la musique', en: '21 June: music day', ex: ['Le 21 juin, on chante dans la rue.', 'On 21 June people sing in the streets.'] },
+    { p: 70, lab: '14 juillet', key: 'feu', fr: 'le 14 juillet · le feu d\'artifice', en: '14 July: Bastille Day, fireworks', ex: ['Le 14 juillet, on regarde le feu d\'artifice.', 'On 14 July we watch the fireworks.'] },
+    { p: 80, lab: 'Toussaint', key: 'saint', fr: 'la Toussaint', en: '1 November: All Saints\' Day', ex: ['La Toussaint, c\'est la fête de tous les saints.', 'All Saints\' Day is the feast of all the saints.'] },
+    { p: 90, lab: 'Noël', key: 'cadeau', fr: 'Noël · le cadeau', en: '25 December: Christmas, present', ex: ['À Noël, on offre des cadeaux.', 'At Christmas we give presents.'] },
+    { p: 100, lab: '31 déc.', key: 'fêter', fr: 'la Saint-Sylvestre', en: '31 December: New Year\'s Eve', ex: ['Le 31 décembre, on fête la nouvelle année.', 'On 31 December we celebrate the new year.'] },
+  ] },
+  { type: 'groups', title: 'Fêter', hint: 'Tap to hear.', ask: 'Which group?', groups: [
+    { name: 'Faire la fête', en: 'celebrating', color: '#d97706', words: [
+      { key: 'anniversaire', fr: 'l\'anniversaire', en: 'birthday', ex: ['Joyeux anniversaire !', 'Happy birthday!'] },
+      { key: 'fête', fr: 'la fête', en: 'party; feast day', ex: ['Bonne fête, Nicolas !', 'Happy name day, Nicolas!'] },
+      { key: 'fêter', fr: 'fêter · célébrer', en: 'to celebrate', ex: ['On fête ses trente ans.', 'We are celebrating his thirtieth.'] },
+      { key: 'souhaiter', fr: 'souhaiter', en: 'to wish', ex: ['Je te souhaite un bon anniversaire.', 'I wish you a happy birthday.'] },
+      { key: 'cadeau', fr: 'le cadeau', en: 'present', ex: ['Merci pour le cadeau !', 'Thank you for the present!'] },
+      { key: 'carte', fr: 'la carte', en: 'card', ex: ['J\'écris une carte d\'anniversaire.', 'I am writing a birthday card.'] },
+      { key: 'gâteau', fr: 'le gâteau', en: 'cake', ex: ['Le gâteau au chocolat est délicieux.', 'The chocolate cake is delicious.'] },
+      { key: 'repas', fr: 'le repas', en: 'meal', ex: ['Le repas de Noël dure des heures.', 'Christmas dinner lasts for hours.'] },
+      { key: 'naissance', fr: 'la naissance', en: 'birth', ex: ['On fête la naissance du bébé.', 'We are celebrating the baby\'s birth.'] },
+    ] },
+    { name: 'La tradition', en: 'customs and heritage', color: '#4f46e5', words: [
+      { key: 'coutume', fr: 'la coutume', en: 'custom', ex: ['C\'est une vieille coutume.', 'It is an old custom.'] },
+      { key: 'patrimoine', fr: 'le patrimoine', en: 'heritage', ex: ['Les Journées du patrimoine ont lieu en septembre.', 'Heritage Days take place in September.'] },
+      { key: 'calendrier', fr: 'le calendrier', en: 'calendar', ex: ['Le calendrier de l\'Avent compte les jours jusqu\'à Noël.', 'The Advent calendar counts the days to Christmas.'] },
+      { key: 'costume', fr: 'le costume', en: 'costume, traditional dress', ex: ['Ils dansent en costume traditionnel.', 'They dance in traditional dress.'] },
+      { key: 'danse', fr: 'la danse', en: 'dance', ex: ['C\'est une danse bretonne.', 'It is a Breton dance.'] },
+      { key: 'chanson', fr: 'la chanson · le chant', en: 'song · singing', ex: ['Tout le monde connaît cette chanson.', 'Everyone knows this song.'] },
+    ] },
+    { name: 'La religion', en: 'faith', color: '#0f766e', words: [
+      { key: 'église', fr: 'l\'église', en: 'church', ex: ['L\'église du village date du XIIe siècle.', 'The village church dates from the 12th century.'] },
+      { key: 'messe', fr: 'la messe', en: 'mass', ex: ['Ils vont à la messe de minuit.', 'They go to midnight mass.'] },
+      { key: 'saint', fr: 'le saint · la sainte', en: 'saint', ex: ['Chaque jour a son saint.', 'Each day has its saint.'] },
+      { key: 'culte', fr: 'le culte', en: 'worship', ex: ['La liberté de culte est un droit.', 'Freedom of worship is a right.'] },
+      { key: 'croyance', fr: 'la croyance', en: 'belief', ex: ['Chacun a ses croyances.', 'Everyone has their beliefs.'] },
+    ] },
+  ] },
+] },
+
+// ---------------- 49 History & Memory ----------------
+49: { name: 'Time line', next: 'Slide through French history', tabs: [
+  { type: 'scale', title: 'Les époques', hint: 'From the past (left) to today (right).', left: 'l\'Antiquité', right: 'aujourd\'hui', color: '#92400e', ask: 'Which comes later?', stops: [
+    { p: 0, lab: 'Antiquité', key: 'fonder', fr: 'l\'Antiquité · fonder', en: 'Antiquity · to found', ex: ['Les Romains ont fondé de nombreuses villes en Gaule.', 'The Romans founded many towns in Gaul.'] },
+    { p: 14, lab: 'Moyen Âge', key: 'moyen âge', fr: 'le Moyen Âge', en: 'the Middle Ages', ex: ['Ce château remonte au Moyen Âge.', 'This castle dates back to the Middle Ages.'] },
+    { p: 29, lab: 'Révolution', key: 'abolir', fr: 'la Révolution · abolir', en: 'the Revolution · to abolish', ex: ['En 1792, la monarchie est abolie.', 'In 1792 the monarchy was abolished.'] },
+    { p: 43, lab: 'renverser', key: 'renverser', fr: 'renverser', en: 'to overthrow', ex: ['Le peuple a renversé le roi.', 'The people overthrew the king.'] },
+    { p: 57, lab: '1914–1918', key: 'guerre mondiale', fr: 'la Première Guerre mondiale', en: 'the First World War (1914–1918)', ex: ['La Première Guerre mondiale a duré quatre ans.', 'The First World War lasted four years.'] },
+    { p: 71, lab: 'Occupation', key: 'occupation', fr: 'l\'Occupation', en: 'the Occupation (1940–1944)', ex: ['Paris a été occupé de 1940 à 1944.', 'Paris was occupied from 1940 to 1944.'] },
+    { p: 86, lab: 'traité', key: 'traité', fr: 'le traité', en: 'treaty', ex: ['Le traité de Rome a créé la CEE en 1957.', 'The Treaty of Rome created the EEC in 1957.'] },
+    { p: 100, lab: 'commémorer', key: 'commémorer', fr: 'commémorer', en: 'to commemorate', ex: ['Le 11 novembre, on commémore l\'armistice de 1918.', 'On 11 November we commemorate the 1918 armistice.'] },
+  ] },
+  { type: 'groups', title: 'La mémoire', hint: 'Words to talk about the past. Tap to hear.', ask: 'Which group?', groups: [
+    { name: 'Le temps', en: 'time', color: '#92400e', words: [
+      { key: 'siècle', fr: 'le siècle', en: 'century', ex: ['Au XIXe siècle, Paris change beaucoup.', 'In the 19th century Paris changed a lot.'] },
+      { key: 'époque', fr: 'l\'époque', en: 'era, period', ex: ['À cette époque, il n\'y avait pas d\'électricité.', 'At that time there was no electricity.'] },
+      { key: 'remonter à', fr: 'remonter à', en: 'to date back to', ex: ['Cette tradition remonte au XVe siècle.', 'This tradition dates back to the 15th century.'] },
+      { key: 'ancêtre', fr: 'l\'ancêtre', en: 'ancestor', ex: ['Mes ancêtres étaient paysans.', 'My ancestors were farmers.'] },
+    ] },
+    { name: 'Les traces', en: 'what remains', color: '#4f46e5', words: [
+      { key: 'vestige', fr: 'le vestige', en: 'remains, ruins', ex: ['On voit encore les vestiges du mur.', 'You can still see the remains of the wall.'] },
+      { key: 'patrimoine', fr: 'le patrimoine', en: 'heritage', ex: ['Le Mont-Saint-Michel fait partie du patrimoine mondial.', 'Mont-Saint-Michel is a World Heritage site.'] },
+      { key: 'archives', fr: 'les archives', en: 'archives, records', ex: ['Il cherche dans les archives de la ville.', 'He searches the town archives.'] },
+      { key: 'témoignage', fr: 'le témoignage', en: 'testimony, account', ex: ['Ce témoignage est très émouvant.', 'This account is very moving.'] },
+    ] },
+    { name: 'Se souvenir', en: 'remembering', color: '#0f766e', words: [
+      { key: 'devoir de mémoire', fr: 'le devoir de mémoire', en: 'the duty to remember', ex: ['L\'école a un devoir de mémoire.', 'Schools have a duty to remember.'] },
+      { key: 'commémorer', fr: 'commémorer', en: 'to commemorate', ex: ['On commémore la fin de la guerre.', 'We commemorate the end of the war.'] },
+    ] },
+  ] },
+] },
+
+// ---------------- 52 Philosophy & Abstract Ideas ----------------
+52: { name: 'Map of ideas', next: 'Slide between opposite ideas', tabs: [
+  { type: 'pairs', title: 'Idées opposées', hint: 'Pick a pair of ideas, then slide. The right-hand words are extra help, not in the topic list.', mid: false, pairs: [
+    { key: 'vérité', a: ['la vérité', 'truth', 'Il faut dire la vérité.', 'You must tell the truth.'], b: ['l\'erreur · le mensonge', 'error · lie', 'C\'est un mensonge.', 'It is a lie.'], extraB: true },
+    { key: 'raison', a: ['la raison', 'reason', 'La raison doit guider nos choix.', 'Reason should guide our choices.'], b: ['la passion', 'passion', 'Parfois, la passion l\'emporte.', 'Sometimes passion wins.'], extraB: true },
+    { key: 'liberté', a: ['la liberté', 'freedom', 'La liberté d\'expression est un droit.', 'Freedom of speech is a right.'], b: ['la contrainte', 'constraint', 'Le travail impose des contraintes.', 'Work imposes constraints.'], extraB: true },
+    { key: 'libre arbitre', a: ['le libre arbitre', 'free will', 'Avons-nous vraiment un libre arbitre ?', 'Do we really have free will?'], b: ['le déterminisme', 'determinism', 'Selon le déterminisme, tout a une cause.', 'According to determinism, everything has a cause.'], extraB: true },
+    { key: 'devoir', a: ['le devoir', 'duty', 'Il fait son devoir.', 'He does his duty.'], b: ['le désir', 'desire', 'Il suit ses désirs.', 'He follows his desires.'], extraB: true },
+    { key: 'bonheur', a: ['le bonheur', 'happiness', 'Le bonheur est-il le but de la vie ?', 'Is happiness the aim of life?'], b: ['le malheur', 'unhappiness, misfortune', 'Il a eu le malheur de perdre son emploi.', 'He had the misfortune to lose his job.'], extraB: true },
+    { key: 'essence', a: ['l\'essence', 'essence', 'Quelle est l\'essence de l\'homme ?', 'What is the essence of man?'], b: ['l\'apparence', 'appearance', 'Il ne faut pas se fier aux apparences.', 'Don\'t trust appearances.'], extraB: true },
+    { key: 'conscience', a: ['la conscience', 'consciousness; conscience', 'Il a pris conscience du problème.', 'He became aware of the problem.'], b: ['l\'inconscient', 'the unconscious', 'Freud a étudié l\'inconscient.', 'Freud studied the unconscious.'], extraB: true },
+  ] },
+  { type: 'groups', title: 'Penser', hint: 'Words to think and argue with. Tap to hear.', ask: 'Which group?', groups: [
+    { name: 'Réfléchir', en: 'thinking', color: '#4f46e5', words: [
+      { key: 'réfléchir à', fr: 'réfléchir à', en: 'to think about', ex: ['Je vais réfléchir à ta proposition.', 'I will think about your proposal.'] },
+      { key: 'remettre en question', fr: 'remettre en question', en: 'to question', ex: ['Il remet tout en question.', 'He questions everything.'] },
+      { key: 'démontrer', fr: 'démontrer', en: 'to prove, to demonstrate', ex: ['Il a démontré que la théorie était fausse.', 'He showed that the theory was wrong.'] },
+      { key: 'en soi', fr: 'en soi', en: 'in itself', ex: ['L\'argent n\'est pas mauvais en soi.', 'Money is not bad in itself.'] },
+    ] },
+    { name: 'Juger', en: 'right and wrong', color: '#e11d48', words: [
+      { key: 'morale', fr: 'la morale', en: 'morality, morals', ex: ['C\'est une question de morale.', 'It is a matter of morals.'] },
+      { key: 'préjugé', fr: 'le préjugé', en: 'prejudice', ex: ['Il faut lutter contre les préjugés.', 'We must fight prejudice.'] },
     ] },
   ] },
 ] },
