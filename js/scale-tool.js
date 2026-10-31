@@ -45,6 +45,7 @@ const CSS = `
 .st-group{border-radius:14px;padding:10px;display:grid;gap:6px;align-content:start}
 .st-group h4{margin:0;font-size:15px;font-weight:900;color:#fff}
 .st-group small{color:#fff;opacity:.9;font-size:12px;margin-top:-4px}
+.st-rule{background:rgba(255,255,255,.18);color:#fff;border-radius:8px;padding:6px 8px;font-size:13px;line-height:1.4}
 .st-group .st-chip{background:#fff;border-color:transparent;text-align:left;border-radius:10px}
 .st-q{font-size:1.25rem;font-weight:900;color:#0f172a}
 .st-opts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
@@ -127,6 +128,7 @@ function mount(T, root, { say, grade, words }) {
             P = t.pairs[i]; side = null;
             body.querySelectorAll('#st-pairs .st-chip').forEach((c, j) => c.setAttribute('aria-pressed', j === i));
             poles[0].textContent = P.a[0]; poles[1].textContent = P.b[0];
+            if (t.mid === false && P.mid === undefined) P.mid = false;
             mid.textContent = P.mid === false ? '' : '↔';
             sl.value = 0; land(true, false);
         };
@@ -154,7 +156,7 @@ function mount(T, root, { say, grade, words }) {
         pick(0);
     }
     function exploreGroups(t) {
-        body.innerHTML = `<p class="st-hint">${esc(t.hint)}</p><div class="st-groups">${t.groups.map((g, gi) => `<div class="st-group" style="background:${g.color}"><h4>${esc(g.name)}</h4><small>${esc(g.en)}</small>${g.words.map((w, wi) => `<button type="button" class="st-chip" data-g="${gi}" data-w="${wi}">${esc(w.fr)}</button>`).join('')}</div>`).join('')}</div><div class="st-out"><span class="st-small">Tap a word.</span></div>`;
+        body.innerHTML = `<p class="st-hint">${esc(t.hint)}</p><div class="st-groups">${t.groups.map((g, gi) => `<div class="st-group" style="background:${g.color}"><h4>${esc(g.name)}</h4><small>${esc(g.en)}</small>${g.rule ? `<div class="st-rule">${esc(g.rule)}</div>` : ''}${g.words.map((w, wi) => `<button type="button" class="st-chip" data-g="${gi}" data-w="${wi}">${esc(w.fr)}</button>`).join('')}</div>`).join('')}</div><div class="st-out"><span class="st-small">Tap a word.</span></div>`;
         const out = body.querySelector('.st-out');
         body.querySelectorAll('.st-group .st-chip').forEach(c => c.addEventListener('click', () => {
             const g = t.groups[Number(c.dataset.g)], w = g.words[Number(c.dataset.w)], all = w.fr + '. ' + w.ex[0];
@@ -195,11 +197,11 @@ function mount(T, root, { say, grade, words }) {
             }
         } else if (t.type === 'pairs') {
             for (const P of shuffle(t.pairs).slice(0, 10)) {
-                const flip = Math.random() < 0.4, from = flip ? P.b : P.a, to = flip ? P.a : P.b;
+                const flip = t.oneWay ? false : Math.random() < 0.4, from = flip ? P.b : P.a, to = flip ? P.a : P.b;
                 // wrong answers: words from other pairs that share no word with this one (chaud / froid and chaud / frais)
                 const words = new Set([P.a[0], P.b[0]]);
                 const others = [...new Set(shuffle(t.pairs.filter(x => x !== P && !words.has(x.a[0]) && !words.has(x.b[0]))).map(x => (Math.random() < .5 ? x.a : x.b)[0]))].filter(o => o !== to[0]).slice(0, 3);
-                Q.push({ q: `Le contraire de « ${from[0]} » ?`, opts: shuffle([to[0], ...others]), a: to[0], key: P.key, key2: P.extraB ? null : P.keyB, why: `${P.a[0]} (${P.a[1]}) ↔ ${P.b[0]} (${P.b[1]})`, say: `${from[0]}, ${to[0]}`.replace(/ · /g, ', ') });
+                Q.push({ q: (t.ask || 'Le contraire de « {w} » ?').replace('{w}', from[0]), opts: shuffle([to[0], ...others]), a: to[0], key: P.key, key2: P.extraB ? null : P.keyB, why: `${P.a[0]} (${P.a[1]}) ↔ ${P.b[0]} (${P.b[1]})`, say: `${from[0]}, ${to[0]}`.replace(/ · /g, ', ') });
             }
         } else if (t.type === 'groups') {
             const all = t.groups.flatMap(g => g.words.map(w => ({ g, w })));
