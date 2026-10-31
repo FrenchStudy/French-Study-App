@@ -9,7 +9,7 @@ html,body{margin:0;padding:0;background:#000;overflow:hidden}
 #sub .fr{font-size:32px;font-weight:600;line-height:1.25;text-shadow:0 2px 6px rgba(0,0,0,.6)}
 #sub .fr b{color:#FFD54A;font-weight:800}
 #sub .en{font-size:21px;color:#e6dccf;font-style:italic;margin-top:4px;text-shadow:0 1px 4px rgba(0,0,0,.6)}
-#cap{position:absolute;color:#fff;font-weight:800;white-space:nowrap;text-shadow:0 3px 12px rgba(0,0,0,.55);transform-origin:left top}
+#cap{position:absolute;color:#fff;font-weight:800;white-space:nowrap;text-shadow:0 3px 12px rgba(0,0,0,.6)}
 #black{position:absolute;inset:0;background:#000;pointer-events:none}
 </style></head>
 <body><div id="stage"><svg id="svg" width="1280" height="720" viewBox="0 0 1280 720"></svg><div id="cap"></div><div id="sub"></div><div id="black"></div></div>
@@ -19,142 +19,284 @@ const cl = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
 const ease = x => { x = cl(x); return x < .5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2; };
 const back = x => { x = cl(x); const c = 1.7; return 1 + (c + 1) * Math.pow(x - 1, 3) + c * Math.pow(x - 1, 2); };
 const mix = (a, b, k) => a + (b - a) * cl(k);
-function mixc(c1, c2, k) { const p = c => [1, 3, 5].map(i => parseInt(c.slice(i, i + 2), 16)); const A = p(c1), B = p(c2); return '#' + A.map((v, i) => Math.round(mix(v, B[i], k)).toString(16).padStart(2, '0')).join(''); }
-const ev = (name) => { const e = TL.events.find(e => e[0] === name && e[2] === SC.id); return e ? e[1] : 1e9; };
+const evs = (name) => TL.events.filter(e => e[0] === name && e[2] === SC.id);
+const ev = (name) => { const e = evs(name)[0]; return e ? e[1] : 1e9; };
+const evd = (name) => { const e = evs(name)[0]; return e ? e[3] : 0; };
 const since = (name) => T - ev(name);
 const amp = (who) => TL.amp[who][Math.round(T * TL.fps)] || 0;
+const speaking = (who) => TL.lines.some(l => l.who === who && T >= l.start && T <= l.end);
+const lineNow = () => TL.lines.find(l => T >= l.start - 0.05 && T <= l.end + 0.05);
 
-// ---------- drawn things: centre x, bottom y ----------
-const D = {
-  jus: (x, y) => `<g transform="translate(${x - 30},${y - 96})"><defs><linearGradient id="oj" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFB547"/><stop offset="1" stop-color="#F57C00"/></linearGradient></defs><path d="M4,10 L56,10 L50,92 Q30,98 10,92Z" fill="#FFF8EC" stroke="#E7C9A0" stroke-width="2"/><path d="M7,26 L53,26 L50,90 Q30,95 10,90Z" fill="url(#oj)"/><circle cx="52" cy="12" r="14" fill="#FFB547" stroke="#fff" stroke-width="3"/><path d="M14,30 L17,84" stroke="#fff" stroke-opacity=".6" stroke-width="4" stroke-linecap="round"/></g>`,
-  confiture: (x, y) => `<g transform="translate(${x - 36},${y - 84})"><rect x="6" y="18" width="60" height="66" rx="12" fill="#C2185B"/><rect x="6" y="18" width="60" height="66" rx="12" fill="#fff" opacity=".12"/><rect x="2" y="6" width="68" height="16" rx="4" fill="#E53935"/><path d="M4,10 h64" stroke="#fff" stroke-width="3" stroke-dasharray="6 6"/><rect x="14" y="42" width="44" height="24" rx="4" fill="#FFF3E0"/><path d="M14,30 v44" stroke="#fff" stroke-opacity=".4" stroke-width="5" stroke-linecap="round"/></g>`,
-  sucre: (x, y) => `<g transform="translate(${x - 34},${y - 52})" stroke="#CFD8DC" stroke-width="1.5" fill="#fff"><rect x="2" y="24" width="26" height="26" rx="4"/><rect x="34" y="24" width="26" height="26" rx="4"/><rect x="18" y="0" width="26" height="26" rx="4"/></g>`,
-  carte: (x, y) => `<g transform="translate(${x - 70},${y - 110})"><path d="M4,10 L68,0 L68,104 L4,110Z" fill="#7B3F00"/><path d="M68,0 L136,10 L136,110 L68,104Z" fill="#8D4A0B"/><path d="M14,18 L62,12 L62,96 L14,100Z M76,12 L126,18 L126,100 L76,96Z" fill="#FFF8E7"/><text x="38" y="40" text-anchor="middle" font-size="13" font-weight="800" fill="#7B3F00" transform="rotate(-5,38,40)">MENU</text><path d="M22,54 h32 M22,66 h28 M22,78 h30 M84,34 h34 M84,46 h28 M84,58 h32 M84,70 h26" stroke="#B08968" stroke-width="3" stroke-linecap="round"/></g>`,
-  plat: (x, y) => `<g transform="translate(${x - 70},${y - 64})"><ellipse cx="70" cy="54" rx="68" ry="10" fill="#E0E5EA"/><ellipse cx="70" cy="50" rx="66" ry="10" fill="#fff" stroke="#CFD8DC"/><path d="M14,48 Q14,0 70,0 Q126,0 126,48Z" fill="#CFD8DC"/><path d="M22,46 Q24,8 70,6" stroke="#fff" stroke-width="5" fill="none" stroke-linecap="round"/><circle cx="70" cy="0" r="7" fill="#90A4AE"/></g>`,
-  eau: (x, y) => `<g transform="translate(${x - 26},${y - 120})"><defs><linearGradient id="bt" x1="0" x2="1"><stop offset="0" stop-color="#7CC4EE"/><stop offset=".5" stop-color="#BDE6FB"/><stop offset="1" stop-color="#5AA9DA"/></linearGradient></defs><path d="M18,0 h16 v14 q18,10 18,30 v68 q0,8 -8,8 h-36 q-8,0 -8,-8 v-68 q0,-20 18,-30z" fill="url(#bt)"/><rect x="16" y="-4" width="20" height="8" rx="2" fill="#E53935"/><rect x="2" y="56" width="48" height="26" rx="3" fill="#fff" opacity=".9"/><text x="26" y="73" text-anchor="middle" font-size="11" font-weight="800" fill="#1976D2">GAZ</text>${[0,1,2,3,4,5].map(i => `<circle cx="${12 + (i * 7) % 28}" cy="${100 - ((T * 40 + i * 15) % 40)}" r="2.5" fill="#fff" opacity=".85"/>`).join('')}</g>`,
-  mug: (x, y) => `<g transform="translate(${x - 40},${y - 90})"><path d="M66,38 q20,0 20,18 q0,18 -20,18" stroke="#8D6E63" stroke-width="8" fill="none"/><path d="M4,30 L70,30 L64,88 Q37,94 10,88Z" fill="#A1887F"/><ellipse cx="37" cy="30" rx="33" ry="8" fill="#5D4037"/><path d="M14,28 q8,-22 23,-18 q15,-10 23,6 q8,4 4,12z" fill="#FFFDF7"/>${[0, 1].map(i => `<path d="M${26 + i * 22},${4 - ((T * 18 + i * 9) % 14)} q-6,-8 0,-16" stroke="#fff" stroke-opacity=".7" stroke-width="3" fill="none"/>`).join('')}</g>`,
-  table: (x, y) => `<g transform="translate(${x - 40},${y - 54})"><path d="M0,54 L20,0 L60,0 L80,54Z" fill="#2E7D32"/><text x="40" y="34" text-anchor="middle" font-size="12" font-weight="800" fill="#fff">RÉSERVÉ</text><text x="40" y="48" text-anchor="middle" font-size="12" font-weight="800" fill="#FFD54A">2</text></g>`,
-  cross: (x, y, k) => `<g opacity="${k}" stroke="#E53935" stroke-width="10" stroke-linecap="round"><path d="M${x - 38},${y - 92} L${x + 38},${y - 16} M${x + 38},${y - 92} L${x - 38},${y - 16}"/></g>`,
-};
+// ---------- pictures ----------
 const img = (f, x, y, s) => `<image href="pics/${f}.png" x="${x - s / 2}" y="${y - s}" width="${s}" height="${s}"/>`;
-const tag = (t, x, y, k = 1) => `<g opacity="${k}"><rect x="${x - t.length * 4.4 - 8}" y="${y + 6}" width="${t.length * 8.8 + 16}" height="24" rx="12" fill="#3E2723" opacity=".88"/><text x="${x}" y="${y + 23}" text-anchor="middle" font-size="15" font-weight="700" fill="#FFE9B0">${t}</text></g>`;
-// an object on the table: pops in at its event; gone: hidden after that event
-function item(evn, draw, x, y, label, opt = {}) {
-  const s = since(evn); if (s < 0) return '';
-  if (opt.until && since(opt.until) > 0.4) return '';
-  const k = back(s / 0.45), fadeOut = opt.fade ? 1 - cl((s - opt.fade) / 0.6) : 1;
-  if (fadeOut <= 0) return '';
-  const crossK = opt.cross ? cl((since(opt.cross) - 0.1) / 0.3) : 0;
-  return `<g opacity="${fadeOut}"><g transform="translate(${x},${y}) scale(${k}) translate(${-x},${-y})">${draw(x, y)}</g>${crossK > 0 ? D.cross(x, y, crossK) : ''}${tag(label, x, y, cl(s / 0.4))}</g>`;
-}
+const D = {
+  cafe: (x, y, s = 1) => img('hot-beverage', x, y, 96 * s),
+  jus: (x, y, s = 1) => `<g transform="translate(${x},${y}) scale(${s}) translate(-28,-86)"><path d="M4,8 L52,8 L46,82 Q28,88 10,82Z" fill="#FFF8EC" stroke="#E7C9A0" stroke-width="2"/><path d="M7,24 L49,24 L46,80 Q28,85 10,80Z" fill="#F7931E"/><circle cx="48" cy="10" r="12" fill="#FFB547" stroke="#fff" stroke-width="3"/></g>`,
+  pain: (x, y, s = 1) => img('baguette-bread', x, y, 104 * s),
+  beurre: (x, y, s = 1) => img('butter', x, y, 84 * s),
+  confiture: (x, y, s = 1) => `<g transform="translate(${x},${y}) scale(${s}) translate(-30,-72)"><rect x="5" y="16" width="50" height="56" rx="10" fill="#C2185B"/><rect x="2" y="6" width="56" height="14" rx="4" fill="#E53935"/><rect x="12" y="36" width="36" height="20" rx="4" fill="#FFF3E0"/></g>`,
+  sucre: (x, y, s = 1) => `<g transform="translate(${x},${y}) scale(${s}) translate(-30,-50)" stroke="#CFD8DC" stroke-width="1.5" fill="#fff"><rect x="2" y="24" width="24" height="24" rx="4"/><rect x="32" y="24" width="24" height="24" rx="4"/><rect x="17" y="0" width="24" height="24" rx="4"/></g>`,
+  salade: (x, y, s = 1) => img('green-salad', x, y, 96 * s),
+  pates: (x, y, s = 1) => img('spaghetti', x, y, 104 * s),
+  poulet: (x, y, s = 1) => img('poultry-leg', x, y, 80 * s),
+  poisson: (x, y, s = 1) => img('fish', x, y, 80 * s),
+  eau: (x, y, s = 1) => `<g transform="translate(${x},${y}) scale(${s}) translate(-24,-108)"><path d="M16,0 h16 v12 q16,10 16,28 v62 q0,6 -6,6 h-36 q-6,0 -6,-6 v-62 q0,-18 16,-28z" fill="#8FD0F2"/><rect x="14" y="-4" width="20" height="8" rx="2" fill="#E53935"/><rect x="2" y="52" width="44" height="22" rx="3" fill="#fff"/><text x="24" y="67" text-anchor="middle" font-size="10" font-weight="800" fill="#1976D2">GAZEUSE</text>${[0, 1, 2, 3].map(i => `<circle cx="${12 + i * 7}" cy="${98 - ((T * 40 + i * 13) % 34)}" r="2.2" fill="#fff"/>`).join('')}</g>`,
+  choco: (x, y, s = 1) => `<g transform="translate(${x},${y}) scale(${s}) translate(-38,-84)"><path d="M62,34 q18,0 18,16 q0,16 -18,16" stroke="#8D6E63" stroke-width="7" fill="none"/><path d="M4,26 L66,26 L60,82 Q35,88 10,82Z" fill="#A1887F"/><ellipse cx="35" cy="26" rx="31" ry="7" fill="#5D4037"/><path d="M12,24 q8,-20 23,-16 q14,-9 22,5 q8,4 4,11z" fill="#FFFDF7"/></g>`,
+  tarte: (x, y, s = 1) => img('pie', x, y, 90 * s),
+  glace: (x, y, s = 1) => `${img('ice-cream', x - 14, y, 92 * s)}${img('strawberry', x + 36 * s, y, 48 * s)}`,
+  gateau: (x, y, s = 1) => img('shortcake', x, y, 88 * s),
+  boite: (x, y, s = 1) => img('takeout-box', x, y, 84 * s),
+  addition: (x, y, s = 1) => img('receipt', x, y, 84 * s),
+  table2: (x, y, s = 1) => `<g transform="translate(${x},${y}) scale(${s}) translate(-36,-50)"><path d="M0,50 L18,0 L54,0 L72,50Z" fill="#2E7D32"/><text x="36" y="30" text-anchor="middle" font-size="11" font-weight="800" fill="#fff">RÉSERVÉ</text><text x="36" y="44" text-anchor="middle" font-size="12" font-weight="800" fill="#FFD54A">2</text></g>`,
+  cloche: (x, y, s = 1) => `<g transform="translate(${x},${y}) scale(${s}) translate(-56,-52)"><ellipse cx="56" cy="46" rx="54" ry="8" fill="#fff" stroke="#CFD8DC"/><path d="M10,44 Q10,0 56,0 Q102,0 102,44Z" fill="#CFD8DC"/><circle cx="56" cy="0" r="6" fill="#90A4AE"/></g>`,
+};
+const X = (x, y, k, r = 34) => `<g opacity="${k}" stroke="#E53935" stroke-width="9" stroke-linecap="round"><path d="M${x - r},${y - r} L${x + r},${y + r} M${x + r},${y - r} L${x - r},${y + r}"/></g>`;
+const tag = (t, x, y, k = 1, col = '#3E2723') => `<g opacity="${k}"><rect x="${x - t.length * 4.3 - 9}" y="${y}" width="${t.length * 8.6 + 18}" height="24" rx="12" fill="${col}" opacity=".9"/><text x="${x}" y="${y + 17}" text-anchor="middle" font-size="15" font-weight="700" fill="#FFE9B0">${t}</text></g>`;
 
-// ---------- the café ----------
+// ---------- the room ----------
 function room() {
   const sky = { matin: ['#FDE6C8', '#CFE6F5'], midi: ['#8EC8F0', '#D8EEFA'], gouter: ['#F6B36B', '#FBD9A8'] }[SC.id];
-  let s = `<defs><linearGradient id="wall" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F3E3C7"/><stop offset="1" stop-color="#E8D2AE"/></linearGradient>
+  return `<defs><linearGradient id="wall" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F3E3C7"/><stop offset="1" stop-color="#E8D2AE"/></linearGradient>
     <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${sky[0]}"/><stop offset="1" stop-color="${sky[1]}"/></linearGradient>
-    <linearGradient id="marble" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FAFAFA"/><stop offset="1" stop-color="#E3E6EA"/></linearGradient></defs>
-    <rect width="1280" height="720" fill="url(#wall)"/>
-    <rect y="380" width="1280" height="100" fill="#8D5B3A"/>${[...Array(16)].map((_, i) => `<rect x="${i * 80 + 8}" y="392" width="64" height="76" rx="4" fill="none" stroke="#6F4329" stroke-width="3"/>`).join('')}
-    <rect y="480" width="1280" height="240" fill="#5D3A24"/>`;
-  // window onto the street
-  s += `<rect x="50" y="50" width="330" height="290" rx="6" fill="url(#sky)"/>
-    <g fill="${SC.id === 'gouter' ? '#C9A27A' : '#D9C2A0'}"><rect x="60" y="150" width="90" height="190"/><rect x="160" y="120" width="110" height="220"/><rect x="280" y="170" width="90" height="170"/></g>
-    <g fill="#8FB8D6">${[0, 1, 2].map(c => [0, 1, 2, 3].map(r => `<rect x="${178 + c * 30}" y="${140 + r * 44}" width="16" height="26"/>`).join('')).join('')}${[0, 1].map(c => [0, 1, 2].map(r => `<rect x="${74 + c * 34}" y="${170 + r * 48}" width="16" height="26"/>`).join('')).join('')}</g>
-    <path d="M150,120 L215,96 L280,120Z" fill="#7A8794"/>
-    <rect x="50" y="50" width="330" height="290" rx="6" fill="none" stroke="#6F4329" stroke-width="12"/><path d="M215,50 V340 M50,190 H380" stroke="#6F4329" stroke-width="8"/>
-    ${[...Array(8)].map((_, i) => `<path d="M${50 + i * 41.25},40 h41.25 v26 q-20.6,14 -41.25,0z" fill="${i % 2 ? '#fff' : '#C62828'}"/>`).join('')}`;
-  // chalkboard
-  s += `<rect x="440" y="60" width="290" height="250" rx="8" fill="#2F3B35" stroke="#8D5B3A" stroke-width="10"/>
-    <g fill="#F4F1E8" font-family="'Comic Sans MS','DejaVu Sans',sans-serif"><text x="585" y="104" text-anchor="middle" font-size="30" font-weight="700">La carte</text>
-    <text x="466" y="146" font-size="18">Formule midi ........ 15 €</text><text x="466" y="174" font-size="15" opacity=".85">entrée + plat principal</text>
-    <text x="466" y="208" font-size="18">Café crème ........... 3 €</text><text x="466" y="238" font-size="18">Chocolat chaud ...... 4 €</text><text x="466" y="268" font-size="18">Tarte du jour ........ 5 €</text></g>`;
-  // lamps
-  s += [600, 1000].map(x => `<line x1="${x}" y1="0" x2="${x}" y2="30" stroke="#333" stroke-width="3"/><path d="M${x - 34},62 Q${x},18 ${x + 34},62Z" fill="#2E7D5B"/><ellipse cx="${x}" cy="64" rx="18" ry="7" fill="#FFE9A8"/>`).join('');
-  // counter and coffee machine behind Hugo
-  s += `<rect x="760" y="330" width="520" height="150" fill="#6F4329"/><rect x="760" y="318" width="520" height="16" fill="#C7B8A3"/>
-    <rect x="1160" y="236" width="96" height="84" rx="8" fill="#B0BEC5"/><rect x="1172" y="250" width="72" height="30" rx="4" fill="#37474F"/><circle cx="1208" cy="300" r="7" fill="#E53935"/>
-    <g fill="#fff">${[0, 1, 2].map(i => `<rect x="${790 + i * 30}" y="300" width="22" height="18" rx="3"/>`).join('')}</g>`;
-  return s;
+    <linearGradient id="marble" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FAFAFA"/><stop offset="1" stop-color="#E1E5EA"/></linearGradient></defs>
+    <rect x="-200" y="-100" width="1680" height="920" fill="url(#wall)"/>
+    <rect x="-200" y="380" width="1680" height="100" fill="#8D5B3A"/>${[...Array(20)].map((_, i) => `<rect x="${i * 80 - 152}" y="392" width="64" height="76" rx="4" fill="none" stroke="#6F4329" stroke-width="3"/>`).join('')}
+    <rect x="-200" y="480" width="1680" height="400" fill="#5D3A24"/>
+    <rect x="-40" y="60" width="250" height="300" rx="6" fill="url(#sky)"/><g fill="#D9C2A0"><rect x="-30" y="150" width="80" height="210"/><rect x="60" y="120" width="100" height="240"/><rect x="170" y="170" width="40" height="190"/></g>
+    <g fill="#8FB8D6">${[0, 1, 2].map(c => [0, 1, 2, 3].map(r => `<rect x="${74 + c * 28}" y="${140 + r * 46}" width="14" height="26"/>`).join('')).join('')}</g>
+    <rect x="-40" y="60" width="250" height="300" rx="6" fill="none" stroke="#6F4329" stroke-width="12"/><path d="M85,60 V360 M-40,200 H210" stroke="#6F4329" stroke-width="8"/>
+    ${[...Array(7)].map((_, i) => `<path d="M${-40 + i * 36},50 h36 v24 q-18,12 -36,0z" fill="${i % 2 ? '#fff' : '#C62828'}"/>`).join('')}
+    <rect x="560" y="70" width="270" height="230" rx="8" fill="#2F3B35" stroke="#8D5B3A" stroke-width="10"/>
+    <g fill="#F4F1E8"><text x="695" y="112" text-anchor="middle" font-size="28" font-weight="700">La carte</text><text x="584" y="150" font-size="17">Formule midi ....... 15 €</text><text x="584" y="174" font-size="14" opacity=".85">entrée + plat principal</text><text x="584" y="206" font-size="17">Café crème .......... 3 €</text><text x="584" y="234" font-size="17">Chocolat chaud ..... 4 €</text><text x="584" y="262" font-size="17">Tarte du jour ....... 5 €</text></g>
+    ${[700, 1050].map(x => `<line x1="${x}" y1="-100" x2="${x}" y2="30" stroke="#333" stroke-width="3"/><path d="M${x - 34},62 Q${x},18 ${x + 34},62Z" fill="#2E7D5B"/><ellipse cx="${x}" cy="64" rx="18" ry="7" fill="#FFE9A8"/>`).join('')}
+    <rect x="980" y="320" width="500" height="160" fill="#6F4329"/><rect x="980" y="308" width="500" height="16" fill="#C7B8A3"/>
+    <rect x="1170" y="226" width="96" height="84" rx="8" fill="#B0BEC5"/><rect x="1182" y="240" width="72" height="30" rx="4" fill="#37474F"/><circle cx="1218" cy="290" r="7" fill="#E53935"/>
+    <rect x="-60" y="140" width="40" height="340" fill="#6F4329"/>`;
 }
-const CH = { L: { x: 395, top: 150, size: 360, body: '#b11f1f' }, H: { x: 1010, top: 96, size: 400, body: '#e8e9e6' } };
-function person(who) {
-  const c = CH[who], a = amp(who), m = a < 0.06 ? 'smile' : a < 0.45 ? 'laugh' : 'agape';
-  const bob = Math.sin(T * 2 + (who === 'H' ? 1 : 0)) * 2, x0 = c.x - c.size / 2, y0 = c.top + bob;
-  const name = who === 'L' ? 'lea' : 'hugo', bw = c.size * 0.6;
-  let s = `<rect x="${c.x - bw / 2}" y="${y0 + c.size * 0.98}" width="${bw}" height="${720 - y0 - c.size * 0.98}" rx="20" fill="${c.body}"/>`;
-  if (who === 'H') s += `<rect x="${c.x - bw * 0.36}" y="${y0 + c.size * 1.04}" width="${bw * 0.72}" height="400" rx="10" fill="#263238"/><path d="M${c.x - bw * 0.36},${y0 + c.size * 1.06} L${c.x - bw / 2 + 8},${y0 + c.size * 0.93} M${c.x + bw * 0.36},${y0 + c.size * 1.06} L${c.x + bw / 2 - 8},${y0 + c.size * 0.93}" stroke="#263238" stroke-width="8"/>`;
-  s += `<image href="chars/${name}-${m}.svg" x="${x0}" y="${y0}" width="${c.size}" height="${c.size}"/>`;
-  return s;
+
+// ---------- people ----------
+const SKIN = { L: '#F1C3A5', C: '#B98E6A' };
+function face(who, x, top, size, tilt) {
+  const name = who === 'L' ? 'lea' : 'chloe', a = speaking(who) ? amp(who) : 0;
+  const m = a < 0.07 ? 'smile' : a < 0.5 ? 'laugh' : 'agape';
+  const happy = (who === 'L' && since('happy') >= 0 && since('happy') < 2.4) || since('bye') >= 0;
+  const blink = ((T + (who === 'L' ? 0.4 : 1.9)) % 3.7) < 0.13;
+  const e = blink ? 'humble' : happy ? 'bow' : 'happy';
+  return `<g transform="rotate(${tilt},${x},${top + size * 0.95})"><image href="chars/${name}-${m}-${e}.svg" x="${x - size / 2}" y="${top}" width="${size}" height="${size}"/></g>`;
 }
-function bubble(items, k, crossK = 0) {   // Hugo's suggestions, in a speech bubble
-  if (k <= 0) return '';
-  const w = 110 * items.length + 30;
-  const cross = crossK > 0 ? `<g opacity="${crossK}" stroke="#E53935" stroke-width="10" stroke-linecap="round"><path d="M${w / 2 - 50},24 L${w / 2 + 50},116 M${w / 2 + 50},24 L${w / 2 - 50},116"/></g>` : '';
-  return `<g opacity="${k}" transform="translate(${760 - w},${70}) scale(${back(k)})"><rect width="${w}" height="140" rx="26" fill="#fff" stroke="#3E2723" stroke-width="3"/><path d="M${w - 30},120 L${w + 30},160 L${w - 70},138Z" fill="#fff" stroke="#3E2723" stroke-width="3" stroke-linejoin="round"/><rect x="${w - 74}" y="116" width="46" height="20" fill="#fff"/>${items.join('')}${cross}</g>`;
+// the listener nods a little after the other one stops talking, and leans towards whoever talks
+function headMove(who) {
+  let tilt = 0;
+  const other = who === 'L' ? 'C' : 'L';
+  if (speaking(other)) tilt = who === 'L' ? 2.5 : -2.5;
+  const ended = TL.lines.filter(l => l.who === other && T > l.end && T < l.end + 0.7);
+  if (ended.length) tilt += Math.sin((T - ended[0].end) / 0.7 * Math.PI) * 4;
+  if (speaking(who)) tilt += Math.sin(T * 3.1) * 1.2;
+  return tilt;
+}
+function chloePos() {
+  // where Chloé is: by the table (900), or away at the counter (1400), walking in between
+  const home = 900, away = 1420;
+  let x = home;
+  const arr = evs('arrive')[0];
+  if (arr) { const k = (T - arr[1]) / 1.6; x = mix(away, home, ease(k)); if (k < 0) x = away; }
+  for (const name of ['serve', 'bill']) {
+    const e = evs(name)[0]; if (!e) continue;
+    const s = T - e[1];
+    if (s >= 0 && s < 1.2) x = mix(home, away, ease(s / 1.2));
+    else if (s >= 1.2 && s < 2.4) x = mix(away, home, ease((s - 1.2) / 1.2));
+  }
+  const ent = evs('enter')[0];
+  if (ent && T < ent[1] + 0.1) x = home;
+  return x;
+}
+function chloe() {
+  const x = chloePos(), top = 112 + Math.sin(T * 2.2) * 2, size = 330;
+  const walking = Math.abs(chloePos() - (T > 0.03 ? (() => { const t0 = T; T -= 0.03; const p = chloePos(); T = t0; return p; })() : x)) > 0.5;
+  const step = walking ? Math.abs(Math.sin(T * 9)) * 6 : 0;
+  const pose = poseC();
+  let s = `<g transform="translate(0,${-step})">`;
+  // body: white shirt, black apron
+  s += `<rect x="${x - 98}" y="${top + size * 0.93}" width="196" height="400" rx="26" fill="#E8E9E6"/><rect x="${x - 70}" y="${top + size * 1.0}" width="140" height="360" rx="10" fill="#263238"/><path d="M${x - 70},${top + size * 1.02} L${x - 88},${top + size * 0.9} M${x + 70},${top + size * 1.02} L${x + 88},${top + size * 0.9}" stroke="#263238" stroke-width="7"/>`;
+  s += face('C', x, top, size, headMove('C'));
+  s += armsC(x, top + size * 0.95, pose);
+  return s + '</g>';
+}
+function poseC() {
+  if (since('bye') >= 0) return 'wave';
+  for (const name of ['serve', 'bill']) { const s = since(name); if (s >= 1.0 && s < 2.6 + (SERVE[SC.id] || []).length * 0.6 + 0.2 && s < evd(name)) return 'tray'; }
+  return 'pad';
+}
+function armsC(x, sh, pose) {
+  const sk = SKIN.C, sl = '#E8E9E6';
+  const arm = (x1, y1, x2, y2, x3, y3) => `<path d="M${x1},${y1} Q${x2},${y2} ${x3},${y3}" stroke="${sl}" stroke-width="30" fill="none" stroke-linecap="round"/><circle cx="${x3}" cy="${y3}" r="15" fill="${sk}"/>`;
+  if (pose === 'wave') {
+    const w = Math.sin(T * 9) * 12;
+    return arm(x - 90, sh + 20, x - 110, sh + 100, x - 70, sh + 150) + arm(x + 90, sh + 20, x + 130, sh - 30, x + 120 + w, sh - 110);
+  }
+  if (pose === 'tray') {
+    const carry = trayItems();
+    return arm(x + 90, sh + 20, x + 100, sh + 110, x + 60, sh + 150) + arm(x - 90, sh + 20, x - 130, sh + 90, x - 160, sh + 100)
+      + `<ellipse cx="${x - 190}" cy="${sh + 92}" rx="95" ry="14" fill="#B0BEC5" stroke="#78909C" stroke-width="2"/>` + carry.map((it, i) => it.draw(x - 250 + i * 55, sh + 88, 0.6)).join('');
+  }
+  // the notepad: she writes while Léa orders
+  const writing = speaking('L') && SC.id !== 'gouter' || (speaking('L') && SC.id === 'gouter');
+  const pen = writing ? Math.sin(T * 14) * 6 : 0;
+  return arm(x - 90, sh + 20, x - 120, sh + 120, x - 40, sh + 130) + `<rect x="${x - 70}" y="${sh + 70}" width="70" height="86" rx="4" fill="#FFFDF5" stroke="#B0A58F" stroke-width="2" transform="rotate(-8,${x - 35},${sh + 113})"/>${[0, 1, 2, 3].map(i => `<path d="M${x - 60},${sh + 92 + i * 14} h${40 - i * 6}" stroke="#90A4AE" stroke-width="3" transform="rotate(-8,${x - 35},${sh + 113})"/>`).join('')}`
+    + arm(x + 90, sh + 20, x + 60, sh + 120, x + 5 + pen, sh + 112) + `<path d="M${x + 5 + pen},${sh + 112} l-18,-30" stroke="#1E3A8A" stroke-width="5" stroke-linecap="round"/>`;
+}
+function lea() {
+  // standing at the door (midi, before she sits), else sitting at the table
+  let x = 430, top = 150, standing = false;
+  const ent = evs('enter')[0], sit = evs('sit')[0];
+  if (ent && sit) {
+    if (T < ent[1]) x = -300;
+    if (T >= ent[1] && T < sit[1]) { standing = true; x = mix(-300, 160, ease((T - ent[1]) / 1.6)); top = 80; }
+    if (T >= sit[1] && T < sit[1] + 2.0) { const k = ease((T - sit[1]) / 2.0); x = mix(160, 430, k); top = mix(80, 150, k); standing = k < 0.95; }
+  }
+  const size = 320, bob = Math.sin(T * 1.8 + 1) * 1.5;
+  let s = `<rect x="${x - 92}" y="${top + bob + size * 0.93}" width="184" height="${standing ? 420 : 160}" rx="26" fill="#B11F1F"/>`;
+  if (standing) s += `<rect x="${x - 60}" y="${top + size * 0.93 + 230}" width="50" height="200" fill="#37474F"/><rect x="${x + 10}" y="${top + size * 0.93 + 230}" width="50" height="200" fill="#37474F"/>`;
+  s += face('L', x, top + bob, size, headMove('L'));
+  return { s, x, top: top + bob, standing };
+}
+function leaHands(L) {
+  if (L.standing) return '';
+  const sk = SKIN.L, y = 476;
+  // holding the menu (midi, from when Chloé gives it until she takes it back)
+  const m = since('menu'), sv = since('serve');
+  if (SC.id === 'midi' && m >= 0.6 && sv < 0.6) {
+    const k = ease((m - 0.6) / 0.5);
+    return `<g transform="translate(${L.x},${mix(600, 548, k)}) scale(0.85)"><path d="M-110,-150 L0,-140 L0,10 L-110,0Z" fill="#7B3F00"/><path d="M0,-140 L110,-150 L110,0 L0,10Z" fill="#8D4A0B"/><path d="M-98,-136 L-8,-128 L-8,-4 L-98,-12Z M8,-128 L98,-136 L98,-12 L8,-4Z" fill="#FFF8E7"/><text x="-52" y="-104" text-anchor="middle" font-size="14" font-weight="800" fill="#7B3F00">MENU</text>${[0, 1, 2, 3, 4].map(i => `<path d="M-86,${-86 + i * 16} h66 M20,${-116 + i * 18} h62" stroke="#B08968" stroke-width="3"/>`).join('')}<circle cx="-112" cy="-40" r="15" fill="${sk}"/><circle cx="112" cy="-40" r="15" fill="${sk}"/></g>`;
+  }
+  if (since('bye') >= 0 && SC.id === 'gouter') {
+    const w = Math.sin(T * 9 + 1) * 12;
+    return `<circle cx="${L.x - 70}" cy="${y}" r="15" fill="${sk}"/><path d="M${L.x + 80},${L.top + 300} Q${L.x + 120},${L.top + 240} ${L.x + 120 + w},${L.top + 180}" stroke="#B11F1F" stroke-width="30" fill="none" stroke-linecap="round"/><circle cx="${L.x + 120 + w}" cy="${L.top + 176}" r="15" fill="${sk}"/>`;
+  }
+  return `<circle cx="${L.x - 70}" cy="${y}" r="15" fill="${sk}"/><circle cx="${L.x + 70}" cy="${y}" r="15" fill="${sk}"/>`;
 }
 function table() {
-  return `<path d="M70,450 L800,450 L860,580 L10,580Z" fill="url(#marble)"/><path d="M10,580 L860,580 L860,596 L10,596Z" fill="#B0BEC5"/><path d="M70,450 L800,450" stroke="#fff" stroke-width="3"/>`;
+  return `<path d="M60,452 L800,452 L860,580 L0,580Z" fill="url(#marble)"/><path d="M0,580 L860,580 L860,598 L0,598Z" fill="#B0BEC5"/><path d="M60,452 L800,452" stroke="#fff" stroke-width="3"/>`;
 }
-function stuff() {
+
+// ---------- what is ordered, carried and put on the table ----------
+const SERVE = {
+  matin: [['cafe', 'un café crème', 200], ['jus', "un jus d'orange", 320], ['pain', 'du pain', 470], ['beurre', 'du beurre', 600], ['confiture', 'de la confiture', 720]],
+  midi: [['salade', "l'entrée", 230], ['pates', 'le plat : les pâtes', 440], ['eau', "l'eau gazeuse", 660]],
+  gouter: [['choco', 'un chocolat chaud', 230], ['glace', 'une glace à la fraise', 450]],
+};
+function trayItems() {
+  const list = SERVE[SC.id] || [], s = since('serve');
+  const k = Math.floor((s - 2.6) / 0.6);   // how many are already on the table
+  if (since('bill') >= 0 && since('bill') < evd('bill')) return [{ draw: (x, y, sc) => D.addition(x, y, sc) }];
+  return list.slice(Math.max(0, k + 1)).map(([n]) => ({ draw: (x, y, sc) => D[n](x, y, sc) }));
+}
+function onTable() {
   let s = '';
-  const Y = 540;
-  if (SC.id === 'matin') {
-    s += item('cafe', (x, y) => img('hot-beverage', x, y, 110), 150, Y, 'un café crème');
-    s += item('jus', D.jus, 290, Y, "un jus d'orange");
-    s += item('pain', (x, y) => img('baguette-bread', x, y, 120), 430, Y, 'du pain');
-    s += item('beurre', (x, y) => img('butter', x, y, 100), 570, Y, 'du beurre');
-    s += item('confiture', D.confiture, 700, Y, 'de la confiture');
-    s += item('nosucre', D.sucre, 640, 420, 'sans sucre', { cross: 'nosucre', fade: 3.2 });
-  } else if (SC.id === 'midi') {
-    s += item('table', D.table, 720, Y, 'pour deux', { until: 'eau' });
-    s += item('carte', D.carte, 160, Y, 'la carte', { until: 'pates' });
-    s += item('entree', (x, y) => img('green-salad', x, y, 110), 330, Y, "l'entrée");
-    s += item('plat', D.plat, 500, Y, 'le plat principal', { until: 'pates' });
-    s += item('pates', (x, y) => img('spaghetti', x, y, 120), 500, Y, 'les pâtes');
-    s += item('nopoulet', (x, y) => img('poultry-leg', x, y, 100), 620, 420, 'pas de poulet', { cross: 'nopoulet', fade: 2.4 });
-    s += item('nopoisson', (x, y) => img('fish', x, y, 100), 740, 420, 'pas de poisson', { cross: 'nopoisson', fade: 2.0 });
-    s += item('eau', D.eau, 720, Y, "l'eau gazeuse");
-  } else {
-    const sug = [];
-    const b1 = since('choco'), b2 = since('gateau');
-    if (b1 >= 0 && since('choco2') < 0) {
-      if (since('choco') >= 0) sug.push(`<g transform="translate(15,0)">${D.mug(60, 110)}</g>`);
-      if (since('tarte') >= 0) sug.push(`<g transform="translate(125,0)">${img('pie', 60, 112, 96)}</g>`);
-      s += bubble(sug, cl(b1 / 0.3));
-    }
-    if (b2 >= 0 && since('nogateau') < 0.9) {
-      const crossK = cl((since('nogateau') - 0.1) / 0.3);
-      s += bubble([`<g transform="translate(15,0)">${img('shortcake', 60, 112, 96)}</g>`, `<g transform="translate(125,0)">${img('takeout-box', 60, 112, 96)}</g>`], cl(b2 / 0.3) * (1 - cl((since('nogateau') - 0.5) / 0.4)), crossK);
-    }
-    s += item('choco2', D.mug, 170, Y, 'un chocolat chaud');
-    s += item('glace', (x, y) => img('ice-cream', x, y, 110), 330, Y, 'une glace');
-    s += item('glace', (x, y) => img('strawberry', x, y, 70), 430, Y, 'à la fraise');
-    s += item('surplace', (x, y) => `<g transform="translate(${x - 50},${y - 70})"><rect width="100" height="64" rx="12" fill="#2E7D32"/><text x="50" y="40" text-anchor="middle" font-size="18" font-weight="800" fill="#fff">ICI ✓</text></g>`, 560, Y, 'sur place');
-    s += item('receipt', (x, y) => img('receipt', x, y, 100), 700, Y, "l'addition");
+  const list = SERVE[SC.id] || [], sv = since('serve'), Y = 540;
+  list.forEach(([n, label, tx], i) => {
+    const t0 = 2.6 + i * 0.6, k = (sv - t0) / 0.5;
+    if (sv < t0) return;
+    const sx = chloePos() - 250 + i * 55, sy = 430;
+    const x = mix(sx, tx, ease(k)), y = mix(sy, Y, ease(k)) - Math.sin(cl(k) * Math.PI) * 60;
+    s += D[n](x, y, mix(0.6, 1, ease(k))) + (k >= 1 ? tag(label, tx, Y + 8, cl((k - 1) * 3)) : '');
+  });
+  if (SC.id === 'midi' && since('n_table') >= 0 && sv < 2.6) s += D.table2(720, Y) + tag('une table pour deux', 720, Y + 8, cl(since('n_table') / 0.4));
+  if (SC.id === 'gouter') {
+    const b = since('bill');
+    if (b >= 2.6) { const k = ease((b - 2.6) / 0.6); s += D.addition(mix(chloePos() - 230, 760, k), mix(430, Y - 10, k), mix(.6, 1, k)) + (k >= 1 ? tag("l'addition", 760, Y - 2) : ''); }
+    if (since('n_surplace') >= 0) s += `<g opacity="${cl(since('n_surplace') / .4)}"><rect x="560" y="${Y - 60}" width="110" height="50" rx="12" fill="#2E7D32"/><text x="615" y="${Y - 28}" text-anchor="middle" font-size="18" font-weight="800" fill="#fff">ICI ✓</text>${tag('sur place', 615, Y + 8)}</g>`;
   }
   return s;
+}
+// Chloé's order ticket: what Léa asks for appears on it, like a note she is writing
+function ticket() {
+  const rows = {
+    matin: [['n_cafe', 'cafe', 'un café crème'], ['n_jus', 'jus', "un jus d'orange"], ['n_pain', 'pain', 'du pain'], ['n_beurre', 'beurre', 'du beurre'], ['n_confiture', 'confiture', 'de la confiture'], ['n_sucre', 'sucre', 'sans sucre', true]],
+    midi: [['n_entree', 'salade', "l'entrée"], ['n_plat', 'cloche', 'le plat principal'], ['n_pates', 'pates', 'les pâtes'], ['n_eau', 'eau', "l'eau gazeuse"]],
+    gouter: [['n_choco', 'choco', 'un chocolat chaud'], ['n_glace', 'glace', 'une glace à la fraise']],
+  }[SC.id];
+  const shown = rows.filter(r => since(r[0]) >= 0);
+  if (!shown.length || since('serve') >= 1.0 || (SC.id === 'gouter' && since('bill') >= 0)) return '';
+  const x0 = 1010, y0 = 70, h = 34 + shown.length * 56;
+  let s = `<g><rect x="${x0}" y="${y0}" width="250" height="${h}" rx="10" fill="#FFFDF5" stroke="#B0A58F" stroke-width="2" transform="rotate(2,${x0 + 125},${y0})"/><text x="${x0 + 18}" y="${y0 + 26}" font-size="16" font-weight="800" fill="#6D4C41">La commande</text>`;
+  shown.forEach((r, i) => {
+    const k = back(since(r[0]) / 0.4), y = y0 + 80 + i * 56;
+    s += `<g opacity="${cl(since(r[0]) / 0.25)}">${D[r[1]](x0 + 42, y, 0.5 * k)}<text x="${x0 + 80}" y="${y - 18}" font-size="17" font-weight="700" fill="#3E2723">${r[2]}</text>${r[3] ? X(x0 + 42, y - 22, cl((since(r[0]) - .2) / .3), 18) : ''}</g>`;
+  });
+  return s + '</g>';
+}
+// Chloé's suggestions and advice: a bubble by her head
+function bubble() {
+  let items = [], cross = [], k = 0;
+  const S = (n) => since(n);
+  if (SC.id === 'midi' && S('n_poulet') >= 0 && S('n_eau') < 0) {
+    items = [['poulet', S('n_poulet')], ['poisson', S('n_poisson')], ['pates', S('n_pates')]];
+    cross = [true, true, false]; k = cl(S('n_poulet') / 0.3);
+  } else if (SC.id === 'gouter' && S('s_choco') >= 0 && S('n_choco') < 0) {
+    items = [['choco', S('s_choco')], ['tarte', S('s_tarte')]]; k = cl(S('s_choco') / 0.3);
+  } else if (SC.id === 'gouter' && S('s_gateau') >= 0 && S('no_gateau') < 1.2) {
+    items = [['gateau', S('s_gateau')], ['boite', S('s_gateau')]]; cross = [S('no_gateau') >= 0, S('no_gateau') >= 0]; k = cl(S('s_gateau') / 0.3) * (1 - cl((S('no_gateau') - 0.8) / 0.4));
+  } else if (SC.id === 'midi' && S('n_entree') >= -0.6 && S('n_vege') < 0) {
+    items = [['salade', S('n_entree')], ['cloche', S('n_plat')]]; k = cl((S('n_entree') + 0.6) / 0.3);
+  }
+  if (!items.length || k <= 0) return '';
+  const w = items.length * 120 + 30, x0 = chloePos() - 160 - w, y0 = 60;
+  let s = `<g opacity="${k}"><rect x="${x0}" y="${y0}" width="${w}" height="150" rx="26" fill="#fff" stroke="#3E2723" stroke-width="3"/><path d="M${x0 + w - 30},${y0 + 120} L${x0 + w + 50},${y0 + 170} L${x0 + w - 70},${y0 + 146}Z" fill="#fff" stroke="#3E2723" stroke-width="3" stroke-linejoin="round"/><rect x="${x0 + w - 74}" y="${y0 + 116}" width="46" height="20" fill="#fff"/>`;
+  items.forEach(([n, t0], i) => {
+    if (t0 < 0) return;
+    const cx = x0 + 75 + i * 120;
+    s += `<g opacity="${cl(t0 / .25)}">${D[n](cx, y0 + 125, 0.9 * back(t0 / .4))}${cross[i] ? X(cx, y0 + 80, cl((t0 - .25) / .3)) : ''}</g>`;
+  });
+  if (SC.id === 'midi' && items[0][0] === 'salade') s += `<text x="${x0 + w / 2}" y="${y0 + 144}" text-anchor="middle" font-size="15" font-weight="800" fill="#2E7D32">la formule = entrée + plat</text>`;
+  return s + '</g>';
+}
+
+// ---------- camera: close on whoever talks, wide for actions ----------
+function camTarget(t) {
+  const l = TL.lines.find(l => t >= l.start - 0.3 && t <= l.end + 0.5);
+  if (!l) return [640, 360, 1];
+  if (l.who === 'C') return [chloePosAt(t) - 130, 330, 1.3];
+  return [leaPosAt(t) + 120, 340, 1.3];
+}
+function chloePosAt(t) { const t0 = T; T = t; const p = chloePos(); T = t0; return p; }
+function leaPosAt(t) { const t0 = T; T = t; const p = lea().x; T = t0; return p; }
+function camera() {
+  // ease from where the camera was 0.8 s ago to where it should be now
+  let a = camTarget(T - 0.8), b = camTarget(T);
+  const steps = 8; let c = [0, 0, 0];
+  for (let i = 0; i < steps; i++) { const p = camTarget(T - 0.8 + 0.8 * (i + 1) / steps); c = c.map((v, j) => v + p[j] / steps); }
+  return c;
 }
 
 function render(t) {
   T = t;
   SC = TL.scenes.find(s => t >= s.start && t < s.end) || TL.scenes[TL.scenes.length - 1];
-  document.getElementById('svg').innerHTML = room() + person('H') + person('L') + table() + stuff();
+  const [cx, cy, z] = camera();
+  const L = lea();
+  const world = room() + chloe() + L.s + (L.standing ? '' : table() + leaHands(L)) + onTable() + bubble() + ticket();
+  document.getElementById('svg').innerHTML = `<g transform="translate(640,360) scale(${z}) translate(${-cx},${-cy})">${world}</g>`;
   const fin = cl((t - SC.start) / 0.45), fout = cl((SC.end - t) / 0.45);
   document.getElementById('black').style.opacity = 1 - Math.min(fin, fout);
   const cap = document.getElementById('cap'), parts = SC.caption.split(' · ');
-  cap.innerHTML = `${parts[0]}${parts[1] ? ` <span style="opacity:.85;font-weight:600">· ${parts[1]}</span>` : ''}`;
-  const k = ease((t - SC.start - 1.2) / 0.6);
-  cap.style.fontSize = mix(64, 28, k) + 'px';
-  cap.style.left = mix(640 - cap.offsetWidth / 2, 28, k) + 'px';
-  cap.style.top = mix(300, 18, k) + 'px';
+  cap.innerHTML = `${parts[0]} <span style="opacity:.85;font-weight:600">· ${parts[1]}</span>`;
+  const k = ease((t - SC.start - 1.3) / 0.6);
+  cap.style.fontSize = mix(60, 26, k) + 'px';
+  cap.style.left = mix(640 - cap.offsetWidth / 2, 24, k) + 'px';
+  cap.style.top = mix(290, 16, k) + 'px';
   cap.style.opacity = cl((t - SC.start - 0.15) / 0.35);
   const sub = TL.subs.find(s => t >= s.start && t < s.end), box = document.getElementById('sub');
   if (sub) {
-    const who = sub.who === 'L' ? ['Léa', '#b11f1f'] : ['Hugo · le serveur', '#2E7D5B'];
+    const who = sub.who === 'L' ? ['Léa', '#B11F1F'] : ['Chloé · la serveuse', '#2E7D5B'];
     box.style.opacity = cl((t - sub.start) / 0.15) * cl((sub.end - t) / 0.15);
     box.innerHTML = `<div class="who" style="background:${who[1]}">${who[0]}</div><div class="fr">${sub.fr.replace(/\*\*(.+?)\*\*/g, '<b>$1</b>')}</div><div class="en">${sub.en}</div>`;
   } else box.style.opacity = 0;
 }
-window.load = (tl) => { TL = tl; };
+window.load = async (tl) => {
+  TL = tl;
+  const names = [];
+  for (const w of ['lea', 'chloe']) for (const m of ['smile', 'laugh', 'agape']) for (const e of ['happy', 'humble', 'bow']) names.push(`chars/${w}-${m}-${e}.svg`);
+  for (const f of ['hot-beverage', 'baguette-bread', 'butter', 'green-salad', 'spaghetti', 'poultry-leg', 'fish', 'pie', 'ice-cream', 'strawberry', 'shortcake', 'takeout-box', 'receipt']) names.push(`pics/${f}.png`);
+  await Promise.all(names.map(n => new Promise(r => { const i = new Image(); i.onload = i.onerror = r; i.src = n; })));
+};
 </script></body></html>

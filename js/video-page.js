@@ -3,7 +3,7 @@
 //   Watch: the video, buttons to jump to each part, a few rules to remember
 //   Check yourself: questions, some with a still from the video; the wrong answers are the usual mistakes,
 //          explained when picked; right first time moves the word up a box
-// Videos and pictures are made by tools/<name>-video (Léa and Hugo: DiceBear toon-head, CC BY 4.0, Johan Melin;
+// Videos and pictures are made by tools/<name>-video (Léa and Chloé: DiceBear toon-head, CC BY 4.0, Johan Melin;
 // food: Microsoft Fluent Emoji, MIT; voices: Piper).
 //   VIDEO_PAGES[themeId] = { name, next, dir, chapters: [[label, seconds]], rules: [html], questions: [...] }
 //   question: { img?, t? (seconds, for "See it in the video"), q, a, opts: [a + wrong answers], why, wrong?: { answer: why not }, key? }
@@ -16,8 +16,8 @@ const PAGES = {
 // ---------------- 18 Café, Food & Ordering ----------------
 18: {
     name: 'Café video', next: 'Watch the café video', dir: 'media/cafe/', file: 'cafe.mp4',
-    credit: 'Léa and Hugo: DiceBear toon-head (CC BY 4.0, Johan Melin) · food: Microsoft Fluent Emoji (MIT)',
-    chapters: [['Le petit-déjeuner', 0], ['Le déjeuner', 28.2], ['Le goûter', 53.9]],
+    credit: 'Léa and Chloé: DiceBear toon-head (CC BY 4.0, Johan Melin) · food: Microsoft Fluent Emoji (MIT) · voice: Piper',
+    chapters: [['Le petit-déjeuner', 0], ['Le déjeuner', 28.3], ['Le goûter', 69.6]],
     rules: [
         '<b>Je voudrais…</b> is the polite way to order. <i>Je veux…</i> sounds rude to a waiter.',
         '<b>Je vais prendre…</b> = I\'ll have… (when you have chosen).',
@@ -25,17 +25,17 @@ const PAGES = {
         '<b>la carte</b> = the menu · <b>la formule</b> = the set menu · <b>l\'addition</b> = the bill.',
     ],
     questions: [
-        { img: 'matin', t: 8, q: 'Qu\'est-ce que Léa commande ?', a: 'Un café crème et un jus d\'orange.', opts: ['Un café crème et un jus d\'orange.', 'Un thé et un croissant.', 'Un chocolat chaud et une glace.', 'Une bière et des frites.'], why: 'Je voudrais un café crème et un jus d\'orange, s\'il vous plaît.', key: 'café crème' },
-        { t: 1, q: 'Le serveur demande : « Qu\'est-ce que je vous sers ? » Vous répondez :', a: 'Je voudrais un café, s\'il vous plaît.', opts: ['Je voudrais un café, s\'il vous plaît.', 'Je suis un café.', 'Je veux café.', 'Donne-moi un café !'], why: 'Je voudrais… is polite. Je veux… sounds rude, and « donne-moi » uses tu with a stranger.', wrong: { 'Je suis un café.': 'Je suis = I am. You are not a coffee!', 'Je veux café.': 'Je veux sounds rude, and it needs un: un café.', 'Donne-moi un café !': 'Donne-moi uses tu: too familiar with a waiter.' }, key: 'je voudrais…' },
-        { t: 24, q: 'Vous ne voulez pas de sucre dans votre café :', a: 'Sans sucre, s\'il vous plaît.', opts: ['Sans sucre, s\'il vous plaît.', 'Avec du sucre, s\'il vous plaît.', 'Pas sucre.', 'Moins sucre.'], why: 'Sans + noun, with no article: sans sucre.', key: 'sans…' },
-        { t: 29, q: 'Vous arrivez au café avec une amie :', a: 'Une table pour deux, s\'il vous plaît.', opts: ['Une table pour deux, s\'il vous plaît.', 'Deux tables, s\'il vous plaît.', 'Une chaise pour deux.', 'Un deux, s\'il vous plaît.'], why: 'Une table pour deux = a table for two people.', key: 'table pour deux, s\'il vous plaît.' },
-        { img: 'midi', t: 34, q: 'La formule, c\'est…', a: 'une entrée et un plat principal', opts: ['une entrée et un plat principal', 'une boisson et un café', 'le petit-déjeuner', 'un plat et l\'addition'], why: 'Voici la carte. La formule, c\'est une entrée et un plat principal.', key: 'formule' },
-        { t: 41, q: 'Vous ne mangez ni viande ni poisson :', a: 'Je suis végétarien.', opts: ['Je suis végétarien.', 'Je suis viande.', 'Je n\'ai pas viande.', 'Je suis légume.'], why: 'Je suis végétarien · végétarienne.', key: 'je suis végétarien / végétarienne.' },
-        { t: 40, q: 'Vous voulez l\'avis du serveur :', a: 'Qu\'est-ce que vous me conseillez ?', opts: ['Qu\'est-ce que vous me conseillez ?', 'Qu\'est-ce que vous me commandez ?', 'Où est le conseil ?', 'Vous conseillez quoi, toi ?'], why: 'Conseiller = to recommend. Qu\'est-ce que vous me conseillez ? = What do you recommend?', key: 'qu\'est-ce que vous me conseillez ?' },
-        { t: 50, q: 'L\'eau avec des bulles, c\'est…', a: 'de l\'eau gazeuse', opts: ['de l\'eau gazeuse', 'de l\'eau plate', 'du lait', 'du jus d\'orange'], why: 'Gazeuse = with bubbles. Plate = still.', key: 'de l\'eau plate / gazeuse' },
-        { img: 'gouter', t: 63, q: 'Léa mange sa glace…', a: 'sur place', opts: ['sur place', 'à emporter', 'à la maison', 'dans le bus'], why: 'Sur place = here, at the café. À emporter = to take away.', key: 'sur place / à emporter' },
-        { t: 71, q: 'Le repas est fini. Vous voulez payer :', a: 'L\'addition, s\'il vous plaît.', opts: ['L\'addition, s\'il vous plaît.', 'La carte, s\'il vous plaît.', 'Le prix, s\'il vous plaît.', 'La note de musique, merci.'], why: 'In a café or a restaurant you ask for l\'addition.', wrong: { 'La carte, s\'il vous plaît.': 'La carte is the menu: you ask for it before you order.' }, key: 'addition, s\'il vous plaît.' },
-        { t: 70, q: 'Le repas était très bon :', a: 'C\'était délicieux !', opts: ['C\'était délicieux !', 'J\'étais délicieux !', 'C\'est délicieux hier.', 'C\'était délicat.'], why: 'C\'était délicieux = it was delicious (the meal, not you).', wrong: { 'J\'étais délicieux !': 'J\'étais = I was. You were not delicious!', 'C\'était délicat.': 'Délicat = delicate, tricky. Not the same.' }, key: 'c\'était délicieux.' },
+        { img: 'matin', t: 6, q: 'Qu\'est-ce que Léa commande ?', a: 'Un café crème et un jus d\'orange.', opts: ['Un café crème et un jus d\'orange.', 'Un thé et un croissant.', 'Un chocolat chaud et une glace.', 'Une bière et des frites.'], why: 'Je voudrais un café crème et un jus d\'orange, s\'il vous plaît.', key: 'café crème' },
+        { t: 2.6, q: 'La serveuse demande : « Qu\'est-ce que je vous sers ? » Vous répondez :', a: 'Je voudrais un café, s\'il vous plaît.', opts: ['Je voudrais un café, s\'il vous plaît.', 'Je suis un café.', 'Je veux café.', 'Donne-moi un café !'], why: 'Je voudrais… is polite. Je veux… sounds rude, and « donne-moi » uses tu with a stranger.', wrong: { 'Je suis un café.': 'Je suis = I am. You are not a coffee!', 'Je veux café.': 'Je veux sounds rude, and it needs un: un café.', 'Donne-moi un café !': 'Donne-moi uses tu: too familiar with a waitress or a waiter.' }, key: 'je voudrais…' },
+        { t: 13.4, q: 'Vous ne voulez pas de sucre dans votre café :', a: 'Sans sucre, s\'il vous plaît.', opts: ['Sans sucre, s\'il vous plaît.', 'Avec du sucre, s\'il vous plaît.', 'Pas sucre.', 'Moins sucre.'], why: 'Sans + noun, with no article: sans sucre.', key: 'sans…' },
+        { t: 30.6, q: 'Vous arrivez au café et votre amie arrive bientôt :', a: 'Une table pour deux, s\'il vous plaît.', opts: ['Une table pour deux, s\'il vous plaît.', 'Deux tables, s\'il vous plaît.', 'Une chaise pour deux.', 'Un deux, s\'il vous plaît.'], why: 'Une table pour deux = a table for two people.', key: 'table pour deux, s\'il vous plaît.' },
+        { img: 'midi', t: 41.2, q: 'La formule, c\'est…', a: 'une entrée et un plat principal', opts: ['une entrée et un plat principal', 'une boisson et un café', 'le petit-déjeuner', 'un plat et l\'addition'], why: 'Voici la carte. La formule, c\'est une entrée et un plat principal.', key: 'formule' },
+        { t: 46.7, q: 'Vous ne mangez ni viande ni poisson :', a: 'Je suis végétarien.', opts: ['Je suis végétarien.', 'Je suis viande.', 'Je n\'ai pas viande.', 'Je suis légume.'], why: 'Je suis végétarien · végétarienne.', key: 'je suis végétarien / végétarienne.' },
+        { t: 46.7, q: 'Vous voulez l\'avis de la serveuse :', a: 'Qu\'est-ce que vous me conseillez ?', opts: ['Qu\'est-ce que vous me conseillez ?', 'Qu\'est-ce que vous me commandez ?', 'Où est le conseil ?', 'Vous conseillez quoi, toi ?'], why: 'Conseiller = to recommend. Qu\'est-ce que vous me conseillez ? = What do you recommend?', key: 'qu\'est-ce que vous me conseillez ?' },
+        { t: 54.5, q: 'L\'eau avec des bulles, c\'est…', a: 'de l\'eau gazeuse', opts: ['de l\'eau gazeuse', 'de l\'eau plate', 'du lait', 'du jus d\'orange'], why: 'Gazeuse = with bubbles. Plate = still.', key: 'de l\'eau plate / gazeuse' },
+        { img: 'gouter', t: 76.4, q: 'Léa mange sa glace…', a: 'sur place', opts: ['sur place', 'à emporter', 'à la maison', 'dans le bus'], why: 'Sur place = here, at the café. À emporter = to take away.', key: 'sur place / à emporter' },
+        { t: 90, q: 'Le repas est fini. Vous voulez payer :', a: 'L\'addition, s\'il vous plaît.', opts: ['L\'addition, s\'il vous plaît.', 'La carte, s\'il vous plaît.', 'Le prix, s\'il vous plaît.', 'La note de musique, merci.'], why: 'In a café or a restaurant you ask for l\'addition.', wrong: { 'La carte, s\'il vous plaît.': 'La carte is the menu: you ask for it before you order.' }, key: 'addition, s\'il vous plaît.' },
+        { t: 90, q: 'Le repas était très bon :', a: 'C\'était délicieux !', opts: ['C\'était délicieux !', 'J\'étais délicieux !', 'C\'est délicieux hier.', 'C\'était délicat.'], why: 'C\'était délicieux = it was delicious (the meal, not you).', wrong: { 'J\'étais délicieux !': 'J\'étais = I was. You were not delicious!', 'C\'était délicat.': 'Délicat = delicate, tricky. Not the same.' }, key: 'c\'était délicieux.' },
     ],
 },
 };

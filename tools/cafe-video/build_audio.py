@@ -1,105 +1,117 @@
-# Builds the voices, the timeline (timeline.json) and the mixed sound track (audio.wav) for the weather video.
-import json, subprocess, wave, os, numpy as np
+# Café video, take 2: whole sentences (no cut-up lines), one clear voice (Piper siwis) for both women,
+# Chloé a little higher. Writes timeline.json (lines, events, mouth amplitude per frame) and audio.wav.
+import json, subprocess, wave, os, re, numpy as np
 D = os.path.dirname(os.path.abspath(__file__))
-SR = 22050
-FPS = 24
-VOICE = {'L': (D + '/voices/fr-siwis-medium/fr-siwis-medium.onnx', 1.1), 'H': (D + '/voices/fr-gilles-low/fr-gilles-low.onnx', 1.08)}
+SR, FPS = 22050, 30
+PIPER = D + '/piper/piper'
+MODEL = D + '/voices/fr-siwis-medium/fr-siwis-medium.onnx'
 
-# scene: id, caption, lines. line: speaker, subtitle FR (**word** = vocab), EN, segments [(text, event)]
+# a line: ('L' or 'C', subtitle FR (**word** = topic word), EN, [(text that triggers, event), ...])
+# a beat: ('beat', seconds, event)   -- an action with no speech
 SCENES = [
  ('matin', 'Le petit-déjeuner · 8 h', [
-   ('H', "Bonjour madame ! Qu'est-ce que je vous sers ?", "Good morning! What can I get you?", [("Bonjour madame ! Qu'est-ce que je vous sers ?", None)]),
-   ('L', "**Je voudrais** un **café crème** et un **jus d'orange**, s'il vous plaît.", "I would like a white coffee and an orange juice, please.", [("Je voudrais un café crème", 'cafe'), ("et un jus d'orange, s'il vous plaît.", 'jus')]),
-   ('H', "Avec du **pain**, du **beurre** et de la **confiture** ?", "With bread, butter and jam?", [("Avec du pain,", 'pain'), ("du beurre", 'beurre'), ("et de la confiture ?", 'confiture')]),
-   ('L', "Oui, très bien. Le café **sans sucre**, s'il vous plaît.", "Yes, fine. The coffee without sugar, please.", [("Oui, très bien.", None), ("Le café sans sucre, s'il vous plaît.", 'nosucre')]),
+   ('beat', 2.2, 'arrive'),
+   ('C', "Bonjour madame ! Qu'est-ce que je vous sers ?", "Good morning! What can I get you?", []),
+   ('L', "**Je voudrais** un **café crème** et un **jus d'orange**, s'il vous plaît.", "I'd like a white coffee and an orange juice, please.", [('café crème', 'n_cafe'), ("jus d'orange", 'n_jus')]),
+   ('C', "Avec du **pain**, du **beurre** et de la **confiture** ?", "With bread, butter and jam?", [('pain', 'n_pain'), ('beurre', 'n_beurre'), ('confiture', 'n_confiture')]),
+   ('L', "Oui, très bien. Le café **sans sucre**, s'il vous plaît.", "Yes, fine. The coffee without sugar, please.", [('sans sucre', 'n_sucre')]),
+   ('C', "Très bien, j'arrive !", "Very good, I'll be right back!", []),
+   ('beat', 5.6, 'serve'),
+   ('L', "Merci beaucoup !", "Thank you very much!", []),
+   ('beat', 1.2, None),
  ]),
  ('midi', 'Le déjeuner · 12 h 30', [
-   ('L', "Bonjour ! Une **table pour deux**, s'il vous plaît. Mon amie arrive.", "Hello! A table for two, please. My friend is on her way.", [("Bonjour ! Une table pour deux, s'il vous plaît.", 'table'), ("Mon amie arrive.", None)]),
-   ('H', "Voici **la carte**. La **formule**, c'est une **entrée** et un **plat principal**.", "Here is the menu. The set menu is a starter and a main course.", [("Voici la carte.", 'carte'), ("La formule, c'est une entrée", 'entree'), ("et un plat principal.", 'plat')]),
-   ('L', "**Qu'est-ce que vous me conseillez ?** **Je suis végétarienne.**", "What do you recommend? I am vegetarian.", [("Qu'est-ce que vous me conseillez ?", None), ("Je suis végétarienne.", 'vege')]),
-   ('H', "Alors, pas de **poulet**, pas de **poisson** : je vous conseille les **pâtes** aux légumes.", "So no chicken, no fish: I recommend the vegetable pasta.", [("Alors, pas de poulet,", 'nopoulet'), ("pas de poisson :", 'nopoisson'), ("je vous conseille les pâtes aux légumes.", 'pates')]),
-   ('L', "Parfait, **je vais prendre** les pâtes. Et **de l'eau gazeuse**.", "Perfect, I'll have the pasta. And some sparkling water.", [("Parfait, je vais prendre les pâtes.", None), ("Et de l'eau gazeuse.", 'eau')]),
+   ('beat', 1.8, 'enter'),
+   ('L', "Bonjour ! Une **table pour deux**, s'il vous plaît. Mon amie arrive.", "Hello! A table for two, please. My friend is on her way.", [('table pour deux', 'n_table')]),
+   ('C', "Bien sûr. Par ici, madame.", "Of course. This way, madam.", []),
+   ('beat', 2.4, 'sit'),
+   ('C', "Voici **la carte**. La **formule**, c'est une **entrée** et un **plat principal**.", "Here is the menu. The set menu is a starter and a main course.", [('Voici', 'menu'), ('entrée', 'n_entree'), ('plat principal', 'n_plat')]),
+   ('L', "**Qu'est-ce que vous me conseillez ?** **Je suis végétarienne.**", "What do you recommend? I'm vegetarian.", [('végétarienne', 'n_vege')]),
+   ('C', "Alors, pas de **poulet**, pas de **poisson** : je vous conseille les **pâtes** aux légumes.", "So no chicken, no fish: I recommend the vegetable pasta.", [('poulet', 'n_poulet'), ('poisson', 'n_poisson'), ('pâtes', 'n_pates')]),
+   ('L', "Parfait, **je vais prendre** les pâtes. Et **de l'eau gazeuse**, s'il vous plaît.", "Perfect, I'll have the pasta. And some sparkling water, please.", [('eau gazeuse', 'n_eau')]),
+   ('beat', 5.6, 'serve'),
+   ('L', "Merci ! Ça a l'air délicieux.", "Thank you! It looks delicious.", []),
+   ('beat', 1.2, None),
  ]),
  ('gouter', 'Le goûter · 16 h', [
-   ('H', "Et pour le **goûter** ? Un **chocolat chaud** ? Une **tarte** ?", "And for an afternoon snack? A hot chocolate? A tart?", [("Et pour le goûter ?", None), ("Un chocolat chaud ?", 'choco'), ("Une tarte ?", 'tarte')]),
-   ('L', "Un chocolat chaud et une **glace** à la **fraise**, **sur place**.", "A hot chocolate and a strawberry ice cream, to have here.", [("Un chocolat chaud", 'choco2'), ("et une glace à la fraise,", 'glace'), ("sur place.", 'surplace')]),
-   ('H', "Et un **gâteau** **à emporter** ?", "And a cake to take away?", [("Et un gâteau à emporter ?", 'gateau')]),
-   ('L', "Non merci. **C'était délicieux !** **L'addition**, s'il vous plaît.", "No thank you. It was delicious! The bill, please.", [("Non merci.", 'nogateau'), ("C'était délicieux !", None), ("L'addition, s'il vous plaît.", 'addition')]),
-   ('H', "Voilà, madame. Bonne journée !", "Here you are, madam. Have a nice day!", [("Voilà, madame.", 'receipt'), ("Bonne journée !", 'wave')]),
+   ('beat', 2.0, 'arrive'),
+   ('C', "Et pour le **goûter** ? Un **chocolat chaud** ? Une **tarte** ?", "And for an afternoon snack? A hot chocolate? A tart?", [('chocolat chaud', 's_choco'), ('tarte', 's_tarte')]),
+   ('L', "Un chocolat chaud et une **glace** à la **fraise**, **sur place**.", "A hot chocolate and a strawberry ice cream, to have here.", [('chocolat chaud', 'n_choco'), ('glace', 'n_glace'), ('sur place', 'n_surplace')]),
+   ('beat', 4.6, 'serve'),
+   ('L', "Mmm… merci !", "Mmm… thank you!", []),
+   ('beat', 1.6, None),
+   ('C', "Et un **gâteau** **à emporter** ?", "And a cake to take away?", [('gâteau', 's_gateau')]),
+   ('L', "Non merci. **C'était délicieux !** **L'addition**, s'il vous plaît.", "No thank you. It was delicious! The bill, please.", [('Non merci', 'no_gateau'), ('délicieux', 'happy'), ("L'addition", 'n_addition')]),
+   ('beat', 3.6, 'bill'),
+   ('C', "Voilà, madame. Bonne journée !", "Here you are, madam. Have a nice day!", []),
+   ('beat', 2.4, 'bye'),
  ]),
 ]
-BEATS = {('matin', -1): (0.4, None), ('midi', -1): (0.3, None), ('gouter', -1): (0.3, None)}
 
+def plain(s): return re.sub(r'\*\*', '', s)
 def synth(text, who, path):
-    model, ls = VOICE[who]
     raw = path + '.raw.wav'
-    subprocess.run([D + '/piper/piper', '-m', model, '--length_scale', str(ls), '-f', raw], input=text.encode(), check=True, capture_output=True)
-    subprocess.run(['ffmpeg', '-y', '-loglevel', 'error', '-i', raw, '-ar', str(SR), '-ac', '1', path], check=True)
+    subprocess.run([PIPER, '-m', MODEL, '--length_scale', '1.08', '--noise_scale', '0.55', '--noise_w', '0.7', '-f', raw], input=text.encode(), check=True, capture_output=True)
+    af = 'rubberband=pitch=1.07:formant=preserved' if who == 'C' else 'anull'
+    subprocess.run(['ffmpeg', '-y', '-loglevel', 'error', '-i', raw, '-af', af, '-ar', str(SR), '-ac', '1', path], check=True)
     with wave.open(path) as w:
         a = np.frombuffer(w.readframes(w.getnframes()), dtype=np.int16).astype(np.float32) / 32768
-    # trim silence at both ends
     nz = np.where(np.abs(a) > 0.01)[0]
-    if len(nz): a = a[max(0, nz[0] - 400): nz[-1] + 800]
-    return a
+    return a[max(0, nz[0] - 300): nz[-1] + 900] if len(nz) else a
 
 os.makedirs(D + '/clips', exist_ok=True)
-track = []      # (start, array, speaker)
-timeline = {'scenes': [], 'events': [], 'subs': []}
-t = 0.0
-for sid, cap, lines in SCENES:
-    s0 = t
-    t += 1.2   # the caption shows first
-    if (sid, -1) in BEATS:
-        pause, ev = BEATS[(sid, -1)]; timeline['events'].append([ev, round(t, 3), sid]); t += pause
-    for li, (who, fr, en, segs) in enumerate(lines):
-        l0 = t
-        for si, (txt, ev) in enumerate(segs):
-            a = synth(txt, who, f'{D}/clips/{sid}_{li}_{si}.wav')
-            if ev: timeline['events'].append([ev, round(t, 3), sid])
-            track.append((t, a, who)); t += len(a) / SR + 0.22
-        timeline['subs'].append({'who': who, 'fr': fr, 'en': en, 'start': round(l0 - 0.1, 3), 'end': round(t + 0.25, 3), 'scene': sid})
-        t += 0.45
-        if (sid, li) in BEATS:
-            pause, ev = BEATS[(sid, li)]
-            if ev: timeline['events'].append([ev, round(t, 3), sid])
-            t += pause
-    t += 0.9
-    timeline['scenes'].append({'id': sid, 'caption': cap, 'start': round(s0, 3), 'end': round(t, 3)})
-total = t + 0.5
-timeline['total'] = round(total, 3)
+track, TLd, t = [], {'scenes': [], 'events': [], 'subs': [], 'lines': []}, 0.0
+for sid, cap, items in SCENES:
+    s0 = t; t += 0.6
+    for n, it in enumerate(items):
+        if it[0] == 'beat':
+            if it[2]: TLd['events'].append([it[2], round(t, 3), sid, it[1]])
+            t += it[1]; continue
+        who, fr, en, trig = it
+        text = plain(fr)
+        a = synth(text, who, f'{D}/clips/{sid}_{n}.wav')
+        dur = len(a) / SR
+        track.append((t, a, who))
+        for sub, ev in trig:   # an event lands where its words are in the sentence
+            i = text.find(sub); assert i >= 0, (sub, text)
+            TLd['events'].append([ev, round(t + dur * (i / max(1, len(text))) + 0.15, 3), sid, 0])
+        TLd['lines'].append({'who': who, 'start': round(t, 3), 'end': round(t + dur, 3), 'scene': sid})
+        TLd['subs'].append({'who': who, 'fr': fr, 'en': en, 'start': round(t - 0.15, 3), 'end': round(t + dur + 0.35, 3), 'scene': sid})
+        t += dur + 0.7
+    t += 0.4
+    TLd['scenes'].append({'id': sid, 'caption': cap, 'start': round(s0, 3), 'end': round(t, 3)})
+total = t
+TLd['total'], TLd['fps'] = round(total, 3), FPS
 
-n = int(total * SR) + 1
+n = int(total * SR) + SR
 voice = np.zeros(n, np.float32)
-amp = {'L': np.zeros(int(total * FPS) + 2), 'H': np.zeros(int(total * FPS) + 2)}
+amp = {k: np.zeros(int(total * FPS) + 2) for k in 'LC'}
 for st, a, who in track:
     i = int(st * SR); voice[i:i + len(a)] += a
     for f in range(int(st * FPS), int((st + len(a) / SR) * FPS) + 1):
-        seg = a[int(f / FPS * SR) - i: int((f + 1) / FPS * SR) - i]
+        seg = a[max(0, int(f / FPS * SR) - i): max(0, int((f + 1) / FPS * SR) - i)]
         if len(seg): amp[who][f] = max(amp[who][f], float(np.sqrt(np.mean(seg ** 2))))
 for k in amp:
-    m = np.percentile(amp[k][amp[k] > 0], 95) if (amp[k] > 0).any() else 1
+    m = np.percentile(amp[k][amp[k] > 0], 90) if (amp[k] > 0).any() else 1
     amp[k] = np.clip(amp[k] / m, 0, 1)
-timeline['amp'] = {k: [round(float(x), 2) for x in v] for k, v in amp.items()}
-timeline['fps'] = FPS
+TLd['amp'] = {k: [round(float(x), 2) for x in v] for k, v in amp.items()}
 
-# ---- sound effects: a quiet café murmur under everything, a cup on a saucer when the drinks come ----
+# a quiet café under everything, a cup on a saucer when things are put on the table
 rng = np.random.default_rng(3)
-def lowpass(x, k):
-    c = np.cumsum(np.concatenate([[0], x])); return (c[k:] - c[:-k]) / k
-sfx = np.zeros(n, np.float32)
-mur = lowpass(rng.standard_normal(n + 400), 60)[:n]; mur = mur / np.max(np.abs(mur))
-mur *= 0.6 + 0.4 * np.sin(np.arange(n) / SR * 2 * np.pi * 0.17)
-sfx += mur * 0.05
-def clink(st, v=0.25):
-    i = int(st * SR); L = int(0.35 * SR); t_ = np.arange(L) / SR
-    x = (np.sin(2 * np.pi * 2200 * t_) + 0.6 * np.sin(2 * np.pi * 3300 * t_)) * np.exp(-t_ * 18)
+def lowpass(x, k): c = np.cumsum(np.concatenate([[0], x])); return (c[k:] - c[:-k]) / k
+mur = lowpass(rng.standard_normal(n + 400), 60)[:n]; mur /= np.max(np.abs(mur))
+sfx = mur * (0.6 + 0.4 * np.sin(np.arange(n) / SR * 2 * np.pi * 0.17)) * 0.045
+def clink(st, v=0.22):
+    i = int(st * SR); L = int(0.35 * SR); tt = np.arange(L) / SR
+    x = (np.sin(2 * np.pi * 2200 * tt) + 0.6 * np.sin(2 * np.pi * 3300 * tt)) * np.exp(-tt * 18)
     x = x[: n - i]; sfx[i:i + len(x)] += x * v
-for e, tt, s in timeline['events']:
-    if e in ('cafe', 'jus', 'eau', 'choco2'): clink(tt + 0.6)
-mix = voice * 0.95 + sfx
-mix = mix / max(1.0, float(np.max(np.abs(mix))) / 0.95)
+for e, tt, s, d in TLd['events']:
+    if e == 'serve':
+        for k in range(3): clink(tt + 2.6 + k * 0.9)
+mix = voice + sfx
+mix /= max(1.0, float(np.max(np.abs(mix))) / 0.95)
 with wave.open(D + '/audio.wav', 'wb') as w:
     w.setnchannels(1); w.setsampwidth(2); w.setframerate(SR); w.writeframes((mix * 32767).astype(np.int16).tobytes())
-json.dump(timeline, open(D + '/timeline.json', 'w'), ensure_ascii=False)
-print('total', round(total, 1), 's;', len(timeline['subs']), 'subtitles;', len(timeline['events']), 'events')
-for s in timeline['scenes']: print(s['id'], s['start'], s['end'])
+json.dump(TLd, open(D + '/timeline.json', 'w'), ensure_ascii=False)
+print('total', round(total, 1), 's')
+for s in TLd['scenes']: print(s['id'], s['start'], s['end'])
