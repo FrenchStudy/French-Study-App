@@ -1,6 +1,7 @@
 // memory-palace.js - the "Memory palace" step in Vocab.
-// Each topic with a palace is a picture of a place cut open (a house, a station, a street of shops).
-// Every word sits in the room where it happens, as an object you can tap.
+// Each topic with a palace is a place cut open (a house, a station, a street of shops), drawn as rooms of big
+// picture tiles: every word sits in the room where it happens, with its 3D picture (js/palace-icons.js,
+// media/palace/; Microsoft Fluent Emoji, MIT). On a phone the rooms stack, three tiles to a row.
 // Modes: Explore (tap anything), Walk through (room by room, in order; each stop is read out, "Play the walk" moves on
 // by itself), Quiz (names hidden: find the object).
 //
@@ -33,26 +34,25 @@ const CSS = `
 .mp-modes button[aria-pressed="true"]{background:#4f46e5;color:#fff}
 .mp-grid{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:16px;align-items:start}
 @media (max-width:1023px){.mp-grid{grid-template-columns:minmax(0,1fr)}}
-.mp-scene{background:#fff;border:1px solid #e2e8f0;border-radius:16px;overflow-x:auto}
-.mp-scene svg{display:block;min-width:780px;width:100%;height:auto}
-.mp-tools{display:flex;flex-wrap:wrap;gap:8px}
-.mp-zoom{display:flex;align-items:center;gap:2px;background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:4px}
-.mp-zoom button{font-weight:800;font-size:16px;color:#334155;background:transparent;border:0;border-radius:9px;min-width:40px;min-height:40px;padding:0 10px;cursor:pointer}
-.mp-zoom button:hover:not(:disabled){background:#f1f5f9}
-.mp-zoom button:disabled{opacity:.35;cursor:default}
-.mp-zoom .mp-fullbtn{font-size:14px;color:#4f46e5}
-.mp-zoom button:focus-visible{outline:3px solid #6366f1;outline-offset:2px}
-.mp-zl{font-size:13px;font-weight:700;color:#64748b;min-width:44px;text-align:center;font-variant-numeric:tabular-nums}
-.mp-full{position:fixed;inset:0;margin:0!important;z-index:60;background:#f8fafc;overflow:auto;display:flex;flex-direction:column;gap:12px;
-  padding:calc(env(safe-area-inset-top,0px) + 12px) max(16px,env(safe-area-inset-right,0px)) calc(env(safe-area-inset-bottom,0px) + 12px) max(16px,env(safe-area-inset-left,0px))}
-.mp-full .mp-grid{flex:1;min-height:0}
-.mp-full .mp-scene{max-height:calc(100vh - 110px);overflow:auto}
-@media (max-width:1023px){.mp-full .mp-scene{max-height:58vh}}
-.mp-full .mp-hint{display:none}
+.mp-scene{background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:12px}
+.mp-frame{background:#334155;border-radius:14px;padding:10px}
+.mp-frame.street{background:#cbd5e1}
+.mp-roof{height:52px;background:#334155;clip-path:polygon(2% 100%,50% 0,98% 100%);display:flex;align-items:flex-end;justify-content:center;padding-bottom:6px}
+.mp-sign{background:#fff;border-radius:8px;padding:3px 14px;font-weight:900;font-size:14px;color:#1e293b;white-space:nowrap}
+.mp-street{text-align:center;font-weight:900;font-size:18px;color:#475569;padding:10px 0 2px}
+.mp-floor{display:flex;gap:10px;margin-bottom:10px}.mp-floor:last-child{margin-bottom:0}
+.mp-room{background:#fff;border-radius:10px;padding:10px 10px 12px;min-width:0;border-bottom:8px solid #e2e8f0}
+.mp-rh{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px;min-height:30px}
+.mp-rn{font-size:13px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#64748b}
+.mp-ren{font-size:12px;color:#94a3b8;text-align:right}
+.mp-tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(108px,1fr));gap:8px}
+@media (max-width:640px){.mp-floor{flex-direction:column}.mp-tiles{grid-template-columns:repeat(3,minmax(0,1fr))}.mp-scene{padding:6px}.mp-frame{padding:6px}}
+.mp-hint{display:none}
 .mp-lock,.mp-lock body{overflow:hidden}
 .mp-hint{font-size:13px;color:#64748b;margin-top:6px}
 .mp-card{background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:16px;display:grid;gap:10px}
 @media (min-width:1024px){.mp-card{position:sticky;top:12px}}
+@media (max-width:1023px){.mp-card{position:sticky;bottom:8px;z-index:5;box-shadow:0 -6px 24px rgba(15,23,42,.18);max-height:46vh;overflow:auto;padding:12px;gap:8px}.mp-card .mp-big{font-size:1.4rem}}
 .mp-eyebrow{font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#4f46e5}
 .mp-big{font-size:1.75rem;font-weight:900;line-height:1.15;overflow-wrap:anywhere}
 .mp-en{font-size:1.1rem;font-weight:700;color:#047857}
@@ -66,86 +66,27 @@ const CSS = `
 .mp-fb{font-weight:700}.mp-fb.ok{color:#047857}.mp-fb.no{color:#be123c}
 .mp-m{color:#0369a1}.mp-f{color:#e11d48}
 .mp-modes button:focus-visible,.mp-btn:focus-visible{outline:3px solid #6366f1;outline-offset:2px}
-.mp-spot{cursor:pointer}.mp-spot:focus{outline:none}
-.mp-spot .d{fill:#fff;stroke:#cbd5e1;stroke-width:2;transition:stroke .15s,fill .15s}
-.mp-spot:hover .d,.mp-spot:focus-visible .d{stroke:#6366f1}
-.mp-spot.on .d{stroke:#4f46e5;stroke-width:4;fill:#eef2ff}
-.mp-spot.right .d{stroke:#059669;stroke-width:4}.mp-spot.wrong .d{stroke:#e11d48;stroke-width:4}
-.mp-spot .em{font-size:27px;text-anchor:middle;dominant-baseline:central;pointer-events:none}
-.mp-spot .ar{font-size:11px;fill:#64748b;text-anchor:middle;pointer-events:none}
-.mp-spot .wd{font-size:12.5px;font-weight:700;text-anchor:middle;pointer-events:none;fill:#0f172a}
-.mp-spot .wd.m{fill:#0369a1}.mp-spot .wd.f{fill:#e11d48}
-.mp-tag{cursor:pointer}.mp-tag rect{fill:#f1f5f9;stroke:#cbd5e1}.mp-tag:hover rect,.mp-tag:focus-visible rect{stroke:#6366f1}
-.mp-tag.on rect{fill:#eef2ff;stroke:#4f46e5;stroke-width:3}.mp-tag.right rect{stroke:#059669;stroke-width:3}.mp-tag.wrong rect{stroke:#e11d48;stroke-width:3}
-.mp-tag text{font-size:13px;font-weight:800;pointer-events:none}.mp-tag:focus{outline:none}
-.mp-quiz .mp-spot .ar,.mp-quiz .mp-spot .wd,.mp-quiz .mp-tag text.lbl{visibility:hidden}
-.mp-quiz .mp-spot.done .ar,.mp-quiz .mp-spot.done .wd,.mp-quiz .mp-tag.done text.lbl{visibility:visible}
-.mp-zone-en{font-size:12px;fill:#64748b}
-@media (prefers-reduced-motion:reduce){.mp-spot .d{transition:none}}
+.mp-spot{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:2px;background:#f8fafc;border:2px solid #e2e8f0;border-radius:14px;padding:8px 4px;cursor:pointer;font:inherit;color:inherit;min-height:124px;transition:border-color .15s,background .15s,transform .15s}
+.mp-spot:hover{border-color:#a5b4fc}
+.mp-spot,.mp-tag{scroll-margin-top:84px}
+.mp-spot:focus-visible,.mp-tag:focus-visible{outline:3px solid #6366f1;outline-offset:2px}
+.mp-spot img{width:64px;height:64px;object-fit:contain;display:block}
+.mp-spot .em{font-size:46px;line-height:64px;height:64px;display:block}
+.mp-spot .ar{font-size:12px;color:#64748b;min-height:15px;line-height:15px}
+.mp-spot .wd{font-size:15px;font-weight:800;line-height:1.15;text-align:center;color:#0f172a;overflow-wrap:anywhere}
+.mp-spot .wd.m,.mp-tag.m{color:#0369a1}.mp-spot .wd.f,.mp-tag.f{color:#e11d48}
+.mp-spot.on{border-color:#4f46e5;background:#eef2ff;transform:scale(1.04)}
+.mp-spot.right{border-color:#059669;background:#ecfdf5}.mp-spot.wrong{border-color:#e11d48;background:#fff1f2}
+.mp-tag{font:inherit;font-weight:800;font-size:14px;border:2px solid #cbd5e1;background:#f1f5f9;color:#0f172a;border-radius:999px;padding:4px 12px;min-height:32px;cursor:pointer}
+.mp-tag.on{border-color:#4f46e5;background:#eef2ff}.mp-tag.right{border-color:#059669}.mp-tag.wrong{border-color:#e11d48}
+.mp-quiz .mp-spot:not(.done) .ar,.mp-quiz .mp-spot:not(.done) .wd,.mp-quiz .mp-tag:not(.done) .lbl{visibility:hidden}
+.mp-quiz .mp-tag:not(.done)::after{content:'?';font-weight:900;color:#64748b}
+@media (max-width:640px){.mp-spot{min-height:112px;padding:6px 2px}.mp-spot img{width:56px;height:56px}.mp-spot .em{font-size:40px;line-height:56px;height:56px}.mp-spot .wd{font-size:14px}}
+@media (prefers-reduced-motion:reduce){.mp-spot{transition:none}.mp-spot.on{transform:none}}
 `;
 function injectCss() {
     if (document.getElementById('mp-css')) return;
     const s = document.createElement('style'); s.id = 'mp-css'; s.textContent = CSS; document.head.appendChild(s);
-}
-
-// ---------- drawing ----------
-function drawBackdrop(svg, P) {
-    const b = P.backdrop || {};
-    mk('rect', { x: 0, y: 0, width: P.w, height: P.h, fill: '#e0f2fe' }, svg);
-    mk('rect', { x: 0, y: b.ground || P.h, width: P.w, height: P.h - (b.ground || P.h), fill: '#d1e7d6' }, svg);
-    if (b.street) {
-        const sy = typeof b.street === 'number' ? b.street : 718;
-        mk('rect', { x: 0, y: 0, width: P.w, height: P.h, fill: b.sky || '#f1f5f9' }, svg);
-        mk('rect', { x: 0, y: sy, width: P.w, height: P.h - sy, fill: b.streetColor || '#cbd5e1' }, svg);
-        if (!b.noDashes) for (let x = 30; x < P.w; x += 120) mk('rect', { x, y: sy + 82, width: 60, height: 8, rx: 4, fill: '#fff' }, svg);
-        mk('text', { x: P.w / 2, y: sy + 52, 'text-anchor': 'middle', style: 'font-size:22px;font-weight:900;fill:#475569' }, svg).textContent = b.streetName || 'Rue de la Gourmandise';
-    }
-    if (b.roof) {
-        const [x1, x2, top] = b.roof;
-        if (b.arch) mk('path', { d: `M${x1 - 8} ${top + 10} Q${(x1 + x2) / 2} ${top - 70} ${x2 + 8} ${top + 10} Z`, fill: '#334155' }, svg);
-        else mk('path', { d: `M${x1 - 14} ${top} L${(x1 + x2) / 2} ${top - 64} L${x2 + 14} ${top} Z`, fill: '#334155' }, svg);
-        mk('rect', { x: x1 - 6, y: top, width: x2 - x1 + 12, height: (b.ground || P.h) - top + 8, rx: 4, fill: '#334155' }, svg);
-        if (b.sign) {
-            const cx = (x1 + x2) / 2;
-            mk('rect', { x: cx - 90, y: top - 50, width: 180, height: 32, rx: 8, fill: '#fff' }, svg);
-            mk('text', { x: cx, y: top - 29, 'text-anchor': 'middle', style: 'font-size:15px;font-weight:900;fill:#1e293b' }, svg).textContent = b.sign;
-        }
-    }
-    if (b.block) { const [x1, x2, top] = b.block; mk('rect', { x: x1 - 6, y: top, width: x2 - x1 + 12, height: (b.ground || P.h) - top + 8, rx: 4, fill: '#475569' }, svg); }
-    if (b.tower) { const [x1, x2] = b.tower; mk('rect', { x: x1 - 6, y: 112, width: x2 - x1 + 12, height: 364, rx: 4, fill: '#475569' }, svg);
-        mk('rect', { x: x2 - 70, y: 40, width: 46, height: 76, rx: 4, fill: '#475569' }, svg); mk('rect', { x: x2 - 80, y: 30, width: 66, height: 16, rx: 4, fill: '#334155' }, svg); }
-}
-
-// positions of the objects in each zone: rows of evenly spaced spots
-function layout(P, items) {
-    const pos = {};
-    P.zones.forEach(z => {
-        const its = items.filter(it => it.z === z.id);
-        if (!its.length) return;
-        const cols = Math.max(1, Math.min(its.length, z.cols || Math.floor(z.w / 82)));
-        const rows = Math.ceil(its.length / cols);
-        its.forEach((it, i) => {
-            const r = Math.floor(i / cols), inRow = Math.min(cols, its.length - r * cols), c = i % cols;
-            const step = z.w / inRow;
-            pos[it.k] = [z.x + step * (c + 0.5), z.y + (z.shop ? 76 : 64) + r * 108, step];
-        });
-        z._rows = rows;
-    });
-    return pos;
-}
-
-// A word or phrase on at most two lines that fit the object's space (the full phrase shows when tapped)
-function wrapLabel(text, max) {
-    if (text.length <= max || !text.includes(' ')) return [text];
-    const lines = [''];
-    text.split(' ').forEach(w => {
-        const cur = lines[lines.length - 1];
-        if (!cur || (cur + ' ' + w).length <= max) lines[lines.length - 1] = cur ? cur + ' ' + w : w;
-        else lines.push(w);
-    });
-    if (lines.length <= 2) return lines;
-    const rest = lines.slice(1).join(' ');
-    return [lines[0], rest.length <= max ? rest : rest.slice(0, max - 1).trimEnd() + '…'];
 }
 
 // ---------- the step ----------
@@ -175,111 +116,70 @@ function mount(root, themeId, deckWords, opts = {}) {
                     <button type="button" data-m="walk" aria-pressed="false">Walk through</button>
                     <button type="button" data-m="quiz" aria-pressed="false">Quiz</button>
                 </div>
-                <div class="mp-zoom" role="group" aria-label="Picture size">
-                    <button type="button" data-z="-1" aria-label="Smaller">−</button>
-                    <span class="mp-zl" aria-live="polite">100%</span>
-                    <button type="button" data-z="1" aria-label="Bigger">+</button>
-                    <button type="button" class="mp-fullbtn" data-full aria-pressed="false">⤢ Enlarge</button>
-                </div>
             </div>
         </div>
         <div class="mp-grid">
-            <div><div class="mp-scene"></div><p class="mp-hint">Tap an object to see and hear the word. Use + and − or ⤢ Enlarge to make the picture bigger; slide it sideways on a phone.</p></div>
+            <div><div class="mp-scene"></div><p class="mp-hint">Tap a picture to see and hear the word. Each room is a place where the words happen.</p></div>
             <div class="mp-card" aria-live="polite"></div>
         </div>`;
     const sceneBox = root.querySelector('.mp-scene');
     const card = root.querySelector('.mp-card');
-    const svg = mk('svg', { viewBox: `0 0 ${P.w} ${P.h}`, role: 'img', 'aria-label': `${P.title}: one object for each word` });
-    sceneBox.appendChild(svg);
-    drawBackdrop(svg, P);
-
-    // rooms
-    P.zones.forEach(z => {
-        if (z.shop) {
-            mk('rect', { x: z.x, y: z.y, width: z.w, height: z.h, rx: 6, fill: '#fff', stroke: '#cbd5e1' }, svg);
-            mk('rect', { x: z.x, y: z.y, width: z.w, height: 30, rx: 6, fill: z.shop }, svg);
-            for (let x = z.x + 10; x < z.x + z.w - 10; x += 36) mk('path', { d: `M${x} 0 l18 0 l-9 12 z`, transform: `translate(0 ${z.y + 30})`, fill: z.shop, opacity: 0.55 }, svg);
-        } else {
-            mk('rect', { x: z.x, y: z.y, width: z.w, height: z.h, rx: 4, fill: '#ffffff' }, svg);
-            mk('rect', { x: z.x, y: z.y + z.h - 12, width: z.w, height: 12, fill: '#e2e8f0' }, svg);
-        }
-    });
     const spots = new Map();
-    function hookUp(g, it) {
-        g.addEventListener('click', () => pick(it));
-        g.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(it); } });
-        spots.set(it, g);
+    function hookUp(el, it) {
+        el.addEventListener('click', () => pick(it));
+        spots.set(it, el);
     }
-    // room name tags (a word themselves when the zone has k)
-    P.zones.forEach(z => {
-        const tag = tags.find(t => t.z === z.id);
-        const label = tag ? tag.w.fr : z.fr;
-        const y = z.y + (z.shop ? 20 : 20);
-        if (tag) {
-            const g = mk('g', { class: 'mp-tag', tabindex: 0, role: 'button', 'aria-label': `${label}: ${tag.w.en}` }, svg);
-            const wpx = Math.max(70, label.length * 8 + 22);
-            mk('rect', { x: z.x + 8, y: y - 15, width: wpx, height: 24, rx: 12 }, g);
-            mk('text', { x: z.x + 8 + wpx / 2, y: y + 2, 'text-anchor': 'middle', class: 'lbl', fill: gc(tag.w) === 'f' ? '#e11d48' : gc(tag.w) === 'm' ? '#0369a1' : '#0f172a' }, g).textContent = label;
-            if (z.shop) g.querySelector('rect').setAttribute('style', 'fill:#fff');
-            hookUp(g, tag);
-        } else {
-            mk('text', { x: z.x + 12, y: y + 2, style: `font-size:13px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;fill:${z.shop ? '#fff' : '#64748b'}` }, svg).textContent = label;
-        }
-        if (z.w > 200) mk('text', { x: z.x + z.w - 12, y: y + 2, 'text-anchor': 'end', class: 'mp-zone-en', style: z.shop ? 'fill:#fff' : '' }, svg).textContent = z.en;
+    const icon = (e) => {
+        const f = window.PALACE_ICONS && PALACE_ICONS[e];
+        return f ? `<img src="media/palace/${f}.webp" alt="" loading="lazy" decoding="async">` : `<span class="em" aria-hidden="true">${esc(e || '•')}</span>`;
+    };
+    // floors: rooms side by side when they sit at the same height in the old picture
+    const zs = P.zones.slice().sort((a, b) => a.y - b.y || a.x - b.x), floors = [];
+    zs.forEach(z => { const f = floors[floors.length - 1]; if (f && Math.abs(f[0].y - z.y) < 40) f.push(z); else floors.push([z]); });
+    floors.forEach(f => f.sort((a, b) => a.x - b.x));
+    const b = P.backdrop || {};
+    const frame = document.createElement('div');
+    frame.className = 'mp-frame' + (b.street ? ' street' : '');
+    floors.forEach(f => {
+        const fl = document.createElement('div'); fl.className = 'mp-floor';
+        f.forEach(z => {
+            const its = items.filter(it => it.z === z.id), tag = tags.find(t => t.z === z.id);
+            if (!its.length && !tag) return;
+            const room = document.createElement('section');
+            room.className = 'mp-room';
+            room.style.flex = `${z.w} 1 0`;
+            if (z.shop) room.style.borderTop = `8px solid ${z.shop}`;
+            const head = document.createElement('div'); head.className = 'mp-rh';
+            if (tag) {
+                const t = document.createElement('button');
+                t.type = 'button'; t.className = 'mp-tag ' + gc(tag.w); t.setAttribute('aria-label', `${tag.w.fr}: ${tag.w.en}`);
+                t.innerHTML = `<span class="lbl">${esc(tag.w.fr)}</span>`;
+                head.appendChild(t); hookUp(t, tag);
+            } else head.insertAdjacentHTML('beforeend', `<span class="mp-rn">${esc(z.fr)}</span>`);
+            head.insertAdjacentHTML('beforeend', `<span class="mp-ren">${esc(z.en)}</span>`);
+            room.appendChild(head);
+            const tiles = document.createElement('div'); tiles.className = 'mp-tiles';
+            its.forEach(it => {
+                const w = it.w, m = /^(le\/la |le |la |les |l['’]|un |une )(.*)$/i.exec(w.fr);
+                const el = document.createElement('button');
+                el.type = 'button'; el.className = 'mp-spot'; el.setAttribute('aria-label', `${w.fr}: ${w.en}`);
+                el.innerHTML = `${icon(it.e)}<span class="ar">${esc(m ? m[1].trim() : '')}</span><span class="wd ${gc(w)}">${esc(m ? m[2] : w.fr)}</span>`;
+                tiles.appendChild(el); hookUp(el, it);
+            });
+            room.appendChild(tiles);
+            fl.appendChild(room);
+        });
+        if (fl.children.length) frame.appendChild(fl);
     });
-    // objects
-    const pos = layout(P, items);
-    items.forEach(it => {
-        const [x, y] = pos[it.k];
-        const w = it.w;
-        const m = /^(le\/la |le |la |les |l['’]|un |une )(.*)$/i.exec(w.fr);
-        const art = m ? m[1].trim() : '';
-        const word = m ? m[2] : w.fr;
-        const g = mk('g', { class: 'mp-spot', tabindex: 0, role: 'button', 'aria-label': `${w.fr}: ${w.en}` }, svg);
-        mk('circle', { cx: x, cy: y, r: 26, class: 'd' }, g);
-        mk('text', { x, y: y + 1, class: 'em' }, g).textContent = it.e;
-        mk('text', { x, y: y + 42, class: 'ar' }, g).textContent = art;
-        const parts = wrapLabel(word, Math.max(12, Math.floor((pos[it.k][2] || 90) / 7.2)));
-        parts.forEach((p, i) => mk('text', { x, y: y + 57 + i * 14, class: 'wd ' + gc(w) }, g).textContent = p);
-        hookUp(g, it);
-    });
+    if (b.roof || b.sign) {
+        const roof = document.createElement('div'); roof.className = 'mp-roof';
+        roof.innerHTML = `<span class="mp-sign">${esc(b.sign || P.title)}</span>`;
+        sceneBox.appendChild(roof);
+    }
+    sceneBox.appendChild(frame);
+    if (b.street) sceneBox.insertAdjacentHTML('beforeend', `<div class="mp-street">${esc(b.streetName || '')}</div>`);
 
     // ---------- modes ----------
-    // ---------- size: zoom steps and a full-screen view ----------
-    const ZOOMS = [1, 1.25, 1.5, 2, 2.5];
-    let zi = 0;
-    function applyZoom(keepCentre) {
-        const z = ZOOMS[zi];
-        const cx = sceneBox.scrollLeft + sceneBox.clientWidth / 2, cy = sceneBox.scrollTop + sceneBox.clientHeight / 2;
-        const oldW = svg.clientWidth || 1, oldH = svg.clientHeight || 1;
-        svg.style.width = (z * 100) + '%';
-        svg.style.minWidth = Math.round(780 * z) + 'px';
-        root.querySelector('.mp-zl').textContent = Math.round(z * 100) + '%';
-        root.querySelector('[data-z="-1"]').disabled = zi === 0;
-        root.querySelector('[data-z="1"]').disabled = zi === ZOOMS.length - 1;
-        if (keepCentre) {   // keep the same spot in the middle while zooming
-            const kx = svg.clientWidth / oldW, ky = svg.clientHeight / oldH;
-            sceneBox.scrollLeft = cx * kx - sceneBox.clientWidth / 2;
-            sceneBox.scrollTop = cy * ky - sceneBox.clientHeight / 2;
-        }
-    }
-    root.querySelectorAll('[data-z]').forEach(b => b.addEventListener('click', () => {
-        zi = Math.max(0, Math.min(ZOOMS.length - 1, zi + Number(b.dataset.z)));
-        applyZoom(true);
-    }));
-    const fullBtn = root.querySelector('[data-full]');
-    function setFull(on) {
-        root.classList.toggle('mp-full', on);
-        document.documentElement.classList.toggle('mp-lock', on);
-        fullBtn.setAttribute('aria-pressed', on);
-        fullBtn.textContent = on ? '✕ Close' : '⤢ Enlarge';
-        if (on && zi === 0 && window.innerWidth < 700) { zi = 1; }
-        applyZoom(false);
-        fullBtn.focus();
-    }
-    fullBtn.addEventListener('click', () => setFull(!root.classList.contains('mp-full')));
-    root.addEventListener('keydown', (e) => { if (e.key === 'Escape' && root.classList.contains('mp-full')) setFull(false); });
-    applyZoom(false);
 
     let mode = 'explore', quiz = null;
     const modeBtns = root.querySelectorAll('.mp-modes button');
@@ -289,10 +189,10 @@ function mount(root, themeId, deckWords, opts = {}) {
         spots.forEach(g => g.classList.remove('on'));
         if (!it) return;
         const g = spots.get(it); g.classList.add('on');
-        const bb = g.getBBox(), px = (bb.x + bb.width / 2) / P.w * svg.clientWidth, py = (bb.y + bb.height / 2) / P.h * svg.clientHeight;
-        const left = sceneBox.scrollWidth > sceneBox.clientWidth ? Math.max(0, px - sceneBox.clientWidth / 2) : 0;
-        const top = sceneBox.scrollHeight > sceneBox.clientHeight ? Math.max(0, py - sceneBox.clientHeight / 2) : 0;
-        if (left || top || sceneBox.scrollLeft || sceneBox.scrollTop) sceneBox.scrollTo({ left, top, behavior: 'smooth' });
+        // on a phone the word card sits at the bottom of the screen, so the tile goes to the top half
+        const r = g.getBoundingClientRect(), narrow = window.innerWidth < 1024;
+        const limit = narrow ? window.innerHeight * 0.5 : window.innerHeight;
+        if (r.top < 70 || r.bottom > limit) g.scrollIntoView({ block: narrow ? 'start' : 'center', behavior: 'smooth' });
     }
     // Auto walk: speaks each stop and moves on by itself until paused
     let autoTimer = null;
@@ -302,7 +202,7 @@ function mount(root, themeId, deckWords, opts = {}) {
         stopAuto();
         mode = m;
         modeBtns.forEach(b => b.setAttribute('aria-pressed', b.dataset.m === m));
-        svg.classList.toggle('mp-quiz', m === 'quiz');
+        sceneBox.classList.toggle('mp-quiz', m === 'quiz');
         clearMarks();
         if (m === 'explore') intro();
         if (m === 'walk') show(0, true);

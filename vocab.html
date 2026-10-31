@@ -1386,7 +1386,7 @@
         function loadPalaces() {
             if (window.MemoryPalace) return Promise.resolve();
             const one = (src) => new Promise((ok, fail) => { const el = document.createElement('script'); el.src = src; el.onload = ok; el.onerror = () => fail(new Error('Could not load ' + src)); document.head.appendChild(el); });
-            palaceLoading = palaceLoading || one('js/palaces-data.js').then(() => one('js/palaces-data-2.js')).then(() => one('js/memory-palace.js')).catch(e => { palaceLoading = null; throw e; });
+            palaceLoading = palaceLoading || one('js/palaces-data.js').then(() => one('js/palaces-data-2.js')).then(() => one('js/palace-icons.js')).then(() => one('js/memory-palace.js')).catch(e => { palaceLoading = null; throw e; });
             return palaceLoading;
         }
         function stepsFor(tp) {
