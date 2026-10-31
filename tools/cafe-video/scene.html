@@ -1,0 +1,160 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<style>
+html,body{margin:0;padding:0;background:#000;overflow:hidden}
+#stage{position:relative;width:1280px;height:720px;overflow:hidden;font-family:Inter,'DejaVu Sans',sans-serif}
+#svg{position:absolute;inset:0}
+#sub{position:absolute;left:0;right:0;bottom:0;padding:14px 60px 18px;background:linear-gradient(transparent,rgba(20,12,6,.86) 28%);text-align:center;color:#fff}
+#sub .who{display:inline-block;font-size:17px;font-weight:700;padding:2px 12px;border-radius:999px;margin-bottom:6px;letter-spacing:.03em}
+#sub .fr{font-size:32px;font-weight:600;line-height:1.25;text-shadow:0 2px 6px rgba(0,0,0,.6)}
+#sub .fr b{color:#FFD54A;font-weight:800}
+#sub .en{font-size:21px;color:#e6dccf;font-style:italic;margin-top:4px;text-shadow:0 1px 4px rgba(0,0,0,.6)}
+#cap{position:absolute;color:#fff;font-weight:800;white-space:nowrap;text-shadow:0 3px 12px rgba(0,0,0,.55);transform-origin:left top}
+#black{position:absolute;inset:0;background:#000;pointer-events:none}
+</style></head>
+<body><div id="stage"><svg id="svg" width="1280" height="720" viewBox="0 0 1280 720"></svg><div id="cap"></div><div id="sub"></div><div id="black"></div></div>
+<script>
+let TL = null, T = 0, SC = null;
+const cl = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
+const ease = x => { x = cl(x); return x < .5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2; };
+const back = x => { x = cl(x); const c = 1.7; return 1 + (c + 1) * Math.pow(x - 1, 3) + c * Math.pow(x - 1, 2); };
+const mix = (a, b, k) => a + (b - a) * cl(k);
+function mixc(c1, c2, k) { const p = c => [1, 3, 5].map(i => parseInt(c.slice(i, i + 2), 16)); const A = p(c1), B = p(c2); return '#' + A.map((v, i) => Math.round(mix(v, B[i], k)).toString(16).padStart(2, '0')).join(''); }
+const ev = (name) => { const e = TL.events.find(e => e[0] === name && e[2] === SC.id); return e ? e[1] : 1e9; };
+const since = (name) => T - ev(name);
+const amp = (who) => TL.amp[who][Math.round(T * TL.fps)] || 0;
+
+// ---------- drawn things: centre x, bottom y ----------
+const D = {
+  jus: (x, y) => `<g transform="translate(${x - 30},${y - 96})"><defs><linearGradient id="oj" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFB547"/><stop offset="1" stop-color="#F57C00"/></linearGradient></defs><path d="M4,10 L56,10 L50,92 Q30,98 10,92Z" fill="#FFF8EC" stroke="#E7C9A0" stroke-width="2"/><path d="M7,26 L53,26 L50,90 Q30,95 10,90Z" fill="url(#oj)"/><circle cx="52" cy="12" r="14" fill="#FFB547" stroke="#fff" stroke-width="3"/><path d="M14,30 L17,84" stroke="#fff" stroke-opacity=".6" stroke-width="4" stroke-linecap="round"/></g>`,
+  confiture: (x, y) => `<g transform="translate(${x - 36},${y - 84})"><rect x="6" y="18" width="60" height="66" rx="12" fill="#C2185B"/><rect x="6" y="18" width="60" height="66" rx="12" fill="#fff" opacity=".12"/><rect x="2" y="6" width="68" height="16" rx="4" fill="#E53935"/><path d="M4,10 h64" stroke="#fff" stroke-width="3" stroke-dasharray="6 6"/><rect x="14" y="42" width="44" height="24" rx="4" fill="#FFF3E0"/><path d="M14,30 v44" stroke="#fff" stroke-opacity=".4" stroke-width="5" stroke-linecap="round"/></g>`,
+  sucre: (x, y) => `<g transform="translate(${x - 34},${y - 52})" stroke="#CFD8DC" stroke-width="1.5" fill="#fff"><rect x="2" y="24" width="26" height="26" rx="4"/><rect x="34" y="24" width="26" height="26" rx="4"/><rect x="18" y="0" width="26" height="26" rx="4"/></g>`,
+  carte: (x, y) => `<g transform="translate(${x - 70},${y - 110})"><path d="M4,10 L68,0 L68,104 L4,110Z" fill="#7B3F00"/><path d="M68,0 L136,10 L136,110 L68,104Z" fill="#8D4A0B"/><path d="M14,18 L62,12 L62,96 L14,100Z M76,12 L126,18 L126,100 L76,96Z" fill="#FFF8E7"/><text x="38" y="40" text-anchor="middle" font-size="13" font-weight="800" fill="#7B3F00" transform="rotate(-5,38,40)">MENU</text><path d="M22,54 h32 M22,66 h28 M22,78 h30 M84,34 h34 M84,46 h28 M84,58 h32 M84,70 h26" stroke="#B08968" stroke-width="3" stroke-linecap="round"/></g>`,
+  plat: (x, y) => `<g transform="translate(${x - 70},${y - 64})"><ellipse cx="70" cy="54" rx="68" ry="10" fill="#E0E5EA"/><ellipse cx="70" cy="50" rx="66" ry="10" fill="#fff" stroke="#CFD8DC"/><path d="M14,48 Q14,0 70,0 Q126,0 126,48Z" fill="#CFD8DC"/><path d="M22,46 Q24,8 70,6" stroke="#fff" stroke-width="5" fill="none" stroke-linecap="round"/><circle cx="70" cy="0" r="7" fill="#90A4AE"/></g>`,
+  eau: (x, y) => `<g transform="translate(${x - 26},${y - 120})"><defs><linearGradient id="bt" x1="0" x2="1"><stop offset="0" stop-color="#7CC4EE"/><stop offset=".5" stop-color="#BDE6FB"/><stop offset="1" stop-color="#5AA9DA"/></linearGradient></defs><path d="M18,0 h16 v14 q18,10 18,30 v68 q0,8 -8,8 h-36 q-8,0 -8,-8 v-68 q0,-20 18,-30z" fill="url(#bt)"/><rect x="16" y="-4" width="20" height="8" rx="2" fill="#E53935"/><rect x="2" y="56" width="48" height="26" rx="3" fill="#fff" opacity=".9"/><text x="26" y="73" text-anchor="middle" font-size="11" font-weight="800" fill="#1976D2">GAZ</text>${[0,1,2,3,4,5].map(i => `<circle cx="${12 + (i * 7) % 28}" cy="${100 - ((T * 40 + i * 15) % 40)}" r="2.5" fill="#fff" opacity=".85"/>`).join('')}</g>`,
+  mug: (x, y) => `<g transform="translate(${x - 40},${y - 90})"><path d="M66,38 q20,0 20,18 q0,18 -20,18" stroke="#8D6E63" stroke-width="8" fill="none"/><path d="M4,30 L70,30 L64,88 Q37,94 10,88Z" fill="#A1887F"/><ellipse cx="37" cy="30" rx="33" ry="8" fill="#5D4037"/><path d="M14,28 q8,-22 23,-18 q15,-10 23,6 q8,4 4,12z" fill="#FFFDF7"/>${[0, 1].map(i => `<path d="M${26 + i * 22},${4 - ((T * 18 + i * 9) % 14)} q-6,-8 0,-16" stroke="#fff" stroke-opacity=".7" stroke-width="3" fill="none"/>`).join('')}</g>`,
+  table: (x, y) => `<g transform="translate(${x - 40},${y - 54})"><path d="M0,54 L20,0 L60,0 L80,54Z" fill="#2E7D32"/><text x="40" y="34" text-anchor="middle" font-size="12" font-weight="800" fill="#fff">RÉSERVÉ</text><text x="40" y="48" text-anchor="middle" font-size="12" font-weight="800" fill="#FFD54A">2</text></g>`,
+  cross: (x, y, k) => `<g opacity="${k}" stroke="#E53935" stroke-width="10" stroke-linecap="round"><path d="M${x - 38},${y - 92} L${x + 38},${y - 16} M${x + 38},${y - 92} L${x - 38},${y - 16}"/></g>`,
+};
+const img = (f, x, y, s) => `<image href="pics/${f}.png" x="${x - s / 2}" y="${y - s}" width="${s}" height="${s}"/>`;
+const tag = (t, x, y, k = 1) => `<g opacity="${k}"><rect x="${x - t.length * 4.4 - 8}" y="${y + 6}" width="${t.length * 8.8 + 16}" height="24" rx="12" fill="#3E2723" opacity=".88"/><text x="${x}" y="${y + 23}" text-anchor="middle" font-size="15" font-weight="700" fill="#FFE9B0">${t}</text></g>`;
+// an object on the table: pops in at its event; gone: hidden after that event
+function item(evn, draw, x, y, label, opt = {}) {
+  const s = since(evn); if (s < 0) return '';
+  if (opt.until && since(opt.until) > 0.4) return '';
+  const k = back(s / 0.45), fadeOut = opt.fade ? 1 - cl((s - opt.fade) / 0.6) : 1;
+  if (fadeOut <= 0) return '';
+  const crossK = opt.cross ? cl((since(opt.cross) - 0.1) / 0.3) : 0;
+  return `<g opacity="${fadeOut}"><g transform="translate(${x},${y}) scale(${k}) translate(${-x},${-y})">${draw(x, y)}</g>${crossK > 0 ? D.cross(x, y, crossK) : ''}${tag(label, x, y, cl(s / 0.4))}</g>`;
+}
+
+// ---------- the café ----------
+function room() {
+  const sky = { matin: ['#FDE6C8', '#CFE6F5'], midi: ['#8EC8F0', '#D8EEFA'], gouter: ['#F6B36B', '#FBD9A8'] }[SC.id];
+  let s = `<defs><linearGradient id="wall" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F3E3C7"/><stop offset="1" stop-color="#E8D2AE"/></linearGradient>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${sky[0]}"/><stop offset="1" stop-color="${sky[1]}"/></linearGradient>
+    <linearGradient id="marble" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FAFAFA"/><stop offset="1" stop-color="#E3E6EA"/></linearGradient></defs>
+    <rect width="1280" height="720" fill="url(#wall)"/>
+    <rect y="380" width="1280" height="100" fill="#8D5B3A"/>${[...Array(16)].map((_, i) => `<rect x="${i * 80 + 8}" y="392" width="64" height="76" rx="4" fill="none" stroke="#6F4329" stroke-width="3"/>`).join('')}
+    <rect y="480" width="1280" height="240" fill="#5D3A24"/>`;
+  // window onto the street
+  s += `<rect x="50" y="50" width="330" height="290" rx="6" fill="url(#sky)"/>
+    <g fill="${SC.id === 'gouter' ? '#C9A27A' : '#D9C2A0'}"><rect x="60" y="150" width="90" height="190"/><rect x="160" y="120" width="110" height="220"/><rect x="280" y="170" width="90" height="170"/></g>
+    <g fill="#8FB8D6">${[0, 1, 2].map(c => [0, 1, 2, 3].map(r => `<rect x="${178 + c * 30}" y="${140 + r * 44}" width="16" height="26"/>`).join('')).join('')}${[0, 1].map(c => [0, 1, 2].map(r => `<rect x="${74 + c * 34}" y="${170 + r * 48}" width="16" height="26"/>`).join('')).join('')}</g>
+    <path d="M150,120 L215,96 L280,120Z" fill="#7A8794"/>
+    <rect x="50" y="50" width="330" height="290" rx="6" fill="none" stroke="#6F4329" stroke-width="12"/><path d="M215,50 V340 M50,190 H380" stroke="#6F4329" stroke-width="8"/>
+    ${[...Array(8)].map((_, i) => `<path d="M${50 + i * 41.25},40 h41.25 v26 q-20.6,14 -41.25,0z" fill="${i % 2 ? '#fff' : '#C62828'}"/>`).join('')}`;
+  // chalkboard
+  s += `<rect x="440" y="60" width="290" height="250" rx="8" fill="#2F3B35" stroke="#8D5B3A" stroke-width="10"/>
+    <g fill="#F4F1E8" font-family="'Comic Sans MS','DejaVu Sans',sans-serif"><text x="585" y="104" text-anchor="middle" font-size="30" font-weight="700">La carte</text>
+    <text x="466" y="146" font-size="18">Formule midi ........ 15 €</text><text x="466" y="174" font-size="15" opacity=".85">entrée + plat principal</text>
+    <text x="466" y="208" font-size="18">Café crème ........... 3 €</text><text x="466" y="238" font-size="18">Chocolat chaud ...... 4 €</text><text x="466" y="268" font-size="18">Tarte du jour ........ 5 €</text></g>`;
+  // lamps
+  s += [600, 1000].map(x => `<line x1="${x}" y1="0" x2="${x}" y2="30" stroke="#333" stroke-width="3"/><path d="M${x - 34},62 Q${x},18 ${x + 34},62Z" fill="#2E7D5B"/><ellipse cx="${x}" cy="64" rx="18" ry="7" fill="#FFE9A8"/>`).join('');
+  // counter and coffee machine behind Hugo
+  s += `<rect x="760" y="330" width="520" height="150" fill="#6F4329"/><rect x="760" y="318" width="520" height="16" fill="#C7B8A3"/>
+    <rect x="1160" y="236" width="96" height="84" rx="8" fill="#B0BEC5"/><rect x="1172" y="250" width="72" height="30" rx="4" fill="#37474F"/><circle cx="1208" cy="300" r="7" fill="#E53935"/>
+    <g fill="#fff">${[0, 1, 2].map(i => `<rect x="${790 + i * 30}" y="300" width="22" height="18" rx="3"/>`).join('')}</g>`;
+  return s;
+}
+const CH = { L: { x: 395, top: 150, size: 360, body: '#b11f1f' }, H: { x: 1010, top: 96, size: 400, body: '#e8e9e6' } };
+function person(who) {
+  const c = CH[who], a = amp(who), m = a < 0.06 ? 'smile' : a < 0.45 ? 'laugh' : 'agape';
+  const bob = Math.sin(T * 2 + (who === 'H' ? 1 : 0)) * 2, x0 = c.x - c.size / 2, y0 = c.top + bob;
+  const name = who === 'L' ? 'lea' : 'hugo', bw = c.size * 0.6;
+  let s = `<rect x="${c.x - bw / 2}" y="${y0 + c.size * 0.98}" width="${bw}" height="${720 - y0 - c.size * 0.98}" rx="20" fill="${c.body}"/>`;
+  if (who === 'H') s += `<rect x="${c.x - bw * 0.36}" y="${y0 + c.size * 1.04}" width="${bw * 0.72}" height="400" rx="10" fill="#263238"/><path d="M${c.x - bw * 0.36},${y0 + c.size * 1.06} L${c.x - bw / 2 + 8},${y0 + c.size * 0.93} M${c.x + bw * 0.36},${y0 + c.size * 1.06} L${c.x + bw / 2 - 8},${y0 + c.size * 0.93}" stroke="#263238" stroke-width="8"/>`;
+  s += `<image href="chars/${name}-${m}.svg" x="${x0}" y="${y0}" width="${c.size}" height="${c.size}"/>`;
+  return s;
+}
+function bubble(items, k, crossK = 0) {   // Hugo's suggestions, in a speech bubble
+  if (k <= 0) return '';
+  const w = 110 * items.length + 30;
+  const cross = crossK > 0 ? `<g opacity="${crossK}" stroke="#E53935" stroke-width="10" stroke-linecap="round"><path d="M${w / 2 - 50},24 L${w / 2 + 50},116 M${w / 2 + 50},24 L${w / 2 - 50},116"/></g>` : '';
+  return `<g opacity="${k}" transform="translate(${760 - w},${70}) scale(${back(k)})"><rect width="${w}" height="140" rx="26" fill="#fff" stroke="#3E2723" stroke-width="3"/><path d="M${w - 30},120 L${w + 30},160 L${w - 70},138Z" fill="#fff" stroke="#3E2723" stroke-width="3" stroke-linejoin="round"/><rect x="${w - 74}" y="116" width="46" height="20" fill="#fff"/>${items.join('')}${cross}</g>`;
+}
+function table() {
+  return `<path d="M70,450 L800,450 L860,580 L10,580Z" fill="url(#marble)"/><path d="M10,580 L860,580 L860,596 L10,596Z" fill="#B0BEC5"/><path d="M70,450 L800,450" stroke="#fff" stroke-width="3"/>`;
+}
+function stuff() {
+  let s = '';
+  const Y = 540;
+  if (SC.id === 'matin') {
+    s += item('cafe', (x, y) => img('hot-beverage', x, y, 110), 150, Y, 'un café crème');
+    s += item('jus', D.jus, 290, Y, "un jus d'orange");
+    s += item('pain', (x, y) => img('baguette-bread', x, y, 120), 430, Y, 'du pain');
+    s += item('beurre', (x, y) => img('butter', x, y, 100), 570, Y, 'du beurre');
+    s += item('confiture', D.confiture, 700, Y, 'de la confiture');
+    s += item('nosucre', D.sucre, 640, 420, 'sans sucre', { cross: 'nosucre', fade: 3.2 });
+  } else if (SC.id === 'midi') {
+    s += item('table', D.table, 720, Y, 'pour deux', { until: 'eau' });
+    s += item('carte', D.carte, 160, Y, 'la carte', { until: 'pates' });
+    s += item('entree', (x, y) => img('green-salad', x, y, 110), 330, Y, "l'entrée");
+    s += item('plat', D.plat, 500, Y, 'le plat principal', { until: 'pates' });
+    s += item('pates', (x, y) => img('spaghetti', x, y, 120), 500, Y, 'les pâtes');
+    s += item('nopoulet', (x, y) => img('poultry-leg', x, y, 100), 620, 420, 'pas de poulet', { cross: 'nopoulet', fade: 2.4 });
+    s += item('nopoisson', (x, y) => img('fish', x, y, 100), 740, 420, 'pas de poisson', { cross: 'nopoisson', fade: 2.0 });
+    s += item('eau', D.eau, 720, Y, "l'eau gazeuse");
+  } else {
+    const sug = [];
+    const b1 = since('choco'), b2 = since('gateau');
+    if (b1 >= 0 && since('choco2') < 0) {
+      if (since('choco') >= 0) sug.push(`<g transform="translate(15,0)">${D.mug(60, 110)}</g>`);
+      if (since('tarte') >= 0) sug.push(`<g transform="translate(125,0)">${img('pie', 60, 112, 96)}</g>`);
+      s += bubble(sug, cl(b1 / 0.3));
+    }
+    if (b2 >= 0 && since('nogateau') < 0.9) {
+      const crossK = cl((since('nogateau') - 0.1) / 0.3);
+      s += bubble([`<g transform="translate(15,0)">${img('shortcake', 60, 112, 96)}</g>`, `<g transform="translate(125,0)">${img('takeout-box', 60, 112, 96)}</g>`], cl(b2 / 0.3) * (1 - cl((since('nogateau') - 0.5) / 0.4)), crossK);
+    }
+    s += item('choco2', D.mug, 170, Y, 'un chocolat chaud');
+    s += item('glace', (x, y) => img('ice-cream', x, y, 110), 330, Y, 'une glace');
+    s += item('glace', (x, y) => img('strawberry', x, y, 70), 430, Y, 'à la fraise');
+    s += item('surplace', (x, y) => `<g transform="translate(${x - 50},${y - 70})"><rect width="100" height="64" rx="12" fill="#2E7D32"/><text x="50" y="40" text-anchor="middle" font-size="18" font-weight="800" fill="#fff">ICI ✓</text></g>`, 560, Y, 'sur place');
+    s += item('receipt', (x, y) => img('receipt', x, y, 100), 700, Y, "l'addition");
+  }
+  return s;
+}
+
+function render(t) {
+  T = t;
+  SC = TL.scenes.find(s => t >= s.start && t < s.end) || TL.scenes[TL.scenes.length - 1];
+  document.getElementById('svg').innerHTML = room() + person('H') + person('L') + table() + stuff();
+  const fin = cl((t - SC.start) / 0.45), fout = cl((SC.end - t) / 0.45);
+  document.getElementById('black').style.opacity = 1 - Math.min(fin, fout);
+  const cap = document.getElementById('cap'), parts = SC.caption.split(' · ');
+  cap.innerHTML = `${parts[0]}${parts[1] ? ` <span style="opacity:.85;font-weight:600">· ${parts[1]}</span>` : ''}`;
+  const k = ease((t - SC.start - 1.2) / 0.6);
+  cap.style.fontSize = mix(64, 28, k) + 'px';
+  cap.style.left = mix(640 - cap.offsetWidth / 2, 28, k) + 'px';
+  cap.style.top = mix(300, 18, k) + 'px';
+  cap.style.opacity = cl((t - SC.start - 0.15) / 0.35);
+  const sub = TL.subs.find(s => t >= s.start && t < s.end), box = document.getElementById('sub');
+  if (sub) {
+    const who = sub.who === 'L' ? ['Léa', '#b11f1f'] : ['Hugo · le serveur', '#2E7D5B'];
+    box.style.opacity = cl((t - sub.start) / 0.15) * cl((sub.end - t) / 0.15);
+    box.innerHTML = `<div class="who" style="background:${who[1]}">${who[0]}</div><div class="fr">${sub.fr.replace(/\*\*(.+?)\*\*/g, '<b>$1</b>')}</div><div class="en">${sub.en}</div>`;
+  } else box.style.opacity = 0;
+}
+window.load = (tl) => { TL = tl; };
+</script></body></html>
