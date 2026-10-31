@@ -215,54 +215,6 @@ window.PALACE_DATA = {
     ],
 },
 
-// ---------------- 1 Greetings & Politeness ----------------
-// A day in town, from the first bonjour to bonne nuit.
-1: {
-    title: 'Une journée de politesse', w: 1160, h: 770,
-    backdrop: { street: 650, streetName: 'Rue de la Politesse', sky: '#f0f9ff' },
-    zones: [
-        S('matin', null, 'le matin', 'morning', 10, 10, 330, 310, '#0369a1', 3),
-        S('comptoir', null, 'au comptoir', 'at the counter', 350, 10, 330, 310, '#0f766e', 3),
-        S('rencontre', null, 'la rencontre', 'meeting someone', 690, 10, 460, 310, '#7c3aed', 4),
-        S('rue', null, 'dans la rue', 'in the street', 10, 330, 560, 310, '#be123c', 3),
-        S('soir', null, 'le soir', 'evening', 580, 330, 570, 310, '#334155', 4),
-    ],
-    items: [
-        ['bonjour', '☀️', 'matin', 'Bon (good) + jour (day): the first word of every day, to everyone.'],
-        ['salut', '👋', 'matin', 'A salute to a friend: hi, and also bye.'],
-        ['ça va ?', '🙂', 'matin', 'Does it go? The everyday "how are you?" between friends.'],
-        ['comment allez-vous ?', '🎩', 'matin', 'How are you going? The polite version, with vous.'],
-        ['ça va bien, merci.', '👍', 'matin', 'It goes well, thanks: the usual answer.'],
-        ['comme ci, comme ça', '🤷', 'matin', 'Like this, like that: a hand wobbling, so-so.'],
-        ["s'il vous plaît", '🙏', 'comptoir', 'If it pleases you: say it to the waiter.'],
-        ["s'il te plaît", '🧒', 'comptoir', 'The same with tu: to a friend or a child.'],
-        ['merci', '💐', 'comptoir', 'Mercy: you thank the baker for her kindness.'],
-        ['merci beaucoup', '🙇', 'comptoir', 'Beaucoup (a lot): thanks a lot.'],
-        ['de rien', '🫶', 'comptoir', 'Of nothing: it was nothing, you\'re welcome.'],
-        ['je vous en prie', '🤵', 'comptoir', 'I pray you: the polite "you\'re welcome", or "please, go ahead".'],
-        ["je m'appelle…", '🏷️', 'rencontre', 'I call myself…: your name badge.'],
-        ['comment vous appelez-vous ?', '🤝', 'rencontre', 'How do you call yourself? Asking a stranger politely.'],
-        ["comment tu t'appelles ?", '🧑‍🤝‍🧑', 'rencontre', 'The same question with tu, to a child or a new classmate.'],
-        ['prénom', '🔤', 'rencontre', 'Pre-name: the name before your surname, your first name.'],
-        ['nom de famille', '👨‍👩‍👧', 'rencontre', 'The name of the family: your surname.'],
-        ['enchanté / enchantée', '✨', 'rencontre', 'Enchanted to meet you: pleased to meet you.'],
-        ['oui / non', '✅', 'rencontre', 'Yes and no: the first two answers you need.'],
-        ['excusez-moi', '🙋', 'rue', 'Excuse me, to catch a stranger\'s attention (vous).'],
-        ['excuse-moi', '🙋‍♂️', 'rue', 'The same to a friend (tu).'],
-        ['pardon', '😬', 'rue', 'You bump into someone: pardon!'],
-        ['désolé / désolée', '😔', 'rue', 'Desolate: I\'m so sorry.'],
-        ['je ne comprends pas.', '❓', 'rue', 'I don\'t comprehend: I don\'t understand.'],
-        ["parlez plus lentement, s'il vous plaît.", '🐢', 'rue', 'Speak more slowly, like a tortoise: lent means slow.'],
-        ['bonsoir', '🌆', 'soir', 'Good evening: from about six o\'clock.'],
-        ['au revoir', '👋', 'soir', 'Until we see again (revoir): goodbye.'],
-        ['à bientôt', '⏳', 'soir', 'Bientôt (soon): see you soon.'],
-        ['à demain', '📅', 'soir', 'Demain (tomorrow): see you tomorrow.'],
-        ['bonne journée', '🌞', 'soir', 'Have a good day: said when you leave in the morning.'],
-        ['bonne soirée', '🎉', 'soir', 'Have a good evening: soirée is the whole evening.'],
-        ['bonne nuit', '🌙', 'soir', 'Good night, only when going to bed.'],
-    ],
-},
-
 // ---------------- 25 Emergency Phrases ----------------
 // One street, one bad day: shout, call, explain, find help.
 25: {

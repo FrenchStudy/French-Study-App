@@ -1,0 +1,358 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<style>
+html,body{margin:0;padding:0;background:#000;overflow:hidden}
+#stage{position:relative;width:1280px;height:720px;overflow:hidden;font-family:Inter,'DejaVu Sans',sans-serif}
+#svg{position:absolute;inset:0}
+#sub{position:absolute;left:0;right:0;bottom:0;padding:14px 60px 18px;background:linear-gradient(transparent,rgba(12,10,20,.86) 28%);text-align:center;color:#fff}
+#sub .who{display:inline-block;font-size:17px;font-weight:700;padding:2px 12px;border-radius:999px;margin-bottom:6px;letter-spacing:.03em}
+#sub .fr{font-size:32px;font-weight:600;line-height:1.25;text-shadow:0 2px 6px rgba(0,0,0,.6)}
+#sub .fr b{color:#FFD54A;font-weight:800}
+#sub .en{font-size:21px;color:#e6e0ef;font-style:italic;margin-top:4px;text-shadow:0 1px 4px rgba(0,0,0,.6)}
+#cap{position:absolute;color:#fff;font-weight:800;white-space:nowrap;text-shadow:0 3px 12px rgba(0,0,0,.6)}
+#cue{position:absolute;right:18px;top:14px;display:flex;gap:8px;align-items:stretch}
+#cue .c{background:rgba(255,255,255,.93);border-radius:14px;padding:6px 12px 7px;box-shadow:0 3px 10px rgba(0,0,0,.25);color:#222;display:flex;align-items:center;gap:8px}
+#cue img{width:34px;height:34px}
+#cue .big{font-size:22px;font-weight:900;letter-spacing:.04em}
+#cue .sm{font-size:13px;font-weight:600;color:#555;line-height:1.2}
+#black{position:absolute;inset:0;background:#000;pointer-events:none}
+</style></head>
+<body><div id="stage"><svg id="svg" width="1280" height="720" viewBox="0 0 1280 720"></svg><div id="cap"></div><div id="cue"></div><div id="sub"></div><div id="black"></div></div>
+<script>
+let TL = null, T = 0, SC = null;
+const cl = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
+const ease = x => { x = cl(x); return x < .5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2; };
+const back = x => { x = cl(x); const c = 1.7; return 1 + (c + 1) * Math.pow(x - 1, 3) + c * Math.pow(x - 1, 2); };
+const mix = (a, b, k) => a + (b - a) * cl(k);
+const evs = (name) => TL.events.filter(e => e[0] === name && e[2] === SC.id);
+const ev = (name) => { const e = evs(name)[0]; return e ? e[1] : 1e9; };
+const evd = (name) => { const e = evs(name)[0]; return e ? e[3] : 0; };
+const since = (name) => T - ev(name);
+const amp = (who) => (TL.amp[who] || [])[Math.round(T * TL.fps)] || 0;
+const speaking = (who) => TL.lines.some(l => l.who === who && T >= l.start && T <= l.end);
+const lineOf = (who, k) => TL.lines.filter(l => l.who === who && l.scene === SC.id)[k];
+const img = (f, x, y, s) => `<image href="pics/${f}.png" x="${x - s / 2}" y="${y - s}" width="${s}" height="${s}"/>`;
+const tag = (t, x, y, k = 1, col = '#2B2440') => `<g opacity="${k}"><rect x="${x - t.length * 4.6 - 10}" y="${y}" width="${t.length * 9.2 + 20}" height="26" rx="13" fill="${col}" opacity=".92"/><text x="${x}" y="${y + 18}" text-anchor="middle" font-size="16" font-weight="700" fill="#FFE9B0">${t}</text></g>`;
+
+// ---------- who is who ----------
+const P = {
+  L: { file: 'lea', col: '#B11F1F', skin: '#F1C3A5', name: ['Léa', '#B11F1F'] },
+  D: { file: 'dubois', col: '#731AC3', skin: '#F1C3A5', name: ['Mme Dubois · la voisine', '#731AC3'] },
+  M: { file: 'martin', col: '#0B3286', skin: '#C68E7A', name: ["Mme Martin · l'accueil", '#0B3286'] },
+  K: { file: 'camille', col: '#F97316', skin: '#F1C3A5', name: ["Camille · l'amie", '#D9600B'] },
+  Z: { file: 'zoe', col: '#147F3C', skin: '#F1C3A5', name: ['Zoé · la petite sœur', '#147F3C'] },
+};
+const CAST = { matin: ['L', 'D'], bureau: ['L', 'M'], soir: ['L', 'K', 'Z'] };
+
+// where each person is: {x, top, size, sit}
+function where(who) {
+  const id = SC.id, w = evs('walk')[0];
+  const walkIn = (to) => !w ? to : T < w[1] ? -320 : mix(-320, to, ease((T - w[1]) / w[3]));
+  if (who === 'L') {
+    if (id === 'matin') {
+      let x = walkIn(430); const lv = evs('leave')[0];
+      if (lv && T >= lv[1]) x = mix(430, -360, ease((T - lv[1]) / lv[3]));
+      return { x, top: 92, size: 300 };
+    }
+    if (id === 'bureau') return { x: walkIn(400), top: 92, size: 300 };
+    // soir: walks in, la bise, sits, stands, leaves
+    let x = walkIn(560), top = 92, sit = false;
+    const b = since('bise') - 1.0;
+    if (b >= 0 && b < 2.4) x += Math.sin(b / 2.4 * Math.PI) * 70;
+    const s = since('sit');
+    if (s >= 0) { const k = ease(s / 1.6); x = mix(560, 400, k); top = mix(92, 160, k); sit = k > 0.5; }
+    const st = since('stand');
+    if (st >= 0) { const k = ease(st / 0.8); top = mix(160, 92, k); sit = k < 0.5; }
+    const by = evs('bye')[0];
+    if (by && T >= by[1]) x = mix(400, -360, ease((T - by[1]) / by[3]));
+    return { x, top, size: 300, sit };
+  }
+  if (who === 'D') return { x: 880, top: 108, size: 292 };
+  if (who === 'M') return { x: 880, top: 100, size: 292 };
+  if (who === 'K') {
+    let x = 880, top = 92, sit = false;
+    const b = since('bise') - 1.0;
+    if (b >= 0 && b < 2.4) x -= Math.sin(b / 2.4 * Math.PI) * 70;
+    const s = since('sit');
+    if (s >= 0) { const k = ease(s / 1.6); x = mix(880, 820, k); top = mix(92, 160, k); sit = k > 0.5; }
+    return { x, top, size: 300, sit };
+  }
+  if (who === 'Z') {
+    const z = since('zoe');
+    return { x: z < 0 ? 1500 : mix(1460, 1100, ease(z / 1.0)), top: 236 + (z >= 0 && z < 1 ? -Math.sin(z * Math.PI) * 30 : 0), size: 230, sit: true };
+  }
+}
+function at(t, f) { const t0 = T; T = t; const r = f(); T = t0; return r; }
+const walking = (who) => Math.abs(where(who).x - at(T - 0.04, () => where(who).x)) > 0.6;
+
+// ---------- faces and bodies ----------
+function face(who, p) {
+  const a = speaking(who) ? amp(who) : 0;
+  let m = a < 0.07 ? 'smile' : a < 0.5 ? 'laugh' : 'agape';
+  // Léa looks lost while Mme Martin talks too fast
+  if (who === 'L' && SC.id === 'bureau' && !speaking('L') && since('fast') >= 0.8 && since('lost') < 0) m = 'agape';
+  const happyAt = [['hello', 2], ['shake', 2.6], ['bise', 3.6], ['zoe', 3], ['sugar', 3]];
+  let happy = happyAt.some(([n, d]) => since(n) >= 0 && since(n) < d) || since('wave') >= 0 || since('bye') >= 0;
+  if (who === 'D' && since('back') >= 0 && since('back') < 2.6) happy = false;
+  const blink = ((T + { L: 0.4, D: 1.9, M: 1.1, K: 2.6, Z: 0.9 }[who]) % 3.7) < 0.13;
+  const e = blink ? 'humble' : happy ? 'bow' : 'happy';
+  const tilt = headMove(who, p);
+  return `<g transform="rotate(${tilt},${p.x},${p.top + p.size * 0.95})"><image href="chars/${P[who].file}-${m}-${e}.svg" x="${p.x - p.size / 2}" y="${p.top}" width="${p.size}" height="${p.size}"/></g>`;
+}
+// the listener leans towards whoever talks and nods when they stop; la bise tilts both heads
+function headMove(who, p) {
+  let tilt = 0;
+  const talker = CAST[SC.id].find(o => o !== who && speaking(o));
+  if (talker) tilt = (where(talker).x > p.x ? 1 : -1) * 2.5;
+  for (const o of CAST[SC.id]) if (o !== who) {
+    const ended = TL.lines.filter(l => l.who === o && T > l.end && T < l.end + 0.7);
+    if (ended.length) tilt += Math.sin((T - ended[0].end) / 0.7 * Math.PI) * 4;
+  }
+  if (speaking(who)) tilt += Math.sin(T * 3.1) * 1.2;
+  const b = since('bise') - 1.0;
+  if (SC.id === 'soir' && b >= 0 && b < 2.4 && (who === 'L' || who === 'K')) tilt += (who === 'L' ? 1 : -1) * Math.sin(b / 2.4 * Math.PI) * 9;
+  return tilt;
+}
+function body(who) {
+  const p = where(who), c = P[who].col, wk = walking(who) ? Math.abs(Math.sin(T * 9)) * 6 : 0;
+  const sc = p.size / 300, y0 = p.top - wk + p.size * 0.93;
+  const s = `<g><rect x="${p.x - 92 * sc}" y="${y0}" width="${184 * sc}" height="${p.sit ? 150 : 460}" rx="${26 * sc}" fill="${c}"/>${who === 'M' ? `<path d="M${p.x - 24},${y0} L${p.x},${y0 + 70} L${p.x + 24},${y0}Z" fill="#fff"/>` : ''}</g>`;
+  return s + face(who, { ...p, top: p.top - wk });
+}
+function arm(who, x1, y1, x2, y2, x3, y3, sc = 1) {
+  return `<path d="M${x1},${y1} Q${x2},${y2} ${x3},${y3}" stroke="${P[who].col}" stroke-width="${30 * sc}" fill="none" stroke-linecap="round" stroke-opacity="1"/><path d="M${x1},${y1} Q${x2},${y2} ${x3},${y3}" stroke="#000" stroke-opacity=".08" stroke-width="${30 * sc}" fill="none" stroke-linecap="round"/><circle cx="${x3}" cy="${y3}" r="${15 * sc}" fill="${P[who].skin}"/>`;
+}
+// the side nearer the other person is "front"
+function arms(who) {
+  const p = where(who), sc = p.size / 300, sh = p.top + p.size * 0.95, x = p.x;
+  const f = (who === 'L') ? 1 : -1;           // Léa faces right, the others face left
+  const A = (...a) => arm(who, ...a, sc);
+  const down = (side) => A(x + side * 90 * sc, sh + 20 * sc, x + side * 112 * sc, sh + 110 * sc, x + side * 96 * sc, sh + 196 * sc);
+  const onTable = (side) => `<circle cx="${x + side * 72 * sc}" cy="${476}" r="${15 * sc}" fill="${P[who].skin}"/>`;
+  const wave = (side, ph = 0) => { const w = Math.sin(T * 9 + ph) * 12; return A(x + side * 90 * sc, sh + 20 * sc, x + side * 132 * sc, sh - 30 * sc, x + side * 122 * sc + w, sh - 112 * sc); };
+  const waving = since('wave') >= 0 || (who === 'L' && since('hello') >= 0 && since('hello') < 1.8) || (who === 'L' && since('bye') >= 0);
+  const front = f, rear = -f;
+  // Mme Dubois: a baguette under her arm, a hand on her back when it hurts
+  if (who === 'D') {
+    const hurt = since('back') >= 0 && since('back') < 3.0;
+    let s = A(x + 90, sh + 20, x + 112, sh + 110, x + 96, sh + 196);
+    if (hurt) s += A(x - 90, sh + 20, x - 140, sh + 120, x - 80, sh + 190) + `<g opacity="${cl(since('back') / .3)}" stroke="#E53935" stroke-width="5" stroke-linecap="round">${[0, 1, 2].map(i => `<path d="M${x - 150 - i * 4},${sh + 160 + i * 22} l-26,-6"/>`).join('')}</g>` + tag('aïe ! le dos', x - 230, sh + 110, cl(since('back') / .3), '#C62828');
+    else s += waving ? wave(-1, 1) : down(-1);
+    return s;
+  }
+  // Mme Martin behind the desk: hands on the desk, the handshake, a pen while she writes the name
+  if (who === 'M') {
+    const sk = shakeAt();
+    let s = sk ? A(x - 90, sh + 20, x - 160, sh + 110, sk[0], sk[1]) : A(x - 90, sh + 20, x - 110, sh + 110, x - 70, sh + 150);
+    if (since('sign') >= 0) s += A(x + 90, sh + 20, x + 60, sh - 40, x - 40 - Math.sin(T * 4) * 8, sh - 90);    // points the way
+    else if (since('wave') >= 0) s += wave(1);
+    else s += A(x + 90, sh + 20, x + 110, sh + 110, x + 70, sh + 150);
+    return s;
+  }
+  if (who === 'L') {
+    if (p.sit) return onTable(-1) + onTable(1);
+    let s = down(rear);
+    if (SC.id === 'bureau' && since('lost') >= 0 && since('sign') < 0) return s + A(x + 90, sh + 20, x + 150, sh - 40, x + 70, p.top + 70);   // scratches her head
+    const sk = SC.id === 'bureau' && shakeAt();
+    if (sk) return s + A(x + 90, sh + 20, x + 160, sh + 110, sk[0], sk[1]);
+    return s + (waving ? wave(front) : down(front));
+  }
+  if (who === 'K') {
+    if (p.sit) {
+      const sg = since('sugar') - 0.5;
+      if (sg >= 0 && sg < 1.4) { const bx = sugarX(); return onTable(1) + A(x - 90 * sc, sh + 20, x - 150, sh + 90, bx + 30, 470); }
+      return since('wave') >= 0 ? onTable(-1) + wave(1) : onTable(-1) + onTable(1);
+    }
+    return down(1) + down(-1);
+  }
+  if (who === 'Z') return since('wave') >= 0 ? onTable(-1) + wave(1, 2) : onTable(-1) + onTable(1);
+}
+function shakeAt() {
+  const s = since('shake');
+  if (SC.id !== 'bureau' || s < 0 || s > 2.8) return null;
+  const k = ease(Math.min(s / 0.5, (2.8 - s) / 0.5));
+  const hx = 640, hy = 455 + Math.sin(s * 12) * 8 * (s > 0.5 && s < 2.2 ? 1 : 0);
+  return [hx, mix(560, hy, k)];
+}
+
+// ---------- places ----------
+const DEFS = `<defs>
+ <linearGradient id="skyM" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9FD3F5"/><stop offset="1" stop-color="#FDE7C9"/></linearGradient>
+ <linearGradient id="skyN" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0E1A3A"/><stop offset="1" stop-color="#2C3E78"/></linearGradient>
+ <linearGradient id="wood" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8A5A3B"/><stop offset="1" stop-color="#6B4129"/></linearGradient>
+ <linearGradient id="marble" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FAFAFA"/><stop offset="1" stop-color="#E1E5EA"/></linearGradient>
+ <radialGradient id="glow"><stop offset="0" stop-color="#FFE7A8" stop-opacity=".55"/><stop offset="1" stop-color="#FFE7A8" stop-opacity="0"/></radialGradient></defs>`;
+function street() {
+  const win = (x, y) => `<rect x="${x}" y="${y}" width="56" height="86" fill="#6E8FAE"/><rect x="${x}" y="${y}" width="56" height="86" fill="none" stroke="#F4EDE1" stroke-width="6"/><path d="M${x + 28},${y} v86" stroke="#F4EDE1" stroke-width="4"/><rect x="${x - 8}" y="${y + 80}" width="72" height="8" fill="#3B3B3B"/>${[0, 1, 2, 3, 4, 5].map(i => `<path d="M${x - 6 + i * 13},${y + 80} v16" stroke="#3B3B3B" stroke-width="3"/>`).join('')}<path d="M${x - 8},${y + 96} h72" stroke="#3B3B3B" stroke-width="3"/>`;
+  let s = `<rect x="-300" y="-200" width="1900" height="700" fill="url(#skyM)"/>${img('sun', 1120, 170, 130)}`;
+  s += `<rect x="-300" y="40" width="1900" height="440" fill="#EFE3CF"/><rect x="-300" y="40" width="1900" height="18" fill="#D8C7AA"/><rect x="-300" y="-40" width="1900" height="80" fill="#5C6B7A"/>`;
+  for (let i = 0; i < 12; i++) s += win(-260 + i * 160, 90) + win(-260 + i * 160, 230);
+  // a bakery in the middle of the street
+  s += `<rect x="480" y="300" width="330" height="190" fill="#2E5A44"/><rect x="500" y="340" width="130" height="140" fill="#F6E7C8"/><rect x="650" y="340" width="140" height="150" fill="#3B2A20"/><rect x="460" y="262" width="370" height="44" fill="#1F3D2F"/><text x="645" y="292" text-anchor="middle" font-size="24" font-weight="800" fill="#F3D27A" letter-spacing="3">BOULANGERIE</text>${[0, 1, 2, 3, 4, 5, 6, 7].map(i => `<path d="M${470 + i * 44},306 h44 v20 q-22,14 -44,0z" fill="${i % 2 ? '#fff' : '#2E5A44'}"/>`).join('')}${img('croissant', 540, 420, 60)}${img('baguette-bread', 600, 470, 70)}`;
+  s += `<rect x="-300" y="480" width="1900" height="300" fill="#B7AFA4"/>${[...Array(20)].map((_, i) => `<path d="M${-300 + i * 100},480 l-30,300" stroke="#9E968B" stroke-width="2"/>`).join('')}`;
+  s += `<rect x="236" y="150" width="10" height="340" fill="#2F3A35"/><path d="M216,150 h50 l-8,-40 h-34z" fill="#2F3A35"/><rect x="226" y="118" width="30" height="28" fill="#FFF4C2"/>`;
+  return s;
+}
+function office() {
+  let s = `<rect x="-300" y="-200" width="1900" height="1000" fill="#E7EDF3"/><rect x="-300" y="470" width="1900" height="400" fill="#C9D3DC"/>`;
+  // the lift on the left, a clock at 9:00, the reception sign
+  s += `<g transform="translate(0,60)"><rect x="-40" y="120" width="210" height="350" fill="#B0BCC6"/><rect x="-26" y="134" width="88" height="336" fill="#D5DEE5" stroke="#97A6B2" stroke-width="3"/><rect x="66" y="134" width="88" height="336" fill="#D5DEE5" stroke="#97A6B2" stroke-width="3"/><rect x="18" y="72" width="94" height="38" rx="6" fill="#263238"/><text x="65" y="98" text-anchor="middle" font-size="20" font-weight="800" fill="#7CFC9A">3 ▲</text><text x="65" y="60" text-anchor="middle" font-size="17" font-weight="700" fill="#455A64">ASCENSEUR</text></g>`;
+  s += `<circle cx="1180" cy="120" r="54" fill="#fff" stroke="#455A64" stroke-width="6"/>${[...Array(12)].map((_, i) => `<path d="M${1180 + Math.sin(i / 6 * Math.PI) * 44},${120 - Math.cos(i / 6 * Math.PI) * 44} L${1180 + Math.sin(i / 6 * Math.PI) * 50},${120 - Math.cos(i / 6 * Math.PI) * 50}" stroke="#455A64" stroke-width="3"/>`).join('')}<path d="M1180,120 v-36 M1180,120 h-30" stroke="#263238" stroke-width="6" stroke-linecap="round"/><text x="1180" y="200" text-anchor="middle" font-size="18" font-weight="800" fill="#455A64">9 h</text>`;
+  s += `<rect x="700" y="40" width="360" height="56" rx="8" fill="#0B3286"/><text x="880" y="78" text-anchor="middle" font-size="28" font-weight="800" fill="#fff" letter-spacing="4">ACCUEIL</text>`;
+  s += `<rect x="260" y="330" width="60" height="140" fill="#8D6E63"/><circle cx="290" cy="300" r="56" fill="#4CAF50"/><circle cx="256" cy="268" r="38" fill="#66BB6A"/><circle cx="326" cy="262" r="34" fill="#43A047"/>`;
+  return s;
+}
+function desk() {
+  return `<rect x="660" y="468" width="460" height="300" fill="#ECEFF1"/><rect x="650" y="452" width="480" height="22" rx="4" fill="#90A4AE"/><rect x="660" y="520" width="460" height="10" fill="#0B3286" opacity=".7"/>${img('bouquet', 1060, 456, 90)}`;
+}
+function cafeNight() {
+  let s = `<rect x="-300" y="-200" width="1900" height="1000" fill="#5B3B2C"/><rect x="-300" y="380" width="1900" height="120" fill="#3E2619"/>`;
+  s += `<rect x="40" y="40" width="560" height="300" rx="8" fill="url(#skyN)"/>${[[90, 90], [180, 70], [300, 120], [420, 80], [520, 140], [140, 170]].map(([a, b]) => `<circle cx="${a}" cy="${b}" r="2.5" fill="#fff" opacity="${0.5 + 0.5 * Math.sin(T * 3 + a)}"/>`).join('')}${img('crescent-moon', 480, 170, 110)}`;
+  s += `<g fill="#1B2547"><rect x="40" y="200" width="120" height="140"/><rect x="170" y="230" width="150" height="110"/><rect x="330" y="190" width="110" height="150"/><rect x="450" y="240" width="150" height="100"/></g><g fill="#FFD966">${[[60, 220], [100, 260], [200, 250], [260, 290], [350, 210], [380, 260], [480, 260], [540, 300]].map(([a, b]) => `<rect x="${a}" y="${b}" width="16" height="20"/>`).join('')}</g>`;
+  s += `<rect x="40" y="40" width="560" height="300" rx="8" fill="none" stroke="#2A1810" stroke-width="14"/><path d="M320,40 V340" stroke="#2A1810" stroke-width="9"/>`;
+  s += [760, 1060].map(x => `<circle cx="${x}" cy="80" r="160" fill="url(#glow)"/><line x1="${x}" y1="-100" x2="${x}" y2="40" stroke="#222" stroke-width="3"/><path d="M${x - 34},72 Q${x},28 ${x + 34},72Z" fill="#B8860B"/><ellipse cx="${x}" cy="74" rx="18" ry="7" fill="#FFF1B8"/>`).join('');
+  s += `<rect x="880" y="150" width="260" height="140" rx="8" fill="#22302A" stroke="#7A4E33" stroke-width="8"/><text x="1010" y="196" text-anchor="middle" font-size="24" font-weight="700" fill="#F4F1E8">Bonsoir !</text><text x="1010" y="236" text-anchor="middle" font-size="17" fill="#F4F1E8">Café ......... 2,50 €</text><text x="1010" y="266" text-anchor="middle" font-size="17" fill="#F4F1E8">Chocolat ..... 4 €</text>`;
+  return s;
+}
+function cafeTable() {
+  let s = `<path d="M140,452 L1220,452 L1270,590 L90,590Z" fill="url(#marble)"/><path d="M90,590 L1270,590 L1270,608 L90,608Z" fill="#B0BEC5"/>`;
+  if (since('sit') >= 1.2) s += img('hot-beverage', 470, 540, 86 * back((since('sit') - 1.2) / .4));
+  s += img('hot-beverage', 740, 540, 86);
+  if (since('zoe') >= 0.6) s += img('croissant', 1060, 540, 80 * back((since('zoe') - .6) / .4));
+  // the sugar bowl, passed from Camille to Léa
+  const bx = sugarX();
+  s += `<g transform="translate(${bx},530)"><ellipse cx="0" cy="0" rx="40" ry="10" fill="#fff" stroke="#B0BEC5" stroke-width="2"/><path d="M-40,0 Q-36,34 0,36 Q36,34 40,0Z" fill="#E3F2FD" stroke="#90A4AE" stroke-width="2"/>${[-16, 2, 18].map((a, i) => `<rect x="${a - 8}" y="${-14 - (i % 2) * 6}" width="16" height="16" rx="3" fill="#fff" stroke="#CFD8DC"/>`).join('')}</g>`;
+  if (since('sugar') >= 2.0) s += tag("du sucre", bx, 468, cl((since('sugar') - 2) / .3));
+  return s;
+}
+function sugarX() { const g = since('sugar') - 0.6; return g < 0 ? 900 : mix(900, 580, ease(g / 1.1)); }
+
+// ---------- what pops up ----------
+function pops() {
+  let s = '';
+  if (SC.id === 'bureau') {
+    // the name card while she says her name
+    const a = since('prenom'), b = since('nom'), out = since('shake') - 2.4;
+    if (a >= 0 && out < 0.4) {
+      const k = cl(a / .3) * (1 - cl(out / .4));
+      s += `<g opacity="${k}" transform="translate(460,96)"><rect x="0" y="0" width="360" height="${b >= 0 ? 132 : 82}" rx="12" fill="#FFFDF5" stroke="#B0A58F" stroke-width="2"/><rect x="0" y="0" width="360" height="12" rx="6" fill="#0B3286"/>
+        <text x="20" y="54" font-size="19" font-weight="600" fill="#607D8B">Prénom :</text><text x="140" y="54" font-size="26" font-weight="800" fill="#B11F1F">Léa</text>
+        ${b >= 0 ? `<g opacity="${cl(b / .3)}"><text x="20" y="106" font-size="19" font-weight="600" fill="#607D8B">Nom de famille :</text><text x="200" y="106" font-size="26" font-weight="800" fill="#B11F1F">MOREL</text></g>` : ''}</g>`;
+    }
+    const sk = since('shake');
+    if (sk >= 0.3 && sk < 3.6) s += `<g opacity="${cl((sk - .3) / .3) * cl((3.6 - sk) / .4)}">${img('handshake', 640, 380, 96 * back((sk - .3) / .4))}${tag('enchanté · enchantée', 640, 388)}</g>`;
+    // too fast: the words race through a bubble
+    const f = since('fast'), lost = since('lost');
+    const fl = lineOf('M', 2);
+    if (f >= 0 && fl && T < fl.end + 0.6) {
+      const txt = "Votre bureau est au troisième étage, à gauche après l'ascenseur, la deuxième porte sur la droite… ";
+      const off = (f * 520) % (txt.length * 12.4);
+      s += `<g><rect x="430" y="90" width="380" height="96" rx="24" fill="#fff" stroke="#0B3286" stroke-width="3"/><path d="M790,170 L870,230 L760,184Z" fill="#fff" stroke="#0B3286" stroke-width="3" stroke-linejoin="round"/><rect x="756" y="166" width="40" height="18" fill="#fff"/>
+        <clipPath id="cb"><rect x="446" y="100" width="348" height="76"/></clipPath><g clip-path="url(#cb)"><text x="${800 - off}" y="148" font-size="22" font-weight="700" fill="#263238">${txt}${txt}</text></g>
+        ${[0, 1, 2].map(i => `<path d="M${448 + ((f * 900 + i * 120) % 340)},${112 + i * 22} h40" stroke="#90A4AE" stroke-width="3" opacity=".7"/>`).join('')}
+        ${tag('trop vite !', 620, 196, cl((f - .6) / .3), '#C62828')}</g>`;
+    }
+    // Léa is lost: question marks over her head
+    if (f >= 1.2 && since('sign') < 0) {
+      const L = where('L');
+      s += [0, 1, 2].map(i => { const t0 = 1.2 + i * 0.7; return f >= t0 ? img('red-question-mark', L.x - 60 + i * 60, L.top + 10 - Math.abs(Math.sin(T * 4 + i)) * 12, 60 * back((f - t0) / .3)) : ''; }).join('');
+    }
+    // slowly: three short steps
+    const g = since('sign');
+    if (g >= 0) {
+      const rows = [[0, 'elevator', '3ᵉ étage'], [1.25, 'arrow', 'à gauche'], [2.5, 'door', '2ᵉ porte']];
+      s += `<g opacity="${cl(g / .3)}"><rect x="430" y="70" width="380" height="${46 + 60 * rows.filter(r => g >= r[0]).length}" rx="22" fill="#fff" stroke="#0B3286" stroke-width="3"/>
+        <text x="620" y="102" text-anchor="middle" font-size="17" font-weight="800" fill="#2E7D32">plus lentement ✓</text>`;
+      rows.forEach(([t0, ic, t], i) => {
+        if (g < t0) return; const k = back((g - t0) / .4), y = 150 + i * 60;
+        const icon = ic === 'elevator' ? img('elevator', 500, y + 22, 54 * k)
+          : ic === 'arrow' ? `<path transform="translate(500,${y}) scale(${k})" d="M24,-12 h-28 v-12 l-24,24 l24,24 v-12 h28z" fill="#1976D2"/>`
+          : `<g transform="translate(500,${y}) scale(${k})"><rect x="-18" y="-26" width="36" height="52" rx="3" fill="#8D6E63"/><circle cx="10" cy="2" r="3.5" fill="#FFD54A"/><text x="0" y="-6" text-anchor="middle" font-size="16" font-weight="800" fill="#fff">2</text></g>`;
+        s += `<g opacity="${cl((g - t0) / .25)}">${icon}<text x="550" y="${y + 10}" font-size="30" font-weight="800" fill="#263238">${t}</text></g>`;
+      });
+      s += '</g>';
+    }
+  }
+  if (SC.id === 'soir') {
+    const b = since('bise') - 1.0;
+    if (b >= 0.4 && b < 3.4) {
+      const k = cl((b - .4) / .3) * cl((3.4 - b) / .4), L = where('L'), K = where('K');
+      s += `<g opacity="${k}">${b < 1.4 ? img('kiss-mark', (L.x + K.x) / 2 - 40, 200, 64 * back((b - .4) / .3)) : img('kiss-mark', (L.x + K.x) / 2 + 40, 200, 64 * back((b - 1.4) / .3))}${tag('la bise : 1, 2 !', (L.x + K.x) / 2, 92)}</g>`;
+    }
+    const z = since('zoe');
+    if (z >= 0.8 && z < 4.8) s += tag('ma petite sœur', 1100, 210, cl((z - .8) / .3) * cl((4.8 - z) / .4));
+  }
+  return s;
+}
+
+// ---------- camera: close on whoever talks, wide for walking and actions ----------
+function camTarget(t) {
+  return at(t, () => {
+    const l = TL.lines.find(l => t >= l.start - 0.3 && t <= l.end + 0.5);
+    if (SC && SC.id === 'soir' && since('walk') > 2.0 && since('bye') < 0) return soirCam(l && l.scene === SC.id ? l : null);
+    if (!l || !SC || l.scene !== SC.id) return [640, 360, 1];
+    if (SC.id === 'bureau' && ((since('shake') > -0.3 && since('shake') < 3) || (since('sign') > -0.3) || (since('fast') > -0.3 && since('lost') < 0))) return [640, 330, 1.08];
+    if (SC.id === 'soir') return soirCam(l);
+    const p = where(l.who);
+    return [p.x + (p.x < 640 ? 130 : -140), p.sit ? 380 : 330, 1.28];
+  });
+}
+function soirCam(l) {
+  if (since('sit') < 0.4) return [700, 330, 1.12];            // standing: Léa and Camille together (la bise)
+  if (since('stand') >= 0) return [680, 350, 1.06];           // goodbye: everyone in the picture
+  const dx = 0;
+  return [750 + dx, 372, 1.12];                                // sitting: all three at the table
+}
+function camera() {
+  // one sample per video frame on a fixed time grid, weighted so the newest count most: the camera glides, never steps
+  const f1 = Math.round(T * 30), n = 36;
+  let c = [0, 0, 0], ws = 0;
+  for (let i = 0; i < n; i++) { const wgt = Math.sin((i + 1) / (n + 1) * Math.PI); const p = camTarget((f1 - n + 1 + i) / 30); c = c.map((v, j) => v + p[j] * wgt); ws += wgt; }
+  return c.map(v => v / ws);
+}
+
+const CUE = {
+  matin: [['sun', 'Bonjour', 'le matin, la journée'], [null, 'VOUS', 'une voisine, une dame']],
+  bureau: [['sun', 'Bonjour', 'au travail'], [null, 'VOUS', "on ne se connaît pas"]],
+  soir: [['crescent-moon', 'Bonsoir', 'le soir'], [null, 'TU', 'une amie, un enfant']],
+};
+function render(t) {
+  T = t;
+  SC = TL.scenes.find(s => t >= s.start && t < s.end) || TL.scenes[TL.scenes.length - 1];
+  const [cx, cy, z] = camera();
+  let w = DEFS;
+  if (SC.id === 'matin') w += street() + body('D') + arms('D') + body('L') + arms('L');
+  if (SC.id === 'bureau') w += office() + body('M') + desk() + arms('M') + body('L') + arms('L');
+  if (SC.id === 'soir') {
+    const L = where('L');
+    w += cafeNight() + body('Z') + body('K') + (L.sit ? body('L') : '') + cafeTable() + arms('Z') + arms('K') + (L.sit ? arms('L') : body('L') + arms('L'));
+  }
+  w += pops();
+  document.getElementById('svg').innerHTML = `<g transform="translate(640,360) scale(${z}) translate(${-cx},${-cy})">${w}</g>`;
+  const fin = cl((t - SC.start) / 0.45), fout = cl((SC.end - t) / 0.45);
+  document.getElementById('black').style.opacity = 1 - Math.min(fin, fout);
+  const cap = document.getElementById('cap'), parts = SC.caption.split(' · ');
+  cap.innerHTML = `${parts[0]} <span style="opacity:.85;font-weight:600">· ${parts[1]}</span>`;
+  const k = ease((t - SC.start - 1.3) / 0.6);
+  cap.style.fontSize = mix(60, 26, k) + 'px';
+  cap.style.left = mix(640 - cap.offsetWidth / 2, 24, k) + 'px';
+  cap.style.top = mix(290, 16, k) + 'px';
+  cap.style.opacity = cl((t - SC.start - 0.15) / 0.35);
+  const cue = document.getElementById('cue');
+  cue.innerHTML = CUE[SC.id].map(([ic, big, sm]) => `<div class="c">${ic ? `<img src="pics/${ic}.png">` : ''}<div><div class="big" style="color:${big === 'TU' ? '#D9600B' : big === 'VOUS' ? '#0B3286' : '#222'}">${big}</div><div class="sm">${sm}</div></div></div>`).join('');
+  cue.style.opacity = cl((t - SC.start - 1.8) / 0.5);
+  const sub = TL.subs.find(s => t >= s.start && t < s.end), box = document.getElementById('sub');
+  if (sub) {
+    const who = P[sub.who].name;
+    box.style.opacity = cl((t - sub.start) / 0.15) * cl((sub.end - t) / 0.15);
+    box.innerHTML = `<div class="who" style="background:${who[1]}">${who[0]}</div><div class="fr">${sub.fr.replace(/\*\*(.+?)\*\*/g, '<b>$1</b>')}</div><div class="en">${sub.en}</div>`;
+  } else box.style.opacity = 0;
+}
+window.load = async (tl) => {
+  TL = tl;
+  const names = [];
+  for (const w of ['lea', 'dubois', 'martin', 'camille', 'zoe']) for (const m of ['smile', 'laugh', 'agape']) for (const e of ['happy', 'humble', 'bow']) names.push(`chars/${w}-${m}-${e}.svg`);
+  for (const f of ['hot-beverage', 'baguette-bread', 'croissant', 'sun', 'crescent-moon', 'handshake', 'kiss-mark', 'elevator', 'red-question-mark', 'bouquet']) names.push(`pics/${f}.png`);
+  await Promise.all(names.map(n => new Promise(r => { const i = new Image(); i.onload = i.onerror = r; i.src = n; })));
+};
+</script></body></html>
