@@ -88,40 +88,6 @@ window.PALACE_DATA = {
     ],
 },
 
-// ---------------- 23 Hotel & Accommodation ----------------
-23: {
-    title: 'Hôtel du Lac', w: 1160, h: 760,
-    backdrop: { roof: [190, 1150, 112], ground: 730, sign: 'Hôtel du Lac ★★★' },
-    zones: [
-        R('ch', null, 'Chambre 21', 'Room 21', 200, 122, 940, 250),
-        R('rec', 'réception', 'la réception', 'reception', 200, 382, 470, 250),
-        R('res', null, 'Le restaurant', 'Restaurant', 680, 382, 460, 250),
-        R('ail', null, 'Ailleurs', 'Elsewhere', 0, 382, 180, 348, 1),
-    ],
-    items: [
-        ['chambre simple / double', '🛏️', 'ch', 'A single or double room.'],
-        ['lits jumeaux', '👯', 'ch', 'Twin beds, like twins (jumeaux).'],
-        ['oreiller', '💤', 'ch', 'Your oreille (ear) rests on the pillow.'],
-        ['draps', '🧺', 'ch', 'Fresh sheets, draped over the bed.'],
-        ['couverture', '🟫', 'ch', 'A blanket covers you.'],
-        ['sèche-cheveux', '💨', 'ch', 'Dries (sèche) the hair (cheveux).'],
-        ['serviette en plus', '🧻', 'ch', 'An extra towel (serviette).'],
-        ['climatisation', '❄️', 'ch', 'Climate control: air conditioning.'],
-        ['chauffage', '♨️', 'ch', 'Heating: a chauffeur once stoked the fire.'],
-        ['wifi', '📶', 'ch', 'Wifi, said "wee-fee".'],
-        ['nuit', '🌙', 'rec', 'One night, two nights…'],
-        ['prix par nuit', '🏷️', 'rec', 'Price per night.'],
-        ['caution', '💳', 'rec', 'A deposit: take caution, they keep it if you break something.'],
-        ['complet', '🚫', 'rec', 'Complete: no rooms left, full.'],
-        ['arrivée / le départ', '🛎️', 'rec', 'Arrival and departure at the desk.'],
-        ['petit-déjeuner compris', '🥐', 'res', 'Breakfast included (compris = comprised).'],
-        ['demi-pension', '🍽️', 'res', 'Half board: half (demi) of the meals.'],
-        ['hôtel', '🏨', 'ail', 'The hotel: drop the s from hostel.'],
-        ['auberge de jeunesse', '🎒', 'ail', 'An inn for youth: a youth hostel.'],
-        ["chambre d'hôte", '🏡', 'ail', "A room in the host's house: a B&B."],
-    ],
-},
-
 // ---------------- 24 Money & Banking ----------------
 24: {
     title: 'La banque et le marché', w: 1160, h: 760,
