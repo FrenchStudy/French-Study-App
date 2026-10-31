@@ -304,9 +304,11 @@ function soirCam(l) {
   return [750 + dx, 372, 1.12];                                // sitting: all three at the table
 }
 function camera() {
-  let c = [0, 0, 0]; const steps = 12, win = SC.id === 'soir' ? 1.6 : 0.8;
-  for (let i = 0; i < steps; i++) { const p = camTarget(T - win + win * (i + 1) / steps); c = c.map((v, j) => v + p[j] / steps); }
-  return c;
+  // one sample per video frame on a fixed time grid, weighted so the newest count most: the camera glides, never steps
+  const f1 = Math.round(T * 30), n = 36;
+  let c = [0, 0, 0], ws = 0;
+  for (let i = 0; i < n; i++) { const wgt = Math.sin((i + 1) / (n + 1) * Math.PI); const p = camTarget((f1 - n + 1 + i) / 30); c = c.map((v, j) => v + p[j] * wgt); ws += wgt; }
+  return c.map(v => v / ws);
 }
 
 const CUE = {
