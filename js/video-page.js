@@ -3,7 +3,7 @@
 //   Watch: the video, buttons to jump to each part, a few rules to remember
 //   Check yourself: questions, some with a still from the video; the wrong answers are the usual mistakes,
 //          explained when picked; right first time moves the word up a box
-// Videos and pictures are made by tools/<name>-video (Léa and Chloé: DiceBear toon-head, CC BY 4.0, Johan Melin;
+// Videos and pictures are made by tools/<name>-video (people: DiceBear toon-head, CC BY 4.0, Johan Melin;
 // food: Microsoft Fluent Emoji, MIT; voices: Piper).
 //   VIDEO_PAGES[themeId] = { name, next, dir, chapters: [[label, seconds]], rules: [html], questions: [...] }
 //   question: { img?, t? (seconds, for "See it in the video"), q, a, opts: [a + wrong answers], why, wrong?: { answer: why not }, key? }
@@ -13,6 +13,36 @@ const shuffle = (a) => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) {
 const plain = (s) => String(s).toLowerCase().replace(/[.!?…\s]+$/g, '').replace(/\s+/g, ' ').trim();
 
 const PAGES = {
+// ---------------- 1 Greetings & Politeness ----------------
+1: {
+    name: 'Greetings video', next: 'Watch the greetings video', dir: 'media/greet/', file: 'greet.mp4',
+    credit: 'Léa, Mme Dubois, Mme Martin, Camille and Zoé: DiceBear toon-head (CC BY 4.0, Johan Melin) · pictures: Microsoft Fluent Emoji (MIT) · voice: Piper',
+    chapters: [['Le matin · la voisine', 0], ['Au bureau · 9 h', 25.1], ['Le soir · au café', 64.4]],
+    rules: [
+        '<b>Bonjour</b> all day, to everyone · <b>bonsoir</b> from about 6 pm · <b>bonne nuit</b> only when someone goes to bed.',
+        '<b>vous</b> to an adult you don\'t know well, at work, with madame / monsieur · <b>tu</b> to a friend, family, a child.',
+        'So: <i>excusez-moi · s\'il vous plaît · comment vous appelez-vous ?</i> (vous) and <i>excuse-moi · s\'il te plaît · comment tu t\'appelles ?</i> (tu).',
+        '<b>Merci</b> → <b>de rien</b> (everyday) or <b>je vous en prie</b> (polite, vous).',
+        'When you leave: <b>bonne journée</b> (daytime), <b>bonne soirée</b> (evening), <b>à demain</b>, <b>à bientôt</b>, <b>au revoir</b>.',
+        'At work you shake hands; friends do <b>la bise</b> (a kiss on each cheek).',
+    ],
+    questions: [
+        { img: 'matin', t: 2.8, q: 'Le matin, Léa voit sa voisine. Elle dit :', a: 'Bonjour, madame Dubois !', opts: ['Bonjour, madame Dubois !', 'Bonsoir, madame Dubois !', 'Bonne nuit, madame Dubois !', 'Salut, Dubois !'], why: 'In the morning and all day: bonjour.', wrong: { 'Bonsoir, madame Dubois !': 'Bonsoir is for the evening.', 'Bonne nuit, madame Dubois !': 'Bonne nuit is only when someone goes to bed.', 'Salut, Dubois !': 'Salut is for friends, and a neighbour is madame Dubois.' }, key: 'bonjour' },
+        { t: 4.9, q: 'Vous parlez à une dame que vous ne connaissez pas bien. Vous demandez :', a: 'Comment allez-vous ?', opts: ['Comment allez-vous ?', 'Ça va, toi ?', 'Comment tu vas ?', 'Comment allez-tu ?'], why: 'Vous to an adult you don\'t know well: Comment allez-vous ?', wrong: { 'Ça va, toi ?': 'Toi is tu: for friends.', 'Comment tu vas ?': 'Tu is for friends and family.', 'Comment allez-tu ?': 'Allez goes with vous, not tu.' }, key: 'comment allez-vous ?' },
+        { t: 11.4, q: 'Ça ne va pas très bien, mais pas très mal :', a: 'Comme ci, comme ça.', opts: ['Comme ci, comme ça.', 'Ça va bien, merci.', 'Je vous en prie.', 'Bonne journée.'], why: 'Comme ci, comme ça = so-so.', key: 'comme ci, comme ça' },
+        { t: 14.6, q: 'Mme Dubois a mal au dos. Léa dit :', a: 'Oh, je suis désolée !', opts: ['Oh, je suis désolée !', 'De rien !', 'Enchantée !', 'Je vous en prie !'], why: 'Désolé · désolée = sorry (about something bad). Léa is a woman: désolée.', key: 'désolé / désolée' },
+        { img: 'bureau', t: 34.4, q: '« Je m\'appelle Léa. Mon nom de famille, c\'est Morel. » Morel, c\'est…', a: 'son nom de famille', opts: ['son nom de famille', 'son prénom', 'sa ville', 'son bureau'], why: 'Léa is her prénom (first name). Morel is her nom de famille (surname).', key: 'nom de famille' },
+        { t: 38.9, q: 'Léa écrit à une nouvelle collègue : « … de vous rencontrer ! » Léa est une femme, donc elle écrit :', a: 'Enchantée', opts: ['Enchantée', 'Enchanté', 'Enchantés', 'Enchanter'], why: 'A woman writes enchantée (with an extra e), a man enchanté. They sound the same.', key: 'enchanté / enchantée' },
+        { t: 45.2, q: 'Mme Martin parle trop vite. Vous dites :', a: 'Parlez plus lentement, s\'il vous plaît.', opts: ['Parlez plus lentement, s\'il vous plaît.', 'Parlez plus vite, s\'il vous plaît.', 'Parle plus lentement, s\'il te plaît.', 'Je parle lentement.'], why: 'Lentement = slowly, and vous with a person at work.', wrong: { 'Parle plus lentement, s\'il te plaît.': 'Parle… s\'il te plaît is tu: for a friend, not a receptionist.', 'Parlez plus vite, s\'il vous plaît.': 'Vite = fast: the opposite!' }, key: 'parlez plus lentement, s\'il vous plaît.' },
+        { t: 50.5, q: 'Vous n\'avez pas compris. Vous dites :', a: 'Pardon, je ne comprends pas.', opts: ['Pardon, je ne comprends pas.', 'Pardon, je ne prends pas.', 'Merci, je comprends.', 'Désolée, je ne parle pas.'], why: 'Je ne comprends pas = I don\'t understand.', key: 'je ne comprends pas.' },
+        { t: 60.6, q: 'Léa dit « Merci ! » à Mme Martin. Mme Martin répond poliment :', a: 'Je vous en prie.', opts: ['Je vous en prie.', 'S\'il vous plaît.', 'Merci beaucoup.', 'Excusez-moi.'], why: 'Je vous en prie = you\'re welcome (polite, vous). With friends: de rien.', key: 'je vous en prie' },
+        { img: 'soir', t: 67.1, q: 'Il est 20 h. Léa arrive au café et voit Camille :', a: 'Bonsoir, Camille !', opts: ['Bonsoir, Camille !', 'Bonjour, Camille !', 'Bonne nuit, Camille !', 'Bonne soirée, Camille !'], why: 'In the evening, when you arrive: bonsoir.', wrong: { 'Bonjour, Camille !': 'At 8 pm, bonsoir is better.', 'Bonne nuit, Camille !': 'Bonne nuit is for going to bed, not for arriving.', 'Bonne soirée, Camille !': 'Bonne soirée is what you say when you leave.' }, key: 'bonsoir' },
+        { t: 67.1, q: 'Léa est en retard. À son amie, elle dit :', a: 'Excuse-moi !', opts: ['Excuse-moi !', 'Excusez-moi, madame !', 'De rien !', 'Enchantée !'], why: 'To a friend (tu): excuse-moi. To a stranger (vous): excusez-moi.', key: 'excuse-moi' },
+        { t: 81.8, q: 'Léa demande son prénom à une petite fille :', a: 'Comment tu t\'appelles ?', opts: ['Comment tu t\'appelles ?', 'Comment vous appelez-vous ?', 'Comment t\'appelles-vous ?', 'Tu t\'appelles comment, madame ?'], why: 'Tu to a child: Comment tu t\'appelles ?', wrong: { 'Comment vous appelez-vous ?': 'Vous is for adults you don\'t know. To a child: tu.' }, key: 'comment tu t\'appelles ?' },
+        { t: 87.7, q: 'Camille propose du sucre. Léa en veut :', a: 'Oui, s\'il te plaît.', opts: ['Oui, s\'il te plaît.', 'Oui, s\'il vous plaît, madame.', 'Non, merci.', 'De rien.'], why: 'Camille is a friend (tu): s\'il te plaît.', key: 's\'il te plaît' },
+        { t: 93.7, q: 'On dit « Bonne nuit » quand…', a: 'quelqu\'un va se coucher', opts: ['quelqu\'un va se coucher', 'on arrive le soir', 'on part le matin', 'on rencontre quelqu\'un'], why: 'Bonne nuit = good night, before bed. Arriving in the evening: bonsoir.', key: 'bonne nuit' },
+    ],
+},
 // ---------------- 18 Café, Food & Ordering ----------------
 18: {
     name: 'Café video', next: 'Watch the café video', dir: 'media/cafe/', file: 'cafe.mp4',
