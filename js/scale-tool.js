@@ -54,6 +54,8 @@ const CSS = `
 .st-opt.ok{background:#ecfdf5;border-color:#059669}.st-opt.no{background:#fff1f2;border-color:#e11d48}
 .st-fb{font-weight:800;margin:0}.st-fb.ok{color:#047857}.st-fb.no{color:#be123c}
 .st-small{font-size:13px;color:#64748b}
+.st-trap,.st-means{margin-top:6px;font-size:16px}.st-trap span,.st-means span{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;margin-right:6px}
+.st-trap span{color:#be123c}.st-trap s{color:#be123c}.st-means span{color:#047857}.st-means b{color:#047857}
 
 .st-phone{display:none}
 @media (max-width:600px){.st-phone{display:flex}.st-stop{display:none}.st-track{margin:16px 4px 10px}.st-ends{margin:-6px 4px 6px}}`;
@@ -111,7 +113,7 @@ function mount(T, root, { say, grade, words }) {
     function exploreScale(t) {
         body.innerHTML = `<p class="st-hint">${esc(t.hint)}</p><div id="st-sl"></div><div class="st-ends"><span>← ${esc(t.left)}</span><span>${esc(t.right)} →</span></div><div class="st-out"></div>`;
         const out = body.querySelector('.st-out');
-        const s = slider(t.stops.map(x => ({ p: x.p, lab: x.fr })), t.color, (k, auto) => {
+        const s = slider(t.stops.map(x => ({ p: x.p, lab: x.lab || x.fr })), t.color, (k, auto) => {
             const x = t.stops[k], all = x.fr + '. ' + x.ex[0];
             out.innerHTML = box(x.fr, x.en, x.ex, x.note, t.color); wire(out, all); if (auto) later(all);
         }, Math.floor(t.stops.length / 2));
@@ -185,6 +187,22 @@ function mount(T, root, { say, grade, words }) {
         pick(0, false);
     }
 
+    function exploreCards(t) {
+        body.innerHTML = `<p class="st-hint">${esc(t.hint)}</p><div class="st-chips" id="st-cards">${t.items.map((x, i) => `<button type="button" class="st-chip" data-i="${i}">${esc(x.fr)}</button>`).join('')}</div><div class="st-out"></div>`;
+        const out = body.querySelector('.st-out');
+        const pick = (i, auto) => {
+            const x = t.items[i], all = x.fr + '. ' + x.ex[0];
+            body.querySelectorAll('#st-cards .st-chip').forEach((c, j) => c.setAttribute('aria-pressed', j === i));
+            out.innerHTML = `<span class="st-big" style="color:#4f46e5">${esc(x.fr)}</span>`
+                + (x.trap ? `<div class="st-trap"><span>${esc(t.label1)}</span> <s>${esc(x.trap)}</s></div>` : '')
+                + `<div class="st-means"><span>${esc(t.label2)}</span> <b>${esc(x.means)}</b></div>`
+                + `<div class="st-ex" data-say="${esc(x.ex[0])}">${esc(x.ex[0])}<div>${esc(x.ex[1])}</div></div>` + (x.note ? `<div class="st-note">${esc(x.note)}</div>` : '');
+            wire(out, all); if (auto) speak(all);
+        };
+        body.querySelectorAll('#st-cards .st-chip').forEach(c => c.addEventListener('click', () => pick(Number(c.dataset.i), true)));
+        pick(0, false);
+    }
+
     // ---------------- Check yourself ----------------
     function questions(t) {
         const Q = [];
@@ -207,6 +225,11 @@ function mount(T, root, { say, grade, words }) {
             const all = t.groups.flatMap(g => g.words.map(w => ({ g, w })));
             for (const { g, w } of shuffle(all).slice(0, 10))
                 Q.push({ q: `${w.fr}: ${t.ask}`, opts: t.groups.map(x => x.name), a: g.name, key: w.key, why: `${w.fr} = ${w.en}. ${w.ex[0]}`, say: w.ex[0] });
+        } else if (t.type === 'cards') {
+            for (const x of shuffle(t.items).slice(0, 10)) {
+                const others = [...new Set(shuffle(t.items.filter(y => y !== x)).map(y => y.means))].filter(m => m !== x.means && m !== x.trap).slice(0, x.trap ? 2 : 3);
+                Q.push({ q: `« ${x.fr} » ${t.ask || 'means…'}`, opts: shuffle([x.means, ...(x.trap ? [x.trap] : []), ...others]), a: x.means, key: x.key, why: (x.trap ? `Not « ${x.trap} ». ` : '') + `${x.fr} = ${x.means}. ${x.ex[0]}`, say: x.ex[0] });
+            }
         } else if (t.type === 'register') {
             const keyLevel = (S) => S.w.findIndex(w => w && plain(w[0]).includes(plain(S.key.split(' / ')[0])));
             for (const S of shuffle(t.sets).slice(0, 10)) {
@@ -247,7 +270,7 @@ function mount(T, root, { say, grade, words }) {
         root.querySelectorAll('.st-tab').forEach((b, i) => b.setAttribute('aria-selected', i === tabI));
         root.querySelectorAll('[data-m]').forEach(b => b.setAttribute('aria-pressed', b.dataset.m === mode));
         if (mode === 'check') return check(t);
-        ({ scale: exploreScale, pairs: explorePairs, groups: exploreGroups, register: exploreRegister })[t.type](t);
+        ({ scale: exploreScale, pairs: explorePairs, groups: exploreGroups, register: exploreRegister, cards: exploreCards })[t.type](t);
     }
     root.querySelectorAll('.st-tab').forEach(b => b.addEventListener('click', () => { tabI = Number(b.dataset.t); show(); }));
     root.querySelectorAll('[data-m]').forEach(b => b.addEventListener('click', () => { mode = b.dataset.m; show(); }));
