@@ -12,6 +12,20 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="Français">
     <link rel="stylesheet" href="css/app.css">
+    <style>
+        /* Phones: a short topic header (one line of counts) and five step tabs that fit on one line */
+        .lbl-short{display:none}
+        @media (max-width:639px){
+            .lbl-long{display:none}.lbl-short{display:inline}
+            #progress-legend,#progress-label{display:none}
+            #deck-counts{justify-content:flex-start;font-size:13px;column-gap:10px}
+            #topic-progress .flex.items-center.justify-between{justify-content:flex-start}
+            #deck-title{margin-top:4px}
+            #step-tabs{gap:0}
+            #step-tabs .step-tab{flex:1 1 0;padding:0 2px;text-align:center}
+            #step-tabs .step-num{display:none}
+        }
+    </style>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.104.0"></script>
     <script>window.supabase || document.write('<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"><\/script>')</script>
     <script src="config.js"></script>
@@ -49,7 +63,7 @@
                 <div class="flex flex-col md:flex-row md:items-center gap-3">
                     <div id="topic-levels" class="flex gap-1 p-1 bg-slate-200/70 rounded-xl overflow-x-auto" role="tablist" aria-label="Level"></div>
                     <div class="md:ml-auto flex items-center gap-2">
-                        <input id="topic-search" type="search" placeholder="Search topics, e.g. famille" class="flex-1 min-w-0 md:w-64 text-base md:text-sm px-3 py-2.5 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <input id="topic-search" type="search" placeholder="Search topics or words, e.g. pomme" class="flex-1 min-w-0 md:w-64 text-base md:text-sm px-3 py-2.5 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
                         <!-- The word lists of many topics at once, for Excel or Google Sheets -->
                         <details id="bulk-menu" class="relative shrink-0">
                             <summary class="list-none cursor-pointer inline-flex items-center gap-1.5 min-h-[44px] px-3.5 bg-white border border-slate-200 hover:border-indigo-400 rounded-xl text-sm font-semibold text-slate-700 [&::-webkit-details-marker]:hidden">⬇️ Word lists</summary>
@@ -71,7 +85,7 @@
             <!-- ===== ONE TOPIC ===== -->
             <div id="topic-view" class="hidden space-y-4">
                 <div class="flex items-center justify-between gap-2">
-                    <button id="topic-back" type="button" class="min-h-[44px] px-1 text-sm font-semibold text-slate-600 hover:text-indigo-600">← All topics</button>
+                    <button id="topic-back" type="button" aria-label="All topics" class="min-h-[44px] px-1 text-sm font-semibold text-slate-600 hover:text-indigo-600">← <span class="lbl-long">All topics</span><span class="lbl-short">Topics</span></button>
                     <!-- Prev / Topic 3 of 7 ▾ / Next: the button opens this level's topics as a drop-down -->
                     <div class="relative">
                         <div id="topic-nav-top" class="flex items-center gap-1"></div>
@@ -91,7 +105,7 @@
                             <div id="bar-known" class="h-full bg-emerald-500" style="width:0%"></div>
                             <div id="bar-learning" class="h-full bg-amber-400" style="width:0%"></div>
                         </div>
-                        <div class="flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-500">
+                        <div id="progress-legend" class="flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-500">
                             <span><span class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500 align-middle"></span> Known</span>
                             <span><span class="inline-block w-2.5 h-2.5 rounded-full bg-amber-400 align-middle"></span> Learning</span>
                             <span><span class="inline-block w-2.5 h-2.5 rounded-full bg-slate-200 align-middle"></span> New</span>
@@ -103,7 +117,7 @@
                 <nav id="step-tabs" class="flex gap-0.5 sm:gap-6 text-sm font-semibold overflow-x-auto overflow-y-hidden shadow-[inset_0_-1px_0_#e2e8f0]" role="tablist" aria-label="Steps">
                     <button data-step="learn" role="tab" class="step-tab shrink-0 min-h-[44px] px-1.5 sm:px-0 border-b-2"><span class="step-num">1</span> Learn</button>
                     <button data-step="palace" role="tab" class="step-tab shrink-0 min-h-[44px] px-1.5 sm:px-0 border-b-2 hidden"><span class="step-num">2</span> <span class="step-name">Memory palace</span></button>
-                    <button data-step="practise" role="tab" class="step-tab shrink-0 min-h-[44px] px-1.5 sm:px-0 border-b-2"><span class="step-num">2</span> Flashcards</button>
+                    <button data-step="practise" role="tab" class="step-tab shrink-0 min-h-[44px] px-1.5 sm:px-0 border-b-2"><span class="step-num">2</span> <span class="lbl-long">Flashcards</span><span class="lbl-short">Cards</span></button>
                     <button data-step="test" role="tab" class="step-tab shrink-0 min-h-[44px] px-1.5 sm:px-0 border-b-2"><span class="step-num">3</span> Games</button>
                     <button data-step="list" role="tab" class="step-tab shrink-0 min-h-[44px] px-1.5 sm:px-0 border-b-2"><span class="step-num">4</span> List</button>
                 </nav>
@@ -1423,7 +1437,8 @@
             if (push) history.pushState({}, '', topicUrl(topic.id, s));
             const palaceTab = document.querySelector('[data-step="palace"] .step-name');
             // "Palace" on phones so the five steps fit on one line
-            if (palaceTab) palaceTab.innerHTML = toolFor(topic) ? escapeHtml(toolFor(topic).name) : '<span class="sm:hidden">Palace</span><span class="hidden sm:inline">Memory palace</span>';
+            const shortName = (n) => /video/i.test(n) ? 'Video' : /palace/i.test(n) ? 'Palace' : /picture|map|house/i.test(n) ? 'Picture' : /chart|connect/i.test(n) ? 'Chart' : n.split(/\s+/)[0].slice(0, 9);
+            if (palaceTab) palaceTab.innerHTML = toolFor(topic) ? `<span class="lbl-long">${escapeHtml(toolFor(topic).name)}</span><span class="lbl-short">${escapeHtml(shortName(toolFor(topic).name))}</span>` : '<span class="lbl-short">Palace</span><span class="lbl-long">Memory palace</span>';
             STEP_LABEL.palace = toolFor(topic) ? toolFor(topic).next : 'Walk the memory palace';
             const nxStep = allowed[allowed.indexOf(s) + 1];
             const nx = nxStep ? [nxStep, STEP_LABEL[nxStep]] : null;
@@ -1562,7 +1577,7 @@
             const menuBtn = `<button type="button" id="topic-menu-btn" aria-expanded="false" aria-controls="topic-side" title="All topics of this level"
                 class="min-h-[40px] px-3 inline-flex items-center gap-1.5 text-sm font-semibold text-slate-700 bg-white border border-slate-200 hover:border-indigo-300 rounded-xl">
                 <span class="whitespace-nowrap">${topic.freq ? `Set ${i + 1} of ${list.length}` : topic.no ? `Topic ${topic.no}` : 'Lesson'}</span><span class="text-slate-400" aria-hidden="true">▾</span></button>`;
-            $('topic-nav-top').innerHTML = list.length ? `${small(prev, '‹ Prev', 'prev')}${menuBtn}${small(nx, 'Next ›', 'next')}` : '';
+            $('topic-nav-top').innerHTML = list.length ? `${small(prev, '‹<span class="lbl-long">&nbsp;Prev</span>', 'prev')}${menuBtn}${small(nx, '<span class="lbl-long">Next&nbsp;</span>›', 'next')}` : '';
             $('topic-side').hidden = true;
             renderTopicSide(list);
         }
@@ -1586,6 +1601,20 @@
             const cur = side.querySelector('[aria-current="page"]');
             if (cur) { const box = cur.parentElement; box.scrollTop = Math.max(0, cur.offsetTop - box.offsetTop - box.clientHeight / 2); }
         }
+        // every word of the topics, for the search: the cheat sheet (French and English) and the chapter words
+        let WORD_INDEX = null;
+        function wordIndex() {
+            if (WORD_INDEX) return WORD_INDEX;
+            WORD_INDEX = {};
+            const add = (n, fr, en) => {
+                const L = WORD_INDEX[n] = WORD_INDEX[n] || [], k = plain(fr).replace(/^(le |la |les |l['’]|un |une )/, '');
+                if (k && !L.some(e => e.k === k)) L.push({ k, fr, en: en || '', t: plain(fr + ' ' + (en || '')) });
+            };
+            Object.entries((CS && CS.blocks) || {}).forEach(([id, b]) => (b.sections || []).forEach(sec => (sec.items || []).forEach(it => add(Number(id), it[0], it[2]))));
+            TOPICS.filter(x => x.n).forEach(x => ((window.Chapters && Chapters.for(x.n)) || []).forEach(c => c.keys.forEach(k => add(x.n, k, ''))));
+            return WORD_INDEX;
+        }
+        const startsWord = (text, w) => (' ' + text.replace(/[’'\-(/,.;:?!…«»"]/g, ' ')).includes(' ' + w);
         function renderTopics() {
             renderBulkScope();
             const words = plain($('topic-search').value.trim()).split(/\s+/).filter(Boolean);
@@ -1598,8 +1627,15 @@
                 return `<button type="button" role="tab" aria-selected="${on}" data-level="${lv}" class="shrink-0 px-3.5 py-1.5 rounded-lg text-sm font-bold transition ${on ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-800'}">
                     ${levelLabel(lv)}<span class="ml-1.5 text-xs font-semibold ${on ? lvStyle(lv)[0] : 'text-slate-400'}">${n}/${list.length}${lv === 'TOP' ? ' sets' : ''}</span></button>`;
             }).join('');
+            // search: topic titles, and the words inside each topic (French and English); a search word must start a word
+            const titleHit = (x) => words.every(w => startsWord(plain(x.title + ' ' + (x.lesson ? x.lesson.title : '')), w));
+            // a whole-word match (chat → le chat) beats a word that only starts the same (chat → châtain)
+            const exact = (t, w) => (' ' + t.replace(/[’'\-(/,.;:?!…«»"]/g, ' ') + ' ').includes(' ' + w + ' ');
+            const anyExact = words.length && TOPICS.some(x => x.n && (wordIndex()[x.n] || []).some(e => words.every(w => exact(e.t, w))));
+            const hitsOf = (x) => x.n ? (wordIndex()[x.n] || []).filter(e => words.every(w => anyExact ? exact(e.t, w) : startsWord(e.t, w))) : [];
+            const hits = {};
             const list = words.length
-                ? TOPICS.filter(x => !x.freq && words.every(w => plain(x.title + ' ' + (x.lesson ? x.lesson.title : '')).includes(w)))
+                ? TOPICS.filter(x => !x.freq && (titleHit(x) || (hits[x.id] = hitsOf(x)).length)).sort((a, b) => titleHit(b) - titleHit(a))
                 : TOPICS.filter(x => x.level === level);
             const nxt = words.length ? null : nextTopicIn(list);
             const bandHeading = (x) => {
@@ -1623,6 +1659,7 @@
                     <span class="min-w-0 flex-1">
                         <span class="flex items-start justify-between gap-2"><span class="font-bold text-slate-900 leading-snug group-hover:text-indigo-700">${escapeHtml(x.short || x.title)}</span>${status}</span>
                         ${sub}
+                        ${hits[x.id] && hits[x.id].length ? `<span class="block mt-1.5 text-sm text-slate-600">🔎 ${hits[x.id].slice(0, 3).map(e => `<b class="text-slate-800">${escapeHtml(e.fr)}</b>${e.en ? ' · ' + escapeHtml(e.en) : ''}`).join(' &nbsp; ')}${hits[x.id].length > 3 ? ` <span class="text-slate-400">+${hits[x.id].length - 3}</span>` : ''}</span>` : ''}
                         ${x.n && x.lesson ? `<span class="inline-block mt-2 text-[11px] font-bold uppercase tracking-wide text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">▶ Hands-on lesson</span>` : ''}
                     </span></a>`;
             })()).join('') : '<p class="text-sm text-slate-500">No topics match your search.</p>';
