@@ -480,7 +480,7 @@ function mountScene(page, root, { say, grade, words }) {
         <button type="button" class="pp-btn" data-m="name" aria-pressed="false">Name it</button>
         <label class="pp-en"><input type="checkbox" id="pp-en" ${showEnglish ? 'checked' : ''}> English</label>
       </div>
-      <div class="pp-leg"><b style="color:${CO.m}">blue = le</b> (masculine) · <b style="color:${CO.f}">pink = la</b> (feminine) · before a vowel it is l', and the colour tells you which</div>
+      <div class="pp-leg">${page.legend || `<b style="color:${CO.m}">blue = le</b> (masculine) · <b style="color:${CO.f}">pink = la</b> (feminine) · before a vowel it is l', and the colour tells you which`}</div>
       <div class="pp-card">${page.minw ? '<p class="pp-swipe on">Swipe sideways to see the whole picture.</p>' : ''}<svg class="pp-svg" viewBox="0 0 ${page.w} ${page.h}" role="img" aria-label="${esc(page.title)}"${page.minw ? ` style="min-width:${page.minw}px"` : ''}>${page.scene}<g class="objs"></g><g class="labs"></g></svg></div>
       <div class="pp-panel" id="pp-pn" aria-live="polite"></div>
       ${page.credit ? `<p class="pp-small">${esc(page.credit)}</p>` : ''}</div>`;
@@ -580,6 +580,7 @@ function mountScene(page, root, { say, grade, words }) {
     drawLabels(); setMode('explore');
 }
 
+Object.assign(PAGES, window.PICTURE_PAGES_EXTRA || {});   // pages made by tools (js/people-pages.js)
 window.PicturePages = PAGES;
 window.VocabTools = window.VocabTools || {};
 for (const id of Object.keys(PAGES)) {
