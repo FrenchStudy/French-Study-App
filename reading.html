@@ -199,7 +199,7 @@
             { const all = list.length + topicsFor(level).length, done = list.filter(t => result(t.id)).length + topicsFor(level).filter(tp => { const t = topicText(tp); return t && result(t.id); }).length;
               $('texts-heading').textContent = all ? `${all} texts for ${level} · ${done} done` : ''; }
             $('text-grid').innerHTML = (list.length || topicsFor(level).length) ? topicsFor(level).map(topicCard).join('') + list.map(t => textCard(t, st)).join('') : '<p class="text-sm text-slate-500">No texts yet at this level. Tap ✨ New text above.</p>';
-            $('lib-note').textContent = LIB.libraryReady() === false ? 'Shared library not set up yet' : '';
+            $('lib-note').textContent = '';   // (the shared library state is for the admin page, not for learners)
         }
         function textCard(t, st) {
             const r = result(t.id);
