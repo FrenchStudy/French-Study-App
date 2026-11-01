@@ -177,7 +177,7 @@
 
                 <!-- STEP 2: PRACTISE -->
             <!-- (flashcards) -->
-            <section id="mode-cards" class="space-y-3 max-w-2xl">
+            <section id="mode-cards" class="space-y-3 max-w-2xl lg:mx-auto">
                 <div class="flex items-center justify-between text-sm text-slate-500">
                     <span id="session-info"></span>
                     <button id="btn-review-all" class="hidden text-indigo-600 font-semibold min-h-[44px]">Review all words anyway</button>
@@ -193,7 +193,7 @@
                     <button id="card" type="button" class="vc-stage w-full text-center rounded-3xl border border-emerald-100 shadow-sm p-5 sm:p-7 min-h-[340px] flex flex-col gap-3 focus:outline-none focus:ring-2 focus:ring-indigo-500">
                         <div class="flex items-center justify-between gap-2">
                             <span id="card-status" class="text-xs font-bold px-2.5 py-1 rounded-full"></span>
-                            <span id="card-tag" class="min-w-0 truncate text-[11px] font-bold uppercase tracking-wider text-emerald-800 bg-white/80 px-2.5 py-1 rounded-full"></span>
+                            <span id="card-tag" class="min-w-0 truncate text-xs font-bold uppercase tracking-wider text-emerald-800 bg-white/80 px-2.5 py-1 rounded-full"></span>
                         </div>
                         <div id="card-front" class="flex-1 flex flex-col items-center justify-center gap-2.5">
                             <div id="card-front-pic" class="hidden text-8xl leading-none py-1" aria-hidden="true"><span class="vc-float inline-block"></span></div>
@@ -258,11 +258,11 @@
                 <!-- STEP 3: TEST -->
             <!-- (quiz) -->
             <section id="step-palace" class="hidden space-y-3"></section>
-            <section id="mode-quiz" class="hidden space-y-3 max-w-2xl">
+            <section id="mode-quiz" class="hidden space-y-3 max-w-2xl lg:mx-auto">
                 <div id="quiz-types" class="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                    <button data-quiz="meaning" class="quiz-type min-h-[56px] bg-white border border-slate-200 rounded-xl text-sm font-semibold">Pick the meaning</button>
-                    <button data-quiz="type" class="quiz-type min-h-[56px] bg-white border border-slate-200 rounded-xl text-sm font-semibold">Type the French</button>
-                    <button data-quiz="listen" class="quiz-type min-h-[56px] bg-white border border-slate-200 rounded-xl text-sm font-semibold">Listen and pick</button>
+                    <button data-quiz="meaning" class="quiz-type min-h-[56px] bg-white border border-slate-200 rounded-xl text-sm font-semibold">🎯 Pick the meaning</button>
+                    <button data-quiz="type" class="quiz-type min-h-[56px] bg-white border border-slate-200 rounded-xl text-sm font-semibold">⌨️ Type the French</button>
+                    <button data-quiz="listen" class="quiz-type min-h-[56px] bg-white border border-slate-200 rounded-xl text-sm font-semibold">👂 Listen and pick</button>
                     <button data-quiz="picture" id="quiz-picture-btn" class="quiz-type hidden min-h-[56px] bg-white border border-slate-200 rounded-xl text-sm font-semibold">🖼️ Picture game</button>
                     <button data-quiz="match" class="quiz-type min-h-[56px] bg-white border border-slate-200 rounded-xl text-sm font-semibold">🧩 Match pairs</button>
                     <button data-quiz="gender" class="quiz-type min-h-[56px] bg-white border border-slate-200 rounded-xl text-sm font-semibold">⚖️ Le or la?</button>
@@ -680,9 +680,9 @@
                     <span class="text-xs text-slate-500 break-words">${escapeHtml(w.en)}</span>
                 </button>
                 <div class="flex items-center justify-between gap-1 px-2 pb-2">
-                    <span class="text-[11px] font-bold px-1.5 py-0.5 rounded-full ${cls}" title="${escapeHtml(whenDue(w))}">${label}</span>
-                    ${easy ? '' : `<label class="flex items-center gap-1 text-xs text-slate-600 min-h-[36px] cursor-pointer" title="I know it">
-                        <input type="checkbox" data-known="${escapeHtml(w.key)}" class="w-4 h-4 accent-emerald-600" ${st === 'known' ? 'checked' : ''}> Know</label>`}
+                    <span class="text-xs font-bold px-1.5 py-0.5 rounded-full ${cls}" title="${escapeHtml(whenDue(w))}">${label}</span>
+                    ${easy ? '' : `<label class="flex items-center gap-1.5 text-sm text-slate-600 min-h-[44px] pl-2 -ml-2 pr-1 cursor-pointer" title="I know it">
+                        <input type="checkbox" data-known="${escapeHtml(w.key)}" class="w-5 h-5 accent-emerald-600" ${st === 'known' ? 'checked' : ''}> Know</label>`}
                 </div>
             </div>`;
         }
@@ -697,13 +697,13 @@
                 fr.replace(STORY_MARK, (m, text, key, pos) => {
                     html += escapeHtml(fr.slice(at, pos));
                     const w = byKey[key || text] || byKey[(key || text).toLowerCase()];   // « Hier » marks hier
-                    html += w ? `<button type="button" data-story-word="${escapeHtml(w.key)}" data-line="${ci}-${n}" class="font-bold underline decoration-2 underline-offset-4 ${genderClass(w)} hover:bg-amber-50 rounded">${escapeHtml(text)}</button>` : escapeHtml(text);
+                    html += w ? `<button type="button" data-story-word="${escapeHtml(w.key)}" data-line="${ci}-${n}" class="font-bold underline decoration-2 underline-offset-4 py-1.5 ${genderClass(w)} hover:bg-amber-50 rounded">${escapeHtml(text)}</button>` : escapeHtml(text);
                     at = pos + m.length;
                     return m;
                 });
                 html += escapeHtml(fr.slice(at));
                 return `<p class="flex items-start gap-2 -mx-2 px-2 py-1 rounded-xl transition-colors" data-story-line="${ci}-${n}">
-                    <button type="button" data-story-from="${ci}-${n}" class="shrink-0 mt-1 w-8 h-8 inline-flex items-center justify-center rounded-full border border-emerald-200 bg-white/70 hover:bg-emerald-50 text-emerald-700" aria-label="Play from sentence ${n + 1}" title="Play from here">${ICON.small}</button>
+                    <button type="button" data-story-from="${ci}-${n}" class="shrink-0 w-10 h-10 inline-flex items-center justify-center rounded-full border border-emerald-200 bg-white/70 hover:bg-emerald-50 text-emerald-700" aria-label="Play from sentence ${n + 1}" title="Play from here">${ICON.small}</button>
                     <span class="min-w-0 flex-1"><span class="block">${html}</span>
                     <span class="hidden block text-sm font-semibold text-amber-800 bg-amber-50 rounded-lg px-2 py-1 mt-1" data-gloss="${ci}-${n}"></span>
                     <span class="story-en hidden block text-base text-slate-500">${escapeHtml(en)}</span></span></p>`;
@@ -856,7 +856,7 @@
             const due = deck.words.filter(isDue).length;
             const fresh = total - known - learning;
             // Each count opens the word list filtered to those words
-            const chip = (n, label, f, cls) => `<button type="button" data-count-filter="${f}" class="inline-flex items-center min-h-[32px] underline decoration-dotted underline-offset-2 hover:text-indigo-700 ${n ? cls : ''}">${n} ${label}</button>`;
+            const chip = (n, label, f, cls) => `<button type="button" data-count-filter="${f}" class="inline-flex items-center min-h-[40px] px-1 -mx-1 underline decoration-dotted underline-offset-2 hover:text-indigo-700 ${n ? cls : ''}">${n} ${label}</button>`;
             $('deck-counts').innerHTML = total ? [chip(known, 'known', 'known', 'text-emerald-700'), chip(learning, 'learning', 'learning', 'text-amber-700'),
                 chip(due, 'to review', 'review', 'text-rose-700 font-semibold'), chip(fresh, 'new', 'new', '')].join('') : '';
             $('deck-counts').title = total ? `Known: ${known} · Learning: ${learning} (${due} of them due for review now) · New: ${fresh}` : '';
@@ -1593,7 +1593,7 @@
                         ${list.map((x, k) => {
                             const st = topicState(x), on = x === topic;
                             return `<a href="${topicUrl(x.id)}" data-topic="${escapeHtml(x.id)}" ${on ? 'aria-current="page"' : ''} class="flex items-center gap-2 px-1 py-2 text-sm rounded-lg ${on ? 'bg-indigo-50 font-bold text-slate-900' : 'text-slate-700 hover:bg-slate-50'}">
-                                <span class="shrink-0 w-6 h-6 rounded-full text-[11px] font-bold flex items-center justify-center ${st.done ? 'bg-emerald-500 text-white' : on ? 'bg-indigo-600 text-white' : st.started ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-600'}">${st.done ? '✓' : k + 1}</span>
+                                <span class="shrink-0 w-6 h-6 rounded-full text-xs font-bold flex items-center justify-center ${st.done ? 'bg-emerald-500 text-white' : on ? 'bg-indigo-600 text-white' : st.started ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-600'}">${st.done ? '✓' : k + 1}</span>
                                 <span class="truncate">${escapeHtml(x.short || x.title)}</span></a>`;
                         }).join('')}
                     </div>
@@ -1660,7 +1660,7 @@
                         <span class="flex items-start justify-between gap-2"><span class="font-bold text-slate-900 leading-snug group-hover:text-indigo-700">${escapeHtml(x.short || x.title)}</span>${status}</span>
                         ${sub}
                         ${hits[x.id] && hits[x.id].length ? `<span class="block mt-1.5 text-sm text-slate-600">🔎 ${hits[x.id].slice(0, 3).map(e => `<b class="text-slate-800">${escapeHtml(e.fr)}</b>${e.en ? ' · ' + escapeHtml(e.en) : ''}`).join(' &nbsp; ')}${hits[x.id].length > 3 ? ` <span class="text-slate-400">+${hits[x.id].length - 3}</span>` : ''}</span>` : ''}
-                        ${x.n && x.lesson ? `<span class="inline-block mt-2 text-[11px] font-bold uppercase tracking-wide text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">▶ Hands-on lesson</span>` : ''}
+                        ${x.n && x.lesson ? `<span class="inline-block mt-2 text-xs font-bold uppercase tracking-wide text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">▶ Hands-on lesson</span>` : ''}
                     </span></a>`;
             })()).join('') : '<p class="text-sm text-slate-500">No topics match your search.</p>';
         }
