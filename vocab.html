@@ -768,7 +768,8 @@
                 renderEasy();
                 return;
             }
-            $('learn-words-title').textContent = `${chapters.length} chapters · ${deck.words.length} words`;
+            const easyN = ((deck && deck.easy) || []).length;
+            $('learn-words-title').textContent = `${chapters.length} chapters · ${deck.words.length + easyN} words` + (easyN ? ` (${easyN} you already know)` : '');
             $('chapter-nav').innerHTML = chapters.map((c, i) => {
                 const done = chapterDone(c);
                 return `<a href="#chapter-${i + 1}" data-chapter-jump="${i}" class="shrink-0 min-h-[52px] px-3 py-1.5 rounded-xl border text-left ${done ? 'bg-emerald-50 border-emerald-200 text-emerald-900' : 'bg-white border-slate-200 text-slate-800'} hover:border-indigo-400">
@@ -1276,7 +1277,11 @@
             const val = (x) => field === 'en' ? quizEn(x) : quizFr(x);
             let pool = deck.words.filter(o => o.key !== w.key && o[field] && val(o) !== val(w));
             if (pictured && pool.filter(o => WordMemory.picture(o)).length >= 3) pool = pool.filter(o => WordMemory.picture(o));
-            const others = shuffle(pool).slice(0, 3);
+            // wrong answers look like the right one: words with words, phrases and questions with phrases
+            const shape = (x) => { const v = val(x).trim(), n = v.split(/\s+/).length; return (/[?]$/.test(v) ? 'q' : n >= 3 || /[.!]$/.test(v) ? 's' : 'w') + (n > 6 ? '+' : ''); };
+            const same = pool.filter(o => shape(o) === shape(w));
+            const near = pool.filter(o => shape(o)[0] === shape(w)[0] && !same.includes(o));
+            const others = [...shuffle(same), ...shuffle(near), ...shuffle(pool.filter(o => !same.includes(o) && !near.includes(o)))].slice(0, 3);
             return shuffle([w, ...others]);
         }
         function acceptedAnswers(fr) {
@@ -1556,7 +1561,7 @@
                 : `<span class="min-h-[40px] px-3 inline-flex items-center text-sm font-semibold text-slate-300 bg-white border border-slate-100 rounded-xl" aria-hidden="true">${label}</span>`;
             const menuBtn = `<button type="button" id="topic-menu-btn" aria-expanded="false" aria-controls="topic-side" title="All topics of this level"
                 class="min-h-[40px] px-3 inline-flex items-center gap-1.5 text-sm font-semibold text-slate-700 bg-white border border-slate-200 hover:border-indigo-300 rounded-xl">
-                <span class="whitespace-nowrap">${topic.freq ? 'Set' : 'Topic'} ${i + 1} of ${list.length}</span><span class="text-slate-400" aria-hidden="true">▾</span></button>`;
+                <span class="whitespace-nowrap">${topic.freq ? `Set ${i + 1} of ${list.length}` : topic.no ? `Topic ${topic.no}` : 'Lesson'}</span><span class="text-slate-400" aria-hidden="true">▾</span></button>`;
             $('topic-nav-top').innerHTML = list.length ? `${small(prev, '‹ Prev', 'prev')}${menuBtn}${small(nx, 'Next ›', 'next')}` : '';
             $('topic-side').hidden = true;
             renderTopicSide(list);
@@ -1587,7 +1592,7 @@
             const level = currentLevel();
             const levels = [...new Set(TOPICS.map(x => x.level))];
             $('topic-levels').innerHTML = levels.map(lv => {
-                const list = TOPICS.filter(x => x.level === lv);
+                const list = TOPICS.filter(x => x.level === lv && (x.n || x.freq));   // the small lessons are not counted
                 const n = list.filter(x => topicState(x).done).length;
                 const on = lv === level && !words.length;
                 return `<button type="button" role="tab" aria-selected="${on}" data-level="${lv}" class="shrink-0 px-3.5 py-1.5 rounded-lg text-sm font-bold transition ${on ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-800'}">
