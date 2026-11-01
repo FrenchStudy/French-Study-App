@@ -464,7 +464,7 @@
         };
         const lvStyle = (lv) => LEVEL_STYLE[lv] || LEVEL_STYLE.A1;
         // Hands-on lessons with no word list of their own, and where they sit
-        const LESSON_TOPICS = { lalphabet: 0, 'objets-classe': 17 };   // after theme N (0 = first)
+        const LESSON_TOPICS = { lalphabet: 0 };   // after theme N (0 = first)
 
         function buildTopics() {
             const themes = dbThemes
@@ -1048,15 +1048,13 @@
         // ---------- Copy / download the list (Article | French | English) ----------
         const ARTICLE_COL = /^(le\/la |le |la |les |l['’]|un |une )/i;
         function exportRows() {
-            const g = grouped();
             return shownWords().map(w => {
                 const fr = String(w.fr || '').trim();
                 const m = /[.?!…]$/.test(fr) ? null : fr.match(ARTICLE_COL);   // sentences keep their first word
-                const row = m ? [m[1].trim(), fr.slice(m[1].length).trim(), w.en || ''] : ['', fr, w.en || ''];
-                return g ? row.concat(groupOf(w)) : row;
+                return m ? [m[1].trim(), fr.slice(m[1].length).trim(), w.en || ''] : ['', fr, w.en || ''];
             });
         }
-        const exportHead = () => grouped() ? ['Article', 'French', 'English', deck.chapters ? 'Chapter' : 'Group'] : ['Article', 'French', 'English'];
+        const exportHead = () => ['Article', 'French', 'English'];
         function listStatus(text) {
             $('copy-status').textContent = text;
             clearTimeout(listStatus.t);
@@ -1772,8 +1770,9 @@
             s = { flashcards: 'practise', games: 'test' }[s] || s;   // new names for the old step ids
             if (!id && p.get('deck')) { id = p.get('deck'); }                       // old: ?deck=theme:9
             if (!id && p.get('review')) { id = 'review'; s = 'practise'; }
-            // Lessons folded into a topic: Noms et prénoms went into Greetings, L'adresse into Numbers
-            const MERGED = { 'noms-prenoms': 'theme:1', ladresse: 'theme:4' };
+            // Lessons folded into a topic: Noms et prénoms went into Greetings, L'adresse into Numbers; the small lessons
+            // Objets personnels, La famille (the tree is in the memory palace) and Objets de la classe were removed
+            const MERGED = { 'noms-prenoms': 'theme:1', ladresse: 'theme:4', 'objets-personnels': 'theme:17', 'famille-proche': 'theme:9', 'objets-classe': 'theme:27' };
             if (id && id.startsWith('lesson:') && MERGED[id.slice(7)]) id = MERGED[id.slice(7)];
             if (!id && MERGED[p.get('lesson')]) id = MERGED[p.get('lesson')];
             if (!id && p.get('lesson')) {                                            // old: ?lesson=famille-proche

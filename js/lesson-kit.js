@@ -25,11 +25,8 @@ const LessonKit = (function () {
     const INTERACTIVE = [
         { id: 'lalphabet', emoji: '🔤', title: "L'alphabet", blurb: 'The alphabet and spelling out loud.', level: 'A1', path: 'content/vocab/lalphabet.html' },
         { id: 'nombres', emoji: '🔢', title: 'Les nombres', blurb: 'Numbers from 0 upwards, with audio.', level: 'A1', path: 'content/vocab/nombres.html', theme: 4 },
-        { id: 'objets-personnels', emoji: '🎒', title: 'Objets personnels', blurb: 'Everyday personal objects.', level: 'A1', path: 'content/vocab/objets-personnels.html', theme: 17 },
-        { id: 'objets-classe', emoji: '✏️', title: 'Objets de la classe', blurb: 'Classroom objects.', level: 'A1', path: 'content/vocab/objets-classe.html' },
         { id: 'nationalites', emoji: '🌍', title: 'Les nationalités', blurb: 'Countries and nationalities.', level: 'A1', path: 'content/vocab/nationalites.html', theme: 10, grammar: [27], widget: 'nationalites' },
         { id: 'professions', emoji: '👩‍⚕️', title: 'Les professions', blurb: 'Jobs, with and without an article.', level: 'A1', path: 'content/vocab/professions.html', theme: 11, grammar: [11] },
-        { id: 'famille-proche', emoji: '👨‍👩‍👧', title: 'La famille', blurb: 'An interactive family tree.', level: 'A1', path: 'content/vocab/famille-proche.html', theme: 9 },
         { id: 'lheure-prix', emoji: '⏰', title: "L'heure et les prix", blurb: 'Telling the time and prices, with a practice clock.', level: 'A1', path: 'content/vocab/lheure-prix.html', theme: 6, widget: 'clock' },
         { id: 'meteo-date-jours', emoji: '⛅', title: 'Météo, date et jours', blurb: 'Weather, days and dates, with a sentence builder.', level: 'A1', path: 'content/vocab/meteo-date-jours.html', theme: 8, widget: 'meteo' },
         { id: 'loisirs-hobbies', emoji: '⚽', title: 'Les loisirs', blurb: 'Hobbies and free time.', level: 'A1', path: 'content/vocab/loisirs-hobbies.html', theme: 26 },
