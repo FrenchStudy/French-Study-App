@@ -408,35 +408,65 @@ window.SCALE_DATA = {
 ] },
 
 // ---------------- 3 Connectors & Small Words ----------------
-3: { name: 'Rule chart', next: 'What does each small word do?', tabs: [
-  { type: 'groups', title: 'Relier', hint: 'Small words that join ideas, sorted by what they do. Tap to hear.', ask: 'What does it do?', groups: [
-    { name: 'Ajouter', en: 'and, also', color: '#059669', words: [
+3: { name: 'Connectors', next: 'Join ideas and put things in order', tabs: [
+  { type: 'joiner', title: 'Relier', hint: 'Small words that join two ideas. Tap a word above to hear it, or join the two halves below.', roles: [
+    { name: 'Ajouter', en: 'and, also', color: '#059669', icon: '➕', words: [
       { key: 'et', fr: 'et', en: 'and', ex: ['J\'ai un frère et une sœur.', 'I have a brother and a sister.'] },
       { key: 'aussi', fr: 'aussi', en: 'also, too', ex: ['Moi aussi !', 'Me too!'] },
     ] },
-    { name: 'Opposer', en: 'but', color: '#e11d48', words: [
+    { name: 'Opposer', en: 'but', color: '#e11d48', icon: '↔️', words: [
       { key: 'mais', fr: 'mais', en: 'but', ex: ['C\'est cher, mais c\'est bon.', 'It is expensive, but it is good.'] },
     ] },
-    { name: 'Choisir', en: 'or', color: '#7c3aed', words: [
+    { name: 'Choisir', en: 'or', color: '#7c3aed', icon: '🔀', words: [
       { key: 'ou', fr: 'ou', en: 'or', ex: ['Thé ou café ?', 'Tea or coffee?'], note: 'Ou (or) has no accent; où (where) has one.' },
     ] },
-    { name: 'Expliquer', en: 'because', color: '#d97706', words: [
+    { name: 'Expliquer', en: 'because', color: '#d97706', icon: '💡', words: [
       { key: 'parce que / parce qu\'', fr: 'parce que', en: 'because', ex: ['Je reste ici parce qu\'il pleut.', 'I am staying here because it is raining.'] },
       { key: 'car', fr: 'car', en: 'because, for (written)', ex: ['Le magasin est fermé, car c\'est dimanche.', 'The shop is closed, as it is Sunday.'], note: 'Car never starts a sentence; parce que can answer « pourquoi ? ».' },
     ] },
-    { name: 'Conclure', en: 'so', color: '#0369a1', words: [
+    { name: 'Conclure', en: 'so', color: '#0369a1', icon: '➡️', words: [
       { key: 'donc', fr: 'donc', en: 'so, therefore', ex: ['Il est malade, donc il reste à la maison.', 'He is ill, so he is staying at home.'] },
       { key: 'alors', fr: 'alors', en: 'so, then', ex: ['Il fait beau, alors on sort.', 'The weather is nice, so we are going out.'] },
     ] },
-    { name: 'Condition', en: 'if', color: '#0f766e', words: [
+    { name: 'Condition', en: 'if', color: '#0f766e', icon: '❓', words: [
       { key: 'si', fr: 'si', en: 'if', ex: ['Si tu veux, on va au cinéma.', 'If you want, we can go to the cinema.'], note: 'Si + il = s\'il (s\'il pleut).' },
     ] },
-    { name: 'Dans l\'ordre', en: 'first, then, finally', color: '#475569', words: [
-      { key: 'd\'abord', fr: 'd\'abord', en: 'first', ex: ['D\'abord, je prends une douche.', 'First, I have a shower.'] },
-      { key: 'ensuite', fr: 'ensuite', en: 'next', ex: ['Ensuite, je prends le petit-déjeuner.', 'Next, I have breakfast.'] },
-      { key: 'puis', fr: 'puis', en: 'then', ex: ['Puis je pars au travail.', 'Then I leave for work.'] },
-      { key: 'après', fr: 'après', en: 'after, afterwards', ex: ['Après, on va au parc.', 'Afterwards, we go to the park.'] },
-      { key: 'enfin', fr: 'enfin', en: 'finally', ex: ['Enfin, je me couche.', 'Finally, I go to bed.'] },
+  ], items: [
+    { a: 'J\'ai faim,', b: 'je mange une pomme.', w: ['donc', 'alors'], en: 'I\'m hungry, so I eat an apple.' },
+    { a: 'Je reste à la maison', b: 'il pleut.', w: ['parce que', 'car'], en: 'I\'m staying at home because it\'s raining.' },
+    { a: 'Tu veux du thé', b: 'du café ?', w: ['ou'], en: 'Do you want tea or coffee?' },
+    { a: 'Le restaurant est cher,', b: 'c\'est très bon.', w: ['mais'], en: 'The restaurant is expensive, but it\'s very good.' },
+    { a: 'J\'ai un chat', b: 'un chien.', w: ['et'], en: 'I have a cat and a dog.' },
+    { a: '', b: 'il fait beau demain, on va à la plage.', w: ['si'], en: 'If the weather is nice tomorrow, we\'ll go to the beach.' },
+    { a: 'Paul parle anglais. Il parle', b: 'espagnol.', w: ['aussi'], en: 'Paul speaks English. He speaks Spanish too.' },
+    { a: 'Il est malade,', b: 'il ne vient pas.', w: ['donc', 'alors'], en: 'He is ill, so he isn\'t coming.' },
+    { a: 'Je prends un taxi', b: 'je suis en retard.', w: ['parce que', 'car'], en: 'I\'m taking a taxi because I\'m late.' },
+    { a: 'Elle est petite,', b: 'très forte.', w: ['mais'], en: 'She is small, but very strong.' },
+    { a: 'On mange ici', b: 'chez toi ?', w: ['ou'], en: 'Shall we eat here or at your place?' },
+    { a: 'Je lis', b: 'j\'écoute de la musique.', w: ['et'], en: 'I read and listen to music.' },
+    { a: '', b: 'tu as le temps, appelle-moi !', w: ['si'], en: 'If you have time, call me!' },
+    { a: 'Le magasin est fermé,', b: 'c\'est dimanche.', w: ['car', 'parce que'], en: 'The shop is closed, as it\'s Sunday.' },
+  ] },
+  { type: 'sequence', title: 'Dans l\'ordre', hint: 'First, then, finally: the steps of a story. Tap a step, or play the whole story.', note: 'Ensuite, puis and après are the middle steps: you can swap them. D\'abord starts, enfin ends.', steps: [
+    { key: 'd\'abord', fr: 'd\'abord', en: 'first' },
+    { key: 'ensuite', fr: 'ensuite', en: 'next' },
+    { key: 'puis', fr: 'puis', en: 'then' },
+    { key: 'après', fr: 'après', en: 'afterwards' },
+    { key: 'enfin', fr: 'enfin', en: 'finally' },
+  ], stories: [
+    { title: 'Ma journée', lines: [
+      ['fe-shower', 'D\'abord, je prends une douche.', 'First, I have a shower.'],
+      ['fe-croissant', 'Ensuite, je mange un croissant.', 'Next, I eat a croissant.'],
+      ['fe-bus', 'Puis je prends le bus.', 'Then I take the bus.'],
+      ['fe-deciduous-tree', 'Après le travail, je vais au parc.', 'After work, I go to the park.'],
+      ['fe-bed', 'Enfin, je me couche.', 'Finally, I go to bed.'],
+    ] },
+    { title: 'Les crêpes', lines: [
+      ['fe-egg', 'D\'abord, on casse les œufs.', 'First, you break the eggs.'],
+      ['fe-glass-of-milk', 'Ensuite, on ajoute le lait.', 'Next, you add the milk.'],
+      ['fe-bowl-with-spoon', 'Puis on mélange bien.', 'Then you mix well.'],
+      ['fe-cooking', 'Après, on fait cuire les crêpes.', 'Afterwards, you cook the pancakes.'],
+      ['fe-pancakes', 'Enfin, on mange !', 'Finally, we eat!'],
     ] },
   ] },
   { type: 'scale', title: 'Combien ?', hint: 'From a little (left) to too much (right).', left: 'peu', right: 'trop', color: '#d97706', ask: 'Which one is more?', stops: [

@@ -1,5 +1,5 @@
 // scale-tool.js - slider tools in step 2 of Vocab topics whose words sit on a line rather than in a room:
-// 12 Personality (opposites), 13 Emotions (how strong), 16 Opposites, 44 Ideas & Opinions (how sure),
+// 3 Connectors (join two halves; a story timeline for d'abord… enfin), 12 Personality (opposites), 13 Emotions (how strong), 16 Opposites, 44 Ideas & Opinions (how sure),
 // 54 Formal French and 56 Slang (register: familier · courant · soutenu), 55 Precise verbs (weak → strong).
 // The words are in scale-data.js. Each topic has tabs; each tab has Explore (slide or tap: the word, an example,
 // said aloud when you land on it) and Check yourself (10 questions; right first time moves the word up a box).
@@ -57,6 +57,31 @@ const CSS = `
 .st-trap,.st-means{margin-top:6px;font-size:16px}.st-trap span,.st-means span{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;margin-right:6px}
 .st-trap span{color:#be123c}.st-trap s{color:#be123c}.st-means span{color:#047857}.st-means b{color:#047857}
 
+.st-roles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+.st-role{border-radius:12px;padding:8px 10px;display:grid;gap:5px;align-content:start;color:#fff}
+.st-role h4{margin:0;font-size:14px;font-weight:900}.st-role small{font-size:12px;opacity:.9;margin-top:-4px}
+.st-role .st-chip{background:#fff;border-color:transparent;border-radius:10px;font-weight:800;color:#0f172a}
+.st-join{border:1px solid #e2e8f0;border-radius:14px;padding:14px;background:#f8fafc;display:grid;gap:12px}
+.st-sent{font-size:1.3rem;font-weight:700;line-height:1.6;color:#0f172a}
+.st-gap{display:inline-block;min-width:96px;border-bottom:3px dashed #94a3b8;text-align:center;color:#94a3b8;margin:0 6px;font-weight:900}
+.st-gap.ok{border-bottom-style:solid;color:#fff;border-radius:8px;padding:0 8px}
+.st-gap.no{border-bottom-color:#e11d48;color:#e11d48}
+.st-seq{position:relative;display:grid;grid-template-columns:repeat(5,1fr);gap:6px;padding:4px 0 0}
+.st-seq-line{position:absolute;left:10%;right:10%;top:38px;height:6px;border-radius:3px;background:#e2e8f0}
+.st-seq-fill{height:100%;border-radius:3px;background:#4f46e5;transition:width .4s}
+.st-node{position:relative;display:grid;justify-items:center;gap:4px;background:none;border:0;cursor:pointer;padding:0;font:inherit}
+.st-node .n{width:76px;height:76px;border-radius:50%;background:#fff;border:3px solid #cbd5e1;display:grid;place-items:center;transition:border-color .2s,transform .2s}
+.st-node .n img{width:52px;height:52px;object-fit:contain}
+.st-node .k{font-size:16px;font-weight:900;color:#334155}.st-node .e{font-size:12px;color:#64748b}
+.st-node .num{position:absolute;top:-4px;left:calc(50% + 22px);width:24px;height:24px;border-radius:50%;background:#94a3b8;color:#fff;font-size:13px;font-weight:900;display:grid;place-items:center}
+.st-node.on .n{border-color:#4f46e5;transform:scale(1.08)}.st-node.on .k{color:#4f46e5}.st-node.on .num{background:#4f46e5}
+.st-node.done .n{border-color:#a5b4fc}
+.st-mid{text-align:center;font-size:13px;color:#4f46e5;font-weight:700;margin-top:-2px}
+.st-story{display:grid;gap:6px}
+.st-line{display:flex;gap:10px;align-items:center;font-size:17px;color:#0f172a;cursor:pointer;opacity:.25;transition:opacity .3s}
+.st-line.shown{opacity:1}.st-line b{color:#4f46e5}.st-line small{display:block;font-size:13px;color:#64748b}
+.st-line img{width:34px;height:34px;object-fit:contain;flex:none}
+@media (max-width:560px){.st-node .n{width:54px;height:54px}.st-node .n img{width:36px;height:36px}.st-seq-line{top:27px}.st-node .k{font-size:13px}.st-node .e{display:none}.st-node .num{left:calc(50% + 14px);width:20px;height:20px;font-size:11px}.st-sent{font-size:1.1rem}}
 .st-phone{display:none}
 @media (max-width:600px){.st-phone{display:flex}.st-stop{display:none}.st-track{margin:16px 4px 10px}.st-ends{margin:-6px 4px 6px}}`;
 function css() { if (!document.getElementById('st-css')) { const s = document.createElement('style'); s.id = 'st-css'; s.textContent = CSS; document.head.appendChild(s); } }
@@ -203,6 +228,87 @@ function mount(T, root, { say, grade, words }) {
         pick(0, false);
     }
 
+    // ---- Relier: the roles of the small words, then join two halves of a sentence ----
+    function exploreJoiner(t) {
+        const all = t.roles.flatMap(r => r.words.map(w => ({ r, w })));
+        const roleOf = (fr) => all.find(x => x.w.fr === fr);
+        let order = shuffle(t.items), k = 0;
+        body.innerHTML = `<p class="st-hint">${esc(t.hint)}</p><div class="st-roles">${t.roles.map((r, ri) => `<div class="st-role" style="background:${r.color}"><h4>${r.icon || ''} ${esc(r.name)}</h4><small>${esc(r.en)}</small>${r.words.map((w, wi) => `<button type="button" class="st-chip" data-r="${ri}" data-w="${wi}">${esc(w.fr)}</button>`).join('')}</div>`).join('')}</div>
+            <div class="st-out" id="st-wd"><span class="st-small">Tap a word to hear it with an example.</span></div>
+            <div class="st-join"><div class="st-small" style="font-weight:800;color:#334155">Join the two halves</div><div class="st-sent" id="st-sent"></div>
+            <div class="st-chips" id="st-pick">${all.map(x => `<button type="button" class="st-chip" data-fr="${esc(x.w.fr)}">${esc(x.w.fr)}</button>`).join('')}</div>
+            <p class="st-fb" id="st-jfb"></p><div class="st-row"><button type="button" class="st-btn" id="st-jnext">Another sentence →</button></div></div>`;
+        const wd = body.querySelector('#st-wd');
+        body.querySelectorAll('.st-role .st-chip').forEach(c => c.addEventListener('click', () => {
+            const r = t.roles[Number(c.dataset.r)], w = r.words[Number(c.dataset.w)], say = w.fr + '. ' + w.ex[0];
+            body.querySelectorAll('.st-role .st-chip').forEach(x => x.setAttribute('aria-pressed', x === c));
+            wd.innerHTML = box(w.fr, `${w.en} · ${r.name}`, w.ex, w.note, r.color); wire(wd, say); speak(say);
+        }));
+        const sentence = (it, fill, cls, col) => {
+            const f = fill && !it.a ? fill.charAt(0).toUpperCase() + fill.slice(1) : fill;
+            const gap = `<span class="st-gap ${cls || ''}" style="${col ? 'background:' + col + ';border-color:' + col : ''}">${f ? esc(f) : '?'}</span>`;
+            return it.a ? `${esc(it.a)} ${gap} ${esc(it.b)}` : `${gap} ${esc(it.b)}`;
+        };
+        const full = (it, w) => (it.a ? it.a + ' ' + w + ' ' + it.b : w.charAt(0).toUpperCase() + w.slice(1) + ' ' + it.b).replace(/que i/, 'qu\'i').replace(/que e/, 'qu\'e');
+        const showItem = () => {
+            const it = order[k % order.length];
+            body.querySelector('#st-sent').innerHTML = sentence(it);
+            body.querySelector('#st-jfb').textContent = '';
+            body.querySelectorAll('#st-pick .st-chip').forEach(c => { c.disabled = false; c.setAttribute('aria-pressed', 'false'); });
+        };
+        body.querySelectorAll('#st-pick .st-chip').forEach(c => c.addEventListener('click', () => {
+            const it = order[k % order.length], w = c.dataset.fr, fb = body.querySelector('#st-jfb'), x = roleOf(w);
+            if (it.w.includes(w)) {
+                body.querySelector('#st-sent').innerHTML = sentence(it, w === 'parce que' && /^[aeiouhéè]/i.test(it.b) ? 'parce qu\'' : w, 'ok', x.r.color) + `<div class="st-small" style="font-weight:400">${esc(it.en)}</div>`;
+                fb.className = 'st-fb ok';
+                fb.textContent = `${x.r.icon || ''} ${w} = ${x.w.en} (${x.r.name.toLowerCase()})` + (it.w.length > 1 ? ` · « ${it.w.find(o => o !== w)} » works too.` : '');
+                speak(full(it, w));
+                body.querySelectorAll('#st-pick .st-chip').forEach(b => { b.disabled = true; });
+            } else {
+                c.disabled = true; fb.className = 'st-fb no';
+                fb.textContent = `Not « ${w} »: it means ${x.w.en} (${x.r.name.toLowerCase()}). What links these two ideas?`;
+            }
+        }));
+        body.querySelector('#st-jnext').addEventListener('click', () => { k++; showItem(); });
+        showItem();
+    }
+    // ---- Dans l'ordre: a numbered timeline that tells a story step by step ----
+    function exploreSequence(t) {
+        let si = 0, at = -1, play = null;
+        const stop = () => { clearTimeout(play); play = null; const b = body.querySelector('#st-play'); if (b) b.textContent = '▶ Play the story'; };
+        body.innerHTML = `<p class="st-hint">${esc(t.hint)}</p><div class="st-chips" id="st-stories">${t.stories.map((S, i) => `<button type="button" class="st-chip" data-s="${i}">${esc(S.title)}</button>`).join('')}</div>
+            <div class="st-seq"><div class="st-seq-line"><div class="st-seq-fill" style="width:0%"></div></div>${t.steps.map((st, i) => `<button type="button" class="st-node" data-i="${i}"><span class="num">${i + 1}</span><span class="n"></span><span class="k">${esc(st.fr)}</span><span class="e">${esc(st.en)}</span></button>`).join('')}</div>
+            <div class="st-mid">⟵ ensuite · puis · après: the middle steps, in any order ⟶</div>
+            <div class="st-row"><button type="button" class="st-btn pri" id="st-play">▶ Play the story</button><button type="button" class="st-btn" id="st-reset">Start again</button></div>
+            <div class="st-out st-story" id="st-story"></div>${t.note ? `<div class="st-note">${esc(t.note)}</div>` : ''}`;
+        const draw = () => {
+            const S = t.stories[si];
+            body.querySelectorAll('#st-stories .st-chip').forEach((c, i) => c.setAttribute('aria-pressed', i === si));
+            body.querySelectorAll('.st-node').forEach((n, i) => {
+                n.classList.toggle('on', i === at); n.classList.toggle('done', i < at);
+                n.querySelector('.n').innerHTML = `<img src="media/pictures/${S.lines[i][0]}.webp" alt="">`;
+            });
+            body.querySelector('.st-seq-fill').style.width = (at < 0 ? 0 : at / (t.steps.length - 1) * 100) + '%';
+            body.querySelector('#st-story').innerHTML = S.lines.map((L, i) => {
+                const w = t.steps[i].fr, txt = esc(L[1]).replace(new RegExp('^(' + w.replace(/'/g, '(?:\'|&#39;)') + ')', 'i'), '<b>$1</b>');
+                return `<div class="st-line ${i <= at ? 'shown' : ''}" data-i="${i}"><img src="media/pictures/${L[0]}.webp" alt=""><div>${txt}<small>${esc(L[2])}</small></div></div>`;
+            }).join('');
+            body.querySelectorAll('.st-line').forEach(l => l.addEventListener('click', () => { stop(); go(Number(l.dataset.i)); }));
+        };
+        const go = (i) => { at = i; draw(); speak(t.stories[si].lines[i][1]); };
+        body.querySelectorAll('.st-node').forEach(n => n.addEventListener('click', () => { stop(); go(Number(n.dataset.i)); }));
+        body.querySelectorAll('#st-stories .st-chip').forEach(c => c.addEventListener('click', () => { stop(); si = Number(c.dataset.s); at = -1; draw(); }));
+        body.querySelector('#st-reset').addEventListener('click', () => { stop(); at = -1; draw(); });
+        body.querySelector('#st-play').addEventListener('click', (e) => {
+            if (play) return stop();
+            e.target.textContent = '⏸ Pause';
+            const step = () => { if (!root.isConnected || !body.querySelector('.st-seq')) return stop(); if (at >= t.steps.length - 1) { stop(); return; } go(at + 1); play = setTimeout(step, 2800); };
+            if (at >= t.steps.length - 1) at = -1;
+            play = 0; step();
+        });
+        draw();
+    }
+
     // ---------------- Check yourself ----------------
     function questions(t) {
         const Q = [];
@@ -225,6 +331,23 @@ function mount(T, root, { say, grade, words }) {
             const all = t.groups.flatMap(g => g.words.map(w => ({ g, w })));
             for (const { g, w } of shuffle(all).slice(0, 10))
                 Q.push({ q: `${w.fr}: ${t.ask}`, opts: t.groups.map(x => x.name), a: g.name, key: w.key, why: `${w.fr} = ${w.en}. ${w.ex[0]}`, say: w.ex[0] });
+        } else if (t.type === 'joiner') {
+            const conn = t.roles.flatMap(r => r.words.map(w => ({ r, w })));
+            for (const it of shuffle(t.items).slice(0, 10)) {
+                const right = it.w[0], x = conn.find(c => c.w.fr === right);
+                const others = shuffle(conn.filter(c => !it.w.includes(c.w.fr))).slice(0, 3).map(c => c.w.fr);
+                const gap = it.a ? `${it.a} ___ ${it.b}` : `___ ${it.b}`;
+                Q.push({ q: `« ${gap} »`, opts: shuffle([right, ...others]), a: right, key: x.w.key, why: `${right} = ${x.w.en} (${x.r.name.toLowerCase()}). ${it.en}` + (it.w.length > 1 ? ` « ${it.w[1]} » works too.` : ''), say: it.a ? `${it.a} ${right} ${it.b}` : `${right} ${it.b}` });
+            }
+        } else if (t.type === 'sequence') {
+            const mid = t.steps.slice(1, -1).map(s => s.fr);
+            for (const S of t.stories) S.lines.forEach((L, i) => {
+                const st = t.steps[i], rest = L[1].slice(st.fr.length).replace(/^,?\s*/, '');
+                const wrong = i === 0 || i === t.steps.length - 1
+                    ? shuffle([t.steps[i === 0 ? t.steps.length - 1 : 0].fr, ...shuffle(mid).slice(0, 1), 'mais']).slice(0, 3)
+                    : [t.steps[0].fr, t.steps[t.steps.length - 1].fr, shuffle(['mais', 'si', 'ou'])[0]];
+                Q.push({ q: `${S.title}, step ${i + 1} of ${t.steps.length}: « ___ ${rest} »`, opts: shuffle([st.fr, ...wrong.filter(w => w !== st.fr)]), a: st.fr, key: st.key, why: `${st.fr} = ${st.en}. ${L[1]}` + (mid.includes(st.fr) ? ' (Ensuite, puis and après can swap.)' : ''), say: L[1] });
+            });
         } else if (t.type === 'cards') {
             for (const x of shuffle(t.items).slice(0, 10)) {
                 const others = [...new Set(shuffle(t.items.filter(y => y !== x)).map(y => y.means))].filter(m => m !== x.means && m !== x.trap).slice(0, x.trap ? 2 : 3);
@@ -270,7 +393,7 @@ function mount(T, root, { say, grade, words }) {
         root.querySelectorAll('.st-tab').forEach((b, i) => b.setAttribute('aria-selected', i === tabI));
         root.querySelectorAll('[data-m]').forEach(b => b.setAttribute('aria-pressed', b.dataset.m === mode));
         if (mode === 'check') return check(t);
-        ({ scale: exploreScale, pairs: explorePairs, groups: exploreGroups, register: exploreRegister, cards: exploreCards })[t.type](t);
+        ({ scale: exploreScale, pairs: explorePairs, groups: exploreGroups, register: exploreRegister, cards: exploreCards, joiner: exploreJoiner, sequence: exploreSequence })[t.type](t);
     }
     root.querySelectorAll('.st-tab').forEach(b => b.addEventListener('click', () => { tabI = Number(b.dataset.t); show(); }));
     root.querySelectorAll('[data-m]').forEach(b => b.addEventListener('click', () => { mode = b.dataset.m; show(); }));
