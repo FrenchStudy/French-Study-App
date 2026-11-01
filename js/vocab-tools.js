@@ -147,17 +147,20 @@ function mountNumbers(root, { say }) {
             <div class="vt-chips" id="vt-chips"></div><div id="vt-notes" class="vt"></div>
           </div></div>`;
         const inp = main.querySelector('#vt-n');
+        let hide = false;   // after the dice: the French stays hidden until Listen
         const upd = () => {
             n = Math.max(0, Math.min(999999999, Math.floor(Number(inp.value) || 0)));
-            main.querySelector('#vt-words').textContent = numberFr(n);
+            main.querySelector('#vt-words').innerHTML = hide ? '<span style="color:#64748b;font-size:.6em">Say it out loud, then tap 🔊 Listen to check.</span>' : esc(numberFr(n));
+            main.querySelector('#vt-chips').style.display = main.querySelector('#vt-notes').style.display = hide ? 'none' : '';
             main.querySelector('#vt-chips').innerHTML = pieces(n).map(([w, m], i) => `<div class="vt-chip c${i % 4}"><b>${esc(w)}</b><span>${esc(m)}</span></div>`).join('');
             main.querySelector('#vt-notes').innerHTML = numberNotes(n).map(t => `<div class="vt-note">${t}</div>`).join('');
         };
-        inp.addEventListener('input', upd);
-        main.querySelectorAll('[data-d]').forEach(b => b.addEventListener('click', () => { inp.value = Math.max(0, n + Number(b.dataset.d)); upd(); say(numberFr(n)); }));
-        main.querySelectorAll('[data-n]').forEach(b => b.addEventListener('click', () => { inp.value = b.dataset.n; upd(); say(numberFr(n)); }));
-        main.querySelector('[data-rand]').addEventListener('click', () => { inp.value = rand(0, 100) < 60 ? rand(0, 100) : rand(100, 2100); upd(); say(numberFr(n)); });
-        main.querySelector('#vt-say').addEventListener('click', () => say(numberFr(n)));
+        inp.addEventListener('input', () => { hide = false; upd(); });
+        main.querySelectorAll('[data-d]').forEach(b => b.addEventListener('click', () => { hide = false; inp.value = Math.max(0, n + Number(b.dataset.d)); upd(); say(numberFr(n)); }));
+        main.querySelectorAll('[data-n]').forEach(b => b.addEventListener('click', () => { hide = false; inp.value = b.dataset.n; upd(); say(numberFr(n)); }));
+        // the dice is silent: say the number yourself first, then tap Listen to check
+        main.querySelector('[data-rand]').addEventListener('click', () => { inp.value = rand(0, 100) < 60 ? rand(0, 100) : rand(100, 2100); hide = true; upd(); });
+        main.querySelector('#vt-say').addEventListener('click', () => { if (hide) { hide = false; upd(); } say(numberFr(n)); });
         upd();
     }
     function pick() {
