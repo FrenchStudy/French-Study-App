@@ -711,7 +711,8 @@
             }).join('');
         }
 
-        // ---------- Story player: sentence by sentence, with play / pause / stop and "play from this sentence" ----------
+        // ---------- Story player: sentence by sentence; ▶ at the top plays the story, the ▸ beside a sentence plays from
+        // there and turns into ⏸ while that sentence is read ----------
         // Pause stops after cancelling the current sentence and remembers it, so play starts that sentence again
         // (speechSynthesis.pause() is unreliable, especially on phones).
         const ICON = {
@@ -730,11 +731,17 @@
                     p.classList.toggle('bg-amber-50', on);
                     p.classList.toggle('ring-1', on); p.classList.toggle('ring-amber-200', on);
                 });
+                // the pause button sits on the sentence being read: its ▸ turns into ⏸ (tap again to go on)
+                $('learn-body').querySelectorAll('[data-story-from]').forEach(b => {
+                    const here = ci !== null && b.dataset.storyFrom === `${ci}-${n}`, on = playing && here;
+                    b.innerHTML = on ? ICON.pause.replace(/18/g, '14') : ICON.small;
+                    b.style.cssText = on ? 'background:#059669;color:#fff;border-color:#059669' : '';
+                    b.setAttribute('aria-label', on ? 'Pause' : here ? 'Go on from this sentence' : `Play from sentence ${Number(b.dataset.storyFrom.split('-')[1]) + 1}`);
+                    b.title = on ? 'Pause' : 'Play from here';
+                });
                 $('learn-body').querySelectorAll('[data-story-play]').forEach(b => {
-                    const on = playing && Number(b.dataset.storyPlay) === ci;
-                    b.innerHTML = on ? ICON.pause : ICON.play;
-                    b.setAttribute('aria-label', on ? 'Pause' : ci !== null && Number(b.dataset.storyPlay) === ci ? 'Resume the story' : 'Play the story');
-                    b.title = on ? 'Pause' : 'Play';
+                    const paused = !playing && ci !== null && Number(b.dataset.storyPlay) === ci;
+                    b.setAttribute('aria-label', paused ? 'Go on with the story' : 'Play the story');
                 });
             }
             function speakLine() {
@@ -762,9 +769,10 @@
                     speakLine();
                 },
                 toggle(c) {
-                    if (playing && ci === c) { this.pause(); return; }
+                    if (playing && ci === c) return;   // already playing: pause it on the sentence itself
                     this.play(c, ci === c ? n : 0);   // resume the sentence you paused on, or start the story
                 },
+                isPlaying: (c, k) => playing && ci === c && n === k,
                 pause() { if (!playing) return; playing = false; halt(); paint(); },
                 stop() { playing = false; halt(); ci = null; n = 0; paint(); },
                 repaint: () => paint(),
@@ -803,10 +811,9 @@
                     </div>
                     ${c.story ? `<div class="vc-stage border border-emerald-100 rounded-2xl p-4 sm:p-5 space-y-3">
                         <div class="flex flex-wrap items-center justify-between gap-2">
-                            <p class="text-sm text-slate-600">📖 Story · tap a coloured word to hear it, or the ▸ beside a sentence to listen from there.</p>
+                            <p class="text-sm text-slate-600">📖 Story · tap a coloured word to hear it, or the ▸ beside a sentence to listen from there (it becomes a pause button while that sentence is read).</p>
                             <div class="flex flex-wrap gap-2">
                                 <button type="button" data-story-play="${i}" class="min-h-[40px] min-w-[44px] px-3 inline-flex items-center justify-center bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl" aria-label="Play the story" title="Play">${ICON.play}</button>
-                                <button type="button" data-story-stop="${i}" class="min-h-[40px] min-w-[44px] px-3 inline-flex items-center justify-center bg-white border border-slate-200 hover:border-emerald-400 text-slate-700 rounded-xl" aria-label="Stop" title="Stop">${ICON.stop}</button>
                                 <button type="button" data-story-en="${i}" aria-pressed="false" class="min-h-[40px] px-3 bg-white border border-slate-200 hover:border-emerald-400 font-semibold rounded-xl text-sm">Show English</button>
                                 <button type="button" data-chapter-watch="${i}" class="min-h-[40px] px-3 bg-slate-900 hover:bg-slate-700 text-white font-bold rounded-xl text-sm">🎬 Watch</button>
                             </div>
@@ -1745,7 +1752,7 @@
             const sp = e.target.closest('[data-story-stop]');
             if (sp) { Story.stop(); return; }
             const fr = e.target.closest('[data-story-from]');
-            if (fr) { const [ci, n] = fr.dataset.storyFrom.split('-').map(Number); Story.play(ci, n); return; }
+            if (fr) { const [ci, n] = fr.dataset.storyFrom.split('-').map(Number); if (Story.isPlaying(ci, n)) Story.pause(); else Story.play(ci, n); return; }
             const en = e.target.closest('[data-story-en]');
             if (en) {
                 const on = en.getAttribute('aria-pressed') !== 'true';
