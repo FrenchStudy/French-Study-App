@@ -60,7 +60,7 @@
             'prépositions de temps & lieu': 'prepositions-temps-lieu'
         };
         // lessons that were removed: their words are in a Vocab topic
-        const FOLDED = { nombres: 'theme:4', 'objets-personnels': 'theme:17', 'famille-proche': 'theme:9', 'objets-classe': 'theme:27' };
+        const FOLDED = { 'objets-personnels': 'theme:17', 'famille-proche': 'theme:9', 'objets-classe': 'theme:27' };
         function openInteractive(id) {
             if (FOLDED[id]) { location.replace('vocab.html?topic=' + FOLDED[id]); return true; }
             const item = LessonKit.INTERACTIVE.find(x => x.id === id);

@@ -143,48 +143,6 @@ const CHAPTERS = {
             ["Je prends mes clés [[dans]] mon sac et je rentre chez moi.", "I take my keys out of my bag and go home."],
           ] },
     ],
-    // ---------------- 4 Numbers & Scale Units ----------------
-    4: [
-        { title: "De zéro à dix", en: "From zero to ten",
-          keys: ["0 · zéro", "1 · un / une", "2 · deux", "3 · trois", "4 · quatre", "5 · cinq", "6 · six", "7 · sept", "8 · huit", "9 · neuf", "10 · dix"],
-          story: [
-            ["Ma fille Léa a [[quatre|4 · quatre]] ans et elle apprend à compter : « [[Un|1 · un / une]], [[deux|2 · deux]], [[trois|3 · trois]] ! »", "My daughter Léa is four and she's learning to count: \"One, two, three!\""],
-            ["Son frère a [[sept|7 · sept]] ans et sa cousine a [[neuf|9 · neuf]] ans.", "Her brother is seven and her cousin is nine."],
-            ["Ce matin, il fait [[zéro|0 · zéro]] degré dehors !", "This morning, it's zero degrees outside!"],
-            ["J'achète [[six|6 · six]] œufs, [[cinq|5 · cinq]] pommes et [[huit|8 · huit]] croissants.", "I buy six eggs, five apples and eight croissants."],
-            ["La boulangerie ouvre à [[dix|10 · dix]] heures.", "The bakery opens at ten o'clock."],
-          ] },
-        { title: "De onze à vingt-deux", en: "From eleven to twenty-two",
-          keys: ["11 · onze", "12 · douze", "13 · treize", "14 · quatorze", "15 · quinze", "16 · seize", "17 · dix-sept", "18 · dix-huit", "19 · dix-neuf", "20 · vingt", "21 · vingt et un", "22 · vingt-deux"],
-          story: [
-            ["Mon fils a [[onze|11 · onze]] ans, et ma fille va avoir [[treize|13 · treize]] ans en mai.", "My son is eleven, and my daughter will be thirteen in May."],
-            ["Dans sa classe, il y a [[vingt-deux|22 · vingt-deux]] élèves : [[douze|12 · douze]] filles et dix garçons.", "In his class, there are twenty-two pupils: twelve girls and ten boys."],
-            ["J'habite au [[quatorze|14 · quatorze]], rue Laurier. Le cours de piano est à [[quinze|15 · quinze]] heures, et le soccer à [[seize|16 · seize]] heures.", "I live at fourteen, rue Laurier. The piano lesson is at three, and soccer at four."],
-            ["Mon frère a [[dix-sept|17 · dix-sept]] ans et ma sœur [[dix-neuf|19 · dix-neuf]] ans. À [[dix-huit|18 · dix-huit]] ans, on peut voter.", "My brother is seventeen and my sister nineteen. At eighteen, you can vote."],
-            ["Ma mère a eu [[vingt|20 · vingt]] ans en 1990, et mon père [[vingt et un|21 · vingt et un]] ans.", "My mother turned twenty in 1990, and my father twenty-one."],
-          ] },
-        { title: "Les dizaines", en: "The tens",
-          keys: ["30 · trente", "40 · quarante", "60 · soixante", "80 · quatre-vingts", "81 · quatre-vingt-un", "70 · soixante-dix", "72 · soixante-douze", "50 · cinquante", "99 · quatre-vingt-dix-neuf", "91 · quatre-vingt-onze", "71 · soixante et onze", "79 · soixante-dix-neuf", "90 · quatre-vingt-dix"],
-          story: [
-            ["Dans ma famille, j'ai [[trente|30 · trente]] ans, mon mari [[quarante|40 · quarante]] ans et ma mère [[soixante|60 · soixante]] ans.", "In my family, I'm thirty, my husband is forty and my mother is sixty."],
-            ["Mon grand-père a [[quatre-vingts|80 · quatre-vingts]] ans, et sa sœur [[quatre-vingt-un|81 · quatre-vingt-un]] ans.", "My grandfather is eighty, and his sister eighty-one."],
-            ["Ma voisine fête ses [[soixante-dix|70 · soixante-dix]] ans, et son mari a [[soixante-douze|72 · soixante-douze]] ans.", "My neighbour is celebrating her seventieth birthday, and her husband is seventy-two."],
-            ["Au magasin, une veste coûte [[cinquante|50 · cinquante]] dollars et un manteau [[quatre-vingt-dix-neuf|99 · quatre-vingt-dix-neuf]] dollars.", "At the shop, a jacket costs fifty dollars and a coat ninety-nine dollars."],
-            ["Mon arrière-grand-mère est née en 1935 : elle a [[quatre-vingt-onze|91 · quatre-vingt-onze]] ans !", "My great-grandmother was born in 1935: she is ninety-one!"],
-            ["J'habite au [[soixante et onze|71 · soixante et onze]], et ma sœur au [[soixante-dix-neuf|79 · soixante-dix-neuf]], dans la même rue.", "I live at seventy-one, and my sister at seventy-nine, on the same street."],
-            ["En Belgique et en Suisse, on dit « nonante » pour [[quatre-vingt-dix|90 · quatre-vingt-dix]].", "In Belgium and Switzerland, people say \"nonante\" for ninety."],
-          ] },
-        { title: "Grands nombres et adresse", en: "Big numbers and addresses",
-          keys: ["adresse", "numéro", "201 · deux cent un", "rue", "ville", "code postal", "1 000 · mille", "2 000 · deux mille", "200 · deux cents", "100 · cent", "1 000 000 · un million", "1 000 000 000 · un milliard"],
-          story: [
-            ["Mon [[adresse]] : [[numéro]] [[deux cent un|201 · deux cent un]], [[rue]] Sainte-Catherine.", "My address: number two hundred and one, rue Sainte-Catherine."],
-            ["J'habite dans la [[ville]] de Montréal, et mon [[code postal]] est H3B 1A7.", "I live in the city of Montreal, and my postcode is H3B 1A7."],
-            ["Mon loyer est de mille deux cents dollars : c'est plus que [[mille|1 000 · mille]], mais moins que [[deux mille|2 000 · deux mille]] !", "My rent is twelve hundred dollars: more than a thousand, but less than two thousand!"],
-            ["La réparation de ma voiture a coûté [[deux cents|200 · deux cents]] dollars, et le vélo de mon fils, [[cent|100 · cent]] dollars.", "Fixing my car cost two hundred dollars, and my son's bike, a hundred dollars."],
-            ["Au loto, le gros lot est d'[[un million|1 000 000 · un million]] de dollars !", "In the lottery, the jackpot is a million dollars!"],
-            ["Et sur la Terre, il y a plus de huit [[milliards|1 000 000 000 · un milliard]] de personnes.", "And on Earth, there are more than eight billion people."],
-          ] },
-    ],
     // ---------------- 5 The Calendar & Timeline ----------------
     5: [
         { title: "Les jours de la semaine", en: "The days of the week",
