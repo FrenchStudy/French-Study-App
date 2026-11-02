@@ -52,7 +52,8 @@ const CSS = `
 .vt-thing{font-size:28px;min-width:56px;min-height:56px;border:1px solid #e2e8f0;background:#fff;border-radius:12px;cursor:pointer}
 .vt-thing[aria-pressed="true"]{border:2px solid #4f46e5;background:#eef2ff}
 .vt-show{display:flex;align-items:center;gap:16px}
-.vt-blob{width:96px;height:96px;border-radius:24px;display:flex;align-items:center;justify-content:center;font-size:56px;border:1px solid #cbd5e1;flex:none}
+.vt-blob{width:120px;height:120px;border-radius:24px;display:flex;align-items:center;justify-content:center;padding:8px;background:#f8fafc;border:1px solid #e2e8f0;flex:none}
+.vt-thing svg{width:36px;height:36px;display:block;margin:auto}
 `;
 function css() { if (!document.getElementById('vt-css')) { const s = document.createElement('style'); s.id = 'vt-css'; s.textContent = CSS; document.head.appendChild(s); } }
 
@@ -346,6 +347,29 @@ const THINGS = [
     { fr: 'chaussures', art: 'des', g: 'f', pl: true, e: '👟', en: 'shoes' }, { fr: 'gants', art: 'des', g: 'm', pl: true, e: '🧤', en: 'gloves' },
     { fr: 'fleurs', art: 'des', g: 'f', pl: true, e: '🌷', en: 'flowers' }, { fr: 'yeux', art: 'des', g: 'm', pl: true, e: '👀', en: 'eyes' },
 ];
+// Simple drawings that take the chosen colour (emoji have fixed colours, so a red dress could not turn green)
+function mix(hex, to, k) {
+    const n = (h) => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
+    const a = n(hex), b = n(to);
+    return '#' + a.map((v, i) => Math.round(v + (b[i] - v) * k).toString(16).padStart(2, '0')).join('');
+}
+function yellowish(hex) { const [r, g, b] = [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16)); return r > 180 && g > 150 && b < 140; }
+function shadeHex(hex, shade) { return shade === 'clair' ? mix(hex, '#ffffff', 0.45) : shade === 'foncé' ? mix(hex, '#000000', 0.45) : hex; }
+function thingSvg(key, c) {
+    const k = mix(c, '#000000', 0.35), lite = /^#f[a-f0-9]f[a-f0-9]f/i.test(c) || c.toLowerCase() === '#ffffff';
+    const line = lite ? '#94a3b8' : k, sw = `stroke="${line}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"`;
+    const parts = {
+        robe: `<path d="M41 8 L40 22 M59 8 L60 22" fill="none" ${sw}/><path d="M38 21 Q50 27 62 21 L60 44 L40 44 Z" fill="${c}" ${sw}/><path d="M40 44 L60 44 L82 88 Q66 95 50 91 Q34 95 18 88 Z" fill="${c}" ${sw}/><path d="M40 44 L60 44" stroke="${line}" stroke-width="5"/>`,
+        pull: `<path d="M32 18 L42 14 Q50 24 58 14 L68 18 L90 50 L78 58 L70 46 L70 88 L30 88 L30 46 L22 58 L10 50 Z" fill="${c}" ${sw}/><path d="M42 14 Q50 24 58 14" fill="none" ${sw}/><path d="M30 82 L70 82 M15 54 L24 49 M85 54 L76 49" fill="none" ${sw}/>`,
+        voiture: `<path d="M24 52 L34 32 Q36 28 42 28 L64 28 Q70 28 73 33 L82 52 Z" fill="${c}" ${sw}/><path d="M33 50 L40 34 L52 34 L52 50 Z M57 50 L57 34 L66 34 L74 50 Z" fill="#e0f2fe" stroke="${line}" stroke-width="2"/><path d="M8 54 Q8 50 14 50 L88 50 Q94 50 94 56 L94 70 L8 70 Z" fill="${c}" ${sw}/><circle cx="28" cy="72" r="10" fill="#1e293b"/><circle cx="74" cy="72" r="10" fill="#1e293b"/><circle cx="28" cy="72" r="4" fill="#cbd5e1"/><circle cx="74" cy="72" r="4" fill="#cbd5e1"/><rect x="86" y="55" width="6" height="5" rx="2" fill="#fde68a"/>`,
+        sac: `<path d="M34 40 Q34 14 50 14 Q66 14 66 40" fill="none" stroke="${line}" stroke-width="6" stroke-linecap="round"/><path d="M20 40 L80 40 L86 84 Q86 90 80 90 L20 90 Q14 90 14 84 Z" fill="${c}" ${sw}/><path d="M18 52 L82 52" stroke="${line}" stroke-width="2"/><rect x="44" y="47" width="12" height="10" rx="2" fill="#fbbf24" stroke="#b45309" stroke-width="1.5"/>`,
+        chaussures: [0, 50].map(x => `<g transform="translate(${x} 0)"><path d="M4 76 L4 52 Q4 44 12 44 L22 44 Q26 56 38 58 Q46 60 46 68 L46 76 Z" fill="${c}" ${sw}/><path d="M4 76 L46 76 L46 82 Q46 84 44 84 L6 84 Q4 84 4 82 Z" fill="#f8fafc" stroke="${line}" stroke-width="2"/><path d="M24 52 L30 50 M27 57 L33 54" stroke="${line}" stroke-width="2"/></g>`).join(''),
+        gants: [[0, 1], [100, -1]].map(([x, f]) => `<g transform="translate(${x} 0) scale(${f} 1)"><path d="M10 86 L10 62 Q4 54 8 46 Q12 44 16 50 L18 54 L18 26 Q18 20 23 20 Q28 20 28 26 L28 18 Q28 12 33 12 Q38 12 38 18 L38 24 Q38 18 43 18 Q47 18 47 24 L47 64 Q47 74 42 78 L42 86 Z" fill="${c}" ${sw}/><path d="M10 80 L42 80" stroke="${line}" stroke-width="2"/></g>`).join(''),
+        fleurs: [[26, 40], [50, 26], [74, 42]].map(([x, y]) => `<path d="M${x} ${y} Q${x + (50 - x) * 0.4} ${y + 30} 50 92" fill="none" stroke="#16a34a" stroke-width="3"/>`).join('') + `<path d="M50 80 Q36 70 34 78 Q42 84 50 84 M50 84 Q62 72 68 78 Q60 86 50 86" fill="#22c55e"/>` + [[26, 40], [50, 26], [74, 42]].map(([x, y]) => [0, 72, 144, 216, 288].map(r => `<ellipse cx="${x}" cy="${y - 8}" rx="6" ry="9" fill="${c}" stroke="${line}" stroke-width="1.5" transform="rotate(${r} ${x} ${y})"/>`).join('') + `<circle cx="${x}" cy="${y}" r="5" fill="${yellowish(c) ? '#ea580c' : '#facc15'}"/>`).join(''),
+        yeux: [27, 73].map(x => `<path d="M${x - 20} 50 Q${x} 28 ${x + 20} 50 Q${x} 72 ${x - 20} 50 Z" fill="#fff" stroke="#334155" stroke-width="2.5"/><circle cx="${x}" cy="50" r="10" fill="${c}" stroke="${lite ? '#94a3b8' : k}" stroke-width="1.5"/><circle cx="${x}" cy="50" r="4.5" fill="#0f172a"/><circle cx="${x + 3}" cy="46" r="2" fill="#fff"/>`).join(''),
+    };
+    return `<svg viewBox="0 0 100 100" width="100%" height="100%" aria-hidden="true">${parts[key] || ''}</svg>`;
+}
 function colourWord(c, t, shade) {
     if (c.inv || shade) return c.m + (shade ? ' ' + shade : '');
     let w = t.g === 'f' ? c.f : c.m;
@@ -379,7 +403,7 @@ function mountColours(root, { say }) {
         main.innerHTML = `<div class="vt-grid">
           <div class="vt-card">
             <div class="vt-label">1. Choose a thing</div>
-            <div class="vt-row">${THINGS.map((t, i) => `<button type="button" class="vt-thing" data-t="${i}" aria-pressed="${i === ti}" aria-label="${esc(t.art + ' ' + t.fr)}">${t.e}</button>`).join('')}</div>
+            <div class="vt-row">${THINGS.map((t, i) => `<button type="button" class="vt-thing" data-t="${i}" aria-pressed="${i === ti}" aria-label="${esc(t.art + ' ' + t.fr)}" title="${esc(t.art + ' ' + t.fr)}">${thingSvg(t.fr, '#94a3b8')}</button>`).join('')}</div>
             <div class="vt-label">2. Choose a colour</div>
             <div class="vt-sws">${COLOURS.map((c, i) => `<button type="button" class="vt-sw" data-c="${i}" aria-pressed="${i === ci}" aria-label="${esc(c.m)}" title="${esc(c.m)}" style="background:${c.hex}"></button>`).join('')}</div>
             <div class="vt-row" role="group" aria-label="Shade">${[['', 'Normal'], ['clair', 'Light (clair)'], ['foncé', 'Dark (foncé)']].map(([v, l]) => `<button type="button" class="vt-btn" data-s="${v}" aria-pressed="${shade === v}">${l}</button>`).join('')}</div>
@@ -390,7 +414,7 @@ function mountColours(root, { say }) {
         main.querySelectorAll('[data-s]').forEach(b => b.addEventListener('click', () => { shade = b.dataset.s; dress(); speakOut(); }));
         const t = THINGS[ti], c = COLOURS[ci], phrase = `${t.art} ${t.fr} ${colourWord(c, t, shade)}`;
         const out = main.querySelector('#vt-out');
-        out.innerHTML = `<div class="vt-show"><div class="vt-blob" style="background:${c.hex}${shade === 'clair' ? ';filter:brightness(1.35) saturate(.7)' : shade === 'foncé' ? ';filter:brightness(.6)' : ''}">${t.e}</div>
+        out.innerHTML = `<div class="vt-show"><div class="vt-blob">${thingSvg(t.fr, shadeHex(c.hex, shade))}</div>
             <div><div class="vt-big">${esc(phrase)}</div><div class="vt-mid">${esc(t.en)}, ${esc((shade === 'clair' ? 'light ' : shade === 'foncé' ? 'dark ' : '') + c.en)}</div></div></div>
             <div class="vt-row"><button type="button" class="vt-btn" id="vt-say">🔊 Listen</button></div>
             <div class="vt-note">${why(c, t, shade)}</div>`;
@@ -406,7 +430,7 @@ function mountColours(root, { say }) {
         forms.add(`${t.art} ${c.f} ${t.fr}`);   // colour in front: wrong place
         const opts = shuffle([right, ...shuffle([...forms].filter(x => x !== right)).slice(0, 3)]);
         main.innerHTML = `<div class="vt-card" aria-live="polite"><div class="vt-label">Which is right? · ${quiz.n}</div>
-            <div class="vt-show"><div class="vt-blob" style="background:${c.hex}">${t.e}</div><div class="vt-big">${esc(t.en)}, ${esc((sh === 'clair' ? 'light ' : sh === 'foncé' ? 'dark ' : '') + c.en)}</div></div>
+            <div class="vt-show"><div class="vt-blob">${thingSvg(t.fr, shadeHex(c.hex, sh))}</div><div class="vt-big">${esc(t.en)}, ${esc((sh === 'clair' ? 'light ' : sh === 'foncé' ? 'dark ' : '') + c.en)}</div></div>
             <div class="vt">${opts.map((o, i) => `<button type="button" class="vt-opt" data-i="${i}">${esc(o)}</button>`).join('')}</div>
             <p class="vt-small">Score ${quiz.score} / ${quiz.n - 1}</p></div>`;
         let answered = false;

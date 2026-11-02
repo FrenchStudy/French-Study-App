@@ -83,7 +83,7 @@ function open(words, opts = {}) {
             <button type="button" class="wm-play" data-a="play">${ic('pause')} Pause</button>
             <button type="button" data-a="next" aria-label="Next word">${ic('next')}</button>
             <button type="button" data-a="slow" aria-pressed="${settings.slow}">🐢 Slow</button>
-            <button type="button" data-a="english" aria-pressed="${settings.english}">🇬🇧 English voice</button>
+            <button type="button" data-a="english" aria-pressed="${settings.english}"><img src="media/flags/gb.svg" alt="" style="display:inline-block;height:.8em;width:auto;vertical-align:-.05em;border-radius:2px"> English voice</button>
             ${words.some(w => w.exFr) ? `<button type="button" data-a="examples" aria-pressed="${settings.examples}">💬 Examples</button>` : ''}
         </div>
         <div class="wm-count"></div>`;
@@ -93,7 +93,7 @@ function open(words, opts = {}) {
     try { navigator.wakeLock && navigator.wakeLock.request('screen').then(l => { lock = l; }).catch(() => {}); } catch (e) { /* not allowed */ }
 
     function show(w, phase) {
-        q('.wm-pic').textContent = (window.WordMemory && WordMemory.picture(w)) || '';
+        q('.wm-pic').innerHTML = (window.WordMemory && WordMemory.picture(w)) || '';
         const fr = q('.wm-fr'); fr.textContent = w.fr; fr.className = 'wm-fr ' + (w.gender === 'm' ? 'm' : w.gender === 'f' ? 'f' : '');
         q('.wm-en').textContent = w.en || '';
         q('.wm-en').classList.toggle('wm-hide', phase < 1);
