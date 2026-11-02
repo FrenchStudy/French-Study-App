@@ -689,6 +689,48 @@
         }
         const TILE_GRID = 'grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5';
 
+        // Learn tiles in coloured series with a rule each (Numbers: the colours of the old « Les nombres » box).
+        // test(w, n): n is the number at the start of the word key ("70 · soixante-dix" -> 70), or NaN
+        const TILE_GROUPS = {
+            4: [
+                { c: 'plain', t: 'Learn these by heart', r: '0 to 16 each have their own word.', test: (w, n) => n <= 16 },
+                { c: 'sky', t: 'Built from parts', r: 'dix-sept = 10 + 7; vingt et un, but vingt-deux: « et » only with 1 (21, 31… 71).', test: (w, n) => n >= 17 && n <= 29 },
+                { c: 'bold', t: 'The tens', r: 'trente, quarante, cinquante, soixante: then add 1–9 the same way.', test: (w, n) => n >= 30 && n <= 69 },
+                { c: 'amber', t: '70 = 60 + 10', r: 'soixante-dix, soixante et onze, soixante-douze… soixante-dix-neuf.', test: (w, n) => n >= 70 && n <= 79 },
+                { c: 'rose', t: '80 = 4 × 20', r: 'quatre-vingts takes an s, but loses it when a number follows: quatre-vingt-un.', test: (w, n) => n >= 80 && n <= 89 },
+                { c: 'green', t: '90 = 4 × 20 + 10', r: 'quatre-vingt-dix, quatre-vingt-onze… quatre-vingt-dix-neuf.', test: (w, n) => n >= 90 && n <= 99 },
+                { c: 'blue', t: 'Hundreds and thousands', r: 'deux cents, but deux cent un; mille never takes an s: deux mille.', test: (w, n) => n >= 100 && n < 1e6 },
+                { c: 'indigo', t: 'Millions and billions', r: 'un million, un milliard: nouns, so de before a noun: un million d’euros.', test: (w, n) => n >= 1e6 },
+                { c: '', t: "L'adresse", r: 'In an address the number comes first, with no comma: 12 rue de la Paix, 75002 Paris.', test: () => true },
+            ]
+        };
+        const GROUP_STYLE = {
+            plain: '', bold: '',
+            sky: 'background:#f0f9ff;border-color:#bae6fd', amber: 'background:#fefce8;border-color:#fde68a',
+            rose: 'background:#fff1f2;border-color:#fecdd3', green: 'background:#f0fdf4;border-color:#bbf7d0',
+            blue: 'background:#eff6ff;border-color:#bfdbfe', indigo: 'background:#eef2ff;border-color:#c7d2fe'
+        };
+        const GROUP_INK = { sky: '#0369a1', amber: '#a16207', rose: '#be123c', green: '#15803d', blue: '#1d4ed8', indigo: '#4338ca', bold: '#0f172a', plain: '#475569' };
+        function groupTiles(words, groups) {
+            const left = words.slice(), out = [];
+            for (const g of groups) {
+                const ws = left.filter(w => g.test(w, parseFloat(String(w.key).replace(/\s/g, ''))));
+                ws.forEach(w => left.splice(left.indexOf(w), 1));
+                if (!ws.length) continue;
+                const st = GROUP_STYLE[g.c] || '', ink = GROUP_INK[g.c];
+                const tiles = ws.map(w => {
+                    let h = tileHtml(w, false);
+                    if (st) h = h.replace('<div class="flex flex-col bg-white border border-slate-200', `<div style="${st}" class="flex flex-col bg-white border border-slate-200`);
+                    if (ink) h = h.replace(/(<span class="text-base font-bold leading-snug break-words[^"]*")/, `$1 style="color:${ink}${g.c === 'bold' ? ';font-weight:900' : ''}"`);
+                    return h;
+                }).join('');
+                out.push(`<section class="mb-5"><h3 class="flex flex-wrap items-baseline gap-x-2 mb-2"><span class="text-base font-black" style="color:${ink || '#0f172a'}">${escapeHtml(g.t)}</span>
+                    <span class="text-sm text-slate-600">${escapeHtml(g.r)}</span></h3><div class="${TILE_GRID}">${tiles}</div></section>`);
+            }
+            if (left.length) out.push(`<div class="${TILE_GRID}">${left.map(w => tileHtml(w, false)).join('')}</div>`);
+            return out.join('');
+        }
+
         // A chapter's story: [[text]] or [[text|key]] marks a word of the chapter
         const STORY_MARK = /\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/g;
         const storyPlain = (fr) => fr.replace(STORY_MARK, (m, text) => text);
@@ -787,7 +829,8 @@
             $('chapter-nav').classList.toggle('hidden', !chapters);
             if (!chapters) {
                 $('learn-words-title').textContent = `Words in this ${topic && topic.freq ? 'set' : 'topic'} (${deck.words.length})`;
-                $('learn-body').innerHTML = `<div class="${TILE_GRID}">${deck.words.map(w => tileHtml(w, false)).join('')}</div>`;
+                const groups = topic && TILE_GROUPS[topic.n] && groupTiles(deck.words, TILE_GROUPS[topic.n]);
+                $('learn-body').innerHTML = groups || `<div class="${TILE_GRID}">${deck.words.map(w => tileHtml(w, false)).join('')}</div>`;
                 renderEasy();
                 return;
             }
@@ -1821,7 +1864,7 @@
             if (!id && p.get('deck')) { id = p.get('deck'); }                       // old: ?deck=theme:9
             if (!id && p.get('review')) { id = 'review'; s = 'practise'; }
             // Lessons folded into a topic: Noms et prénoms went into Greetings, L'adresse into Numbers; the small lessons
-            // Objets personnels, La famille (the tree is in the memory palace), Objets de la classe and Les nombres (the chapters cover it) were removed
+            // Objets personnels, La famille (the tree is in the memory palace), Objets de la classe and Les nombres (the grouped number tiles cover it) were removed
             const MERGED = { 'noms-prenoms': 'theme:1', ladresse: 'theme:4', nombres: 'theme:4', 'objets-personnels': 'theme:17', 'famille-proche': 'theme:9', 'objets-classe': 'theme:27' };
             if (id && id.startsWith('lesson:') && MERGED[id.slice(7)]) id = MERGED[id.slice(7)];
             if (!id && MERGED[p.get('lesson')]) id = MERGED[p.get('lesson')];
