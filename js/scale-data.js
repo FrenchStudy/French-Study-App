@@ -268,7 +268,7 @@ window.SCALE_DATA = {
 
 // ---------------- 2 Question Words ----------------
 2: { name: 'Rule chart', next: 'Which question word?', tabs: [
-  { type: 'groups', title: 'Qui ? Où ? Quand ?', hint: 'Each question word asks for one kind of answer. Tap to hear.', ask: 'What does it ask about?', groups: [
+  { type: 'groups', title: 'Qui ? Où ? Quand ?', hint: 'Each question word asks for one kind of answer. Tap a word to see and hear it in a sentence.', ask: 'What does it ask about?', groups: [
     { name: 'Une personne', en: 'a person', color: '#4f46e5', rule: '— C\'est ma sœur.', words: [
       { key: 'qui', fr: 'qui ?', en: 'who?', ex: ['Qui est-ce ? — C\'est mon frère.', 'Who is it? — It is my brother.'] },
     ] },
@@ -304,7 +304,7 @@ window.SCALE_DATA = {
       { key: 'quel âge avez-vous ?', fr: 'Quel âge avez-vous ?', en: 'How old are you?', ex: ['Quel âge avez-vous ? — J\'ai trente ans.', 'How old are you? — I am thirty.'], note: 'Avoir: j\'ai trente ans (not « je suis »).' },
     ] },
   ] },
-  { type: 'groups', title: 'Quel, quelle, quels, quelles ?', hint: 'Quel agrees with the noun after it. Tap to hear.', ask: 'Quel, quelle, quels or quelles?', groups: [
+  { type: 'groups', title: 'Quel, quelle, quels, quelles ?', hint: 'Quel agrees with the noun after it. Tap a word to see and hear it in a sentence.', ask: 'Quel, quelle, quels or quelles?', groups: [
     { name: 'quel', en: 'masculine', color: '#0369a1', rule: 'quel + le … (one)', words: [
       { key: 'quel / quelle', fr: 'Quel jour ?', en: 'Which day?', ex: ['Quel jour sommes-nous ?', 'What day is it?'] },
       { key: 'quel âge avez-vous ?', fr: 'Quel âge ?', en: 'How old?', ex: ['Quel âge a ton fils ?', 'How old is your son?'] },
@@ -327,7 +327,7 @@ window.SCALE_DATA = {
 
 // ---------------- 3 Connectors & Small Words ----------------
 3: { name: 'Connectors', next: 'Join ideas and put things in order', tabs: [
-  { type: 'joiner', title: 'Relier', hint: 'Small words that join two ideas. Tap a word above to hear it, or join the two halves below.', roles: [
+  { type: 'joiner', title: 'Relier', hint: 'Small words that join two ideas. Tap a word to see it in a sentence, or join the two halves below.', roles: [
     { name: 'Ajouter', en: 'and, also', color: '#059669', icon: '➕', words: [
       { key: 'et', fr: 'et', en: 'and', ex: ['J\'ai un frère et une sœur.', 'I have a brother and a sister.'] },
       { key: 'aussi', fr: 'aussi', en: 'also, too', ex: ['Moi aussi !', 'Me too!'] },
@@ -393,7 +393,7 @@ window.SCALE_DATA = {
     { p: 66, key: 'beaucoup', fr: 'beaucoup', en: 'a lot', ex: ['Merci beaucoup !', 'Thank you very much!'], note: 'Beaucoup de + noun: beaucoup de gens (never « très de »).' },
     { p: 100, key: 'trop', fr: 'trop', en: 'too, too much', ex: ['C\'est trop cher !', 'It is too expensive!'], note: 'Trop = more than you want: a problem.' },
   ] },
-  { type: 'groups', title: 'Petits mots', hint: 'Where? With whom? How much? Tap to hear.', ask: 'What does it say?', groups: [
+  { type: 'groups', title: 'Petits mots', hint: 'Where? With whom? How much? Tap a word to see and hear it in a sentence.', ask: 'What does it say?', groups: [
     { name: 'Où ?', en: 'place', color: '#059669', words: [
       { key: 'sur', fr: 'sur', en: 'on', ex: ['Le livre est sur la table.', 'The book is on the table.'] },
       { key: 'sous', fr: 'sous', en: 'under', ex: ['Le chat est sous le lit.', 'The cat is under the bed.'] },
@@ -427,7 +427,7 @@ window.SCALE_DATA = {
     { p: 83, key: 'par conséquent', fr: 'par conséquent', en: 'consequently', ex: ['Par conséquent, il faut un référendum.', 'Consequently, a referendum is needed.'] },
     { p: 100, key: 'en somme', fr: 'en somme', en: 'in short', ex: ['En somme, le projet doit être revu.', 'In short, the project must be reviewed.'] },
   ] },
-  { type: 'groups', title: 'Les mots du débat', hint: 'Sorted by what they do in an argument. Tap to hear.', ask: 'What does it do?', groups: [
+  { type: 'groups', title: 'Les mots du débat', hint: 'Sorted by what they do in an argument. Tap a word to see and hear it in a sentence.', ask: 'What does it do?', groups: [
     { name: 'Prendre position', en: 'state your view', color: '#4f46e5', words: [
       { key: 'point de vue', fr: 'le point de vue', en: 'point of view', ex: ['De mon point de vue, c\'est une erreur.', 'From my point of view, it is a mistake.'] },
       { key: 'thèse', fr: 'la thèse', en: 'thesis, position', ex: ['Je défendrai la thèse suivante.', 'I shall defend the following position.'] },
@@ -553,7 +553,7 @@ window.SCALE_DATA = {
     { p: 75, key: 'ami', fr: 'l\'ami · l\'amie', en: 'friend', ex: ['C\'est mon meilleur ami.', 'He is my best friend.'] },
     { p: 100, key: 'ensemble', fr: 'ensemble', en: 'together', ex: ['On fait tout ensemble.', 'We do everything together.'] },
   ] },
-  { type: 'groups', title: 'Les liens', hint: 'What makes a relationship work, and what breaks it. Tap to hear.', ask: 'Which group?', groups: [
+  { type: 'groups', title: 'Les liens', hint: 'What makes a relationship work, and what breaks it. Tap a word to see and hear it in a sentence.', ask: 'Which group?', groups: [
     { name: 'Ce qui unit', en: 'what brings people together', color: '#059669', words: [
       { key: 'amitié', fr: 'l\'amitié', en: 'friendship', ex: ['Notre amitié dure depuis vingt ans.', 'Our friendship has lasted twenty years.'] },
       { key: 'confiance', fr: 'la confiance', en: 'trust', ex: ['J\'ai confiance en toi.', 'I trust you.'] },
@@ -592,7 +592,7 @@ window.SCALE_DATA = {
     { p: 90, lab: 'Noël', key: 'cadeau', fr: 'Noël · le cadeau', en: '25 December: Christmas, present', ex: ['À Noël, on offre des cadeaux.', 'At Christmas we give presents.'] },
     { p: 100, lab: '31 déc.', key: 'fêter', fr: 'la Saint-Sylvestre', en: '31 December: New Year\'s Eve', ex: ['Le 31 décembre, on fête la nouvelle année.', 'On 31 December we celebrate the new year.'] },
   ] },
-  { type: 'groups', title: 'Fêter', hint: 'Tap to hear.', ask: 'Which group?', groups: [
+  { type: 'groups', title: 'Fêter', hint: 'Tap a word to see and hear it in a sentence.', ask: 'Which group?', groups: [
     { name: 'Faire la fête', en: 'celebrating', color: '#d97706', words: [
       { key: 'anniversaire', fr: 'l\'anniversaire', en: 'birthday', ex: ['Joyeux anniversaire !', 'Happy birthday!'] },
       { key: 'fête', fr: 'la fête', en: 'party; feast day', ex: ['Bonne fête, Nicolas !', 'Happy name day, Nicolas!'] },
@@ -634,7 +634,7 @@ window.SCALE_DATA = {
     { p: 86, lab: 'traité', key: 'traité', fr: 'le traité', en: 'treaty', ex: ['Le traité de Rome a créé la CEE en 1957.', 'The Treaty of Rome created the EEC in 1957.'] },
     { p: 100, lab: 'commémorer', key: 'commémorer', fr: 'commémorer', en: 'to commemorate', ex: ['Le 11 novembre, on commémore l\'armistice de 1918.', 'On 11 November we commemorate the 1918 armistice.'] },
   ] },
-  { type: 'groups', title: 'La mémoire', hint: 'Words to talk about the past. Tap to hear.', ask: 'Which group?', groups: [
+  { type: 'groups', title: 'La mémoire', hint: 'Words to talk about the past. Tap a word to see and hear it in a sentence.', ask: 'Which group?', groups: [
     { name: 'Le temps', en: 'time', color: '#92400e', words: [
       { key: 'siècle', fr: 'le siècle', en: 'century', ex: ['Au XIXe siècle, Paris change beaucoup.', 'In the 19th century Paris changed a lot.'] },
       { key: 'époque', fr: 'l\'époque', en: 'era, period', ex: ['À cette époque, il n\'y avait pas d\'électricité.', 'At that time there was no electricity.'] },
@@ -666,7 +666,7 @@ window.SCALE_DATA = {
     { key: 'essence', a: ['l\'essence', 'essence', 'Quelle est l\'essence de l\'homme ?', 'What is the essence of man?'], b: ['l\'apparence', 'appearance', 'Il ne faut pas se fier aux apparences.', 'Don\'t trust appearances.'], extraB: true },
     { key: 'conscience', a: ['la conscience', 'consciousness; conscience', 'Il a pris conscience du problème.', 'He became aware of the problem.'], b: ['l\'inconscient', 'the unconscious', 'Freud a étudié l\'inconscient.', 'Freud studied the unconscious.'], extraB: true },
   ] },
-  { type: 'groups', title: 'Penser', hint: 'Words to think and argue with. Tap to hear.', ask: 'Which group?', groups: [
+  { type: 'groups', title: 'Penser', hint: 'Words to think and argue with. Tap a word to see and hear it in a sentence.', ask: 'Which group?', groups: [
     { name: 'Réfléchir', en: 'thinking', color: '#4f46e5', words: [
       { key: 'réfléchir à', fr: 'réfléchir à', en: 'to think about', ex: ['Je vais réfléchir à ta proposition.', 'I will think about your proposal.'] },
       { key: 'remettre en question', fr: 'remettre en question', en: 'to question', ex: ['Il remet tout en question.', 'He questions everything.'] },
