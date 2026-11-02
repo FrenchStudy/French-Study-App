@@ -28,7 +28,7 @@ const LessonKit = (function () {
         { id: 'nationalites', emoji: '🌍', title: 'Les nationalités', blurb: 'Countries and nationalities.', level: 'A1', path: 'content/vocab/nationalites.html', theme: 10, grammar: [27], widget: 'nationalites' },
         { id: 'professions', emoji: '👩‍⚕️', title: 'Les professions', blurb: 'Jobs, with and without an article.', level: 'A1', path: 'content/vocab/professions.html', theme: 11, grammar: [11] },
         { id: 'lheure-prix', emoji: '⏰', title: "L'heure et les prix", blurb: 'Telling the time and prices, with a practice clock.', level: 'A1', path: 'content/vocab/lheure-prix.html', theme: 6, widget: 'clock' },
-        { id: 'meteo-date-jours', emoji: '⛅', title: 'Météo, date et jours', blurb: 'Weather, days and dates, with a sentence builder.', level: 'A1', path: 'content/vocab/meteo-date-jours.html', theme: 8, widget: 'meteo' },
+        { id: 'meteo-date-jours', emoji: '⛅', title: 'Météo, date et jours', blurb: 'Dates, weather, temperature and seasons, with a forecast builder and a quiz.', level: 'A1', path: 'content/vocab/meteo-date-jours.html', theme: 8, widget: 'meteo' },
         { id: 'loisirs-hobbies', emoji: '⚽', title: 'Les loisirs', blurb: 'Hobbies and free time.', level: 'A1', path: 'content/vocab/loisirs-hobbies.html', theme: 26 },
         // Grammar practice pages, shown inside their grammar topics
         { id: 'articles-definis-indefinis-partitifs', emoji: '📰', title: 'Les articles', blurb: 'le, un, du: definite, indefinite and partitive.', level: 'A1', path: 'content/grammar/articles-definis-indefinis-partitifs.html', embedIn: [2, 3] },
@@ -349,7 +349,7 @@ const LessonKit = (function () {
                 if (!res.ok) throw new Error(res.status);
                 box.innerHTML = await res.text();
                 if (item.widget === 'clock') { if (!window.FrenchClock) await loadScript('js/clock.js'); bindClockModuleEvents(box); }
-                if (item.widget === 'meteo') bindMeteoModuleEvents(box);
+                if (item.widget === 'meteo') { if (!window.MeteoLesson) await loadScript('js/meteo-lesson.js'); window.MeteoLesson.bind(box); }
                 if (item.widget === 'nationalites') { if (!window.Nationalites) await loadScript('js/nationalites.js'); window.Nationalites.bind(box); }
             } catch (err) {
                 box.innerHTML = '<p class="text-sm text-rose-700">This lesson could not be loaded. Check your connection and try again.</p>';
@@ -366,7 +366,7 @@ const LessonKit = (function () {
         });
     }
 
-    // ---------- Widgets used by two interactive lessons ----------
+    // ---------- The clock lesson's widget ----------
     function bindClockModuleEvents(container) {
         const hourInput = container.querySelector("#fc-hour");
         const minInput = container.querySelector("#fc-min");
@@ -392,35 +392,6 @@ const LessonKit = (function () {
         });
 
         updateClock();
-    }
-
-    function bindMeteoModuleEvents(container) {
-        const daySelect = container.querySelector("#meteo-day");
-        const monthSelect = container.querySelector("#meteo-month");
-        const dateSelect = container.querySelector("#meteo-date");
-        const condSelect = container.querySelector("#meteo-condition");
-        const output = container.querySelector("#meteo-output");
-
-        if (!daySelect || !monthSelect || !condSelect || !output) return;
-
-        function updateMeteo() {
-            const dayText = daySelect.value;
-            const monthText = monthSelect.value;
-            const condText = condSelect.value;
-            
-            // "nous sommes mercredi 12 mars": day + date + month; only the 1st is "1er"
-            const d = dateSelect ? Number(dateSelect.value) : 0;
-            const date = d ? (d === 1 ? '1er ' : d + ' ') : '';
-            const result = `Aujourd'hui, nous sommes ${dayText} ${date}${monthText} et ${condText.toLowerCase()}.`;
-            output.textContent = result;
-            currentPracticeTarget = result;
-        }
-
-        daySelect.addEventListener("change", updateMeteo);
-        monthSelect.addEventListener("change", updateMeteo);
-        if (dateSelect) dateSelect.addEventListener("change", updateMeteo);
-        condSelect.addEventListener("change", updateMeteo);
-        updateMeteo();
     }
 
     // ---------- Clicks inside any lesson browser ----------
