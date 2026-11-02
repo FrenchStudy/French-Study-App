@@ -82,6 +82,15 @@ const CSS = `
 .st-line.shown{opacity:1}.st-line b{color:#4f46e5}.st-line small{display:block;font-size:13px;color:#64748b}
 .st-line img{width:34px;height:34px;object-fit:contain;flex:none}
 @media (max-width:560px){.st-node .n{width:54px;height:54px}.st-node .n img{width:36px;height:36px}.st-seq-line{top:27px}.st-node .k{font-size:13px}.st-node .e{display:none}.st-node .num{left:calc(50% + 14px);width:20px;height:20px;font-size:11px}.st-sent{font-size:1.1rem}}
+.st-det{background:#fff;border-radius:10px;padding:10px 12px;display:grid;gap:6px;color:#0f172a;box-shadow:0 2px 8px rgba(0,0,0,.12);animation:st-pop .18s ease-out}
+.st-det .w{font-size:1.25rem;font-weight:900}.st-det .en{font-size:13px;color:#475569}
+.st-det .ex{font-size:16px;line-height:1.45;cursor:pointer}.st-det .ex div{font-size:13px;color:#64748b}
+.st-det mark{background:#FEF08A;color:inherit;border-radius:4px;padding:0 2px;font-weight:800}
+.st-det .st-note{margin-top:0}
+.st-det .st-row{gap:6px}.st-det .st-btn{min-height:38px;padding:6px 10px;font-size:14px}
+.st-chip.open{font-weight:900;box-shadow:inset 0 0 0 2px currentColor}
+@keyframes st-pop{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.st-det{animation:none}}
 .st-phone{display:none}
 @media (max-width:600px){.st-phone{display:flex}.st-stop{display:none}.st-track{margin:16px 4px 10px}.st-ends{margin:-6px 4px 6px}}`;
 function css() { if (!document.getElementById('st-css')) { const s = document.createElement('style'); s.id = 'st-css'; s.textContent = CSS; document.head.appendChild(s); } }
@@ -182,13 +191,43 @@ function mount(T, root, { say, grade, words }) {
         sl.addEventListener('keydown', (e) => { const d = { ArrowRight: 1, ArrowUp: 1, ArrowLeft: -1, ArrowDown: -1 }[e.key]; if (!d) return; e.preventDefault(); sl.value = Math.max(0, Math.min(100, Number(sl.value) + d * (P.mid === false ? 100 : 50))); land(true, true); });
         pick(0);
     }
+    // the example opens right under the word you tap, with the word marked in the sentence, so what you hear is
+    // what you see; 🔊 buttons replay the word or the sentence
+    const markWord = (sentence, fr) => {
+        const forms = String(fr).split(/\s*\/\s*/).map(f => f.replace(/[\s?!.…]+$/, '')).flatMap(f => f.endsWith(' que') ? [f, f.replace(/que$/, 'qu')] : [f]).filter(Boolean).sort((a, b) => b.length - a.length);
+        const e = esc(sentence);
+        for (const f of forms) {
+            const re = new RegExp('(^|[^\\p{L}])(' + esc(f).replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/'/g, "(?:'|&#39;)") + ')(?=[^\\p{L}]|$)', 'iu');
+            if (re.test(e)) return e.replace(re, '$1<mark>$2</mark>');
+        }
+        return e;
+    };
+    function openDetail(chip, w, color, en) {
+        const host = chip.parentElement;
+        host.querySelectorAll('.st-det').forEach(d => d.remove());
+        host.querySelectorAll('.st-chip.open').forEach(c => c.classList.remove('open'));
+        if (chip.dataset.open === '1') { chip.dataset.open = ''; chip.setAttribute('aria-expanded', 'false'); return; }   // tap again: close
+        host.querySelectorAll('.st-chip').forEach(c => { c.dataset.open = ''; c.setAttribute('aria-expanded', 'false'); });
+        chip.dataset.open = '1'; chip.classList.add('open'); chip.setAttribute('aria-expanded', 'true');
+        const d = document.createElement('div'); d.className = 'st-det';
+        d.innerHTML = `<div><span class="w" style="color:${color}">${esc(w.fr)}</span> <span class="en">${esc(en)}</span></div>`
+            + (w.ex ? `<div class="ex" data-say="${esc(w.ex[0])}">${markWord(w.ex[0], w.fr)}<div>${esc(w.ex[1])}</div></div>` : '')
+            + (w.note ? `<div class="st-note">${esc(w.note)}</div>` : '')
+            + `<div class="st-row"><button type="button" class="st-btn" data-sw>🔊 ${esc(w.fr)}</button>${w.ex ? '<button type="button" class="st-btn" data-ss>🔊 Sentence</button>' : ''}</div>`;
+        chip.insertAdjacentElement('afterend', d);
+        d.querySelector('[data-sw]').addEventListener('click', () => speak(w.fr));
+        d.querySelector('[data-ss]')?.addEventListener('click', () => speak(w.ex[0]));
+        d.querySelector('.ex')?.addEventListener('click', () => speak(w.ex[0]));
+        speak(w.ex ? w.fr.replace(/[\s?!.…]+$/, '') + '. ' + w.ex[0] : w.fr);
+        const r = d.getBoundingClientRect(); if (r.bottom > innerHeight) d.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    }
     function exploreGroups(t) {
-        body.innerHTML = `<p class="st-hint">${esc(t.hint)}</p><div class="st-groups">${t.groups.map((g, gi) => `<div class="st-group" style="background:${g.color}"><h4>${esc(g.name)}</h4><small>${esc(g.en)}</small>${g.rule ? `<div class="st-rule">${esc(g.rule)}</div>` : ''}${g.words.map((w, wi) => `<button type="button" class="st-chip" data-g="${gi}" data-w="${wi}">${esc(w.fr)}</button>`).join('')}</div>`).join('')}</div><div class="st-out"><span class="st-small">Tap a word.</span></div>`;
-        const out = body.querySelector('.st-out');
+        body.innerHTML = `<p class="st-hint">${esc(t.hint)}</p><div class="st-groups">${t.groups.map((g, gi) => `<div class="st-group" style="background:${g.color}"><h4>${esc(g.name)}</h4><small>${esc(g.en)}</small>${g.rule ? `<div class="st-rule">${esc(g.rule)}</div>` : ''}${g.words.map((w, wi) => `<button type="button" class="st-chip" data-g="${gi}" data-w="${wi}" aria-expanded="false">${esc(w.fr)}</button>`).join('')}</div>`).join('')}</div>`;
         body.querySelectorAll('.st-group .st-chip').forEach(c => c.addEventListener('click', () => {
-            const g = t.groups[Number(c.dataset.g)], w = g.words[Number(c.dataset.w)], all = w.fr + '. ' + w.ex[0];
-            body.querySelectorAll('.st-group .st-chip').forEach(x => x.setAttribute('aria-pressed', x === c));
-            out.innerHTML = box(w.fr, `${w.en} · ${g.name}`, w.ex, w.note, g.color); wire(out, all); speak(all);
+            const g = t.groups[Number(c.dataset.g)], w = g.words[Number(c.dataset.w)];
+            body.querySelectorAll('.st-group .st-det').forEach(d => { if (d.parentElement !== c.parentElement) d.remove(); });
+            body.querySelectorAll('.st-group .st-chip').forEach(x => { if (x.parentElement !== c.parentElement) { x.dataset.open = ''; x.classList.remove('open'); } });
+            openDetail(c, w, g.color, `${w.en} · ${g.name}`);
         }));
     }
     function exploreRegister(t) {
@@ -234,15 +273,14 @@ function mount(T, root, { say, grade, words }) {
         const roleOf = (fr) => all.find(x => x.w.fr === fr);
         let order = shuffle(t.items), k = 0;
         body.innerHTML = `<p class="st-hint">${esc(t.hint)}</p><div class="st-roles">${t.roles.map((r, ri) => `<div class="st-role" style="background:${r.color}"><h4>${r.icon || ''} ${esc(r.name)}</h4><small>${esc(r.en)}</small>${r.words.map((w, wi) => `<button type="button" class="st-chip" data-r="${ri}" data-w="${wi}">${esc(w.fr)}</button>`).join('')}</div>`).join('')}</div>
-            <div class="st-out" id="st-wd"><span class="st-small">Tap a word to hear it with an example.</span></div>
             <div class="st-join"><div class="st-small" style="font-weight:800;color:#334155">Join the two halves</div><div class="st-sent" id="st-sent"></div>
             <div class="st-chips" id="st-pick">${all.map(x => `<button type="button" class="st-chip" data-fr="${esc(x.w.fr)}">${esc(x.w.fr)}</button>`).join('')}</div>
             <p class="st-fb" id="st-jfb"></p><div class="st-row"><button type="button" class="st-btn" id="st-jnext">Another sentence →</button></div></div>`;
-        const wd = body.querySelector('#st-wd');
         body.querySelectorAll('.st-role .st-chip').forEach(c => c.addEventListener('click', () => {
-            const r = t.roles[Number(c.dataset.r)], w = r.words[Number(c.dataset.w)], say = w.fr + '. ' + w.ex[0];
-            body.querySelectorAll('.st-role .st-chip').forEach(x => x.setAttribute('aria-pressed', x === c));
-            wd.innerHTML = box(w.fr, `${w.en} · ${r.name}`, w.ex, w.note, r.color); wire(wd, say); speak(say);
+            const r = t.roles[Number(c.dataset.r)], w = r.words[Number(c.dataset.w)];
+            body.querySelectorAll('.st-role .st-det').forEach(d => { if (d.parentElement !== c.parentElement) d.remove(); });
+            body.querySelectorAll('.st-role .st-chip').forEach(x => { if (x.parentElement !== c.parentElement) { x.dataset.open = ''; x.classList.remove('open'); } });
+            openDetail(c, w, r.color, `${w.en} · ${r.name}`);
         }));
         const sentence = (it, fill, cls, col) => {
             const f = fill && !it.a ? fill.charAt(0).toUpperCase() + fill.slice(1) : fill;
