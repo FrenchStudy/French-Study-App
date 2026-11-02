@@ -1821,8 +1821,8 @@
             if (!id && p.get('deck')) { id = p.get('deck'); }                       // old: ?deck=theme:9
             if (!id && p.get('review')) { id = 'review'; s = 'practise'; }
             // Lessons folded into a topic: Noms et prénoms went into Greetings, L'adresse into Numbers; the small lessons
-            // Objets personnels, La famille (the tree is in the memory palace) and Objets de la classe were removed
-            const MERGED = { 'noms-prenoms': 'theme:1', ladresse: 'theme:4', 'objets-personnels': 'theme:17', 'famille-proche': 'theme:9', 'objets-classe': 'theme:27' };
+            // Objets personnels, La famille (the tree is in the memory palace), Objets de la classe and Les nombres (the chapters cover it) were removed
+            const MERGED = { 'noms-prenoms': 'theme:1', ladresse: 'theme:4', nombres: 'theme:4', 'objets-personnels': 'theme:17', 'famille-proche': 'theme:9', 'objets-classe': 'theme:27' };
             if (id && id.startsWith('lesson:') && MERGED[id.slice(7)]) id = MERGED[id.slice(7)];
             if (!id && MERGED[p.get('lesson')]) id = MERGED[p.get('lesson')];
             if (!id && p.get('lesson')) {                                            // old: ?lesson=famille-proche
