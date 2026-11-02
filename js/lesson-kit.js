@@ -24,7 +24,6 @@ const LessonKit = (function () {
     // Interactive lessons (hand-built pages in content/)
     const INTERACTIVE = [
         { id: 'lalphabet', emoji: '🔤', title: "L'alphabet", blurb: 'The alphabet and spelling out loud.', level: 'A1', path: 'content/vocab/lalphabet.html' },
-        { id: 'nombres', emoji: '🔢', title: 'Les nombres', blurb: 'Numbers from 0 upwards, with audio.', level: 'A1', path: 'content/vocab/nombres.html', theme: 4 },
         { id: 'nationalites', emoji: '🌍', title: 'Les nationalités', blurb: 'Countries and nationalities.', level: 'A1', path: 'content/vocab/nationalites.html', theme: 10, grammar: [27], widget: 'nationalites' },
         { id: 'professions', emoji: '👩‍⚕️', title: 'Les professions', blurb: 'Jobs, with and without an article.', level: 'A1', path: 'content/vocab/professions.html', theme: 11, grammar: [11] },
         { id: 'lheure-prix', emoji: '⏰', title: "L'heure et les prix", blurb: 'Telling the time and prices, with a practice clock.', level: 'A1', path: 'content/vocab/lheure-prix.html', theme: 6, widget: 'clock' },
