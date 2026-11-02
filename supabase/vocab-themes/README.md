@@ -24,6 +24,8 @@ Run them in order in the Supabase SQL editor. Each file is safe to run twice, an
 | `12_france_french_examples.sql` | France French: three examples say *par e-mail* instead of *par courriel*, and *courriel* gets a note in its meaning | the four rows with the new text |
 | `13_remove_quebec_words.sql` | Removes the Québec-only words *dépanneur, bleuet, tuque, cégep* (a copy is kept for undo) and adds *myrtille* in place of *bleuet* | 0 still in the list, 4 kept in the backup |
 | `14_add_rarement.sql` | Adds *rarement* (rarely) to Frequency & Time Adverbs | one row: rarement, rarely |
+| `15_more_connectors.sql` | Adds 110 connectors to Connectors & Small Words (theme 3), in the order of its new Learn chapters: reuses the ones already in the bank (never a noun, so *or* is « yet », not « gold ») and adds the others with an example sentence (`source = 'advanced'`). Made by `tools/connectors/connectors.py` | one row: Connectors & Small Words with 141 words |
+| `15_undo_more_connectors.sql` | Removes only those 110 topic links | `words_in_topic` = 31 |
 | `99_undo.sql` | Removes the themes, the new entries and the new columns, and restores gender and article from the backup | `rows_now` = 5000 |
 
 Before running `05_new_themes.sql`, look through `05_new_themes_review.csv` (GitHub shows it as a table).

@@ -1,0 +1,12 @@
+-- 15_undo_more_connectors.sql
+-- Removes the 110 connectors added by 15_more_connectors.sql from the topic Connectors & Small Words (theme 3).
+-- The 31 words the topic had before stay. New word-bank entries stay too (harmless: they are in no topic).
+
+delete from "French-schema".word_themes
+where theme_id = 3
+  and word_id in (select id from "French-schema".vocabulary_bank where "French" in ('de plus', 'en outre', 'par ailleurs', 'non seulement… mais aussi', 'quant à', 'de la même façon', 'soit… soit', 'l''un ou l''autre', 'd''un côté… de l''autre', 'd''un autre côté', 'c''est-à-dire', 'autrement dit', 'en d''autres termes', 'en fait', 'en réalité', 'en effet', 'effectivement', 'par exemple', 'notamment', 'en particulier', 'entre autres', 'c''est le cas de', 'c''est ainsi que', 'cependant', 'pourtant', 'toutefois', 'néanmoins', 'bien que', 'quoique', 'même si', 'certes', 'malgré', 'en dépit de', 'en revanche', 'au contraire', 'à l''inverse', 'contrairement à', 'tandis que', 'alors que', 'au lieu de', 'or', 'sauf', 'à part', 'mis à part', 'excepté', 'hormis', 'en dehors de', 'à défaut de', 'comme', 'puisque', 'étant donné que', 'vu que', 'attendu que', 'du fait que', 'dans la mesure où', 'sous prétexte que', 'grâce à', 'à cause de', 'en raison de', 'par suite de', 'sous la pression de', 'par', 'ainsi', 'par conséquent', 'en conséquence', 'conséquemment', 'de ce fait', 'si bien que', 'c''est pourquoi', 'c''est pour cette raison que', 'd''où', 'en conclusion', 'pour conclure', 'en résumé', 'en définitive', 'en un mot', 'finalement', 'au cas où', 'dans le cas où', 'dans l''hypothèse où', 'à condition que', 'à moins que', 'en admettant que', 'en supposant que', 'à supposer que', 'probablement', 'sans doute', 'apparemment', 'pour que', 'afin que', 'de peur que', 'de crainte que', 'en vue de', 'quand', 'lorsque', 'dès que', 'aussitôt que', 'pendant que', 'au moment où', 'avant que', 'après que', 'depuis', 'depuis que', 'dès lors que', 'en même temps que', 'tout d''abord', 'premièrement / deuxièmement', 'en premier lieu / en second lieu', 'en dernier lieu', 'd''une part… d''autre part'))
+  and word_id not in (select id from "French-schema".vocabulary_bank where "French" in
+      ('et', 'mais', 'ou', 'donc', 'parce que / parce qu''', 'car', 'alors', 'aussi', 'si'));
+
+-- You should see 31
+select count(*) as words_in_topic from "French-schema".word_themes where theme_id = 3;

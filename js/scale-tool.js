@@ -57,8 +57,9 @@ const CSS = `
 .st-trap,.st-means{margin-top:6px;font-size:16px}.st-trap span,.st-means span{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;margin-right:6px}
 .st-trap span{color:#be123c}.st-trap s{color:#be123c}.st-means span{color:#047857}.st-means b{color:#047857}
 
-.st-roles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
-.st-role{border-radius:12px;padding:8px 10px;display:grid;gap:5px;align-content:start;color:#fff}
+.st-roles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;align-items:start}
+.st-role{border-radius:12px;padding:8px 10px;display:flex;flex-wrap:wrap;gap:5px;align-content:flex-start;color:#fff}.st-role h4,.st-role small,.st-role .st-det{flex-basis:100%}.st-role.wide{grid-column:span 2}@media(max-width:520px){.st-roles{grid-template-columns:1fr}.st-role.wide{grid-column:auto}}
+.st-say{margin-top:12px;padding:12px;border:1px solid #e2e8f0;border-radius:12px;background:#f8fafc;display:grid;gap:8px}.st-say .en{font-size:17px;font-weight:700;color:#0f172a}.st-say .fr{font-size:17px;color:#047857;font-weight:700}
 .st-role h4{margin:0;font-size:14px;font-weight:900}.st-role small{font-size:12px;opacity:.9;margin-top:-4px}
 .st-role .st-chip{background:#fff;border-color:transparent;border-radius:10px;font-weight:800;color:#0f172a}
 .st-join{border:1px solid #e2e8f0;border-radius:14px;padding:14px;background:#f8fafc;display:grid;gap:12px}
@@ -194,7 +195,7 @@ function mount(T, root, { say, grade, words }) {
     // the example opens right under the word you tap, with the word marked in the sentence, so what you hear is
     // what you see; 🔊 buttons replay the word or the sentence
     const markWord = (sentence, fr) => {
-        const forms = String(fr).split(/\s*\/\s*/).map(f => f.replace(/[\s?!.…]+$/, '')).flatMap(f => f.endsWith(' que') ? [f, f.replace(/que$/, 'qu')] : [f]).filter(Boolean).sort((a, b) => b.length - a.length);
+        const forms = String(fr).split(/\s*(?:\/|…)\s*/).map(f => f.replace(/[\s?!.…]+$/, '')).flatMap(f => f.endsWith('que') ? [f, f.replace(/que$/, 'qu')] : f.endsWith(' de') ? [f, f.replace(/de$/, 'du'), f.replace(/de$/, 'des'), f.replace(/de$/, 'd')] : f.endsWith(' à') ? [f, f.replace(/à$/, 'au'), f.replace(/à$/, 'aux')] : [f]).filter(Boolean).sort((a, b) => b.length - a.length);
         const e = esc(sentence);
         for (const f of forms) {
             const re = new RegExp('(^|[^\\p{L}])(' + esc(f).replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/'/g, "(?:'|&#39;)") + ')(?=[^\\p{L}]|$)', 'iu');
@@ -272,43 +273,74 @@ function mount(T, root, { say, grade, words }) {
         const all = t.roles.flatMap(r => r.words.map(w => ({ r, w })));
         const roleOf = (fr) => all.find(x => x.w.fr === fr);
         let order = shuffle(t.items), k = 0;
-        body.innerHTML = `<p class="st-hint">${esc(t.hint)}</p><div class="st-roles">${t.roles.map((r, ri) => `<div class="st-role" style="background:${r.color}"><h4>${r.icon || ''} ${esc(r.name)}</h4><small>${esc(r.en)}</small>${r.words.map((w, wi) => `<button type="button" class="st-chip" data-r="${ri}" data-w="${wi}">${esc(w.fr)}</button>`).join('')}</div>`).join('')}</div>
+        body.innerHTML = `<p class="st-hint">${esc(t.hint)}</p><div class="st-roles">${t.roles.map((r, ri) => `<div class="st-role${r.words.length >= 10 ? ' wide' : ''}" style="background:${r.color}"><h4>${r.icon || ''} ${esc(r.name)}</h4><small>${esc(r.en)}</small>${r.words.map((w, wi) => `<button type="button" class="st-chip" data-r="${ri}" data-w="${wi}">${esc(w.fr)}</button>`).join('')}</div>`).join('')}</div>
             <div class="st-join"><div class="st-small" style="font-weight:800;color:#334155">Join the two halves</div><div class="st-sent" id="st-sent"></div>
-            <div class="st-chips" id="st-pick">${all.map(x => `<button type="button" class="st-chip" data-fr="${esc(x.w.fr)}">${esc(x.w.fr)}</button>`).join('')}</div>
-            <p class="st-fb" id="st-jfb"></p><div class="st-row"><button type="button" class="st-btn" id="st-jnext">Another sentence →</button></div></div>`;
+            <div class="st-chips" id="st-pick"></div>
+            <p class="st-fb" id="st-jfb"></p><div class="st-row"><button type="button" class="st-btn" id="st-jnext">Another sentence →</button></div></div>
+            ${t.say ? `<div class="st-say"><div class="st-small" style="font-weight:800;color:#334155">Say it in French</div><div class="en" id="st-say-en"></div><div class="st-small" id="st-say-use"></div>
+            <div class="fr" id="st-say-fr" hidden></div><div class="st-row"><button type="button" class="st-btn pri" id="st-say-show">Show the French</button><button type="button" class="st-btn" id="st-say-next">Another sentence →</button></div></div>` : ''}`;
         body.querySelectorAll('.st-role .st-chip').forEach(c => c.addEventListener('click', () => {
             const r = t.roles[Number(c.dataset.r)], w = r.words[Number(c.dataset.w)];
             body.querySelectorAll('.st-role .st-det').forEach(d => { if (d.parentElement !== c.parentElement) d.remove(); });
             body.querySelectorAll('.st-role .st-chip').forEach(x => { if (x.parentElement !== c.parentElement) { x.dataset.open = ''; x.classList.remove('open'); } });
             openDetail(c, w, r.color, `${w.en} · ${r.name}`);
         }));
+        // a capital after a full stop or at the start; no space before a comma; que + vowel = qu'
+        const capAt = (it) => !it.a || /[.!?]$/.test(it.a);
+        const fillOf = (it, w) => { let f = elide(w, it.b); return capAt(it) ? f.charAt(0).toUpperCase() + f.slice(1) : f; };
+        const glue = (f, b) => /'$/.test(f) || /^,/.test(b) ? '' : ' ';
         const sentence = (it, fill, cls, col) => {
-            const f = fill && !it.a ? fill.charAt(0).toUpperCase() + fill.slice(1) : fill;
+            const f = fill ? fillOf(it, fill) : '';
             const gap = `<span class="st-gap ${cls || ''}" style="${col ? 'background:' + col + ';border-color:' + col : ''}">${f ? esc(f) : '?'}</span>`;
-            return it.a ? `${esc(it.a)} ${gap} ${esc(it.b)}` : `${gap} ${esc(it.b)}`;
+            return (it.a ? esc(it.a) + ' ' : '') + gap + (f ? glue(f, it.b) : /^,/.test(it.b) ? '' : ' ') + esc(it.b);
         };
-        const full = (it, w) => (it.a ? it.a + ' ' + w + ' ' + it.b : w.charAt(0).toUpperCase() + w.slice(1) + ' ' + it.b).replace(/que i/, 'qu\'i').replace(/que e/, 'qu\'e');
+        const full = (it, w) => { const f = fillOf(it, w); return (it.a ? it.a + ' ' : '') + f + glue(f, it.b) + it.b; };
+        // the choices: the right words and a few from other groups
+        const choicesFor = (it) => {
+            const roles = new Set(all.filter(x => it.w.includes(x.w.fr)).map(x => x.r));
+            const others = [...new Set(shuffle(all.filter(x => !roles.has(x.r) && !it.w.includes(x.w.fr))).map(x => x.w.fr))].slice(0, Math.max(3, 6 - it.w.length));
+            return shuffle([...it.w, ...others]);
+        };
         const showItem = () => {
             const it = order[k % order.length];
             body.querySelector('#st-sent').innerHTML = sentence(it);
             body.querySelector('#st-jfb').textContent = '';
-            body.querySelectorAll('#st-pick .st-chip').forEach(c => { c.disabled = false; c.setAttribute('aria-pressed', 'false'); });
+            const pickBox = body.querySelector('#st-pick');
+            pickBox.innerHTML = choicesFor(it).map(fr => `<button type="button" class="st-chip" data-fr="${esc(fr)}">${esc(fr)}</button>`).join('');
+            pickBox.querySelectorAll('.st-chip').forEach(c => c.addEventListener('click', () => choose(c)));
         };
-        body.querySelectorAll('#st-pick .st-chip').forEach(c => c.addEventListener('click', () => {
+        const choose = (c) => {
             const it = order[k % order.length], w = c.dataset.fr, fb = body.querySelector('#st-jfb'), x = roleOf(w);
             if (it.w.includes(w)) {
-                body.querySelector('#st-sent').innerHTML = sentence(it, w === 'parce que' && /^[aeiouhéè]/i.test(it.b) ? 'parce qu\'' : w, 'ok', x.r.color) + `<div class="st-small" style="font-weight:400">${esc(it.en)}</div>`;
+                body.querySelector('#st-sent').innerHTML = sentence(it, w, 'ok', x.r.color) + `<div class="st-small" style="font-weight:400">${esc(it.en)}</div>`;
                 fb.className = 'st-fb ok';
-                fb.textContent = `${x.r.icon || ''} ${w} = ${x.w.en} (${x.r.name.toLowerCase()})` + (it.w.length > 1 ? ` · « ${it.w.find(o => o !== w)} » works too.` : '');
+                const also = it.w.filter(o => o !== w);
+                fb.textContent = `${x.r.icon || ''} ${w} = ${x.w.en} (${x.r.name.toLowerCase()})` + (also.length ? ` · ${also.map(o => '« ' + o + ' »').join(', ')} ${also.length > 1 ? 'work' : 'works'} too.` : '');
                 speak(full(it, w));
                 body.querySelectorAll('#st-pick .st-chip').forEach(b => { b.disabled = true; });
             } else {
                 c.disabled = true; fb.className = 'st-fb no';
                 fb.textContent = `Not « ${w} »: it means ${x.w.en} (${x.r.name.toLowerCase()}). What links these two ideas?`;
             }
-        }));
+        };
         body.querySelector('#st-jnext').addEventListener('click', () => { k++; showItem(); });
         showItem();
+        if (t.say) {
+            const S = shuffle(t.say); let si = 0;
+            const show = () => {
+                const [en, fr, use] = S[si % S.length];
+                body.querySelector('#st-say-en').textContent = en;
+                body.querySelector('#st-say-use').textContent = `Use « ${use} ». Say it out loud, then check.`;
+                const out = body.querySelector('#st-say-fr'); out.hidden = true; out.innerHTML = markWord(fr, use);
+                body.querySelector('#st-say-show').textContent = 'Show the French';
+            };
+            body.querySelector('#st-say-show').addEventListener('click', (e) => {
+                const out = body.querySelector('#st-say-fr'), fr = S[si % S.length][1];
+                out.hidden = false; e.target.textContent = '🔊 Hear it again'; speak(fr);
+            });
+            body.querySelector('#st-say-next').addEventListener('click', () => { si++; show(); });
+            show();
+        }
     }
     // ---- Dans l'ordre: a numbered timeline that tells a story step by step ----
     function exploreSequence(t) {
@@ -318,7 +350,9 @@ function mount(T, root, { say, grade, words }) {
             <div class="st-seq"><div class="st-seq-line"><div class="st-seq-fill" style="width:0%"></div></div>${t.steps.map((st, i) => `<button type="button" class="st-node" data-i="${i}"><span class="num">${i + 1}</span><span class="n"></span><span class="k">${esc(st.fr)}</span><span class="e">${esc(st.en)}</span></button>`).join('')}</div>
             <div class="st-mid">⟵ ensuite · puis · après: the middle steps, in any order ⟶</div>
             <div class="st-row"><button type="button" class="st-btn pri" id="st-play">▶ Play the story</button><button type="button" class="st-btn" id="st-reset">Start again</button></div>
-            <div class="st-out st-story" id="st-story"></div>${t.note ? `<div class="st-note">${esc(t.note)}</div>` : ''}`;
+            <div class="st-out st-story" id="st-story"></div>${t.note ? `<div class="st-note">${esc(t.note)}</div>` : ''}
+            ${t.more ? `<div class="st-small" style="font-weight:800;color:#334155;margin-top:12px">In a list or an essay</div><div class="st-chips" id="st-more">${t.more.map((w, i) => `<button type="button" class="st-chip" data-m="${i}" aria-expanded="false">${esc(w.fr)}</button>`).join('')}</div>` : ''}`;
+        body.querySelectorAll('#st-more .st-chip').forEach(c => c.addEventListener('click', () => { const w = t.more[Number(c.dataset.m)]; openDetail(c, w, '#4f46e5', w.en); }));
         const draw = () => {
             const S = t.stories[si];
             body.querySelectorAll('#st-stories .st-chip').forEach((c, i) => c.setAttribute('aria-pressed', i === si));
@@ -348,6 +382,14 @@ function mount(T, root, { say, grade, words }) {
     }
 
     // ---------------- Check yourself ----------------
+    // que + vowel = qu' (parce qu'il), si + il(s) = s'il
+    const elide = (w, b) => /que$/.test(w) && /^[aeiouhéèêà]/i.test(b) ? w.replace(/que$/, 'qu\'') : w === 'si' && /^ils?\b/.test(b) ? 's\'' : w;
+    // a join item read as one sentence (capital after a full stop, qu' before a vowel, no space before a comma)
+    const joinSay = (it, w) => {
+        let f = elide(w, it.b);
+        if (!it.a || /[.!?]$/.test(it.a)) f = f.charAt(0).toUpperCase() + f.slice(1);
+        return (it.a ? it.a + ' ' : '') + f + (/'$/.test(f) || /^,/.test(it.b) ? '' : ' ') + it.b;
+    };
     function questions(t) {
         const Q = [];
         if (t.type === 'scale') {
@@ -373,9 +415,10 @@ function mount(T, root, { say, grade, words }) {
             const conn = t.roles.flatMap(r => r.words.map(w => ({ r, w })));
             for (const it of shuffle(t.items).slice(0, 10)) {
                 const right = it.w[0], x = conn.find(c => c.w.fr === right);
-                const others = shuffle(conn.filter(c => !it.w.includes(c.w.fr))).slice(0, 3).map(c => c.w.fr);
-                const gap = it.a ? `${it.a} ___ ${it.b}` : `___ ${it.b}`;
-                Q.push({ q: `« ${gap} »`, opts: shuffle([right, ...others]), a: right, key: x.w.key, why: `${right} = ${x.w.en} (${x.r.name.toLowerCase()}). ${it.en}` + (it.w.length > 1 ? ` « ${it.w[1]} » works too.` : ''), say: it.a ? `${it.a} ${right} ${it.b}` : `${right} ${it.b}` });
+                const roles = new Set(conn.filter(c => it.w.includes(c.w.fr)).map(c => c.r));
+                const others = [...new Set(shuffle(conn.filter(c => !roles.has(c.r) && !it.w.includes(c.w.fr))).map(c => c.w.fr))].slice(0, 3);
+                const gap2 = (it.a ? it.a + ' ___' : '___') + (/^,/.test(it.b) ? '' : ' ') + it.b;
+                Q.push({ q: `« ${gap2} »`, opts: shuffle([right, ...others]), a: right, key: x.w.key, why: `${right} = ${x.w.en} (${x.r.name.toLowerCase()}). ${it.en}` + (it.w.length > 1 ? ` « ${it.w.slice(1).join(' », « ')} » ${it.w.length > 2 ? 'work' : 'works'} too.` : ''), say: joinSay(it, right) });
             }
         } else if (t.type === 'sequence') {
             const mid = t.steps.slice(1, -1).map(s => s.fr);
