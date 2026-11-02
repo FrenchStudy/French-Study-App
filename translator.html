@@ -120,11 +120,11 @@
         let busy = false;
 
         // ---------- Direction ----------
-        const NAMES = { fr: '🇫🇷 French', en: '🇬🇧 English' };
+        const NAMES = { fr: '<img src="media/flags/fr.svg" alt="" style="display:inline-block;height:.8em;width:auto;vertical-align:-.05em;border-radius:2px"> French', en: '<img src="media/flags/gb.svg" alt="" style="display:inline-block;height:.8em;width:auto;vertical-align:-.05em;border-radius:2px"> English' };   // pictures: Windows shows flag emoji as letters
         function renderDirection() {
             const to = from === 'fr' ? 'en' : 'fr';
-            $('from-label').textContent = NAMES[from];
-            $('to-label').textContent = NAMES[to];
+            $('from-label').innerHTML = NAMES[from];
+            $('to-label').innerHTML = NAMES[to];
             $('source').placeholder = from === 'fr' ? 'Tapez ou collez un texte en français…' : 'Type or paste English text…';
             $('source').lang = from;
             $('output').lang = to;

@@ -71,6 +71,7 @@ const CSS = `
 .mp-spot,.mp-tag{scroll-margin-top:84px}
 .mp-spot:focus-visible,.mp-tag:focus-visible{outline:3px solid #6366f1;outline-offset:2px}
 .mp-spot img{width:64px;height:64px;object-fit:contain;display:block}
+.mp-spot img.mp-flag{width:60px;height:45px;margin:9px 2px 10px;border-radius:6px;box-shadow:0 0 0 1px rgba(15,23,42,.12),0 3px 8px rgba(15,23,42,.18)}
 .mp-spot .em{font-size:46px;line-height:64px;height:64px;display:block}
 .mp-spot .ar{font-size:12px;color:#64748b;min-height:15px;line-height:15px}
 .mp-spot .wd{font-size:15px;font-weight:800;line-height:1.15;text-align:center;color:#0f172a;overflow-wrap:anywhere}
@@ -131,7 +132,9 @@ function mount(root, themeId, deckWords, opts = {}) {
     }
     const icon = (e) => {
         const f = window.PALACE_ICONS && PALACE_ICONS[e];
-        return f ? `<img src="media/palace/${f}.webp" alt="" loading="lazy" decoding="async">` : `<span class="em" aria-hidden="true">${esc(e || '•')}</span>`;
+        if (f) return `<img src="media/palace/${f}.webp" alt="" loading="lazy" decoding="async">`;
+        const flag = window.flagHtml && /^<img/.test(flagHtml(e)) ? flagHtml(e) : '';
+        return flag ? flag.replace('class="flag-pic"', 'class="mp-flag"') : `<span class="em" aria-hidden="true">${esc(e || '•')}</span>`;
     };
     // floors: rooms side by side when they sit at the same height in the old picture
     const zs = P.zones.slice().sort((a, b) => a.y - b.y || a.x - b.x), floors = [];

@@ -926,7 +926,7 @@
             // Words you have graded keep it for the back, so you recall the meaning yourself.
             const pic = WordMemory.picture(current);
             const picFront = !!pic && statusOf(current) === 'new';
-            $('card-front-pic').firstElementChild.textContent = picFront ? pic : '';
+            $('card-front-pic').firstElementChild.innerHTML = picFront ? pic : '';
             $('card-front-pic').classList.toggle('hidden', !picFront);
             $('card-front-pic').classList.remove('vc-pop'); void $('card-front-pic').offsetWidth; $('card-front-pic').classList.add('vc-pop');
             $('card-pic').textContent = pic;
@@ -1743,7 +1743,7 @@
                 Story.pause();
                 speakFrench(w.fr, 0.9);
                 const g = $('learn-body').querySelector(`[data-gloss="${sw.dataset.line}"]`);
-                g.textContent = `${WordMemory.picture(w) ? WordMemory.picture(w) + ' ' : ''}${w.fr} = ${w.en}`;
+                g.innerHTML = `${WordMemory.picture(w) ? WordMemory.picture(w) + ' ' : ''}${escapeHtml(w.fr)} = ${escapeHtml(w.en)}`;
                 g.classList.remove('hidden');
                 return;
             }
