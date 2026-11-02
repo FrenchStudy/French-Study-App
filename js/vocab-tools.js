@@ -16,6 +16,7 @@ const shuffle = (a) => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) {
 const plain = (s) => String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[\s-]+/g, ' ').trim();
 
 const CSS = `
+.vt-sel{font:inherit;font-size:17px;font-weight:800;color:#0f172a;border:1px solid #e2e8f0;background:#fff;border-radius:12px;padding:8px 10px;min-height:44px;cursor:pointer}
 .vt{display:grid;gap:16px}
 .vt-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:start}
 @media (max-width:860px){.vt-grid{grid-template-columns:minmax(0,1fr)}}
@@ -223,7 +224,13 @@ function relative(d, today) {
     if (name) return name;
     if (diff === 7) return 'dans une semaine (la semaine prochaine)';
     if (diff === -7) return 'il y a une semaine (la semaine dernière)';
-    return diff > 0 ? `dans ${numberFr(diff)} jours` : `il y a ${numberFr(-diff)} jours`;
+    const a = Math.abs(diff), ago = (t) => diff > 0 ? `dans ${t}` : `il y a ${t}`;
+    if (a <= 31) return ago(`${numberFr(a)} jours`);
+    // further away: months, then years (« dans mille trois cent cinquante jours » helps nobody)
+    const months = Math.abs((d.getFullYear() - today.getFullYear()) * 12 + d.getMonth() - today.getMonth());
+    if (months < 12) return ago(months <= 1 ? 'un mois' : `${numberFr(months)} mois`);
+    const years = Math.floor(months / 12);
+    return ago(years === 1 ? 'un an' : `${numberFr(years)} ans`);
 }
 const relEn = { "avant-hier": 'the day before yesterday', hier: 'yesterday', "aujourd'hui": 'today', demain: 'tomorrow', 'après-demain': 'the day after tomorrow' };
 
@@ -241,22 +248,35 @@ function mountCalendar(root, { say }) {
         <div class="vt-card">
           <div class="vt-row" style="justify-content:space-between">
             <button type="button" class="vt-btn" data-m="-1" aria-label="Previous month">◀</button>
-            <div class="vt-mid" id="vt-month"></div>
+            <div class="vt-row" style="gap:6px;flex-wrap:nowrap">
+              <select class="vt-sel" id="vt-msel" aria-label="Month">${MONTHS.map((m, i) => `<option value="${i}">${m}</option>`).join('')}</select>
+              <select class="vt-sel" id="vt-ysel" aria-label="Year">${Array.from({ length: 81 }, (_, k) => today.getFullYear() - 60 + k).map(y => `<option value="${y}">${y}</option>`).join('')}</select>
+            </div>
             <button type="button" class="vt-btn" data-m="1" aria-label="Next month">▶</button>
           </div>
           <div class="vt-cal" id="vt-cal"></div>
+          <div class="vt-row" style="justify-content:center"><button type="button" class="vt-btn" id="vt-today">Aujourd'hui</button></div>
           <p class="vt-small">French weeks start on <b>lundi</b>. Days and months take no capital letter.</p>
         </div>
         <div class="vt-card" id="vt-side" aria-live="polite"></div>
       </div></div>`;
     const side = root.querySelector('#vt-side');
-    root.querySelectorAll('[data-m]').forEach(b => b.addEventListener('click', () => { view = new Date(view.getFullYear(), view.getMonth() + Number(b.dataset.m), 1); draw(); }));
+    root.querySelectorAll('[data-m]').forEach(b => b.addEventListener('click', () => { view = new Date(view.getFullYear(), view.getMonth() + Number(b.dataset.m), 1); draw(); sayMonth(); }));
+    // jump to any month and year; the month and year are said, like on the arrows
+    const msel = root.querySelector('#vt-msel'), ysel = root.querySelector('#vt-ysel');
+    const sayMonth = () => say(`${MONTHS[view.getMonth()]} ${numberFr(view.getFullYear())}`);
+    const jump = () => { view = new Date(Number(ysel.value), Number(msel.value), 1); draw(); sayMonth(); if (mode !== 'explore' && quiz) ask(); };
+    msel.addEventListener('change', jump); ysel.addEventListener('change', jump);
+    root.querySelector('#vt-today').addEventListener('click', () => { view = new Date(today.getFullYear(), today.getMonth(), 1); if (mode === 'explore') { sel = new Date(today); explain(); } draw(); say(`Aujourd'hui, c'est ${dateFr(today)}.`); });
     root.querySelectorAll('[data-mode]').forEach(b => b.addEventListener('click', () => {
         mode = b.dataset.mode; root.querySelectorAll('[data-mode]').forEach(x => x.setAttribute('aria-pressed', x === b));
         if (mode === 'explore') { draw(); explain(); } else { quiz = { n: 0, score: 0 }; ask(); }
     }));
     function draw() {
-        root.querySelector('#vt-month').textContent = `${MONTHS[view.getMonth()]} ${view.getFullYear()}`;
+        root.querySelector('#vt-msel').value = view.getMonth();
+        const ys = root.querySelector('#vt-ysel');
+        if (![...ys.options].some(o => Number(o.value) === view.getFullYear())) ys.insertAdjacentHTML('beforeend', `<option value="${view.getFullYear()}">${view.getFullYear()}</option>`);
+        ys.value = view.getFullYear();
         const first = dow(view), days = new Date(view.getFullYear(), view.getMonth() + 1, 0).getDate();
         let h = DAYS.map(d => `<div class="vt-dow">${d.slice(0, 3)}</div>`).join('');
         for (let i = 0; i < first; i++) h += '<div class="vt-day blank" aria-hidden="true"></div>';

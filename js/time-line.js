@@ -61,6 +61,9 @@ const CSS = `
 .tl-stop{position:absolute;transform:translateX(-50%);background:none;border:0;cursor:pointer;font-size:13px;color:#64748b;white-space:nowrap;padding:4px;transition:color .2s}
 .tl-stop.first{transform:none}.tl-stop.last{transform:translateX(-100%)}
 .tl-stop.up{bottom:30px}.tl-stop.down{top:30px}.tl-stop.low{top:58px;font-size:12px;font-style:italic}
+.tl-tick{position:absolute;width:2px;background:#cbd5e1;transform:translateX(-1px);pointer-events:none;transition:background .2s}
+.tl-tick.up{bottom:11px;height:22px}.tl-tick.down{top:11px;height:22px}.tl-tick.low{top:11px;height:50px}
+.tl-tick.on{background:currentColor;width:3px}.tl-f .tl-tick.on{color:#059669}.tl-w .tl-tick.on{color:#4f46e5}
 .tl-stop.on{font-weight:800}.tl-f .tl-stop.on{color:#047857}.tl-w .tl-stop.on{color:#4338ca}
 .tl-stop:focus-visible,.tl-row:focus-visible{outline:3px solid #6366f1;outline-offset:2px;border-radius:8px}
 .tl-now{position:absolute;left:50%;top:2px;height:26px;width:3px;margin-left:-1.5px;background:#4f46e5;border-radius:2px;pointer-events:none;opacity:.45}
@@ -147,12 +150,16 @@ function mount(root, { say }) {
     function slider(trackSel, outSel, S, start, extra) {
         const tr = $(trackSel), sl = tr.querySelector('input'), out = $(outSel);
         let cur = -1;
+        const ticks = [];
         const stops = S.map((s, i) => {
             const b = document.createElement('button');
             b.type = 'button';
             b.className = 'tl-stop ' + (s.pos || (i % 2 ? 'down' : 'up')) + (s.p < 5 ? ' first' : s.p > 95 ? ' last' : '');
             b.style.left = s.p + '%'; b.textContent = s.lab;
             b.addEventListener('click', () => { sl.value = s.p; go(true, true, true); });
+            // a tick joins the word to its place on the line
+            const t = document.createElement('span'); t.className = 'tl-tick ' + (s.pos || (i % 2 ? 'down' : 'up')); t.style.left = s.p + '%';
+            tr.insertBefore(t, tr.firstChild); ticks.push(t);
             tr.appendChild(b); return b;
         });
         // on a phone the words do not fit on the line: they show as a row of buttons under it instead
@@ -174,6 +181,7 @@ function mount(root, { say }) {
             cur = k;
             sl.setAttribute('aria-valuetext', S[k].fr);
             stops.forEach((b, i) => b.classList.toggle('on', i === k));
+            ticks.forEach((t, i) => t.classList.toggle('on', i === k));
             chipBtns.forEach((b, i) => { b.classList.toggle('on', i === k); b.setAttribute('aria-pressed', i === k); });
             show(out, S[k], extra ? extra(S[k]) : '', auto);
         }
