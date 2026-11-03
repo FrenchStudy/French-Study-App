@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Connecteurs · aperçu</title>
+<style>
+:root{--ink:#0f172a;--mut:#64748b;--line:#e2e8f0;--blue:#1d4ed8}
+*{box-sizing:border-box}
+body{margin:0;background:#f1f5f9;font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink)}
+main{max-width:860px;margin:0 auto;padding:20px 16px 60px;display:grid;gap:20px}
+.card{background:#fff;border:1px solid var(--line);border-radius:20px;padding:18px}
+.kicker{font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#4f46e5;margin:0 0 6px}
+h2{margin:0;font-size:22px}
+.lead{color:#334155;font-size:16px;line-height:1.5;margin:6px 0 0}
+.head{display:flex;gap:14px;align-items:center}
+.head svg{flex:none;width:72px;height:72px}
+.road{width:100%;height:auto;display:block;margin-top:10px}
+.road text{font-family:inherit}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:10px}
+.btn{font:inherit;font-weight:800;font-size:15px;border:1px solid var(--line);background:#fff;border-radius:12px;padding:10px 16px;min-height:44px;cursor:pointer}
+.btn.pri{background:#4f46e5;border-color:#4f46e5;color:#fff}
+.sent{font-size:20px;line-height:1.5;font-weight:600;padding:12px 14px;border-radius:14px;background:#f8fafc;border:1px solid var(--line);margin-top:12px}
+.sent .c{color:#fff;border-radius:8px;padding:1px 8px;white-space:nowrap}
+.en{font-size:14px;color:var(--mut);margin-top:6px}
+.same{font-size:14px;color:#334155;margin-top:10px}
+.same b{background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:2px 8px;margin:2px;display:inline-block;color:var(--blue)}
+/* comic */
+.strip{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:stretch;margin-top:12px}
+.panel{position:relative;border:3px solid var(--ink);border-radius:16px;background:#fffdf5;min-height:220px;padding:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;overflow:hidden}
+.panel .scene{display:flex;align-items:flex-end;justify-content:center;gap:4px;position:relative}
+.panel .face{width:120px;height:120px}
+.panel .prop{width:70px;height:70px}
+.panel .cap{font-weight:800;font-size:17px;text-align:center;background:#fff;border:2px solid var(--ink);border-radius:10px;padding:4px 10px}
+.panel .badge{position:absolute;top:8px;right:8px;width:44px;height:44px}
+.panel.past{background:#f5efe0;filter:sepia(.35)}
+.panel .tag{position:absolute;top:8px;left:10px;font-size:12px;font-weight:900;letter-spacing:.05em;text-transform:uppercase;color:#92400e}
+.panel .pw{position:relative;display:inline-block}.panel .pw .bar{position:absolute;right:-16px;bottom:-8px;width:42px;height:42px}.panel .pw .no{position:absolute;inset:-6px;width:calc(100% + 12px);height:calc(100% + 12px);mix-blend-mode:multiply;opacity:.9}
+.join{display:flex;align-items:center;justify-content:center;font-size:28px;color:#94a3b8;font-weight:900}
+.pick{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.pick button{display:flex;align-items:center;gap:8px;font:inherit;font-weight:800;font-size:16px;border:2px solid var(--line);background:#fff;border-radius:14px;padding:6px 14px 6px 6px;min-height:52px;cursor:pointer}
+.pick button svg{width:36px;height:36px}
+.pick button[aria-pressed="true"]{border-color:var(--c);background:color-mix(in srgb,var(--c) 10%,#fff)}
+.in{animation:slide .45s cubic-bezier(.2,.8,.2,1)}
+@keyframes slide{from{transform:translateX(40px) rotate(2deg);opacity:0}to{transform:none;opacity:1}}
+.pop{animation:pop .5s ease-out}
+@keyframes pop{0%{transform:scale(.6);opacity:0}70%{transform:scale(1.12)}100%{transform:scale(1);opacity:1}}
+@media (max-width:620px){
+  .strip{grid-template-columns:1fr;}
+  .join{transform:rotate(90deg);font-size:22px}
+  .panel{min-height:190px}
+  .panel .face{width:96px;height:96px}
+  .sent{font-size:18px}
+}
+</style>
+</head>
+<body>
+<main>
+  <!-- 1. The road sign: the memory hook -->
+  <section class="card" id="sign">
+    <p class="kicker">Les panneaux · 1 sur 7</p>
+    <div class="head">
+      <svg viewBox="0 0 100 100" aria-hidden="true" id="uturn-big"></svg>
+      <div>
+        <h2>Le demi-tour : <i>pourtant</i></h2>
+        <p class="lead">The second idea turns back against the first. You expect one thing… and the opposite happens.</p>
+      </div>
+    </div>
+    <svg class="road" viewBox="0 0 720 290" role="img" aria-label="A car drives along « Il pleut beaucoup », makes a U-turn at « pourtant », then drives back along « je sors me promener ».">
+      <defs>
+        <filter id="sh" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="3" stdDeviation="3" flood-opacity=".18"/></filter>
+      </defs>
+      <!-- what you would expect: straight on -->
+      <g id="expect" opacity=".6">
+        <path d="M470 80 H690" stroke="#cbd5e1" stroke-width="34" stroke-linecap="round" fill="none" stroke-dasharray="2 14"/>
+        <text x="610" y="30" text-anchor="middle" font-size="15" fill="#64748b" font-weight="800">you expect…</text>
+        <text x="610" y="52" text-anchor="middle" font-size="15" fill="#64748b">je reste à la maison</text>
+        <g transform="translate(694 80)"><circle r="15" fill="#fee2e2" stroke="#e11d48" stroke-width="2"/><path d="M-6 -6 L6 6 M6 -6 L-6 6" stroke="#e11d48" stroke-width="3" stroke-linecap="round"/></g>
+      </g>
+      <!-- the road -->
+      <path id="lane" d="M40 80 H470 A70 70 0 0 1 470 220 H40" stroke="#475569" stroke-width="44" fill="none" stroke-linecap="round"/>
+      <path d="M40 80 H470 A70 70 0 0 1 470 220 H40" stroke="#fff" stroke-width="2.5" fill="none" stroke-dasharray="14 12" opacity=".8"/>
+      <!-- idea 1 and idea 2 -->
+      <image href="media/pictures/fe-cloud-with-rain.webp" x="44" y="6" width="52" height="52"/>
+      <text id="t1" x="104" y="44" font-size="22" font-weight="800" fill="#0f172a">Il pleut beaucoup,</text>
+      <image href="media/pictures/fe-person-walking.webp" x="44" y="236" width="50" height="50"/>
+      <text id="t2" x="104" y="272" font-size="22" font-weight="800" fill="#0f172a" opacity=".25">je sors me promener.</text>
+      <!-- the sign, just before the turn -->
+      <g transform="translate(440 0)">
+        <rect x="-3" y="40" width="6" height="18" fill="#94a3b8"/>
+        <g id="sgn"><svg x="-26" y="-6" width="52" height="52" viewBox="0 0 100 100" id="uturn-road"></svg></g>
+      </g>
+      <g id="word" opacity="0"><rect x="300" y="132" width="132" height="36" rx="10" fill="#1d4ed8"/><text x="366" y="157" text-anchor="middle" font-size="21" font-weight="900" fill="#fff">pourtant</text></g>
+      <!-- the car (the picture faces left) -->
+      <g id="car" filter="url(#sh)"><image href="media/palace/automobile.webp" x="-24" y="-24" width="48" height="48"/></g>
+    </svg>
+    <div class="row"><button class="btn pri" id="go">▶ Drive</button><span style="color:#64748b;font-size:14px">Watch the car turn back at the sign.</span></div>
+    <div class="sent">Il pleut beaucoup, <span class="c" style="background:#1d4ed8">pourtant</span> je sors me promener.</div>
+    <div class="en">It's raining hard, yet I'm going out for a walk.</div>
+    <div class="same">Same sign, same U-turn: <b>mais</b> <b>pourtant</b> <b>cependant</b> <b>néanmoins</b> <span style="color:#64748b">(from everyday to formal: that's for the dress code)</span></div>
+  </section>
+
+  <!-- 2. The comic: meaning -->
+  <section class="card" id="comic">
+    <p class="kicker">Les histoires · 1 sur 8</p>
+    <h2>Léa a faim…</h2>
+    <p class="lead">Same start. Tap a connector: the second picture shows what happens.</p>
+    <div class="strip">
+      <div class="panel">
+        <div class="scene"><img class="face" src="media/people/lea-smile-happy-happy.svg" alt="Léa"><img class="prop" src="media/pictures/fe-shortcake.webp" alt="a cake"></div>
+        <div class="cap" id="cap1">Léa a faim.</div>
+      </div>
+      <div class="join" aria-hidden="true">→</div>
+      <div class="panel" id="p2"></div>
+    </div>
+    <div class="pick" id="pick"></div>
+    <div class="sent" id="cs"></div>
+    <div class="row"><button class="btn" id="say">🔊 Listen</button><button class="btn" id="showen">Show the English</button></div>
+    <div class="en" id="cen" hidden></div>
+  </section>
+</main>
+
+<script>
+// ---- road signs, drawn (blue = do this, like French road signs) ----
+const SIGNS = {
+  uturn: { c: '#1d4ed8', d: '<path d="M38 74 V44 a16 16 0 0 1 32 0 V60" fill="none" stroke="#fff" stroke-width="9" stroke-linecap="round"/><path d="M56 56 L70 74 L84 56 Z" fill="#fff"/>' },
+  arrive: { c: '#059669', d: '<rect x="40" y="26" width="6" height="52" rx="2" fill="#fff"/><path d="M46 28 h30 v24 h-30 z" fill="#fff"/><path d="M46 28 h10 v8 h-10z M66 28 h10 v8 h-10z M56 36 h10 v8 h-10z M46 44 h10 v8 h-10z M66 44 h10 v8 h-10z" fill="#059669"/>' },
+  back: { c: '#d97706', d: '<path d="M72 64 a20 20 0 1 0 -26 -26" fill="none" stroke="#fff" stroke-width="9" stroke-linecap="round"/><path d="M30 26 L52 30 L36 46 Z" fill="#fff"/>' },
+  barrier: { c: '#0f766e', d: '<rect x="20" y="44" width="60" height="14" rx="4" fill="#fff"/><path d="M28 44 l10 0 -8 14 -10 0z M48 44 l10 0 -8 14 -10 0z M68 44 l10 0 -8 14 -10 0z" fill="#e11d48"/><rect x="22" y="58" width="6" height="20" fill="#fff"/><rect x="72" y="58" width="6" height="20" fill="#fff"/>' },
+};
+const sign = (k) => `<circle cx="50" cy="50" r="47" fill="${SIGNS[k].c}" stroke="#fff" stroke-width="4"/><circle cx="50" cy="50" r="47" fill="none" stroke="rgba(0,0,0,.12)" stroke-width="1"/>${SIGNS[k].d}`;
+document.getElementById('uturn-big').innerHTML = sign('uturn');
+document.getElementById('uturn-road').innerHTML = sign('uturn');
+
+// ---- speech: the app's French voice when it is there ----
+const say = (t) => { try { if (window.speakFrench) return speakFrench(t); const u = new SpeechSynthesisUtterance(t); u.lang = 'fr-FR'; u.rate = .9; speechSynthesis.speak(u); } catch (e) {} };
+
+// ---- 1. drive ----
+// the car follows the road: right along idea 1, stops at the sign, turns back along idea 2
+const lane = document.getElementById('lane'), car = document.getElementById('car'), L = lane.getTotalLength(), STOP = 400;
+const put = (l) => {
+  const a = lane.getPointAtLength(Math.max(0, l - 1)), b = lane.getPointAtLength(Math.min(L, l + 1)), p = lane.getPointAtLength(l);
+  const deg = Math.atan2(b.y - a.y, b.x - a.x) * 180 / Math.PI;
+  car.setAttribute('transform', `translate(${p.x} ${p.y}) ` + (Math.cos(deg * Math.PI / 180) >= 0 ? `rotate(${deg}) scale(-1 1)` : `rotate(${deg - 180})`));
+};
+let raf = 0;
+function run() {
+  cancelAnimationFrame(raf); const t0 = performance.now();
+  const ease = (x) => x < .5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2;
+  const step = (now) => {
+    const t = (now - t0) / 1000;
+    const l = t < 2.1 ? STOP * ease(t / 2.1) : t < 3.2 ? STOP : t < 6.5 ? STOP + (L - STOP) * ease((t - 3.2) / 3.3) : L;
+    put(l); if (t < 6.5) raf = requestAnimationFrame(step);
+  };
+  raf = requestAnimationFrame(step);
+}
+put(0);
+const word = document.getElementById('word'), t2 = document.getElementById('t2'), sg = document.getElementById('sgn');
+let timers = [];
+document.getElementById('go').addEventListener('click', () => {
+  timers.forEach(clearTimeout); timers = [];
+  word.setAttribute('opacity', 0); t2.setAttribute('opacity', .25); sg.classList.remove('pop');
+  run(); say('Il pleut beaucoup,');
+  timers.push(setTimeout(() => { word.setAttribute('opacity', 1); sg.classList.add('pop'); say('pourtant'); }, 2100));
+  timers.push(setTimeout(() => { t2.setAttribute('opacity', 1); say('je sors me promener.'); }, 4300));
+});
+
+// ---- 2. the comic ----
+const P = 'media/pictures/', F = 'media/people/';
+const ENDINGS = [
+  { w: 'donc', s: 'arrive', name: 'Arrivée', face: 'lea-laugh-happy-happy', props: ['fe-shortcake', 'fe-fork-and-knife'], cap: '… elle mange le gâteau.',
+    fr: ['Léa a faim, ', 'donc', ' elle mange le gâteau.'], en: 'Léa is hungry, so she eats the cake.' },
+  { w: 'pourtant', s: 'uturn', name: 'Demi-tour', face: 'lea-smile-happy-raised', props: ['fe-shortcake'], no: true, cap: '… elle ne mange pas le gâteau !',
+    fr: ['Léa a faim, ', 'pourtant', ' elle ne mange pas le gâteau.'], en: 'Léa is hungry, yet she does not eat the cake.' },
+  { w: 'parce que', s: 'back', name: 'Marche arrière', past: true, face: 'lea-sad-wide-sad', props: ['fe-alarm-clock', 'fe-fork-and-knife-with-plate'], cap: 'À midi, elle n\'a pas déjeuné.',
+    fr: ['Léa a faim ', 'parce qu\'', 'elle n\'a pas déjeuné.'], en: 'Léa is hungry because she did not have lunch.' },
+  { w: 'si', s: 'barrier', name: 'Barrière', face: 'lea-agape-humble-neutral', props: ['fe-shortcake'], bar: true, start: 'Léa a faim ?', cap: '… alors elle mange le gâteau.',
+    fr: ['', 'Si', ' Léa a faim, elle mange le gâteau.'], en: 'If Léa is hungry, she eats the cake.' },
+];
+const pick = document.getElementById('pick'), p2 = document.getElementById('p2'), cs = document.getElementById('cs'), cen = document.getElementById('cen');
+pick.innerHTML = ENDINGS.map((e, i) => `<button type="button" data-i="${i}" style="--c:${SIGNS[e.s].c}" aria-pressed="false"><svg viewBox="0 0 100 100" aria-hidden="true">${sign(e.s)}</svg>${e.w}</button>`).join('');
+let cur = 0;
+function showEnding(i) {
+  cur = i; const e = ENDINGS[i];
+  pick.querySelectorAll('button').forEach((b, j) => b.setAttribute('aria-pressed', j === i));
+  p2.className = 'panel in' + (e.past ? ' past' : '');
+  p2.innerHTML = (e.past ? '<span class="tag">avant · earlier</span>' : '')
+    + `<svg class="badge" viewBox="0 0 100 100" aria-hidden="true">${sign(e.s)}</svg>`
+    + `<div class="scene"><img class="face" src="${F + e.face}.svg" alt="Léa">${e.props.map((p, k) => k === 0 && (e.no || e.bar)
+        ? `<span class="pw"><img class="prop" src="${P}${p}.webp" alt="">${e.no ? '<img class="no" src="media/palace/prohibited.webp" alt="no">' : `<svg class="bar" viewBox="0 0 100 100" aria-hidden="true">${sign('barrier')}</svg>`}</span>`
+        : `<img class="prop" src="${P}${p}.webp" alt="">`).join('')}</div>`
+    + `<div class="cap">${e.cap}</div>`;
+  document.getElementById('cap1').textContent = e.start || 'Léa a faim.';
+  void p2.offsetWidth;
+  cs.innerHTML = `${e.fr[0]}<span class="c" style="background:${SIGNS[e.s].c}">${e.fr[1]}</span>${e.fr[2]}`;
+  cen.textContent = e.en; cen.hidden = true; document.getElementById('showen').textContent = 'Show the English';
+  say(e.fr.join(''));
+}
+pick.querySelectorAll('button').forEach(b => b.addEventListener('click', () => showEnding(Number(b.dataset.i))));
+document.getElementById('say').addEventListener('click', () => say(ENDINGS[cur].fr.join('')));
+document.getElementById('showen').addEventListener('click', (ev) => { cen.hidden = !cen.hidden; ev.target.textContent = cen.hidden ? 'Show the English' : 'Hide the English'; });
+showEnding(0);
+</script>
+</body>
+</html>
