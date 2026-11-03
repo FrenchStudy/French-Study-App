@@ -1,7 +1,7 @@
 # tools/connectors/connectors.py - the connectors of Topic 3 (Connectors & Small Words), in one place.
 #   python3 tools/connectors/connectors.py
 # Writes:
-#   tools/connectors/out/roles.js     -> the "Relier" tab (roles, join items, say-it sentences): replaces that tab in js/scale-data.js (theme 3)
+#   js/connectors-data.js             -> the words, groups, ladders, grammar bins, join items, texts and say-it sentences of the tabs
 #   tools/connectors/out/order.js     -> the "more:" words of the "Dans l'ordre" tab (same file)
 #   tools/connectors/out/chapters.js  -> the new Learn chapters, after the first three of theme 3 in js/chapters-data.js
 # (out/ is not kept in git: paste the parts in by hand after a change, then run the Vocab tests.)
@@ -280,6 +280,131 @@ CHAPTERS = [
     ('Dans l\'ordre, à l\'écrit', 'Ordering an essay', [o[0] for o in ORDER]),
 ]
 
+# ---------------- The learning tabs (js/connectors-data.js) ----------------
+# What each kind of link means, for « Le lien »
+LINK_EN = {
+    'Ajouter': 'the second idea adds something to the first',
+    'Préciser': 'the second idea says the first more precisely, or gives an example',
+    'Opposer': 'the two ideas contrast, or one is an exception',
+    'Choisir': 'it is one idea or the other',
+    'Expliquer': 'the second idea is the cause of the first',
+    'Conclure': 'the second idea is the result of the first, or sums up',
+    'Condition': 'one idea only happens if the other does',
+    'But': 'the second idea is the goal of the first',
+    'Temps': 'it says when, or two things at the same time',
+}
+# the link learners mix up with each one: its words are the wrong choices in step 2
+CONFUSE = {'Conclure': 'Expliquer', 'Expliquer': 'Conclure', 'Opposer': 'Ajouter', 'Ajouter': 'Opposer', 'Condition': 'Temps',
+           'Temps': 'Condition', 'But': 'Expliquer', 'Préciser': 'Ajouter', 'Choisir': 'Ajouter'}
+
+# L'échelle: words that mean the same, from spoken to formal. s spoken · e everyday · w written · f formal
+LADDERS = {
+    'Ajouter': [[('et', 'e'), ('de plus', 'w'), ('en outre', 'f')]],
+    'Préciser': [[('autrement dit', 'e'), ('en d\'autres termes', 'w')], [('en fait', 'e'), ('en réalité', 'w')], [('par exemple', 'e'), ('notamment', 'w')]],
+    'Opposer': [[('mais', 'e'), ('pourtant', 'e'), ('cependant', 'w'), ('néanmoins', 'f')], [('même si', 'e'), ('bien que', 'w'), ('quoique', 'f')],
+                [('malgré', 'e'), ('en dépit de', 'f')], [('sauf', 'e'), ('excepté', 'w'), ('hormis', 'f')]],
+    'Choisir': [[('ou', 'e'), ('soit… soit', 'w')]],
+    'Expliquer': [[('vu que', 's'), ('parce que', 'e'), ('étant donné que', 'w'), ('attendu que', 'f')], [('à cause de', 'e'), ('en raison de', 'w')]],
+    'Conclure': [[('alors', 's'), ('donc', 'e'), ('par conséquent', 'w'), ('en conséquence', 'f')], [('en résumé', 'e'), ('en conclusion', 'w'), ('en définitive', 'f')]],
+    'Condition': [[('si', 'e'), ('à supposer que', 'w'), ('dans l\'hypothèse où', 'f')], [('au cas où', 'e'), ('dans le cas où', 'w')]],
+    'But': [[('pour que', 'e'), ('afin que', 'w')], [('de peur que', 'w'), ('de crainte que', 'f')]],
+    'Temps': [[('quand', 'e'), ('lorsque', 'w')], [('dès que', 'e'), ('aussitôt que', 'w')], [('pendant que', 'e'), ('tandis que', 'w')]],
+}
+TAGS = {'s': 'Spoken', 'e': 'Everyday', 'w': 'Written', 'f': 'Formal'}
+
+# Ce qui suit: the grammar after each connector
+FOLLOWS = {
+    'subj': ['bien que', 'quoique', 'pour que', 'afin que', 'à condition que', 'à moins que', 'avant que', 'de peur que', 'de crainte que',
+             'en admettant que', 'en supposant que', 'à supposer que'],
+    'ind': ['même si', 'parce que', 'puisque', 'comme', 'étant donné que', 'vu que', 'du fait que', 'dès que', 'pendant que', 'quand', 'lorsque',
+            'après que', 'depuis que', 'tandis que', 'alors que', 'si bien que', 'sous prétexte que', 'dans la mesure où', 'au moment où', 'aussitôt que', 'dès lors que'],
+    'cond': ['au cas où', 'dans le cas où', 'dans l\'hypothèse où'],
+    'nom': ['malgré', 'grâce à', 'à cause de', 'en raison de', 'en dépit de', 'sauf', 'd\'où', 'quant à', 'par suite de', 'contrairement à', 'à défaut de', 'depuis', 'en vue de'],
+}
+BINS = [('ind', '+ indicatif', 'il est, il pleut', '#0369a1'), ('subj', '+ subjonctif', 'qu\'il soit, qu\'il fasse', '#e11d48'),
+        ('cond', '+ conditionnel', 'il serait, il pleuvrait', '#7c3aed'), ('nom', '+ nom', 'la pluie, son travail', '#d97706')]
+FOLLOW_RULES = [
+    'même si + indicatif, but bien que + subjonctif: two words for « although », two moods.',
+    'après que + indicatif, but avant que + subjonctif.',
+    'si never takes the conditionnel (si j\'avais…), but au cas où does (au cas où il pleuvrait).',
+    'malgré, grâce à, à cause de take a noun. With a whole sentence: bien que, parce que.',
+]
+
+# Le texte: [[right|also right||wrong|wrong]] marks a gap; words as they appear in the text (Capital, qu')
+TEXTS = [
+    ('Mon samedi', 'A2', 'A story', '[[D\'abord||Enfin|Donc]], je suis allé au marché. [[Ensuite|Puis||Enfin|Mais]], je suis passé au parc [[parce qu\'||pour qu\'|donc]]il faisait beau. '
+     '[[Mais||Et|Donc]] vers midi, il a commencé à pleuvoir, [[donc|alors||mais|parce que]] je suis rentré à la maison. '
+     '[[Enfin||D\'abord|Si]], le soir, j\'ai regardé un film [[pendant que||avant que|parce que]] ma sœur préparait le dîner.',
+     'First, I went to the market. Next, I went to the park because the weather was nice. But around noon it started to rain, so I went home. Finally, in the evening, I watched a film while my sister was making dinner.'),
+    ('Les crêpes', 'A2', 'A recipe', '[[D\'abord||Enfin|Donc]], versez la farine dans un saladier. [[Ensuite|Puis||Enfin|Mais]], ajoutez les œufs [[et||ou|mais]] mélangez. '
+     'Versez le lait petit à petit [[pour que|afin que||parce que|bien que]] la pâte soit bien lisse. '
+     'Faites cuire chaque crêpe [[dès que|quand|lorsque||avant que|pour que]] la poêle est chaude. [[Enfin||D\'abord|Si]], servez avec du sucre [[ou||mais|donc]] de la confiture.',
+     'First, pour the flour into a bowl. Next, add the eggs and mix. Pour in the milk little by little so that the batter is very smooth. Cook each pancake as soon as the pan is hot. Finally, serve with sugar or jam.'),
+    ('Un e-mail', 'B1', 'An email', 'Bonjour Madame, je vous écris [[car|parce que||donc|pourtant]] je ne pourrai pas venir à la réunion de jeudi. '
+     '[[En effet||En revanche|Pourtant]], je dois accompagner mon fils chez le médecin. [[Cependant|Toutefois|Néanmoins||Par conséquent|Ainsi]], je peux vous envoyer mes notes '
+     '[[afin que|pour que||parce que|bien que]] vous ayez toutes les informations. [[Si||Bien que|Afin que]] vous avez des questions, n\'hésitez pas à m\'appeler. '
+     '[[Par ailleurs|De plus||Par conséquent|Au contraire]], je serai disponible vendredi [[au cas où||à condition que|bien que]] vous voudriez en parler. Cordialement, Paul',
+     'Hello, I am writing because I will not be able to come to Thursday\'s meeting. Indeed, I have to take my son to the doctor. However, I can send you my notes so that you have all the information. If you have any questions, do not hesitate to call me. Besides, I will be free on Friday in case you would like to talk about it. Best regards, Paul'),
+    ('Les réseaux sociaux', 'B2', 'An opinion (TCF / TEF)', 'Les réseaux sociaux font partie de notre quotidien. [[D\'une part||Pourtant|Ainsi]], ils nous permettent de rester en contact avec nos proches ; '
+     '[[d\'autre part||d\'une part|pourtant]], ils facilitent l\'accès à l\'information. [[Cependant|Pourtant|Toutefois|Néanmoins||Par conséquent|De plus]], leur usage pose de nombreux problèmes. '
+     '[[En effet||En revanche|Au contraire]], beaucoup d\'utilisateurs y passent plusieurs heures par jour, [[si bien qu\'||bien qu\'|pour qu\']]ils dorment moins. '
+     '[[De plus|En outre|Par ailleurs||Cependant|Au contraire]], les fausses informations y circulent très vite. [[Certes||Donc|Ainsi]], ces plateformes ne sont pas toutes mauvaises, '
+     '[[mais||car|donc]] il faut apprendre à s\'en servir. [[En conclusion|Pour conclure|En définitive||D\'abord|Par exemple]], les réseaux sociaux sont utiles, '
+     '[[à condition qu\'||bien qu\'|parce qu\']]on les utilise avec modération.',
+     'Social networks are part of our daily lives. On the one hand, they let us stay in touch with our loved ones; on the other hand, they make information easier to find. However, using them causes many problems. Indeed, many users spend several hours a day on them, so much so that they sleep less. What\'s more, false information spreads very fast there. Admittedly, these platforms are not all bad, but we have to learn to use them. In conclusion, social networks are useful, provided that we use them in moderation.'),
+]
+GAP = re.compile(r'\[\[([^\]]+)\]\]')
+
+def base_form(s):
+    """« Parce qu' » -> 'parce que'; « D'abord » -> "d'abord" (the word as it is in the lists)"""
+    s = s.strip().lower()
+    return s[:-3] + 'que' if s.endswith("qu'") else s
+
+def connectors_data(byfr):
+    known = {x['fr']: x for x in W}
+    for o in ORDER: known.setdefault(o[0], byfr[o[0]])
+    for f in ['d\'abord', 'ensuite', 'puis', 'après', 'enfin']:
+        known.setdefault(f, dict(fr=f, key=f))
+    keyof = lambda f: word_key(known[f].get('key', f)) if f in known else None
+    roles = []
+    for name, en, col, icon in ROLES:
+        words = []
+        for x in [x for x in W if x['role'] == name]:
+            o = {'key': word_key(x['key']), 'fr': x['fr'], 'en': x['en'], 'ex': x['ex']}
+            if x['note']: o['note'] = x['note']
+            words.append(o)
+        lad = [[{'fr': f, 'tag': t} for f, t in L] for L in LADDERS[name]]
+        for L in LADDERS[name]:
+            for f, t in L: assert any(w['fr'] == f for w in words), ('ladder', name, f)
+        roles.append({'name': name, 'en': en, 'color': col, 'icon': icon, 'link': LINK_EN[name], 'confuse': CONFUSE[name], 'words': words, 'ladders': lad})
+    first_role = {}
+    for x in W:
+        if not x['dup']: first_role.setdefault(x['fr'], x['role'])
+    items = [{'a': a, 'b': b, 'w': ws, 'en': en, 'role': first_role[ws[0]]} for a, b, ws, en in ITEMS]
+    allfr = {w['fr'] for r in roles for w in r['words']}
+    for k, ws in FOLLOWS.items():
+        for f in ws: assert f in allfr, ('follows', f)
+    texts = []
+    for title, level, kind, body, en in TEXTS:
+        parts, gaps, last = [], 0, 0
+        for m in GAP.finditer(body):
+            parts.append(body[last:m.start()])
+            ok, bad = m.group(1).split('||')
+            ok, bad = ok.split('|'), bad.split('|')
+            f = base_form(ok[0])
+            f = {'d\'une part': 'd\'une part… d\'autre part', 'd\'autre part': 'd\'une part… d\'autre part', 'certes': 'certes… mais'}.get(f, f)
+            assert f in known, ('text word', f)
+            parts.append({'ok': ok, 'no': bad, 'key': keyof(f), 'fr': f})
+            last = m.end(); gaps += 1
+        parts.append(body[last:])
+        texts.append({'title': title, 'level': level, 'kind': kind, 'parts': parts, 'en': en})
+    data = {'roles': roles, 'items': items, 'say': [list(s) for s in SAY], 'tags': TAGS,
+            'follows': FOLLOWS, 'bins': [{'id': b[0], 'name': b[1], 'ex': b[2], 'color': b[3]} for b in BINS], 'rules': FOLLOW_RULES, 'texts': texts}
+    src = ('// connectors-data.js - the connectors of Topic 3 for the learning tabs in scale-tool.js (Le lien, L\'échelle, Ce qui suit, Le texte).\n'
+           '// Made by tools/connectors/connectors.py: change the lists there and run it again, do not edit this file.\n'
+           'window.CONNECTORS = ' + json.dumps(data, ensure_ascii=False, indent=1) + ';\n')
+    open(os.path.join(R, 'js', 'connectors-data.js'), 'w').write(src)
+
 ARTICLE = re.compile(r"^(le |la |les |l['’]|un |une )", re.I)
 def word_key(fr):   # the same as wordKey() in vocab.html
     return re.sub(r'\s+', ' ', ARTICLE.sub('', fr.lower().replace('’', "'"))).strip()
@@ -307,23 +432,8 @@ def main():
     missing = [x['fr'] for x in new if x['fr'] not in seen]
     assert not missing, ('not in a chapter', missing)
 
-    # ---- the Relier tab ----
-    lines = ['  { type: \'joiner\', title: \'Relier\', hint: \'Words that join two ideas, in nine groups. Tap a word to see it in a sentence, then join two halves or say a sentence in French below.\', roles: [']
-    for name, en, col, icon in ROLES:
-        lines.append(f'    {{ name: {js(name)}, en: {js(en)}, color: {js(col)}, icon: {js(icon)}, words: [')
-        for x in [x for x in W if x['role'] == name]:
-            o = {'key': word_key(x['key']), 'fr': x['fr'], 'en': x['en'], 'ex': x['ex']}
-            if x['note']: o['note'] = x['note']
-            lines.append('      ' + js(o) + ',')
-        lines.append('    ] },')
-    lines.append('  ], items: [')
-    for a, b, ws, en in ITEMS:
-        lines.append('    ' + js({'a': a, 'b': b, 'w': ws, 'en': en}) + ',')
-    lines.append('  ], say: [')
-    for en, fr, c in SAY:
-        lines.append('    ' + js([en, fr, c]) + ',')
-    lines.append('  ] },')
-    open(os.path.join(OUT, 'roles.js'), 'w').write('\n'.join(lines) + '\n')
+    # ---- the learning tabs ----
+    connectors_data(byfr)
     # words for the Dans l'ordre tab
     more = ['  more: [']
     for o in ORDER:
