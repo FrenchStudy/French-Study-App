@@ -63,7 +63,7 @@ const CSS = `
 .cl-step{font-weight:800;color:#334155;font-size:14px;margin-top:4px}
 .cl-links{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px}
 .cl-link{display:grid;grid-template-columns:auto 1fr;gap:0 8px;align-items:center;text-align:left;border:2px solid #e2e8f0;border-left:6px solid var(--c);background:#fff;border-radius:12px;padding:8px 10px;min-height:52px;cursor:pointer;font:inherit}
-.cl-link span{grid-row:span 2;font-size:20px}.cl-link b{font-size:15px;color:#0f172a}.cl-link small{font-size:12px;color:#64748b;line-height:1.2}
+.cl-link span{grid-row:span 2;font-size:20px;display:flex}.cl-link span svg{width:32px;height:32px}.cl-link b{font-size:15px;color:#0f172a}.cl-link small{font-size:12px;color:#64748b;line-height:1.2}
 .cl-link.ok{border-color:var(--c);background:#f0fdf4}.cl-link.no{opacity:.45}.cl-link:disabled{cursor:default}
 .st-chip.no{opacity:.45;text-decoration:line-through}.st-chip.ok{background:#ecfdf5;border-color:#059669}
 .cl-legend{display:flex;flex-wrap:wrap;gap:12px;font-size:13px;color:#334155;font-weight:700}.cl-legend span::before{content:'';display:inline-block;width:12px;height:12px;border-radius:4px;background:var(--c);margin-right:5px;vertical-align:-1px}
@@ -429,7 +429,7 @@ function mount(T, root, { say, grade, words }) {
             body.innerHTML = `<p class="st-hint">${esc(t.hint)}</p>
                 <div class="cl-sent" id="cl-sent">${joinHtml(it)}</div>
                 <div class="cl-step">1 · What is the link between the two ideas?</div>
-                <div class="cl-links">${C.roles.map(r => `<button type="button" class="cl-link" data-r="${esc(r.name)}" style="--c:${r.color}"><span>${r.icon}</span><b>${esc(r.name)}</b><small>${esc(r.en)}</small></button>`).join('')}</div>
+                <div class="cl-links">${C.roles.map(r => `<button type="button" class="cl-link" data-r="${esc(r.name)}" style="--c:${r.color}"><span>${window.ConnectorLessons ? ConnectorLessons.badge(r.name) : r.icon}</span><b>${esc(r.name)}</b><small>${esc(r.en)}</small></button>`).join('')}</div>
                 <p class="st-fb" id="cl-fb1"></p><div id="cl-two"></div>`;
             let done1 = false;
             body.querySelectorAll('.cl-link').forEach(b => b.addEventListener('click', () => {
@@ -599,6 +599,8 @@ function mount(T, root, { say, grade, words }) {
         return (it.a ? it.a + ' ' : '') + f + (/'$/.test(f) || /^,/.test(it.b) ? '' : ' ') + it.b;
     };
     function questions(t) {
+        const CL = window.ConnectorLessons;
+        if (CL && CL.types.includes(t.type)) return CL.questions(t.type, { speak, joinSay, markWord });
         const Q = [];
         if (t.type === 'scale') {
             const st = t.stops.filter((s, i, a) => a.findIndex(x => x.fr === s.fr) === i);
@@ -720,6 +722,8 @@ function mount(T, root, { say, grade, words }) {
         root.querySelectorAll('.st-tab').forEach((b, i) => b.setAttribute('aria-selected', i === tabI));
         root.querySelectorAll('[data-m]').forEach(b => b.setAttribute('aria-pressed', b.dataset.m === mode));
         if (mode === 'check') return check(t);
+        const CL = window.ConnectorLessons;
+        if (CL && CL.types.includes(t.type)) return CL.explore(t.type, body, { speak, joinSay, markWord });
         ({ scale: exploreScale, pairs: explorePairs, groups: exploreGroups, register: exploreRegister, cards: exploreCards, joiner: exploreJoiner, sequence: exploreSequence, link: exploreLink, ladder: exploreLadder, follows: exploreFollows, text: exploreText })[t.type](t);
     }
     root.querySelectorAll('.st-tab').forEach(b => b.addEventListener('click', () => { tabI = Number(b.dataset.t); show(); }));
