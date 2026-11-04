@@ -2,7 +2,7 @@
 // Pages and app files: always fetched fresh when online (so updates show at once); the saved copy is
 // used only when there is no connection. The libraries from the CDNs are reused from the cache and
 // refreshed in the background. Sign-in, the database and the AI are never cached.
-const CACHE = 'fs-v2';
+const CACHE = 'fs-v3';
 const CORE = ['./', './index.html', './login.html', './config.js', './css/app.css', './js/ai.js', './manifest.json', './icons/icon-192.png'];
 
 self.addEventListener('install', (e) => {
@@ -20,8 +20,11 @@ self.addEventListener('fetch', (e) => {
     // Videos stream in parts (range requests): leave them to the browser
     if (url.origin === self.location.origin && /\.(mp4|webm)$/.test(url.pathname)) return;
     if (url.origin === self.location.origin) {
-        // Network first, saved copy when offline
-        e.respondWith(fetch(req).then(res => {
+        // Network first, saved copy when offline. cache: 'no-cache' asks the server whether the file changed,
+        // so the browser's own copy (kept up to 10 minutes on GitHub Pages) never hides an update.
+        // (a page request cannot be copied with new options, so it is fetched again by its address)
+        const fresh = req.mode === 'navigate' ? fetch(req.url, { cache: 'no-cache', credentials: 'same-origin' }) : fetch(req, { cache: 'no-cache' });
+        e.respondWith(fresh.then(res => {
             if (res.ok) { const copy = res.clone(); caches.open(CACHE).then(c => c.put(req, copy)); }
             return res;
         }).catch(() => caches.match(req, { ignoreSearch: req.mode === 'navigate' }).then(r => r || caches.match('./index.html'))));
