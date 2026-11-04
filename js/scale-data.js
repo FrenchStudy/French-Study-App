@@ -327,11 +327,13 @@ window.SCALE_DATA = {
 
 // ---------------- 3 Connectors & Small Words ----------------
 3: { name: 'Connectors', next: 'Join ideas and put things in order', tabs: [
-  // Le lien, L'échelle, Ce qui suit, Le texte: the words are in js/connectors-data.js (tools/connectors/connectors.py)
-  { type: 'link', title: 'Le lien', hint: 'First decide what the second idea does (adds, contrasts, gives the cause, the result…), then pick the word that says it.' },
-  { type: 'ladder', title: 'L\'échelle', hint: 'Words that mean the same thing, from spoken to formal. Know the first one of each line; use the formal ones when you write (TCF / TEF). Tap a word to see it in a sentence.' },
-  { type: 'follows', title: 'Ce qui suit', hint: 'What comes after the connector? Put each one in its box: a verb in the indicatif, the subjonctif, the conditionnel, or a noun.' },
-  { type: 'text', title: 'Le texte', hint: 'Connectors hold a whole text together. Fill each gap in order, then listen to the text.' },
+  // Teaching first (js/connector-lessons.js): the road signs, the comics, the dress code, the doors; then practice (js/connectors-data.js)
+  { type: 'signs', title: 'Les panneaux', hint: '' },
+  { type: 'comics', title: 'Les histoires', hint: '' },
+  { type: 'dress', title: 'Le dress code', hint: '' },
+  { type: 'doors', title: 'Les portes', hint: '' },
+  { type: 'link', title: 'Le lien', hint: 'Practice: first decide what the second idea does (which sign?), then pick the word that says it.' },
+  { type: 'text', title: 'Le texte', hint: 'Practice: connectors hold a whole text together. Fill each gap in order, then listen to the text.' },
   { type: 'sequence', title: 'Dans l\'ordre', hint: 'First, then, finally: the steps of a story. Tap a step, or play the whole story.', note: 'Ensuite, puis and après are the middle steps: you can swap them. D\'abord starts, enfin ends.', steps: [
     { key: 'd\'abord', fr: 'd\'abord', en: 'first' },
     { key: 'ensuite', fr: 'ensuite', en: 'next' },
