@@ -49,39 +49,39 @@ function dayWord(h) {
 const CSS = `
 .tl{display:grid;gap:14px;max-width:760px}
 .tl-card{background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:16px}
-.tl-card h3{font-size:17px;font-weight:800;color:#0f172a;margin:0}
-.tl-hint{font-size:13px;color:#64748b;margin-top:2px}
-.tl-top{display:flex;justify-content:flex-end;font-size:14px;color:#475569}
+.tl-card h3{font-size:var(--fs-base);font-weight:800;color:#0f172a;margin:0}
+.tl-hint{font-size:var(--fs-sm);color:#64748b;margin-top:2px}
+.tl-top{display:flex;justify-content:flex-end;font-size:var(--fs-sm);color:#475569}
 .tl-top label{display:flex;align-items:center;gap:8px;cursor:pointer;min-height:44px}
 .tl-top input{width:18px;height:18px;accent-color:#4f46e5}
 .tl-track{position:relative;margin:48px 12px 46px}
 .tl-track.when{margin-bottom:76px}
 .tl input[type=range]{width:100%;height:30px;margin:0;cursor:pointer}
 .tl-f input[type=range]{accent-color:#059669}.tl-w input[type=range]{accent-color:#4f46e5}.tl-t input[type=range]{accent-color:#d97706}
-.tl-stop{position:absolute;transform:translateX(-50%);background:none;border:0;cursor:pointer;font-size:13px;color:#64748b;white-space:nowrap;padding:4px;transition:color .2s}
+.tl-stop{position:absolute;transform:translateX(-50%);background:none;border:0;cursor:pointer;font-size:var(--fs-sm);color:#64748b;white-space:nowrap;padding:4px;transition:color .2s}
 .tl-stop.first{transform:none}.tl-stop.last{transform:translateX(-100%)}
-.tl-stop.up{bottom:30px}.tl-stop.down{top:30px}.tl-stop.low{top:58px;font-size:12px;font-style:italic}
+.tl-stop.up{bottom:30px}.tl-stop.down{top:30px}.tl-stop.low{top:58px;font-size:var(--fs-xs);font-style:italic}
 .tl-tick{position:absolute;width:2px;background:#cbd5e1;transform:translateX(-1px);pointer-events:none;transition:background .2s}
 .tl-tick.up{bottom:11px;height:22px}.tl-tick.down{top:11px;height:22px}.tl-tick.low{top:11px;height:50px}
 .tl-tick.on{background:currentColor;width:3px}.tl-f .tl-tick.on{color:#059669}.tl-w .tl-tick.on{color:#4f46e5}
 .tl-stop.on{font-weight:800}.tl-f .tl-stop.on{color:#047857}.tl-w .tl-stop.on{color:#4338ca}
 .tl-stop:focus-visible,.tl-row:focus-visible{outline:3px solid #6366f1;outline-offset:2px;border-radius:8px}
 .tl-now{position:absolute;left:50%;top:2px;height:26px;width:3px;margin-left:-1.5px;background:#4f46e5;border-radius:2px;pointer-events:none;opacity:.45}
-.tl-ends{display:flex;justify-content:space-between;font-size:12px;color:#64748b;margin:-38px 12px 30px}
+.tl-ends{display:flex;justify-content:space-between;font-size:var(--fs-xs);color:#64748b;margin:-38px 12px 30px}
 .tl-out{border:1px solid #e2e8f0;border-radius:12px;padding:12px 14px;min-height:72px;background:#f8fafc}
-.tl-big{font-size:1.45rem;font-weight:900;cursor:pointer}
+.tl-big{font-size:var(--fs-2xl);font-weight:900;cursor:pointer}
 .tl-f .tl-big{color:#047857}.tl-w .tl-big{color:#4338ca}.tl-t .tl-big{color:#b45309}.tl-l .tl-big{color:#047857}
-.tl-en{font-size:14px;color:#475569}
-.tl-ex{margin-top:8px;font-size:16px;color:#0f172a;cursor:pointer}.tl-ex div{font-size:13px;color:#64748b}
-.tl-tip{margin-top:10px;font-size:14px;line-height:1.5;background:#eef2ff;border-radius:10px;padding:8px 10px;color:#1e293b}
+.tl-en{font-size:var(--fs-sm);color:#475569}
+.tl-ex{margin-top:8px;font-size:var(--fs-base);color:#0f172a;cursor:pointer}.tl-ex div{font-size:var(--fs-sm);color:#64748b}
+.tl-tip{margin-top:10px;font-size:var(--fs-sm);line-height:1.5;background:#eef2ff;border-radius:10px;padding:8px 10px;color:#1e293b}
 .tl-dots{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px}
 .tl-dot{width:16px;height:16px;border-radius:4px;border:1px solid #cbd5e1;transition:background .3s,border-color .3s}
 .tl-dot.on{background:#059669;border-color:#059669}
-.tl-note{font-size:14px;color:#475569;margin-top:10px;line-height:1.55}
+.tl-note{font-size:var(--fs-sm);color:#475569;margin-top:10px;line-height:1.55}
 .tl-note b{cursor:pointer;color:#0f172a}
 .tl-rows{margin:10px 0}
 .tl-row{display:flex;align-items:center;gap:10px;padding:8px 0;cursor:pointer;background:none;border:0;width:100%;text-align:left;color:inherit;min-height:44px}
-.tl-row .nm{width:96px;font-weight:800;font-size:15px;color:#334155}.tl-row.on .nm{color:#047857}
+.tl-row .nm{width:96px;font-weight:800;font-size:var(--fs-base);color:#334155}.tl-row.on .nm{color:#047857}
 .tl-lane{position:relative;flex:1;height:16px}
 .tl-bar{position:absolute;top:2px;height:12px;border-radius:6px;background:#059669;opacity:.4;transform-origin:left center;transition:opacity .3s}
 .tl-row.on .tl-bar{opacity:1}
@@ -93,7 +93,7 @@ const CSS = `
 .tl-day .ln{position:absolute;left:0;right:0;top:15px;border-top:2px solid #cbd5e1}
 .tl-sun{position:absolute;top:5px;width:22px;height:22px;margin-left:-11px;border-radius:50%;background:#f59e0b;transition:left .15s,background .3s}
 .tl-chips{display:none;flex-wrap:wrap;gap:6px;margin:4px 0 12px}
-.tl-chip{border:1px solid #e2e8f0;background:#fff;border-radius:999px;padding:6px 12px;min-height:36px;font-size:14px;color:#334155;cursor:pointer}
+.tl-chip{border:1px solid #e2e8f0;background:#fff;border-radius:999px;padding:6px 12px;min-height:36px;font-size:var(--fs-sm);color:#334155;cursor:pointer}
 .tl-chip.low{font-style:italic}
 .tl-f .tl-chip.on{background:#ecfdf5;border-color:#059669;color:#047857;font-weight:800}
 .tl-w .tl-chip.on{background:#eef2ff;border-color:#6366f1;color:#3730a3;font-weight:800}
@@ -199,7 +199,7 @@ function mount(root, { say }) {
         });
         go(true, false);
     }
-    slider('#tl-t1', '#tl-o1', OFTEN, 47, s => `<div class="tl-dots" aria-label="${s.d.length} days out of 14">${Array.from({ length: 14 }, (_, i) => `<span class="tl-dot${s.d.includes(i) ? ' on' : ''}"></span>`).join('')}</div><div class="tl-en" style="font-size:12px;margin-top:2px">${s.d.length} days out of 14</div>`);
+    slider('#tl-t1', '#tl-o1', OFTEN, 47, s => `<div class="tl-dots" aria-label="${s.d.length} days out of 14">${Array.from({ length: 14 }, (_, i) => `<span class="tl-dot${s.d.includes(i) ? ' on' : ''}"></span>`).join('')}</div><div class="tl-en" style="font-size:var(--fs-xs);margin-top:2px">${s.d.length} days out of 14</div>`);
     slider('#tl-t2', '#tl-o2', WHEN, 50);
 
     const rowsBox = $('#tl-rows'), o3 = $('#tl-o3');

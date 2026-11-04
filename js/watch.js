@@ -8,8 +8,8 @@ const CSS = `
 .wm{position:fixed;inset:0;z-index:70;background:#0f172a;color:#f8fafc;display:flex;flex-direction:column;
   padding:calc(env(safe-area-inset-top,0px) + 12px) max(16px,env(safe-area-inset-right,0px)) calc(env(safe-area-inset-bottom,0px) + 12px) max(16px,env(safe-area-inset-left,0px))}
 .wm-top{display:flex;align-items:center;justify-content:space-between;gap:12px}
-.wm-title{font-weight:800;font-size:14px;color:#cbd5e1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.wm-x{font-weight:800;font-size:15px;border:1px solid #334155;background:#1e293b;color:#f8fafc;border-radius:12px;min-height:44px;padding:0 16px;cursor:pointer}
+.wm-title{font-weight:800;font-size:var(--fs-sm);color:#cbd5e1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wm-x{font-weight:800;font-size:var(--fs-base);border:1px solid #334155;background:#1e293b;color:#f8fafc;border-radius:12px;min-height:44px;padding:0 16px;cursor:pointer}
 .wm-bar{height:6px;background:#1e293b;border-radius:99px;overflow:hidden;margin-top:10px}
 .wm-bar>div{height:100%;background:#818cf8;width:0;transition:width .3s}
 .wm-stage{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:14px;min-height:0;padding:12px 0}
@@ -23,11 +23,11 @@ const CSS = `
 .wm-hide{opacity:0}
 .wm-story{font-size:clamp(24px,4.6vw,40px);font-weight:800;line-height:1.25;max-width:44rem}
 .wm-ctl{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:8px}
-.wm-ctl button{font-weight:800;font-size:16px;border:1px solid #334155;background:#1e293b;color:#f8fafc;border-radius:14px;min-height:52px;min-width:56px;padding:0 16px;cursor:pointer}
+.wm-ctl button{font-weight:800;font-size:var(--fs-base);border:1px solid #334155;background:#1e293b;color:#f8fafc;border-radius:14px;min-height:52px;min-width:56px;padding:0 16px;cursor:pointer}
 .wm-ctl .wm-play{background:#6366f1;border-color:#6366f1;min-width:120px}
 .wm-ctl button[aria-pressed="true"]{background:#312e81;border-color:#818cf8}
 .wm-ctl button:focus-visible,.wm-x:focus-visible{outline:3px solid #a5b4fc;outline-offset:2px}
-.wm-count{font-size:13px;color:#94a3b8;text-align:center;margin-top:6px;font-variant-numeric:tabular-nums}
+.wm-count{font-size:var(--fs-sm);color:#94a3b8;text-align:center;margin-top:6px;font-variant-numeric:tabular-nums}
 @media (prefers-reduced-motion:reduce){.wm-en,.wm-ex,.wm-bar>div{transition:none}}
 `;
 const ic = (k) => (window.MEDIA_ICON ? window.MEDIA_ICON[k](20) : '');

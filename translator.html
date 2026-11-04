@@ -174,7 +174,7 @@
             const notes = r.notes || [];
             $('notes-box').classList.toggle('hidden', !notes.length);
             $('notes').innerHTML = notes.map(n => `<div class="border border-slate-100 bg-slate-50 rounded-xl p-3">
-                <div class="flex items-center gap-2 flex-wrap"><b class="text-slate-900" lang="fr">${escapeHtml(n.term)}</b>${n.type ? `<span class="text-[11px] font-bold uppercase tracking-wide text-indigo-700 bg-indigo-50 px-1.5 py-0.5 rounded">${escapeHtml(n.type)}</span>` : ''}</div>
+                <div class="flex items-center gap-2 flex-wrap"><b class="text-slate-900" lang="fr">${escapeHtml(n.term)}</b>${n.type ? `<span class="text-xs font-bold uppercase tracking-wide text-indigo-700 bg-indigo-50 px-1.5 py-0.5 rounded">${escapeHtml(n.type)}</span>` : ''}</div>
                 <p class="text-sm text-slate-600 mt-1">${escapeHtml(n.explanation)}</p></div>`).join('');
         }
         async function translate() {
@@ -269,7 +269,7 @@ Give 2 to 6 notes about the most useful French words or grammar points. The text
         function renderRecent() {
             const list = store.get('translator_recent', []);
             $('recent-box').classList.toggle('hidden', !list.length);
-            $('recent').innerHTML = list.map((r, i) => `<button type="button" data-recent="${i}" class="max-w-full truncate min-h-[36px] px-3 text-sm bg-white border border-slate-200 hover:border-indigo-300 rounded-full text-slate-700" lang="${r.from}"><span class="text-[11px] font-bold text-slate-400 mr-1">${r.from === 'fr' ? 'FR→EN' : 'EN→FR'}</span>${escapeHtml(r.source.slice(0, 50))}</button>`).join('');
+            $('recent').innerHTML = list.map((r, i) => `<button type="button" data-recent="${i}" class="max-w-full truncate min-h-[36px] px-3 text-sm bg-white border border-slate-200 hover:border-indigo-300 rounded-full text-slate-700" lang="${r.from}"><span class="text-xs font-bold text-slate-400 mr-1">${r.from === 'fr' ? 'FR→EN' : 'EN→FR'}</span>${escapeHtml(r.source.slice(0, 50))}</button>`).join('');
         }
         $('recent').addEventListener('click', (e) => {
             const b = e.target.closest('[data-recent]'); if (!b) return;

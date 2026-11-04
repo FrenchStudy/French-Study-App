@@ -162,7 +162,7 @@ function injectCss() {
     s.textContent = `.tcf-w{font:inherit;color:inherit;background:#fef3c7;border-radius:.3em;padding:0 .15em;text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:3px;cursor:pointer}
 .tcf-w.tcf-m{text-decoration-color:#0284c7}.tcf-w.tcf-f{text-decoration-color:#e11d48}.tcf-w.tcf-x{text-decoration-color:#64748b}
 .tcf-w:hover,.tcf-w:focus-visible{background:#fde68a;outline:none}
-.tcf-tip{position:fixed;z-index:80;max-width:min(22rem,calc(100vw - 2rem));background:#0f172a;color:#f8fafc;border-radius:.75rem;padding:.5rem .75rem;font-size:.9rem;line-height:1.35;box-shadow:0 10px 25px rgb(0 0 0/.2)}
+.tcf-tip{position:fixed;z-index:80;max-width:min(22rem,calc(100vw - 2rem));background:#0f172a;color:#f8fafc;border-radius:.75rem;padding:.5rem .75rem;font-size:var(--fs-base);line-height:1.35;box-shadow:0 10px 25px rgb(0 0 0/.2)}
 .tcf-tip b{display:block}`;
     document.head.appendChild(s);
 }
@@ -244,7 +244,7 @@ async function browser(root, opts) {
             const fr = p.task === 'S3' ? '' : p.prompt.join(' ');
             const en = p.task === 'S3' ? '' : (p.prompt_en || []).join(' ');
             return `<a href="${esc(opts.href(id))}" class="group flex flex-col gap-1 bg-white border border-slate-200 hover:border-indigo-400 hover:shadow-md transition rounded-2xl p-4">
-                <span class="flex items-center justify-between gap-2"><span class="text-[11px] font-bold uppercase tracking-wide text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-full">${esc(TASKS[task].short)} · ${i + 1}</span>
+                <span class="flex items-center justify-between gap-2"><span class="text-xs font-bold uppercase tracking-wide text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-full">${esc(TASKS[task].short)} · ${i + 1}</span>
                 ${done.has(id) ? '<span class="shrink-0 text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">✓ Practised</span>' : ''}</span>
                 <span lang="fr" class="font-bold text-slate-900 leading-snug group-hover:text-indigo-700">${esc(p.title)}</span>
                 ${showEn && p.title_en ? `<span class="text-sm text-slate-500 leading-snug">${esc(p.title_en)}</span>` : ''}
@@ -357,7 +357,7 @@ async function picker(root, opts) {
             const fr = p.task === 'S3' ? '' : p.prompt.join(' ');
             const en = p.task === 'S3' ? '' : (p.prompt_en || []).join(' ');
             return `<a href="${esc(opts.href(id))}" data-pk-open="${esc(id)}" class="group flex flex-col gap-1 bg-white border border-slate-200 hover:border-indigo-400 hover:shadow-md transition rounded-2xl p-4">
-                <span class="flex items-center justify-between gap-2"><span class="text-[11px] font-bold uppercase tracking-wide text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-full">${esc(p.id)}</span>${status(id, done)}</span>
+                <span class="flex items-center justify-between gap-2"><span class="text-xs font-bold uppercase tracking-wide text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-full">${esc(p.id)}</span>${status(id, done)}</span>
                 <span lang="fr" class="font-bold text-slate-900 leading-snug group-hover:text-indigo-700">${esc(p.title)}</span>
                 ${p.title_en ? `<span class="text-sm text-slate-500 leading-snug">${esc(p.title_en)}</span>` : ''}
                 ${fr ? `<span lang="fr" class="text-sm text-slate-600 leading-snug line-clamp-2">${esc(fr)}</span>` : ''}

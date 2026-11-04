@@ -149,7 +149,7 @@ const LessonKit = (function () {
         }).join('')}</tr>`).join('');
         return `<figure class="space-y-1">
             ${t.cap ? `<figcaption class="text-sm font-bold text-slate-800">${escapeHtml(t.cap)}</figcaption>` : ''}
-            <div class="overflow-x-auto border border-slate-200 rounded-xl"><table class="w-full text-[13px] sm:text-sm">${head}<tbody>${body}</tbody></table></div>
+            <div class="overflow-x-auto border border-slate-200 rounded-xl"><table class="w-full text-sm sm:text-sm">${head}<tbody>${body}</tbody></table></div>
         </figure>`;
     }
 
@@ -430,8 +430,8 @@ const LessonKit = (function () {
                     <input type="search" class="lk-search md:ml-auto w-full md:w-72 text-base md:text-sm px-3 py-2.5 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="${escapeHtml(opts.searchPlaceholder || 'Search, e.g. subjonctif')}">
                 </div>
                 <div class="lk-results hidden space-y-5"></div>
-                <div class="lk-pathview space-y-4">
-                    <div class="lk-banner"></div>
+                <div class="lk-pathview flex flex-col gap-4 sm:block sm:space-y-4">
+                    <div class="lk-banner order-last sm:order-none"></div>
                     <div class="lk-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
                 </div>
             </div>
@@ -538,7 +538,7 @@ const LessonKit = (function () {
                     <span class="min-w-0 flex-1">
                         <span class="flex items-start justify-between gap-2"><span class="font-bold text-slate-900 leading-snug group-hover:text-indigo-700">${escapeHtml(t.title)}</span>${status}</span>
                         <span class="block text-sm text-slate-500 leading-snug mt-0.5 line-clamp-2">${escapeHtml(t.blurb || '')}</span>
-                        ${t.verbs ? `<span class="inline-block mt-2 text-[11px] font-bold uppercase tracking-wide text-violet-700 bg-violet-50 px-2 py-0.5 rounded-full">${t.forms.length ? '+ verb forms' : 'Verbs'}</span>` : ''}
+                        ${t.verbs ? `<span class="inline-block mt-2 text-xs font-bold uppercase tracking-wide text-violet-700 bg-violet-50 px-2 py-0.5 rounded-full">${t.forms.length ? '+ verb forms' : 'Verbs'}</span>` : ''}
                     </span>
                 </a>`;
             }).join('');
@@ -581,7 +581,7 @@ const LessonKit = (function () {
                     <div class="text-xs font-bold uppercase tracking-wide ${st.text} px-1 pb-2">${escapeHtml(name)}</div>
                     <div class="max-h-[70vh] overflow-y-auto divide-y divide-slate-100">
                         ${list.map(x => `<a href="${url(x)}" data-open="${escapeHtml(String(x))}" class="flex items-center gap-2 px-1 py-2 text-sm rounded-lg ${x === id ? `${st.soft} font-bold text-slate-900` : 'text-slate-700 hover:bg-slate-50'}">
-                            <span class="shrink-0 w-6 h-6 rounded-full text-[11px] font-bold flex items-center justify-center ${isDone(section, x) ? 'bg-emerald-500 text-white' : x === id ? `${st.solid} text-white` : 'bg-slate-100 text-slate-600'}">${isDone(section, x) ? '✓' : escapeHtml(String(nodeLabel(x, sec.get(x))))}</span>
+                            <span class="shrink-0 w-6 h-6 rounded-full text-xs font-bold flex items-center justify-center ${isDone(section, x) ? 'bg-emerald-500 text-white' : x === id ? `${st.solid} text-white` : 'bg-slate-100 text-slate-600'}">${isDone(section, x) ? '✓' : escapeHtml(String(nodeLabel(x, sec.get(x))))}</span>
                             <span class="truncate">${escapeHtml(sec.get(x).title)}</span></a>`).join('')}
                     </div>
                 </div>`;

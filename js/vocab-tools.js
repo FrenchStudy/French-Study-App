@@ -16,40 +16,41 @@ const shuffle = (a) => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) {
 const plain = (s) => String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[\s-]+/g, ' ').trim();
 
 const CSS = `
-.vt-sel{font:inherit;font-size:17px;font-weight:800;color:#0f172a;border:1px solid #e2e8f0;background:#fff;border-radius:12px;padding:8px 10px;min-height:44px;cursor:pointer}
+.vt-sel{font:inherit;font-size:var(--fs-base);font-weight:800;color:#0f172a;border:1px solid #e2e8f0;background:#fff;border-radius:12px;padding:8px 6px;min-height:44px;min-width:0;cursor:pointer}
 .vt{display:grid;gap:16px}
 .vt-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:start}
 @media (max-width:860px){.vt-grid{grid-template-columns:minmax(0,1fr)}}
 .vt-card{background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:16px;display:grid;gap:10px}
-.vt-label{font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#4f46e5}
-.vt-big{font-size:clamp(1.5rem,4vw,2.2rem);font-weight:900;line-height:1.15;color:#0f172a;overflow-wrap:anywhere}
-.vt-mid{font-size:1.15rem;font-weight:700;color:#334155}
-.vt-small{font-size:14px;color:#64748b}
+.vt-label{font-size:var(--fs-xs);font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#4f46e5}
+@media(min-width:768px){.vt-big{font-size:var(--fs-3xl)!important}}
+.vt-big{font-size:var(--fs-2xl);font-weight:900;line-height:1.15;color:#0f172a;overflow-wrap:anywhere}
+.vt-mid{font-size:var(--fs-lg);font-weight:700;color:#334155}
+.vt-small{font-size:var(--fs-sm);color:#64748b}
 .vt-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
-.vt-btn{font-weight:700;font-size:15px;border:1px solid #e2e8f0;background:#fff;color:#0f172a;border-radius:12px;padding:8px 14px;min-height:44px;cursor:pointer}
+.vt-btn{font-weight:700;font-size:var(--fs-base);border:1px solid #e2e8f0;background:#fff;color:#0f172a;border-radius:12px;padding:8px 14px;min-height:44px;cursor:pointer}
 .vt-btn.pri{background:#4f46e5;border-color:#4f46e5;color:#fff}
 .vt-btn[aria-pressed="true"]{background:#eef2ff;border-color:#6366f1;color:#3730a3}
 .vt-btn:focus-visible,.vt-day:focus-visible,.vt-sw:focus-visible{outline:3px solid #6366f1;outline-offset:2px}
-.vt-input{font-size:1.6rem;font-weight:800;width:100%;max-width:16rem;padding:8px 12px;border:2px solid #c7d2fe;border-radius:12px;font-variant-numeric:tabular-nums}
-.vt-text{font-size:1.05rem;width:100%;padding:10px 12px;border:1px solid #e2e8f0;border-radius:12px}
+.vt-input{font-size:var(--fs-3xl);font-weight:800;width:100%;max-width:16rem;padding:8px 12px;border:2px solid #c7d2fe;border-radius:12px;font-variant-numeric:tabular-nums}
+.vt-text{font-size:var(--fs-base);width:100%;padding:10px 12px;border:1px solid #e2e8f0;border-radius:12px}
 .vt-chips{display:flex;flex-wrap:wrap;gap:8px}
 .vt-chip{border-radius:12px;padding:8px 12px;background:#f1f5f9;display:grid;gap:2px}
-.vt-chip b{font-size:1.05rem;color:#0f172a}.vt-chip span{font-size:12px;color:#475569;font-variant-numeric:tabular-nums}
+.vt-chip b{font-size:var(--fs-base);color:#0f172a}.vt-chip span{font-size:var(--fs-xs);color:#475569;font-variant-numeric:tabular-nums}
 .vt-chip.c0{background:#eef2ff}.vt-chip.c1{background:#ecfdf5}.vt-chip.c2{background:#fff7ed}.vt-chip.c3{background:#fdf2f8}
-.vt-note{background:#fffbeb;border:1px solid #fde68a;border-radius:12px;padding:10px 12px;font-size:15px;color:#1e293b}
+.vt-note{background:#fffbeb;border:1px solid #fde68a;border-radius:12px;padding:10px 12px;font-size:var(--fs-base);color:#1e293b}
 .vt-fb{font-weight:800}.vt-fb.ok{color:#047857}.vt-fb.no{color:#be123c}
-.vt-opt{text-align:left;font-size:16px;font-weight:600;border:1px solid #e2e8f0;background:#fff;border-radius:12px;padding:10px 14px;min-height:48px;cursor:pointer}
+.vt-opt{text-align:left;font-size:var(--fs-base);font-weight:600;border:1px solid #e2e8f0;background:#fff;border-radius:12px;padding:10px 14px;min-height:48px;cursor:pointer}
 .vt-opt.ok{background:#ecfdf5;border-color:#059669}.vt-opt.no{background:#fff1f2;border-color:#e11d48}
 .vt-cal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
-.vt-dow{text-align:center;font-size:12px;font-weight:800;color:#64748b;text-transform:lowercase;padding:4px 0}
-.vt-day{min-height:48px;border:1px solid #e2e8f0;background:#fff;border-radius:10px;font-weight:700;font-size:16px;cursor:pointer;font-variant-numeric:tabular-nums}
+.vt-dow{text-align:center;font-size:var(--fs-xs);font-weight:800;color:#64748b;text-transform:lowercase;padding:4px 0}
+.vt-day{min-height:48px;border:1px solid #e2e8f0;background:#fff;border-radius:10px;font-weight:700;font-size:var(--fs-base);cursor:pointer;font-variant-numeric:tabular-nums}
 .vt-day.we{background:#f8fafc;color:#64748b}.vt-day.today{border:2px solid #4f46e5}
 .vt-day.on{background:#4f46e5;color:#fff;border-color:#4f46e5}.vt-day.right{background:#059669;color:#fff}.vt-day.wrong{background:#e11d48;color:#fff}
 .vt-day.blank{visibility:hidden}
 .vt-sws{display:flex;flex-wrap:wrap;gap:8px}
 .vt-sw{width:48px;height:48px;border-radius:999px;border:3px solid #fff;box-shadow:0 0 0 1px #cbd5e1;cursor:pointer}
 .vt-sw[aria-pressed="true"]{box-shadow:0 0 0 3px #4f46e5}
-.vt-thing{font-size:28px;min-width:56px;min-height:56px;border:1px solid #e2e8f0;background:#fff;border-radius:12px;cursor:pointer}
+.vt-thing{font-size:var(--fs-3xl);min-width:56px;min-height:56px;border:1px solid #e2e8f0;background:#fff;border-radius:12px;cursor:pointer}
 .vt-thing[aria-pressed="true"]{border:2px solid #4f46e5;background:#eef2ff}
 .vt-show{display:flex;align-items:center;gap:16px}
 .vt-blob{width:120px;height:120px;border-radius:24px;display:flex;align-items:center;justify-content:center;padding:8px;background:#f8fafc;border:1px solid #e2e8f0;flex:none}
@@ -247,13 +248,13 @@ function mountCalendar(root, { say }) {
       </div>
       <div class="vt-grid">
         <div class="vt-card">
-          <div class="vt-row" style="justify-content:space-between">
-            <button type="button" class="vt-btn" data-m="-1" aria-label="Previous month">◀</button>
-            <div class="vt-row" style="gap:6px;flex-wrap:nowrap">
+          <div class="vt-row" style="justify-content:space-between;flex-wrap:nowrap;gap:6px">
+            <button type="button" class="vt-btn" data-m="-1" aria-label="Previous month" style="padding:8px 12px;flex:none">◀</button>
+            <div class="vt-row" style="gap:6px;flex-wrap:nowrap;min-width:0">
               <select class="vt-sel" id="vt-msel" aria-label="Month">${MONTHS.map((m, i) => `<option value="${i}">${m}</option>`).join('')}</select>
               <select class="vt-sel" id="vt-ysel" aria-label="Year">${Array.from({ length: 81 }, (_, k) => today.getFullYear() - 60 + k).map(y => `<option value="${y}">${y}</option>`).join('')}</select>
             </div>
-            <button type="button" class="vt-btn" data-m="1" aria-label="Next month">▶</button>
+            <button type="button" class="vt-btn" data-m="1" aria-label="Next month" style="padding:8px 12px;flex:none">▶</button>
           </div>
           <div class="vt-cal" id="vt-cal"></div>
           <div class="vt-row" style="justify-content:center"><button type="button" class="vt-btn" id="vt-today">Aujourd'hui</button></div>

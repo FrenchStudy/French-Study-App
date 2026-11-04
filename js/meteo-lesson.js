@@ -63,52 +63,52 @@ window.MeteoLesson = (function () {
     const CSS = `
 .ml{--ml-day:#4f46e5;--ml-num:#d97706;--ml-mon:#059669;font-family:inherit;color:#1e293b}
 .ml *{box-sizing:border-box}
-.ml h3{font-size:17px;font-weight:700;color:#1e1b4b;margin:0 0 4px}
-.ml .ml-sub{font-size:13px;color:#64748b;margin:0 0 12px}
-.ml .ml-step{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:99px;background:#4f46e5;color:#fff;font-size:13px;font-weight:700;margin-right:6px}
+.ml h3{font-size:var(--fs-base);font-weight:700;color:#1e1b4b;margin:0 0 4px}
+.ml .ml-sub{font-size:var(--fs-sm);color:#64748b;margin:0 0 12px}
+.ml .ml-step{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:99px;background:#4f46e5;color:#fff;font-size:var(--fs-sm);font-weight:700;margin-right:6px}
 .ml .ml-box{background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:16px;margin-bottom:16px}
 .ml .ml-grid{display:grid;gap:16px;grid-template-columns:1fr}
 @media(min-width:900px){.ml .ml-grid{grid-template-columns:minmax(0,3fr) minmax(0,2fr)}.ml .ml-side{position:sticky;top:12px;align-self:start}}
 .ml button{font:inherit;cursor:pointer}
 .ml .ml-cal-head{display:flex;align-items:center;gap:8px;margin-bottom:8px}
-.ml .ml-cal-head .ml-title{flex:1;text-align:center;font-weight:700;font-size:16px;color:var(--ml-mon)}
-.ml .ml-arrow{width:44px;height:40px;border-radius:12px;border:1px solid #e2e8f0;background:#f8fafc;font-size:26px;line-height:1;color:#334155}
+.ml .ml-cal-head .ml-title{flex:1;text-align:center;font-weight:700;font-size:var(--fs-base);color:var(--ml-mon)}
+.ml .ml-arrow{width:44px;height:40px;border-radius:12px;border:1px solid #e2e8f0;background:#f8fafc;font-size:var(--fs-3xl);line-height:1;color:#334155}
 .ml .ml-cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
-.ml .ml-cal .ml-wd{font-size:11px;font-weight:700;color:#94a3b8;text-align:center;padding:4px 0;text-transform:uppercase}
-.ml .ml-cal button{height:40px;border-radius:10px;border:1px solid transparent;background:#f8fafc;font-size:15px;color:#334155}
+.ml .ml-cal .ml-wd{font-size:var(--fs-xs);font-weight:700;color:#94a3b8;text-align:center;padding:4px 0;text-transform:uppercase}
+.ml .ml-cal button{height:40px;border-radius:10px;border:1px solid transparent;background:#f8fafc;font-size:var(--fs-base);color:#334155}
 .ml .ml-cal button.ml-today{border-color:#a5b4fc}
 .ml .ml-cal button.ml-on{background:var(--ml-num);color:#fff;font-weight:700}
 .ml .ml-cal button.ml-we{color:#94a3b8}
 .ml .ml-cal button.ml-on.ml-we{color:#fff}
 .ml .ml-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:10px}
-.ml .ml-pill{border:1px solid #e2e8f0;background:#fff;border-radius:99px;padding:8px 14px;font-size:14px;color:#334155;min-height:40px}
-.ml .ml-date{font-size:20px;font-weight:700;margin-top:12px;line-height:1.4}
-.ml .ml-tip{font-size:13px;color:#475569;background:#f8fafc;border-radius:12px;padding:10px 12px;margin-top:10px;line-height:1.5}
+.ml .ml-pill{border:1px solid #e2e8f0;background:#fff;border-radius:99px;padding:8px 14px;font-size:var(--fs-sm);color:#334155;min-height:40px}
+.ml .ml-date{font-size:var(--fs-xl);font-weight:700;margin-top:12px;line-height:1.4}
+.ml .ml-tip{font-size:var(--fs-sm);color:#475569;background:#f8fafc;border-radius:12px;padding:10px 12px;margin-top:10px;line-height:1.5}
 .ml .ml-tip b{color:#1e1b4b}
 .ml .ml-d{color:var(--ml-day)} .ml .ml-n{color:var(--ml-num)} .ml .ml-m{color:var(--ml-mon)}
 .ml .ml-tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:8px}
 .ml .ml-tile{display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 6px 8px;border-radius:14px;border:2px solid #e2e8f0;background:#fff;text-align:center;min-height:120px;border-top-width:5px}
 .ml .ml-tile img{width:56px;height:56px;object-fit:contain}
-.ml .ml-tile .ml-fr{font-size:14px;font-weight:700;color:#1e293b;line-height:1.2}
-.ml .ml-tile .ml-en{font-size:11px;color:#64748b;line-height:1.2}
+.ml .ml-tile .ml-fr{font-size:var(--fs-sm);font-weight:700;color:#1e293b;line-height:1.2}
+.ml .ml-tile .ml-en{font-size:var(--fs-xs);color:#64748b;line-height:1.2}
 .ml .ml-tile.ml-on{box-shadow:0 0 0 3px #c7d2fe;border-color:#4f46e5}
-.ml .ml-key{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12px;color:#475569;margin:0 0 10px}
+.ml .ml-key{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:var(--fs-xs);color:#475569;margin:0 0 10px}
 .ml .ml-key span::before{content:'';display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;background:var(--c);vertical-align:-1px}
 .ml .ml-temp{display:flex;align-items:center;gap:12px}
 .ml .ml-temp input{flex:1;accent-color:#e11d48;height:36px}
-.ml .ml-deg{min-width:74px;text-align:center;font-size:22px;font-weight:800;border-radius:12px;padding:6px 8px;color:#fff}
-.ml .ml-scale{display:flex;justify-content:space-between;font-size:11px;color:#94a3b8;margin:2px 4px 0}
+.ml .ml-deg{min-width:74px;text-align:center;font-size:var(--fs-xl);font-weight:800;border-radius:12px;padding:6px 8px;color:#fff}
+.ml .ml-scale{display:flex;justify-content:space-between;font-size:var(--fs-xs);color:#94a3b8;margin:2px 4px 0}
 .ml .ml-card{border-radius:20px;padding:18px;color:#1e293b;background:linear-gradient(160deg,#e0f2fe,#eef2ff);border:1px solid #c7d2fe}
 .ml .ml-card .ml-pics{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:8px}
 .ml .ml-card .ml-pics img{width:88px;height:88px;object-fit:contain}
 .ml .ml-card .ml-pics img.ml-small{width:52px;height:52px;opacity:.9}
-.ml .ml-card .ml-big{font-size:28px;font-weight:800;text-align:center;margin-bottom:4px}
-.ml .ml-say{font-size:18px;line-height:1.55;font-weight:600}
+.ml .ml-card .ml-big{font-size:var(--fs-3xl);font-weight:800;text-align:center;margin-bottom:4px}
+.ml .ml-say{font-size:var(--fs-lg);line-height:1.55;font-weight:600}
 .ml .ml-say .ml-w{color:#e11d48} .ml .ml-say .ml-t{color:#0369a1} .ml .ml-say .ml-s{color:#0f766e}
-.ml .ml-card .ml-trans{font-size:13px;color:#64748b;margin-top:8px}
-.ml .ml-listen{display:flex;width:100%;align-items:center;justify-content:center;gap:8px;margin-top:12px;border:0;border-radius:14px;background:#4f46e5;color:#fff;font-weight:700;font-size:16px;min-height:48px}
+.ml .ml-card .ml-trans{font-size:var(--fs-sm);color:#64748b;margin-top:8px}
+.ml .ml-listen{display:flex;width:100%;align-items:center;justify-content:center;gap:8px;margin-top:12px;border:0;border-radius:14px;background:#4f46e5;color:#fff;font-weight:700;font-size:var(--fs-base);min-height:48px}
 .ml .ml-seasons{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:12px}
-.ml .ml-seasons button{border:1px solid #e2e8f0;background:#fff;border-radius:12px;padding:6px 2px;font-size:12px;color:#334155;display:flex;flex-direction:column;align-items:center;gap:2px}
+.ml .ml-seasons button{border:1px solid #e2e8f0;background:#fff;border-radius:12px;padding:6px 2px;font-size:var(--fs-xs);color:#334155;display:flex;flex-direction:column;align-items:center;gap:2px}
 .ml .ml-seasons button img{width:34px;height:34px}
 .ml .ml-seasons button.ml-on{border-color:#0f766e;background:#f0fdfa;font-weight:700;color:#0f766e}
 .ml .ml-q{display:grid;gap:10px}
@@ -117,27 +117,27 @@ window.MeteoLesson = (function () {
 .ml .ml-opts{display:grid;gap:8px}
 .ml .ml-opts.ml-pics4{grid-template-columns:repeat(2,1fr)}
 @media(min-width:640px){.ml .ml-opts.ml-pics4{grid-template-columns:repeat(4,1fr)}}
-.ml .ml-opt{border:2px solid #e2e8f0;background:#fff;border-radius:14px;padding:12px;font-size:16px;font-weight:600;color:#1e293b;min-height:48px;text-align:left}
+.ml .ml-opt{border:2px solid #e2e8f0;background:#fff;border-radius:14px;padding:12px;font-size:var(--fs-base);font-weight:600;color:#1e293b;min-height:48px;text-align:left}
 .ml .ml-pics4 .ml-opt{display:flex;justify-content:center;align-items:center;padding:10px}
 .ml .ml-pics4 .ml-opt img{width:64px;height:64px}
 .ml .ml-opt.ml-ok{border-color:#059669;background:#ecfdf5}
 .ml .ml-opt.ml-bad{border-color:#e11d48;background:#fff1f2}
-.ml .ml-qtop{display:flex;align-items:center;justify-content:space-between;font-size:13px;color:#64748b}
-.ml .ml-hear{display:flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:14px;background:#eef2ff;color:#4338ca;font-weight:700;font-size:16px;min-height:56px}
-.ml .ml-fb{font-size:14px;min-height:20px;color:#475569}
+.ml .ml-qtop{display:flex;align-items:center;justify-content:space-between;font-size:var(--fs-sm);color:#64748b}
+.ml .ml-hear{display:flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:14px;background:#eef2ff;color:#4338ca;font-weight:700;font-size:var(--fs-base);min-height:56px}
+.ml .ml-fb{font-size:var(--fs-sm);min-height:20px;color:#475569}
 .ml .ml-next{border:0;border-radius:12px;background:#4f46e5;color:#fff;font-weight:700;padding:10px 18px;min-height:44px}
 .ml .ml-mini{position:sticky;bottom:8px;z-index:5;display:flex;align-items:center;gap:10px;background:#1e1b4b;color:#fff;border-radius:16px;padding:8px 8px 8px 12px;box-shadow:0 6px 20px rgba(30,27,75,.3);margin-bottom:16px}
 .ml .ml-mini img{width:36px;height:36px}
-.ml .ml-mini span{flex:1;font-size:14px;font-weight:600;line-height:1.3}
+.ml .ml-mini span{flex:1;font-size:var(--fs-sm);font-weight:600;line-height:1.3}
 .ml .ml-mini button{border:0;border-radius:12px;background:#4f46e5;color:#fff;font-weight:700;min-height:44px;padding:0 14px}
 @media(min-width:900px){.ml .ml-mini{display:none}}
 .ml .ml-guide{display:grid;gap:10px}
 @media(min-width:720px){.ml .ml-guide{grid-template-columns:repeat(2,1fr)}}
 .ml .ml-gq{border:1px solid #e2e8f0;border-radius:14px;padding:12px 14px;background:#f8fafc}
-.ml .ml-gq .ml-gh{font-size:16px;font-weight:700;color:#1e1b4b;margin:0 0 2px}
-.ml .ml-gq .ml-ge{font-size:12px;color:#64748b;margin:0 0 8px}
-.ml .ml-gq button{display:block;width:100%;text-align:left;border:0;background:#fff;border-radius:10px;padding:8px 10px;margin-top:6px;font-size:15px;color:#1e293b;min-height:40px}
-.ml .ml-gq button small{display:block;font-size:12px;color:#64748b}
+.ml .ml-gq .ml-gh{font-size:var(--fs-base);font-weight:700;color:#1e1b4b;margin:0 0 2px}
+.ml .ml-gq .ml-ge{font-size:var(--fs-xs);color:#64748b;margin:0 0 8px}
+.ml .ml-gq button{display:block;width:100%;text-align:left;border:0;background:#fff;border-radius:10px;padding:8px 10px;margin-top:6px;font-size:var(--fs-base);color:#1e293b;min-height:40px}
+.ml .ml-gq button small{display:block;font-size:var(--fs-xs);color:#64748b}
 `;
 
     function bind(box) {
@@ -333,7 +333,7 @@ window.MeteoLesson = (function () {
             done = false;
             if (i >= N) {
                 el.innerHTML = `<div style="text-align:center;padding:10px 0"><div style="font-size:40px">${score >= 7 ? '🌟' : score >= 5 ? '👍' : '💪'}</div>
-                    <p style="font-size:18px;font-weight:700;margin:6px 0">${score} / ${N}</p>
+                    <p style="font-size:var(--fs-lg);font-weight:700;margin:6px 0">${score} / ${N}</p>
                     <p class="ml-sub">${score >= 7 ? 'Très bien ! You know your weather.' : 'Have another look at the pictures above, then try again.'}</p>
                     <button type="button" class="ml-next" data-q="again">Try again</button></div>`;
                 return;

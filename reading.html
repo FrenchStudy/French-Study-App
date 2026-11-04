@@ -190,7 +190,7 @@
                 const words = t ? wordCount(t.fr) : 0;
                 return `<a href="reading.html" data-topic="${tp.id}" class="group flex flex-col gap-1.5 bg-white border border-slate-200 hover:border-indigo-400 hover:shadow-md transition rounded-2xl p-4">
                     <span class="flex items-center justify-between gap-2">
-                        <span class="text-[11px] font-bold uppercase tracking-wide ${st[0]} ${st[1]} px-2 py-0.5 rounded-full truncate">${escapeHtml(tp.category || 'Topic')}</span>${status}
+                        <span class="text-xs font-bold uppercase tracking-wide ${st[0]} ${st[1]} px-2 py-0.5 rounded-full truncate">${escapeHtml(tp.category || 'Topic')}</span>${status}
                     </span>
                     <span class="font-bold text-slate-900 group-hover:text-indigo-700 leading-snug">${escapeHtml(t ? t.title : tp.title)}</span>
                     <span data-topic-meta class="text-xs text-slate-500">${t ? escapeHtml([t.kind, words + ' words', Math.max(1, Math.round(words / 120)) + ' min'].filter(Boolean).join(' · ')) : escapeHtml(tp.description || 'Written for you when you open it')}</span>
@@ -208,7 +208,7 @@
             const words = wordCount(t.fr);
             return `<a href="reading.html?text=${encodeURIComponent(t.id)}" data-text="${escapeHtml(t.id)}" class="group flex flex-col gap-1.5 bg-white border border-slate-200 hover:border-indigo-400 hover:shadow-md transition rounded-2xl p-4">
                 <span class="flex items-center justify-between gap-2">
-                    <span class="text-[11px] font-bold uppercase tracking-wide ${badge[1]} px-2 py-0.5 rounded-full">${escapeHtml(badge[0])}</span>${status}
+                    <span class="text-xs font-bold uppercase tracking-wide ${badge[1]} px-2 py-0.5 rounded-full">${escapeHtml(badge[0])}</span>${status}
                 </span>
                 <span class="font-bold text-slate-900 group-hover:text-indigo-700 leading-snug">${escapeHtml(t.title)}</span>
                 <span class="text-xs text-slate-500">${escapeHtml([filterOn() === 'mine' ? t.level : '', t.source === 'built-in' ? t.subject : t.kind !== 'Your text' ? t.kind + ' · ' + t.subject : '', words + ' words', Math.max(1, Math.round(words / 120)) + ' min'].filter(Boolean).join(' · '))}</span>

@@ -51,20 +51,20 @@ const CSS = `
 .fc-hand:focus{outline:none}.fc-hand:focus-visible .fc-handline{stroke:#4f46e5}
 .fc-panel{display:grid;gap:12px}
 .fc-say{background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:16px;display:grid;gap:8px}
-.fc-label{font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#4f46e5}
-.fc-big{font-size:1.5rem;font-weight:900;line-height:1.2;color:#0f172a}
-.fc-formal{font-size:1.05rem;font-weight:700;color:#334155}
-.fc-en{font-size:14px;color:#64748b}
+.fc-label{font-size:var(--fs-xs);font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#4f46e5}
+.fc-big{font-size:var(--fs-2xl);font-weight:900;line-height:1.2;color:#0f172a}
+.fc-formal{font-size:var(--fs-base);font-weight:700;color:#334155}
+.fc-en{font-size:var(--fs-sm);color:#64748b}
 .fc-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
-.fc-btn{font-weight:700;font-size:15px;border:1px solid #e2e8f0;background:#fff;color:#0f172a;border-radius:12px;padding:8px 14px;min-height:44px;cursor:pointer}
+.fc-btn{font-weight:700;font-size:var(--fs-base);border:1px solid #e2e8f0;background:#fff;color:#0f172a;border-radius:12px;padding:8px 14px;min-height:44px;cursor:pointer}
 .fc-btn.pri{background:#4f46e5;border-color:#4f46e5;color:#fff}
 .fc-btn[aria-pressed="true"]{background:#eef2ff;border-color:#6366f1;color:#3730a3}
 .fc-btn:focus-visible{outline:3px solid #6366f1;outline-offset:2px}
 .fc-step{min-width:44px;padding:8px 10px}
-.fc-small{font-size:13px;color:#64748b}
+.fc-small{font-size:var(--fs-sm);color:#64748b}
 .fc-fb{font-weight:800}.fc-fb.ok{color:#047857}.fc-fb.no{color:#be123c}
 .fc-opts{display:grid;gap:8px}
-.fc-opt{text-align:left;font-size:16px;font-weight:600;border:1px solid #e2e8f0;background:#fff;border-radius:12px;padding:10px 14px;min-height:48px;cursor:pointer}
+.fc-opt{text-align:left;font-size:var(--fs-base);font-weight:600;border:1px solid #e2e8f0;background:#fff;border-radius:12px;padding:10px 14px;min-height:48px;cursor:pointer}
 .fc-opt.ok{background:#ecfdf5;border-color:#059669}.fc-opt.no{background:#fff1f2;border-color:#e11d48}
 .fc-hide{visibility:hidden}
 `;
@@ -125,16 +125,16 @@ function mount(root, opts = {}) {
         const r1 = 205, r2 = big ? 186 : 195;
         mk('line', { x1: C + r1 * Math.sin(a), y1: C - r1 * Math.cos(a), x2: C + r2 * Math.sin(a), y2: C - r2 * Math.cos(a), stroke: '#0f172a', 'stroke-width': big ? 5 : 2 }, svg);
         if (big) {   // minute numbers on the black ring
-            mk('text', { x: C + 223 * Math.sin(a), y: C - 223 * Math.cos(a) + 6, 'text-anchor': 'middle', style: 'font:800 16px system-ui,sans-serif;fill:#fff' }, svg).textContent = i === 0 ? '00' : i;
+            mk('text', { x: C + 223 * Math.sin(a), y: C - 223 * Math.cos(a) + 6, 'text-anchor': 'middle', style: 'font-weight:800;font-size:20px;fill:#fff' }, svg).textContent = i === 0 ? '00' : i;
         }
     }
     for (let h = 1; h <= 12; h++) {
         const a = h * 30 * Math.PI / 180;
-        mk('text', { x: C + 155 * Math.sin(a), y: C - 155 * Math.cos(a) + 19, 'text-anchor': 'middle', style: 'font:900 54px system-ui,sans-serif;fill:#0f172a' }, svg).textContent = h;
+        mk('text', { x: C + 155 * Math.sin(a), y: C - 155 * Math.cos(a) + 19, 'text-anchor': 'middle', style: 'font-weight:900;font-size:54px;fill:#0f172a' }, svg).textContent = h;
     }
     const digBox = mk('rect', { x: C - 74, y: 300, width: 148, height: 62, rx: 14, fill: '#eef2ff' }, svg);
-    const dig = mk('text', { x: C, y: 336, 'text-anchor': 'middle', class: 'fc-dig', style: 'font:900 34px system-ui,sans-serif;fill:#0f172a;font-variant-numeric:tabular-nums' }, svg);
-    const per = mk('text', { x: C, y: 355, 'text-anchor': 'middle', style: 'font:800 13px system-ui,sans-serif;fill:#4f46e5' }, svg);
+    const dig = mk('text', { x: C, y: 336, 'text-anchor': 'middle', class: 'fc-dig', style: 'font-weight:900;font-size:34px;fill:#0f172a;font-variant-numeric:tabular-nums' }, svg);
+    const per = mk('text', { x: C, y: 355, 'text-anchor': 'middle', style: 'font-weight:800;font-size:18px;fill:#4f46e5' }, svg);
     function hand(len, width, color, label) {
         const g = mk('g', { class: 'fc-hand', tabindex: 0, role: 'slider', 'aria-label': label }, svg);
         mk('line', { x1: C, y1: C, x2: C, y2: C - len, stroke: 'transparent', 'stroke-width': 44, 'stroke-linecap': 'round' }, g);   // easy to grab

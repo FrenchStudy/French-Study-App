@@ -157,13 +157,13 @@ window.Nationalites = (function () {
 .wm-world .eu,.wm-europe .noneu{display:none}
 .wm-quiz .wm-lbl:not(.done),.wm-small.wm-world .wm-lbl{display:none}
 .wm-quiz.wm-small.wm-world .wm-lbl.done{display:none}
-.wm-key{display:flex;flex-wrap:wrap;gap:12px;font-size:13px;color:#64748b;margin-top:6px}
+.wm-key{display:flex;flex-wrap:wrap;gap:12px;font-size:var(--fs-sm);color:#64748b;margin-top:6px}
 .wm-key i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:5px;vertical-align:-1px}
 .wm-lines{display:grid;gap:6px}
 .wm-say{font:inherit;text-align:left;cursor:pointer;background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:8px 10px;display:flex;gap:10px;align-items:center;color:#0f172a;min-height:44px}
 .wm-say:hover{border-color:#6366f1;background:#fff}
 .wm-say:focus-visible{outline:3px solid #6366f1;outline-offset:2px}
-.wm-say small{display:block;color:#64748b;font-size:12px}
+.wm-say small{display:block;color:#64748b;font-size:var(--fs-xs)}
 .wm-play{flex:none;width:26px;height:26px;border-radius:50%;background:#059669;display:grid;place-items:center}
 .wm-play::after{content:"";border-left:8px solid #fff;border-top:5px solid transparent;border-bottom:5px solid transparent;margin-left:2px}
 .nat-m{color:#0369a1;font-weight:700}.nat-f{color:#e11d48;font-weight:700}
