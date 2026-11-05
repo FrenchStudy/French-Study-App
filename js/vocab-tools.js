@@ -31,7 +31,7 @@ const CSS = `
 .vt-btn.pri{background:#4f46e5;border-color:#4f46e5;color:#fff}
 .vt-btn[aria-pressed="true"]{background:#eef2ff;border-color:#6366f1;color:#3730a3}
 .vt-btn:focus-visible,.vt-day:focus-visible,.vt-sw:focus-visible{outline:3px solid #6366f1;outline-offset:2px}
-.vt-input{font-size:var(--fs-3xl);font-weight:800;width:100%;max-width:16rem;padding:8px 12px;border:2px solid #c7d2fe;border-radius:12px;font-variant-numeric:tabular-nums}
+.vt-input{font-size:var(--fs-3xl);font-weight:800;width:100%;min-width:0;max-width:16rem;padding:8px 12px;border:2px solid #c7d2fe;border-radius:12px;font-variant-numeric:tabular-nums}
 .vt-text{font-size:var(--fs-base);width:100%;padding:10px 12px;border:1px solid #e2e8f0;border-radius:12px}
 .vt-chips{display:flex;flex-wrap:wrap;gap:8px}
 .vt-chip{border-radius:12px;padding:8px 12px;background:#f1f5f9;display:grid;gap:2px}
@@ -138,9 +138,9 @@ function mountNumbers(root, { say }) {
         main.innerHTML = `<div class="vt-grid">
           <div class="vt-card">
             <label class="vt-label" for="vt-n">Type a number</label>
-            <div class="vt-row"><button type="button" class="vt-btn" data-d="-1" aria-label="One less">−</button>
+            <div class="vt-row" style="flex-wrap:nowrap"><button type="button" class="vt-btn" data-d="-1" aria-label="One less" style="flex:none">−</button>
               <input id="vt-n" class="vt-input" type="number" inputmode="numeric" min="0" max="999999999" value="${n}">
-              <button type="button" class="vt-btn" data-d="1" aria-label="One more">+</button></div>
+              <button type="button" class="vt-btn" data-d="1" aria-label="One more" style="flex:none">+</button></div>
             <div class="vt-row">${[21, 71, 80, 81, 91, 99, 200, 201, 1000, 2026, 1000000].map(x => `<button type="button" class="vt-btn" data-n="${x}">${x.toLocaleString('fr-FR')}</button>`).join('')}
               <button type="button" class="vt-btn" data-rand>🎲</button></div>
           </div>
@@ -212,7 +212,7 @@ function mountNumbers(root, { say }) {
     }
     build();
 }
-T[4] = { name: 'Number builder', next: 'Build numbers', mount: mountNumbers };
+T[4] = { name: 'Number builder', next: 'Build numbers', mount: mountNumbers, wordsInside: true };   // the word tiles follow the builder on the same page
 
 // ===================== Calendar =====================
 const DAYS = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'];
@@ -236,49 +236,171 @@ function relative(d, today) {
 }
 const relEn = { "avant-hier": 'the day before yesterday', hier: 'yesterday', "aujourd'hui": 'today', demain: 'tomorrow', 'après-demain': 'the day after tomorrow' };
 
+// The calendar page, in four parts that teach before the practice. Each part sits just before the words of
+// its chapter on the page (data-place, see vocab.html): 1 La semaine, 2 Les mois, 3 La date (the calendar,
+// Find the date, Listen and tap), 4 Avant, après (hier, demain, la semaine dernière…).
+const PIC = (n) => `media/pictures/fe-${n}.webp`;
+// Each day is named after a planet (a Roman god); dimanche is « le jour du Seigneur »
+const DAY_HOOKS = [
+    ['crescent-moon', 'la Lune', 'the Moon'], ['crossed-swords', 'Mars', 'Mars, god of war'], ['wing', 'Mercure', 'Mercury, the winged messenger'],
+    ['high-voltage', 'Jupiter', 'Jupiter, god of thunder'], ['sparkling-heart', 'Vénus', 'Venus, goddess of love'], ['ringed-planet', 'Saturne', 'Saturn'],
+    ['church', 'le jour du Seigneur', 'the Lord\'s day'],
+];
+// a picture and a French moment for each month
+const MONTH_HOOKS = [
+    ['snowman', 'l\'hiver', 'winter'], ['love-letter', 'la Saint-Valentin (le 14)', 'Valentine\'s Day'], ['seedling', 'le printemps (le 20)', 'spring begins'],
+    ['fish', 'le poisson d\'avril (le 1er)', 'April Fool\'s Day'], ['bouquet', 'le muguet du 1er mai', 'lily of the valley on May Day'], ['musical-notes', 'la fête de la musique (le 21)', 'the music festival'],
+    ['fireworks', 'le 14 juillet', 'Bastille Day'], ['beach-with-umbrella', 'les vacances', 'the holidays'], ['backpack', 'la rentrée', 'back to school'],
+    ['grapes', 'les vendanges', 'the grape harvest'], ['fallen-leaf', 'l\'automne', 'autumn'], ['christmas-tree', 'Noël (le 25)', 'Christmas'],
+];
+const SEASON_OF = ['hiver', 'hiver', 'printemps', 'printemps', 'printemps', 'été', 'été', 'été', 'automne', 'automne', 'automne', 'hiver'];
+const SEASON_COL = { hiver: '#0ea5e9', printemps: '#16a34a', été: '#eab308', automne: '#ea580c' };
+const CAL_CSS = `
+.vc5{display:grid;gap:14px}
+.vc5-sec{background:#fff;border:1px solid #e2e8f0;border-radius:18px;padding:16px;display:grid;gap:12px}
+.vc5-sec h3{margin:0;font-size:var(--fs-xl);font-weight:900;color:#0f172a}.vc5-sec h3 small{display:block;font-size:var(--fs-sm);font-weight:600;color:#64748b;margin-top:2px}
+.vc5-days{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+@media(max-width:640px){.vc5-days{grid-template-columns:repeat(4,1fr)}}
+.vc5-day,.vc5-mon{display:flex;flex-direction:column;align-items:center;gap:2px;border:2px solid #e2e8f0;background:#fff;border-radius:14px;padding:8px 4px;cursor:pointer;font:inherit;text-align:center}
+.vc5-day img,.vc5-mon img{width:44px;height:44px}
+.vc5-day b,.vc5-mon b{font-size:var(--fs-base);color:#0f172a}.vc5-day small,.vc5-mon small{font-size:var(--fs-xs);color:#64748b;line-height:1.2}
+.vc5-day.we{background:#f8fafc}.vc5-day.on,.vc5-mon.on{border-color:#4f46e5;background:#eef2ff}
+.vc5-mons{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
+@media(max-width:640px){.vc5-mons{grid-template-columns:repeat(3,1fr)}}
+.vc5-mon{border-top:6px solid var(--c)}
+.vc5-out{border-radius:14px;background:#f8fafc;border:1px solid #e2e8f0;padding:10px 12px;font-size:var(--fs-lg);font-weight:700;color:#0f172a;min-height:48px}
+.vc5-out small{display:block;font-size:var(--fs-sm);font-weight:400;color:#64748b}
+.vc5-rules{margin:0;padding:0;list-style:none;display:grid;gap:6px}
+.vc5-rules li{border-left:5px solid #4f46e5;background:#f8fafc;border-radius:8px;padding:6px 10px;font-size:var(--fs-sm);color:#334155}
+.vc5-key{display:flex;flex-wrap:wrap;gap:10px;font-size:var(--fs-xs);font-weight:700;color:#334155}.vc5-key span::before{content:'';display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:4px;vertical-align:-1px;background:var(--c)}
+.vc5-line{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.vc5-line.three{grid-template-columns:repeat(3,1fr)}
+@media(max-width:640px){.vc5-line{grid-template-columns:repeat(2,1fr)}.vc5-line .now{grid-column:1 / -1;order:-1}.vc5-line.three{grid-template-columns:1fr}}
+.vc5-rel{border:2px solid #e2e8f0;background:#fff;border-radius:14px;padding:8px;cursor:pointer;font:inherit;text-align:center;display:flex;flex-direction:column;gap:2px}
+.vc5-rel b{font-size:var(--fs-base);color:#0f172a}.vc5-rel span{font-size:var(--fs-sm);color:#475569}.vc5-rel small{font-size:var(--fs-xs);color:#64748b}
+.vc5-rel.now{border-color:#4f46e5;background:#eef2ff}.vc5-rel.past{background:#fafaf9}
+.vc5-arrow{display:flex;justify-content:space-between;font-size:var(--fs-xs);font-weight:800;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em}
+`;
 function mountCalendar(root, { say }) {
     css();
-    const today = new Date();
+    if (!document.getElementById('vc5-css')) { const s = document.createElement('style'); s.id = 'vc5-css'; s.textContent = CAL_CSS; document.head.appendChild(s); }
+    const today = new Date(); today.setHours(12, 0, 0, 0);
     let view = new Date(today.getFullYear(), today.getMonth(), 1), sel = new Date(today), mode = 'explore', quiz = null;
-    root.innerHTML = `<div class="vt">
-      <div class="vt-row" role="group" aria-label="Mode">
-        <button type="button" class="vt-btn" data-mode="explore" aria-pressed="true">Explore</button>
-        <button type="button" class="vt-btn" data-mode="find" aria-pressed="false">Find the date</button>
-        <button type="button" class="vt-btn" data-mode="listen" aria-pressed="false">Listen and tap</button>
-      </div>
-      <div class="vt-grid">
-        <div class="vt-card">
-          <div class="vt-row" style="justify-content:space-between;flex-wrap:nowrap;gap:6px">
-            <button type="button" class="vt-btn" data-m="-1" aria-label="Previous month" style="padding:8px 12px;flex:none">◀</button>
-            <div class="vt-row" style="gap:6px;flex-wrap:nowrap;min-width:0">
-              <select class="vt-sel" id="vt-msel" aria-label="Month">${MONTHS.map((m, i) => `<option value="${i}">${m}</option>`).join('')}</select>
-              <select class="vt-sel" id="vt-ysel" aria-label="Year">${Array.from({ length: 81 }, (_, k) => today.getFullYear() - 60 + k).map(y => `<option value="${y}">${y}</option>`).join('')}</select>
-            </div>
-            <button type="button" class="vt-btn" data-m="1" aria-label="Next month" style="padding:8px 12px;flex:none">▶</button>
-          </div>
-          <div class="vt-cal" id="vt-cal"></div>
-          <div class="vt-row" style="justify-content:center"><button type="button" class="vt-btn" id="vt-today">Aujourd'hui</button></div>
-          <p class="vt-small">French weeks start on <b>lundi</b>. Days and months take no capital letter.</p>
+    const dnum = (d) => d === 1 ? '1er' : String(d);
+    const addDays = (n) => { const d = new Date(today); d.setDate(d.getDate() + n); return d; };
+    const short = (d) => `${DAYS[dow(d)]} ${dnum(d.getDate())} ${MONTHS[d.getMonth()]}`;
+    const monday = (n) => { const d = addDays(-dow(today) + 7 * n); return d; };
+    const range = (n) => { const a = monday(n), b = new Date(a); b.setDate(a.getDate() + 6); return `du ${dnum(a.getDate())}${a.getMonth() !== b.getMonth() ? ' ' + MONTHS[a.getMonth()] : ''} au ${dnum(b.getDate())} ${MONTHS[b.getMonth()]}`; };
+    root.innerHTML = `<div class="vc5">
+      <section class="vc5-sec" data-place="chapter-1" id="vc5-week">
+        <h3>1 · La semaine <small>The days are named after the planets. Tap a day.</small></h3>
+        <div class="vc5-days">${DAYS.map((d, i) => `<button type="button" class="vc5-day${i >= 5 ? ' we' : ''}" data-day="${i}"><img src="${PIC(DAY_HOOKS[i][0])}" alt=""><b>${d}</b><small>${esc(DAY_HOOKS[i][1])}</small></button>`).join('')}</div>
+        <div class="vc5-out" id="vc5-dout">Lundi comme <b>la Lune</b>, mardi comme <b>Mars</b>… <small>Tap a day to hear it with its picture.</small></div>
+        <ul class="vc5-rules">
+          <li>The French week starts on <b>lundi</b>. Days take <b>no capital letter</b>: lundi, mardi…</li>
+          <li><b>lundi</b> = this Monday (Lundi, je vais au cinéma) · <b>le lundi</b> = every Monday (Le lundi, je fais du sport).</li>
+          <li>All the days are masculine: <b>un</b> lundi, <b>le</b> week-end.</li>
+        </ul>
+      </section>
+      <section class="vc5-sec" data-place="chapter-2" id="vc5-year">
+        <h3>2 · Les mois <small>Twelve months, coloured by season, each with a French moment. Tap a month.</small></h3>
+        <div class="vc5-key">${Object.entries(SEASON_COL).map(([s, c]) => `<span style="--c:${c}">${s === 'été' ? "l'été" : s === 'hiver' ? "l'hiver" : s === 'automne' ? "l'automne" : 'le printemps'}</span>`).join('')}</div>
+        <div class="vc5-mons">${MONTHS.map((m, i) => `<button type="button" class="vc5-mon" data-mon="${i}" style="--c:${SEASON_COL[SEASON_OF[i]]}"><img src="${PIC(MONTH_HOOKS[i][0])}" alt=""><b>${m}</b><small>${esc(MONTH_HOOKS[i][1])}</small></button>`).join('')}</div>
+        <div class="vc5-out" id="vc5-mout">Tap a month. <small>You will hear it in a sentence.</small></div>
+        <ul class="vc5-rules">
+          <li><b>en</b> janvier or <b>au mois de</b> janvier = in January. No capital letter.</li>
+          <li>Seasons: <b>au</b> printemps, but <b>en</b> été, <b>en</b> automne, <b>en</b> hiver.</li>
+        </ul>
+      </section>
+      <section class="vc5-sec" data-place="chapter-3" id="vc5-date">
+        <h3>3 · La date <small>Le + day + number + month (+ year). Only the 1st is different: le premier.</small></h3>
+        <div class="vt-row" role="group" aria-label="Mode">
+          <button type="button" class="vt-btn" data-mode="explore" aria-pressed="true">Explore</button>
+          <button type="button" class="vt-btn" data-mode="find" aria-pressed="false">Find the date</button>
+          <button type="button" class="vt-btn" data-mode="listen" aria-pressed="false">Listen and tap</button>
         </div>
-        <div class="vt-card" id="vt-side" aria-live="polite"></div>
-      </div></div>`;
-    const side = root.querySelector('#vt-side');
-    root.querySelectorAll('[data-m]').forEach(b => b.addEventListener('click', () => { view = new Date(view.getFullYear(), view.getMonth() + Number(b.dataset.m), 1); draw(); sayMonth(); }));
-    // jump to any month and year; the month and year are said, like on the arrows
-    const msel = root.querySelector('#vt-msel'), ysel = root.querySelector('#vt-ysel');
+        <div class="vt-grid">
+          <div class="vt-card">
+            <div class="vt-row" style="justify-content:space-between;flex-wrap:nowrap;gap:6px">
+              <button type="button" class="vt-btn" data-m="-1" aria-label="Previous month" style="padding:8px 12px;flex:none">◀</button>
+              <div class="vt-row" style="gap:6px;flex-wrap:nowrap;min-width:0">
+                <select class="vt-sel" id="vt-msel" aria-label="Month">${MONTHS.map((m, i) => `<option value="${i}">${m}</option>`).join('')}</select>
+                <select class="vt-sel" id="vt-ysel" aria-label="Year">${Array.from({ length: 81 }, (_, k) => today.getFullYear() - 60 + k).map(y => `<option value="${y}">${y}</option>`).join('')}</select>
+              </div>
+              <button type="button" class="vt-btn" data-m="1" aria-label="Next month" style="padding:8px 12px;flex:none">▶</button>
+            </div>
+            <div class="vt-cal" id="vt-cal"></div>
+            <div class="vt-row" style="justify-content:center"><button type="button" class="vt-btn" id="vt-today">Aujourd'hui</button></div>
+          </div>
+          <div class="vt-card" id="vt-side" aria-live="polite"></div>
+        </div>
+      </section>
+      <section class="vc5-sec" data-place="chapter-3" id="vc5-rel">
+        <h3>4 · Avant, après <small>From today: yesterday was, tomorrow will be. Tap a card.</small></h3>
+        <div class="vc5-arrow"><span>← avant (passé)</span><span>après (futur) →</span></div>
+        <div class="vc5-line" id="vc5-days5"></div>
+        <div class="vc5-line three" id="vc5-weeks"></div>
+        <div class="vc5-line three" id="vc5-years"></div>
+        <div class="vc5-out" id="vc5-rout">Tap a card. <small>Listen to the verb: c'était (past), c'est (now), ce sera (future).</small></div>
+        <ul class="vc5-rules">
+          <li><b>il y a</b> deux jours = two days ago (avant-hier) · <b>dans</b> deux jours = in two days (après-demain).</li>
+          <li>la semaine <b>dernière</b> · cette semaine · la semaine <b>prochaine</b>; the same with le mois, l'année.</li>
+        </ul>
+      </section>
+    </div>`;
+    const secs = [...root.querySelectorAll('.vc5-sec')];
+    // the parts may be moved on the page (between the chapters), so look inside them, not in root
+    const Q = (s) => { for (const x of secs) { const e = x.querySelector(s); if (e) return e; } return null; };
+    const QA = (s) => secs.flatMap(x => [...x.querySelectorAll(s)]);
+    // 1 · days
+    QA('.vc5-day').forEach(b => b.addEventListener('click', () => {
+        const i = Number(b.dataset.day), [, god, en] = DAY_HOOKS[i];
+        QA('.vc5-day').forEach(x => x.classList.toggle('on', x === b));
+        Q('#vc5-dout').innerHTML = `<b>${DAYS[i]}</b> → ${esc(god)}<small>${esc(en)}${i === dow(today) ? ' · Aujourd\'hui, c\'est ' + DAYS[i] + ' !' : ''}</small>`;
+        say(`${DAYS[i]}. ${i === 6 ? 'Le dimanche, c\'est le jour du Seigneur.' : DAYS[i].charAt(0).toUpperCase() + DAYS[i].slice(1) + ', comme ' + god + '.'}`);
+    }));
+    // 2 · months
+    QA('.vc5-mon').forEach(b => b.addEventListener('click', () => {
+        const i = Number(b.dataset.mon), [, moment, en] = MONTH_HOOKS[i], s = SEASON_OF[i];
+        QA('.vc5-mon').forEach(x => x.classList.toggle('on', x === b));
+        const sent = `En ${MONTHS[i]}, c'est ${moment.replace(/ \(.*\)$/, '')}.`;
+        Q('#vc5-mout').innerHTML = `${esc(sent)}<small>${esc(en)} · ${s === 'printemps' ? 'au printemps' : 'en ' + s}</small>`;
+        say(`${MONTHS[i]}. ${sent}`);
+    }));
+    // 4 · before and after
+    const DAYS5 = [[-2, 'avant-hier', 'the day before yesterday', "c'était"], [-1, 'hier', 'yesterday', "c'était"], [0, "aujourd'hui", 'today', "c'est"], [1, 'demain', 'tomorrow', 'ce sera'], [2, 'après-demain', 'the day after tomorrow', 'ce sera']];
+    Q('#vc5-days5').innerHTML = DAYS5.map(([n, fr, en]) => `<button type="button" class="vc5-rel${n === 0 ? ' now' : n < 0 ? ' past' : ''}" data-rel="d${n}"><b>${fr}</b><span>${esc(short(addDays(n)))}</span><small>${en}</small></button>`).join('');
+    const WEEKS = [[-1, 'la semaine dernière', 'last week', "c'était"], [0, 'cette semaine', 'this week', "c'est"], [1, 'la semaine prochaine', 'next week', 'ce sera']];
+    Q('#vc5-weeks').innerHTML = WEEKS.map(([n, fr, en]) => `<button type="button" class="vc5-rel${n === 0 ? ' now' : n < 0 ? ' past' : ''}" data-rel="w${n}"><b>${fr}</b><span>${esc(range(n))}</span><small>${en}</small></button>`).join('');
+    const YEARS = [[-1, "l'année dernière", 'last year', "c'était"], [0, 'cette année', 'this year', "c'est"], [1, "l'année prochaine", 'next year', 'ce sera']];
+    Q('#vc5-years').innerHTML = YEARS.map(([n, fr, en]) => `<button type="button" class="vc5-rel${n === 0 ? ' now' : n < 0 ? ' past' : ''}" data-rel="y${n}"><b>${fr}</b><span>${today.getFullYear() + n}</span><small>${en}</small></button>`).join('');
+    QA('.vc5-rel').forEach(b => b.addEventListener('click', () => {
+        const k = b.dataset.rel, t = k[0], n = Number(k.slice(1));
+        QA('.vc5-rel').forEach(x => x.style.outline = x === b ? '3px solid #a5b4fc' : '');
+        let fr, verb, what;
+        if (t === 'd') { [, fr, , verb] = DAYS5.find(x => x[0] === n); what = dateFr(addDays(n)).replace(/^le /, ''); }
+        if (t === 'w') { [, fr, , verb] = WEEKS.find(x => x[0] === n); what = range(n); }
+        if (t === 'y') { [, fr, , verb] = YEARS.find(x => x[0] === n); what = numberFr(today.getFullYear() + n); }
+        const sent = `${fr.charAt(0).toUpperCase() + fr.slice(1)}, ${verb} ${what}.`;
+        Q('#vc5-rout').innerHTML = `${esc(sent)}<small>${n < 0 ? 'past: c\'était' : n > 0 ? 'future: ce sera' : 'now: c\'est'}</small>`;
+        say(sent);
+    }));
+    // 3 · the calendar (Explore, Find the date, Listen and tap)
+    const side = Q('#vt-side');
+    QA('[data-m]').forEach(b => b.addEventListener('click', () => { view = new Date(view.getFullYear(), view.getMonth() + Number(b.dataset.m), 1); draw(); sayMonth(); }));
+    const msel = Q('#vt-msel'), ysel = Q('#vt-ysel');
     const sayMonth = () => say(`${MONTHS[view.getMonth()]} ${numberFr(view.getFullYear())}`);
     const jump = () => { view = new Date(Number(ysel.value), Number(msel.value), 1); draw(); sayMonth(); if (mode !== 'explore' && quiz) ask(); };
     msel.addEventListener('change', jump); ysel.addEventListener('change', jump);
-    root.querySelector('#vt-today').addEventListener('click', () => { view = new Date(today.getFullYear(), today.getMonth(), 1); if (mode === 'explore') { sel = new Date(today); explain(); } draw(); say(`Aujourd'hui, c'est ${dateFr(today)}.`); });
-    root.querySelectorAll('[data-mode]').forEach(b => b.addEventListener('click', () => {
-        mode = b.dataset.mode; root.querySelectorAll('[data-mode]').forEach(x => x.setAttribute('aria-pressed', x === b));
+    Q('#vt-today').addEventListener('click', () => { view = new Date(today.getFullYear(), today.getMonth(), 1); if (mode === 'explore') { sel = new Date(today); explain(); } draw(); say(`Aujourd'hui, c'est ${dateFr(today)}`); });
+    QA('[data-mode]').forEach(b => b.addEventListener('click', () => {
+        mode = b.dataset.mode; QA('[data-mode]').forEach(x => x.setAttribute('aria-pressed', x === b));
         if (mode === 'explore') { draw(); explain(); } else { quiz = { n: 0, score: 0 }; ask(); }
     }));
     function draw() {
-        root.querySelector('#vt-msel').value = view.getMonth();
-        const ys = root.querySelector('#vt-ysel');
-        if (![...ys.options].some(o => Number(o.value) === view.getFullYear())) ys.insertAdjacentHTML('beforeend', `<option value="${view.getFullYear()}">${view.getFullYear()}</option>`);
-        ys.value = view.getFullYear();
+        msel.value = view.getMonth();
+        if (![...ysel.options].some(o => Number(o.value) === view.getFullYear())) ysel.insertAdjacentHTML('beforeend', `<option value="${view.getFullYear()}">${view.getFullYear()}</option>`);
+        ysel.value = view.getFullYear();
         const first = dow(view), days = new Date(view.getFullYear(), view.getMonth() + 1, 0).getDate();
         let h = DAYS.map(d => `<div class="vt-dow">${d.slice(0, 3)}</div>`).join('');
         for (let i = 0; i < first; i++) h += '<div class="vt-day blank" aria-hidden="true"></div>';
@@ -287,8 +409,8 @@ function mountCalendar(root, { say }) {
             const cls = [dow(date) >= 5 ? 'we' : '', date.toDateString() === today.toDateString() ? 'today' : '', mode === 'explore' && date.toDateString() === sel.toDateString() ? 'on' : ''].join(' ');
             h += `<button type="button" class="vt-day ${cls}" data-d="${d}" aria-label="${esc(dateDigits(date))}">${d}</button>`;
         }
-        const cal = root.querySelector('#vt-cal'); cal.innerHTML = h;
-        cal.querySelectorAll('[data-d]').forEach(b => b.addEventListener('click', () => tap(new Date(view.getFullYear(), view.getMonth(), Number(b.dataset.d)), b)));
+        const cal = Q('#vt-cal'); cal.innerHTML = h;
+        cal.querySelectorAll('[data-d]').forEach(b => b.addEventListener('click', () => tap(new Date(view.getFullYear(), view.getMonth(), Number(b.dataset.d), 12), b)));
     }
     function explain() {
         const rel = relative(sel, today), isToday = sel.toDateString() === today.toDateString();
@@ -297,7 +419,7 @@ function mountCalendar(root, { say }) {
             <div class="vt-big">${esc(dateDigits(sel))}</div>
             <div class="vt-mid">${esc(said)}</div>
             <div class="vt-row"><button type="button" class="vt-btn" id="vt-say">🔊 Listen</button></div>
-            <div class="vt-note">Say <b>le</b> + day + number + month: <i>le ${esc(DAYS[dow(sel)])} ${sel.getDate() === 1 ? 'premier' : sel.getDate()} ${esc(MONTHS[sel.getMonth()])}</i>. Only the 1st is different: <b>le premier</b> (1er). In a month: <b>en ${esc(MONTHS[sel.getMonth()])}</b>. In a year: <b>en ${numberFr(sel.getFullYear())}</b>.</div>
+            <div class="vt-note">Say <b>le</b> + day + number + month: <i>le ${esc(DAYS[dow(sel)])} ${sel.getDate() === 1 ? 'premier' : sel.getDate()} ${esc(MONTHS[sel.getMonth()])}</i>. Only the 1st is different: <b>le premier</b> mai.</div>
             <div class="vt-small">Quelle est la date ? → On est ${esc(dateFr(sel))}.</div>`;
         side.querySelector('#vt-say').addEventListener('click', () => say(said));
     }
@@ -318,7 +440,7 @@ function mountCalendar(root, { say }) {
     function ask() {
         quiz.n++; quiz.tries = 0;
         const d = rand(1, new Date(view.getFullYear(), view.getMonth() + 1, 0).getDate());
-        quiz.target = new Date(view.getFullYear(), view.getMonth(), d);
+        quiz.target = new Date(view.getFullYear(), view.getMonth(), d, 12);
         draw();
         const listen = mode === 'listen';
         side.innerHTML = `<div class="vt-label">${listen ? 'Listen and tap the date' : 'Tap this date'} · ${quiz.n}</div>
@@ -328,7 +450,8 @@ function mountCalendar(root, { say }) {
     }
     draw(); explain();
 }
-T[5] = { name: 'Calendar', next: 'Try the calendar', mount: mountCalendar };
+// wordsInside: the topic's words (chapters) are shown on this page, under each part, instead of a separate step
+T[5] = { name: 'Calendar', next: 'Try the calendar', mount: mountCalendar, wordsInside: true };
 
 // ===================== Colours =====================
 // m, f = masculine and feminine singular; inv = never changes
