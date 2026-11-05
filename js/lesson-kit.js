@@ -264,13 +264,64 @@ const LessonKit = (function () {
         if (forms.some(f => ART.test(f) && noAccents(f.replace(ART, '')) === noAccents(said))) return 'article';
         return 'wrong';
     }
-    function drillBlock(drill) {
+    // ---------- Practice ----------
+    // An item is [question, answer] or [question, answer, rule]. A wrong answer gets a hint and a second try; after that
+    // the answer is shown next to yours (the difference marked) with its rule, and you type it once. The questions you
+    // missed come first next time, marked « missed last time ».
+    const MISSED_KEY = 'lessons_missed';
+    const missedOf = (key) => (store.get(MISSED_KEY, {})[key] || []);
+    function setMissed(key, qText, missed) {
+        const all = store.get(MISSED_KEY, {}), list = new Set(all[key] || []);
+        if (missed) list.add(qText); else list.delete(qText);
+        if (list.size) all[key] = [...list]; else delete all[key];
+        store.set(MISSED_KEY, all);
+    }
+    const wordsOf = (t) => normAns(t).split(' ').filter(Boolean);
+    const loose = (w) => noAccents(w).replace(/'$/, '');
+    // The answer that is closest to what was typed (an answer can have several forms: « a / b »), word by word
+    // Words already in the question (« Je vais ___ marché ») count as there: only the gap is hinted or marked
+    function compareAnswer(said, ansHtml, qHtml) {
+        const given = new Set(wordsOf(qHtml ? toText(qHtml) : '').map(loose));
+        const forms = toText(ansHtml).split(/\s+\/\s+|\s+or\s+|\s+ou\s+/).map(v => v.replace(/\([^)]*\)/g, ' ').replace(/\s+/g, ' ').trim()).filter(Boolean);
+        const mine = wordsOf(said).map(loose);
+        let best = null;
+        forms.forEach(f => {
+            const parts = f.split(' '), got = parts.map(p => { const w = wordsOf(p)[0]; return !!w && (mine.includes(loose(w)) || given.has(loose(w))); });
+            const score = got.filter(Boolean).length;
+            if (!best || score > best.score) best = { parts, got, score };
+        });
+        if (!best) best = { parts: [toText(ansHtml)], got: [false], score: 0 };
+        const theirs = new Set(best.parts.flatMap(p => wordsOf(p)).map(loose));
+        best.extra = [...new Set(wordsOf(said).filter(w => !theirs.has(loose(w))))];
+        best.extra = best.extra.filter(w => !(given.has(loose(w)) && theirs.has(loose(w))));
+        return best;
+    }
+    // Hint: the words you have stay, the others show their first letter (a·· marché); words that should not be there are named
+    function hintHtml(said, ansHtml, qHtml) {
+        const c = compareAnswer(said, ansHtml, qHtml);
+        const mask = (p) => { const m = p.match(/^([«"(]*)(.)(.*?)([.,!?;:»")]*)$/u); return m ? m[1] + m[2] + m[3].replace(/[^\s'’-]/gu, '·') + m[4] : p; };
+        const shape = c.parts.map((p, i) => c.got[i] ? escapeHtml(p) : `<b class="text-indigo-700">${escapeHtml(mask(p))}</b>`).join(' ');
+        const missing = c.got.filter(x => !x).length;
+        return `<div class="mt-1 text-slate-800">Hint: <span class="font-mono tracking-wide">${shape}</span></div>`
+            + (missing ? `<div class="text-sm text-slate-600">${missing === 1 ? '1 word is' : missing + ' words are'} missing or wrong.</div>` : '')
+            + (c.extra.length ? `<div class="text-sm text-slate-600">Not needed: ${c.extra.map(w => `<b>${escapeHtml(w)}</b>`).join(', ')}</div>` : '');
+    }
+    // After the second try: the answer with the words you did not have marked
+    function diffHtml(said, ansHtml, qHtml) {
+        const c = compareAnswer(said, ansHtml, qHtml);
+        return c.parts.map((p, i) => c.got[i] ? escapeHtml(p) : `<mark class="bg-amber-200 text-slate-900 rounded px-1">${escapeHtml(p)}</mark>`).join(' ');
+    }
+    function drillBlock(drill, key) {
+        const missed = new Set(missedOf(key));
+        const order = drill.map((d, i) => ({ d, i, m: missed.has(toText(d[0])) })).sort((x, y) => (y.m - x.m) || (x.i - y.i));
         return `<div class="flex flex-wrap gap-1" aria-label="French letters">${ACCENTS.map(a => `<button type="button" data-accent="${a}" class="min-w-[36px] min-h-[36px] px-2 text-base bg-slate-100 hover:bg-indigo-100 rounded-lg text-slate-700">${a}</button>`).join('')}</div>
-            <ol class="space-y-2">${drill.map(([qn, ans], i) => `
+            ${missed.size ? `<p class="text-sm text-amber-800">↻ The questions you missed last time come first.</p>` : ''}
+            <ol class="space-y-2" data-drill-key="${escapeHtml(key)}">${order.map(({ d: [qn, ans, rule], m }, i) => `
             <li data-drill class="border border-slate-200 rounded-xl p-3 space-y-2">
-                <div class="text-base text-slate-900"><span class="text-slate-400 font-bold mr-1">${i + 1}.</span>${qn}</div>
+                <div class="text-base text-slate-900"><span class="text-slate-400 font-bold mr-1">${i + 1}.</span>${qn}${m ? ' <span class="ml-1 text-xs font-bold text-amber-800 bg-amber-100 px-1.5 py-0.5 rounded-full">missed last time</span>' : ''}</div>
                 <template data-answer>${ans}</template>
                 <template data-question>${qn}</template>
+                ${rule ? `<template data-rule>${rule}</template>` : ''}
                 <form data-drill-form class="flex flex-wrap gap-2">
                     <input type="text" lang="fr" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Your answer to question ${i + 1}" placeholder="Type your answer"
                         class="lk-drill-input flex-1 min-w-[12rem] text-base px-3 py-2 bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
@@ -280,26 +331,58 @@ const LessonKit = (function () {
                 <div data-drill-result class="hidden text-base" role="status"></div>
             </li>`).join('')}</ol>`;
     }
+    const ruleOf = (li) => { const r = li.querySelector('template[data-rule]'); return r ? r.innerHTML : ''; };
+    // First wrong answer: the box stays open, with a hint (and the rule when the question has one)
+    function drillHint(li) {
+        const said = li.querySelector('input').value.trim();
+        const box = li.querySelector('[data-drill-result]');
+        li.dataset.tries = '1';
+        li.className = 'border border-amber-300 bg-amber-50/50 rounded-xl p-3 space-y-2';
+        box.innerHTML = `<div class="font-bold text-amber-900">✗ Not yet. Try again.</div>${hintHtml(said, li.querySelector('template[data-answer]').innerHTML, li.querySelector('template[data-question]').innerHTML)}`
+            + (ruleOf(li) ? `<div class="mt-1 text-sm text-slate-700 bg-white border border-amber-200 rounded-lg px-2 py-1">${ruleOf(li)}</div>` : '');
+        box.classList.remove('hidden');
+        const input = li.querySelector('input'); input.focus(); input.select();
+    }
     function drillResult(li, verdict) {
         const ans = li.querySelector('template[data-answer]').innerHTML;
         const said = li.querySelector('input').value.trim();
         const box = li.querySelector('[data-drill-result]');
-        const ok = verdict === 'right' || verdict === 'accents' || verdict === 'self' || verdict === 'article';
+        const ok = verdict === 'right' || verdict === 'accents' || verdict === 'self' || verdict === 'article' || verdict === 'hint';
         li.dataset.result = ok ? 'right' : 'wrong';
         li.querySelector('input').readOnly = true;
         li.querySelectorAll('form button').forEach(b => b.classList.add('hidden'));
         li.className = `border rounded-xl p-3 space-y-2 ${ok ? 'border-emerald-300 bg-emerald-50/50' : 'border-rose-300 bg-rose-50/50'}`;
-        const head = { right: '✓ Right!', accents: '✓ Right, but watch the accents.', article: '✓ Right! Learn it with its article:', self: '✓ Counted as right.', wrong: '✗ Not quite.', shown: 'The answer:' }[verdict];
+        const key = li.closest('[data-drill-key]')?.dataset.drillKey;
+        if (key) setMissed(key, toText(li.querySelector('template[data-question]').innerHTML), !(verdict === 'right' || verdict === 'accents' || verdict === 'article' || verdict === 'self'));
+        const head = { right: '✓ Right!', accents: '✓ Right, but watch the accents.', article: '✓ Right! Learn it with its article:', self: '✓ Counted as right.', hint: '✓ Right, with the hint. It comes back next time.', wrong: '✗ Not quite. Here is the answer:', shown: 'The answer:' }[verdict];
+        const show = verdict === 'wrong' && said ? diffHtml(said, ans, li.querySelector('template[data-question]').innerHTML) : ans;
+        const rule = ruleOf(li);
         box.innerHTML = `<div class="font-bold ${ok ? 'text-emerald-800' : 'text-rose-800'}">${head}</div>
-            ${verdict === 'right' ? '' : `<div class="mt-1 font-semibold text-slate-900">${ans} <button type="button" data-say="${escapeHtml(toText(ans))}" class="ml-1 text-indigo-600 text-sm" aria-label="Listen">🔊</button></div>`}
+            ${verdict === 'right' || verdict === 'hint' ? '' : `<div class="mt-1 font-semibold text-slate-900">${show} <button type="button" data-say="${escapeHtml(toText(ans))}" class="ml-1 text-indigo-600 text-sm" aria-label="Listen">🔊</button></div>`}
+            ${verdict === 'wrong' && said ? `<div class="text-sm text-slate-600">You wrote: ${escapeHtml(said)}</div>` : ''}
+            ${!ok && rule ? `<div class="mt-1 text-sm text-slate-700 bg-white border border-slate-200 rounded-lg px-2 py-1">${rule}</div>` : ''}
+            ${!ok ? `<form data-drill-copy class="mt-2 flex flex-wrap gap-2 items-center"><label class="text-sm font-semibold text-slate-700">Now type it once:</label>
+                <input type="text" lang="fr" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Type the answer once" class="lk-drill-input flex-1 min-w-[10rem] text-base px-3 py-2 bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <button type="submit" class="min-h-[40px] px-3 text-sm font-bold text-white bg-slate-800 hover:bg-slate-700 rounded-lg">OK</button><span data-copy-fb class="text-sm font-bold"></span></form>` : ''}
             ${verdict === 'wrong' && said ? `<button type="button" data-drill-mine class="mt-2 min-h-[40px] px-3 text-sm font-semibold text-slate-700 bg-white border border-slate-200 hover:border-emerald-400 rounded-lg">My answer means the same: I was right</button>` : ''}`;
         box.classList.remove('hidden');
+        const copy = box.querySelector('[data-drill-copy] input'); if (copy) copy.focus({ preventScroll: true });
     }
 
     // Grammar topics 2, 3, 10 and 28 have a hand-built practice page shown inside them
     // Lessons 2, 3, 10 and 28 used to show an old reference page here; it repeated the lesson
     // (and lesson 27 for countries) without any exercises, so it is no longer shown.
     function embeddedPractice() { return ''; }
+    // explore: [script, global]; mounted with { say } when the lesson opens
+    const EXPLORE = { articles: ['js/articles-lesson.js', 'ArticlesLesson'] };
+    async function mountExplore(container) {
+        for (const box of container.querySelectorAll('[data-explore]')) {
+            const [src, name] = EXPLORE[box.dataset.explore] || [];
+            if (!src) continue;
+            try { if (!window[name]) await loadScript(src); window[name].mount(box, { say: (t) => window.speakText(t) }); }
+            catch (err) { box.innerHTML = '<p class="text-sm text-rose-700">This part could not be loaded. Check your connection and try again.</p>'; }
+        }
+    }
 
     function lessonParts(t, ruleTitle) {
         const parts = [];
@@ -317,12 +400,14 @@ const LessonKit = (function () {
     function topicBody(section, id, t) {
         const parts = lessonParts(t, 'The rule');
         parts.push(embeddedPractice(section, id));
-        if (t.drill && t.drill.length) parts.push(card('Practice', drillBlock(t.drill)));
+        // A lesson with something to play with before typing (t.explore: the script that draws it)
+        if (t.explore && EXPLORE[t.explore]) parts.push(card('Explore and practise', `<div data-explore="${t.explore}"></div>`));
+        if (t.drill && t.drill.length) parts.push(card(t.explore ? 'Now type them' : 'Practice', drillBlock(t.drill, `${section}:${id}`)));
         // The verb forms that go with this lesson
         (t.forms || []).forEach(f => {
             parts.push(`<h2 class="pt-4 text-xl font-black text-slate-900 flex items-center gap-2"><span class="text-xs font-bold uppercase tracking-wide text-violet-700 bg-violet-50 px-2 py-1 rounded-full">Verb forms</span>${escapeHtml(f.title)}</h2>`);
             parts.push(...lessonParts(f, 'How to form it'));
-            if (f.drill && f.drill.length) parts.push(card('Practice the forms', drillBlock(f.drill)));
+            if (f.drill && f.drill.length) parts.push(card('Practice the forms', drillBlock(f.drill, `${section}:${id}:${f.title}`)));
         });
         parts.push(seeAlsoHtml(id, t));
         return parts.join('');
@@ -579,7 +664,7 @@ const LessonKit = (function () {
             q('side').innerHTML = `
                 <div class="bg-white border border-slate-200 rounded-2xl p-3">
                     <div class="text-xs font-bold uppercase tracking-wide ${st.text} px-1 pb-2">${escapeHtml(name)}</div>
-                    <div class="max-h-[70vh] overflow-y-auto divide-y divide-slate-100">
+                    <div class="divide-y divide-slate-100">
                         ${list.map(x => `<a href="${url(x)}" data-open="${escapeHtml(String(x))}" class="flex items-center gap-2 px-1 py-2 text-sm rounded-lg ${x === id ? `${st.soft} font-bold text-slate-900` : 'text-slate-700 hover:bg-slate-50'}">
                             <span class="shrink-0 w-6 h-6 rounded-full text-xs font-bold flex items-center justify-center ${isDone(section, x) ? 'bg-emerald-500 text-white' : x === id ? `${st.solid} text-white` : 'bg-slate-100 text-slate-600'}">${isDone(section, x) ? '✓' : escapeHtml(String(nodeLabel(x, sec.get(x))))}</span>
                             <span class="truncate">${escapeHtml(sec.get(x).title)}</span></a>`).join('')}
@@ -609,6 +694,7 @@ const LessonKit = (function () {
             markWideTables(q('body'));
             renderFooter();
             await loadInteractive(q('body'));
+            await mountExplore(q('body'));
         }
 
         function renderFooter() {
@@ -686,10 +772,23 @@ const LessonKit = (function () {
             const input = form.querySelector('input');
             const verdict = judgeAnswer(input.value, li.querySelector('template[data-question]').innerHTML, li.querySelector('template[data-answer]').innerHTML);
             if (verdict === 'empty') { input.focus(); return; }
-            drillResult(li, verdict);
+            if (verdict === 'wrong' && !li.dataset.tries) { drillHint(li); drillScore(); return; }
+            drillResult(li, verdict === 'right' && li.dataset.tries ? 'hint' : verdict);
             drillScore();
             const next = [...q('body').querySelectorAll('[data-drill]')].find(x => !x.dataset.result);
             if (next && li.dataset.result === 'right') next.querySelector('input').focus({ preventScroll: false });
+        });
+        // « Now type it once »: copying the answer once, after a mistake (it does not change the score)
+        root.addEventListener('submit', (e) => {
+            const form = e.target.closest('[data-drill-copy]');
+            if (!form) return;
+            e.preventDefault();
+            const li = form.closest('[data-drill]'), input = form.querySelector('input'), fb = form.querySelector('[data-copy-fb]');
+            const v = judgeAnswer(input.value, li.querySelector('template[data-question]').innerHTML, li.querySelector('template[data-answer]').innerHTML);
+            if (v === 'empty') { input.focus(); return; }
+            if (v === 'right' || v === 'accents') { fb.className = 'text-sm font-bold text-emerald-700'; fb.textContent = '✓ That\'s it.'; input.readOnly = true; form.querySelector('button').classList.add('hidden');
+                const next = [...q('body').querySelectorAll('[data-drill]')].find(x => !x.dataset.result); if (next) next.querySelector('input').focus({ preventScroll: false }); }
+            else { fb.className = 'text-sm font-bold text-rose-700'; fb.textContent = 'Look at the answer again.'; input.select(); }
         });
         root.addEventListener('focusin', (e) => { if (e.target.classList && e.target.classList.contains('lk-drill-input')) lastInput = e.target; });
         root.addEventListener('mousedown', (e) => { if (e.target.closest('[data-accent]')) e.preventDefault(); });   // keep the cursor in the box
@@ -712,7 +811,7 @@ const LessonKit = (function () {
             if (retry) {
                 const missed = [...q('body').querySelectorAll('[data-drill][data-result="wrong"]')];
                 missed.forEach(li => {
-                    delete li.dataset.result;
+                    delete li.dataset.result; delete li.dataset.tries;
                     li.className = 'border border-slate-200 rounded-xl p-3 space-y-2';
                     const input = li.querySelector('input'); input.readOnly = false; input.value = '';
                     li.querySelectorAll('form button').forEach(b => b.classList.remove('hidden'));
