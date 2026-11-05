@@ -828,17 +828,37 @@
         })();
 
         // ---------- Learn: every chapter (story + words), or the words as tiles ----------
+        // A card of the tool (Calendar: a day, a month, hier, demain…) can name a word of the topic with data-word.
+        // That card is the word's card: it gets the badge and the « Know » tick, and the word is not shown again as a tile.
+        const toolWord = (el) => { const t = plain(el.dataset.word); return deck.words.find(w => plain(w.fr) === t || plain(w.key) === t); };
+        function toolWords() { return new Set([...document.querySelectorAll('#step-palace [data-word], #learn-body [data-word]')].map(toolWord).filter(Boolean)); }
+        function decorateToolWords() {
+            document.querySelectorAll('#learn-body [data-word]').forEach(el => {
+                const w = toolWord(el); if (!w) return;
+                let wrap = el.parentElement;
+                if (!wrap.classList.contains('tw-wrap')) { wrap = document.createElement('div'); wrap.className = 'tw-wrap'; el.replaceWith(wrap); wrap.appendChild(el); }
+                const st = statusOf(w), [label, cls] = STATUS_STYLE[st];
+                let foot = wrap.querySelector('.tw-foot');
+                if (!foot) { foot = document.createElement('div'); foot.className = 'tw-foot flex flex-wrap items-center justify-between gap-1 px-1'; wrap.appendChild(foot); }
+                foot.innerHTML = `<span class="text-xs font-bold px-1.5 py-0.5 rounded-full ${cls}" title="${escapeHtml(whenDue(w))}">${label}</span>
+                    <label class="flex items-center gap-1.5 text-sm text-slate-600 min-h-[44px] cursor-pointer" title="I know it"><input type="checkbox" data-known="${escapeHtml(w.key)}" class="w-5 h-5 accent-emerald-600" ${st === 'known' ? 'checked' : ''}> Know</label>`;
+            });
+        }
+
         function renderLearn() {
             rescueToolParts();
+            const onCard = wordsIn(topic) ? toolWords() : new Set();
+            const asTile = (ws) => ws.filter(w => !onCard.has(w));
             const chapters = deck.chapters;
             $('learn-words').classList.toggle('hidden', !deck.words.length);
             $('chapter-nav').classList.toggle('hidden', !chapters);
             if (!chapters) {
                 $('learn-words-title').textContent = `Words in this ${topic && topic.freq ? 'set' : 'topic'} (${deck.words.length})`;
                 const groups = topic && TILE_GROUPS[topic.n] && groupTiles(deck.words, TILE_GROUPS[topic.n]);
-                $('learn-body').innerHTML = groups || `<div class="${TILE_GRID}">${deck.words.map(w => tileHtml(w, false)).join('')}</div>`;
+                $('learn-body').innerHTML = groups || `<div class="${TILE_GRID}">${asTile(deck.words).map(w => tileHtml(w, false)).join('')}</div>`;
                 renderEasy();
                 placeToolParts();
+                decorateToolWords();
                 return;
             }
             const easyN = ((deck && deck.easy) || []).length;
@@ -870,10 +890,11 @@
                         </div>
                         <div data-story="${i}" class="space-y-3 text-lg leading-relaxed text-slate-800">${storyHtml(c.story, i, byKey)}</div>
                     </div>` : ''}
-                    <div class="${TILE_GRID}">${c.words.map(w => tileHtml(w, false)).join('')}</div>
+                    ${asTile(c.words).length ? `<div class="${TILE_GRID}">${asTile(c.words).map(w => tileHtml(w, false)).join('')}</div>` : ''}
                 </section>`).join('');
             renderEasy();
             placeToolParts();
+            decorateToolWords();
             Story.repaint();   // a story that is playing keeps its highlight after the page is redrawn
         }
 

@@ -7,6 +7,7 @@
 #   off-scale    text in a size outside the app's scale (12 14 16 18 20 24 30 and the big display sizes)
 #   empty        a step that shows nothing
 #   inner scroll a box with its own scroll bar inside the page (sideways or up-down), except the page's main scroller and boxes marked data-scroll-ok (the picture pages on a phone: swipe sideways)
+#   twice        a word shown twice on the same step (a tool card and a word tile, or two tiles)
 #   first screen on a computer, a video (with its controls) does not fit in the first screen
 # Needs Python Playwright with Chromium. --mock FILE: a JavaScript file added after config.js that fakes the database
 # (topics 31-56 come from the database; without it they are skipped). Writes DIR/report.md, DIR/report.json and a
@@ -56,6 +57,12 @@ CHECK = r"""() => {
     if (sx || sy) out.scroll.push((sx ? '↔ ' : '↕ ') + (el.id ? '#' + el.id : el.tagName.toLowerCase() + '.' + [...el.classList].slice(0, 2).join('.')));
   }
   out.scroll = [...new Set(out.scroll)];
+  const norm = (t) => String(t).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+  // a word tile (its French in bold) and a button of the tool on the same page with the same word, or two tiles alike
+  const tiles = [...document.querySelectorAll('#learn-body button[data-say]')].filter(e => e.offsetParent).map(e => norm((e.querySelector('.font-bold') || e).textContent));
+  const tool = [...document.querySelectorAll('#learn-body [data-place] button')].filter(e => e.offsetParent).map(e => norm((e.querySelector('b') || e).textContent));
+  const shown = tiles.concat([...new Set(tool)]);
+  out.twice = [...new Set(shown.filter((t, i) => shown.indexOf(t) !== i))];
   const main = document.querySelector('.vp-video,.wv-video');   // a video's controls must be on the first screen; a picture may start there and go on
   if (main && innerWidth >= 1024) { const r = main.getBoundingClientRect(), top = document.querySelector('#scroller'); const off = top ? top.getBoundingClientRect().top : 0; out.below = r.bottom - off - (top ? top.clientHeight : innerHeight) > 4 ? Math.round(r.bottom) : 0; } else out.below = 0;
   return out;
@@ -115,7 +122,7 @@ def main():
     lines = [f'# App check: {len(rows)} screens ({sum(r["view"] == "phone" for r in rows)} on a phone, {sum(r["view"] == "desktop" for r in rows)} on a desktop)', '',
              f'- JavaScript errors: {sum(bool(r["errors"]) for r in rows)} screens', f'- Wider than the screen: {sum(r["wide"] for r in rows)}',
              f'- Text under 12px: {sum(bool(r["tiny"]) for r in rows)}', f'- Text outside the size scale: {len(offs)}', f'- Empty screens: {sum(r["textLen"] < 20 for r in rows)}',
-             f'- Boxes with their own scroll bar: {sum(bool(r.get("scroll")) for r in rows)}', f'- Main picture or video not in the first screen (computer): {sum(bool(r.get("below")) for r in rows)}', '']
+             f'- Words shown twice on one step: {sum(bool(r.get("twice")) for r in rows)}', f'- Boxes with their own scroll bar: {sum(bool(r.get("scroll")) for r in rows)}', f'- Main picture or video not in the first screen (computer): {sum(bool(r.get("below")) for r in rows)}', '']
     for r in probs:
         lines.append(f'## {r["view"]} · {r["where"]}')
         if r['errors']: lines.append('- errors: ' + '; '.join(r['errors'])[:400])
@@ -123,6 +130,11 @@ def main():
         if r['tiny']: lines.append('- small text: ' + ' | '.join(r['tiny'][:6]))
         if r['textLen'] < 20: lines.append('- empty')
         if r.get('shot'): lines.append(f'- screenshot: {r["shot"]}')
+        lines.append('')
+    tw = [r for r in rows if r.get('twice')]
+    if tw:
+        lines.append('## Words shown twice')
+        for r in tw[:40]: lines.append(f'- {r["view"]} · {r["where"]}: ' + ', '.join(r['twice'][:8]))
         lines.append('')
     sc = [r for r in rows if r.get('scroll') or r.get('below')]
     if sc:
@@ -133,6 +145,6 @@ def main():
         lines.append('## Text outside the scale')
         for r in offs[:40]: lines.append(f'- {r["view"]} · {r["where"]}: ' + ' | '.join(r['off'][:4]))
     open(os.path.join(OUT, 'report.md'), 'w').write('\n'.join(lines) + '\n')
-    print('\n'.join(lines[:10])); print('report:', os.path.join(OUT, 'report.md'))
+    print('\n'.join(lines[:11])); print('report:', os.path.join(OUT, 'report.md'))
 
 main()

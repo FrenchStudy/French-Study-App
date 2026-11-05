@@ -275,10 +275,11 @@ const CAL_CSS = `
 .vc5-key{display:flex;flex-wrap:wrap;gap:10px;font-size:var(--fs-xs);font-weight:700;color:#334155}.vc5-key span::before{content:'';display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:4px;vertical-align:-1px;background:var(--c)}
 .vc5-line{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
 .vc5-line.three{grid-template-columns:repeat(3,1fr)}
-@media(max-width:640px){.vc5-line{grid-template-columns:repeat(2,1fr)}.vc5-line .now{grid-column:1 / -1;order:-1}.vc5-line.three{grid-template-columns:1fr}}
+@media(max-width:640px){.vc5-line{grid-template-columns:repeat(2,1fr)}.vc5-line .now,.vc5-line .tw-wrap:has(>.now){grid-column:1 / -1;order:-1}.vc5-line.three{grid-template-columns:1fr}}
 .vc5-rel{border:2px solid #e2e8f0;background:#fff;border-radius:14px;padding:8px;cursor:pointer;font:inherit;text-align:center;display:flex;flex-direction:column;gap:2px}
 .vc5-rel b{font-size:var(--fs-base);color:#0f172a}.vc5-rel span{font-size:var(--fs-sm);color:#475569}.vc5-rel small{font-size:var(--fs-xs);color:#64748b}
 .vc5-rel.now{border-color:#4f46e5;background:#eef2ff}.vc5-rel.past{background:#fafaf9}
+.tw-wrap{display:flex;flex-direction:column;gap:4px;min-width:0}.tw-wrap>button{flex:1}
 .vc5-arrow{display:flex;justify-content:space-between;font-size:var(--fs-xs);font-weight:800;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em}
 `;
 function mountCalendar(root, { say }) {
@@ -294,7 +295,7 @@ function mountCalendar(root, { say }) {
     root.innerHTML = `<div class="vc5">
       <section class="vc5-sec" data-place="chapter-1" id="vc5-week">
         <h3>1 · La semaine <small>The days are named after the planets. Tap a day.</small></h3>
-        <div class="vc5-days">${DAYS.map((d, i) => `<button type="button" class="vc5-day${i >= 5 ? ' we' : ''}" data-day="${i}"><img src="${PIC(DAY_HOOKS[i][0])}" alt=""><b>${d}</b><small>${esc(DAY_HOOKS[i][1])}</small></button>`).join('')}</div>
+        <div class="vc5-days">${DAYS.map((d, i) => `<button type="button" class="vc5-day${i >= 5 ? ' we' : ''}" data-day="${i}" data-word="${d}"><img src="${PIC(DAY_HOOKS[i][0])}" alt=""><b>${d}</b><small>${esc(DAY_HOOKS[i][1])}</small></button>`).join('')}</div>
         <div class="vc5-out" id="vc5-dout">Lundi comme <b>la Lune</b>, mardi comme <b>Mars</b>… <small>Tap a day to hear it with its picture.</small></div>
         <ul class="vc5-rules">
           <li>The French week starts on <b>lundi</b>. Days take <b>no capital letter</b>: lundi, mardi…</li>
@@ -305,7 +306,7 @@ function mountCalendar(root, { say }) {
       <section class="vc5-sec" data-place="chapter-2" id="vc5-year">
         <h3>2 · Les mois <small>Twelve months, coloured by season, each with a French moment. Tap a month.</small></h3>
         <div class="vc5-key">${Object.entries(SEASON_COL).map(([s, c]) => `<span style="--c:${c}">${s === 'été' ? "l'été" : s === 'hiver' ? "l'hiver" : s === 'automne' ? "l'automne" : 'le printemps'}</span>`).join('')}</div>
-        <div class="vc5-mons">${MONTHS.map((m, i) => `<button type="button" class="vc5-mon" data-mon="${i}" style="--c:${SEASON_COL[SEASON_OF[i]]}"><img src="${PIC(MONTH_HOOKS[i][0])}" alt=""><b>${m}</b><small>${esc(MONTH_HOOKS[i][1])}</small></button>`).join('')}</div>
+        <div class="vc5-mons">${MONTHS.map((m, i) => `<button type="button" class="vc5-mon" data-mon="${i}" data-word="${m}" style="--c:${SEASON_COL[SEASON_OF[i]]}"><img src="${PIC(MONTH_HOOKS[i][0])}" alt=""><b>${m}</b><small>${esc(MONTH_HOOKS[i][1])}</small></button>`).join('')}</div>
         <div class="vc5-out" id="vc5-mout">Tap a month. <small>You will hear it in a sentence.</small></div>
         <ul class="vc5-rules">
           <li><b>en</b> janvier or <b>au mois de</b> janvier = in January. No capital letter.</li>
@@ -369,11 +370,11 @@ function mountCalendar(root, { say }) {
     }));
     // 4 · before and after
     const DAYS5 = [[-2, 'avant-hier', 'the day before yesterday', "c'était"], [-1, 'hier', 'yesterday', "c'était"], [0, "aujourd'hui", 'today', "c'est"], [1, 'demain', 'tomorrow', 'ce sera'], [2, 'après-demain', 'the day after tomorrow', 'ce sera']];
-    Q('#vc5-days5').innerHTML = DAYS5.map(([n, fr, en]) => `<button type="button" class="vc5-rel${n === 0 ? ' now' : n < 0 ? ' past' : ''}" data-rel="d${n}"><b>${fr}</b><span>${esc(short(addDays(n)))}</span><small>${en}</small></button>`).join('');
+    Q('#vc5-days5').innerHTML = DAYS5.map(([n, fr, en]) => `<button type="button" class="vc5-rel${n === 0 ? ' now' : n < 0 ? ' past' : ''}" data-rel="d${n}" data-word="${esc(fr)}"><b>${fr}</b><span>${esc(short(addDays(n)))}</span><small>${en}</small></button>`).join('');
     const WEEKS = [[-1, 'la semaine dernière', 'last week', "c'était"], [0, 'cette semaine', 'this week', "c'est"], [1, 'la semaine prochaine', 'next week', 'ce sera']];
-    Q('#vc5-weeks').innerHTML = WEEKS.map(([n, fr, en]) => `<button type="button" class="vc5-rel${n === 0 ? ' now' : n < 0 ? ' past' : ''}" data-rel="w${n}"><b>${fr}</b><span>${esc(range(n))}</span><small>${en}</small></button>`).join('');
+    Q('#vc5-weeks').innerHTML = WEEKS.map(([n, fr, en]) => `<button type="button" class="vc5-rel${n === 0 ? ' now' : n < 0 ? ' past' : ''}" data-rel="w${n}" data-word="${esc(fr)}"><b>${fr}</b><span>${esc(range(n))}</span><small>${en}</small></button>`).join('');
     const YEARS = [[-1, "l'année dernière", 'last year', "c'était"], [0, 'cette année', 'this year', "c'est"], [1, "l'année prochaine", 'next year', 'ce sera']];
-    Q('#vc5-years').innerHTML = YEARS.map(([n, fr, en]) => `<button type="button" class="vc5-rel${n === 0 ? ' now' : n < 0 ? ' past' : ''}" data-rel="y${n}"><b>${fr}</b><span>${today.getFullYear() + n}</span><small>${en}</small></button>`).join('');
+    Q('#vc5-years').innerHTML = YEARS.map(([n, fr, en]) => `<button type="button" class="vc5-rel${n === 0 ? ' now' : n < 0 ? ' past' : ''}" data-rel="y${n}" data-word="${esc(fr)}"><b>${fr}</b><span>${today.getFullYear() + n}</span><small>${en}</small></button>`).join('');
     QA('.vc5-rel').forEach(b => b.addEventListener('click', () => {
         const k = b.dataset.rel, t = k[0], n = Number(k.slice(1));
         QA('.vc5-rel').forEach(x => x.style.outline = x === b ? '3px solid #a5b4fc' : '');
