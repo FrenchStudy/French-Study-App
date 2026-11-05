@@ -204,7 +204,8 @@ function exploreSigns(body, ctx) {
         box.querySelector('#cl-prev').addEventListener('click', () => show(si - 1, true));
         box.querySelector('#cl-next').addEventListener('click', () => show(si + 1, true));
         // when the page opens the cars drive without the voice (no page talks before you tap); a sign you pick speaks
-        if (voice) box.scrollIntoView({ block: 'start', behavior: 'smooth' });
+        // a picked sign stays where it is; only when its road is off the screen (a small phone) does the page move, just enough
+        if (voice) { const road = box.querySelector('.cl-road'), r = road.getBoundingClientRect(); if (r.bottom > innerHeight || r.top < 0) road.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }
         setTimeout(() => { if (svg.isConnected) cur.play(!voice); }, 300);
     };
     body.querySelectorAll('.cl-signbar button').forEach(b => b.addEventListener('click', () => show(Number(b.dataset.s), true)));
