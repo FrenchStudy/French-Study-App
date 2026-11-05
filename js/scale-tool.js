@@ -21,8 +21,15 @@ const CSS = `
 .st-btn[aria-pressed="true"]{background:#eef2ff;border-color:#6366f1;color:#3730a3}
 .st-tab[aria-selected="true"]{background:#4f46e5;border-color:#4f46e5;color:#fff}
 .st-btn:focus-visible,.st-chip:focus-visible,.st-opt:focus-visible,.st-stop:focus-visible{outline:3px solid #6366f1;outline-offset:2px}
-.st-snd{margin-left:auto;display:flex;align-items:center;gap:8px;font-size:var(--fs-sm);color:#475569;cursor:pointer;min-height:44px}
-.st-snd input{width:18px;height:18px;accent-color:#4f46e5}
+.st-snd{display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border:1px solid #e2e8f0;background:#fff;border-radius:12px;cursor:pointer;font-size:var(--fs-lg);position:relative}
+.st-snd input{position:absolute;opacity:0;width:1px;height:1px}.st-snd .off{display:none}.st-snd:has(input:not(:checked)) .on{display:none}.st-snd:has(input:not(:checked)) .off{display:inline}.st-snd:has(input:focus-visible){outline:3px solid #6366f1;outline-offset:2px}
+/* one toolbar: the parts, the tabs of the open part, then Explore / Check yourself and the sound */
+.st-bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}.st-bar .st-grp,.st-bar .st-tab{font-size:var(--fs-sm);padding:6px 12px;min-height:40px}
+.st-tabs{display:flex;flex-wrap:wrap;gap:6px}.st-sep{color:#94a3b8;font-weight:900;font-size:var(--fs-lg)}
+.st-seg{display:inline-flex;flex-wrap:wrap;gap:2px;padding:2px;border:1px solid #e2e8f0;border-radius:14px;background:#f8fafc}.st-seg .st-btn{border-color:transparent;background:transparent;min-height:40px}
+.st-seg.dark .st-grp[aria-pressed="true"]{background:#0f172a;color:#fff}.st-seg .st-btn[data-m][aria-pressed="true"]{background:#fff;border-color:#6366f1;color:#3730a3}
+.st-end{margin-left:auto;display:flex;gap:8px;align-items:center}
+@media(max-width:640px){.st-end{margin-left:0;width:100%;justify-content:space-between}.st-sep{display:none}.st-bar{gap:6px}.st-bar .st-btn{font-size:var(--fs-sm);padding:6px 10px;min-height:40px}.st-seg.dark{width:100%;flex-wrap:nowrap}.st-seg.dark .st-btn{flex:1;padding:6px 4px}.st-snd{width:40px;height:40px}}
 .st-card{background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:16px;display:grid;gap:10px}
 .st-hint{font-size:var(--fs-sm);color:#64748b;margin:0}
 .st-chips{display:flex;flex-wrap:wrap;gap:6px}
@@ -130,10 +137,12 @@ function mount(T, root, { say, grade, words }) {
     let tabI = 0, mode = 'explore', timer = null;
     const GROUPS = [...new Set(T.tabs.map(t => t.group).filter(Boolean))];
     root.innerHTML = `<div class="st">
-      ${GROUPS.length ? `<div class="st-row" role="group" aria-label="Parts">${GROUPS.map((g, i) => `<button type="button" class="st-btn st-grp" data-g="${i}" aria-pressed="${i === 0}">${esc(g)}</button>`).join('')}</div>` : ''}
-      <div class="st-row" role="tablist" aria-label="Scales">${T.tabs.map((t, i) => `<button type="button" role="tab" class="st-btn st-tab" data-t="${i}" aria-selected="${i === 0}"${GROUPS.length && t.group !== GROUPS[0] ? ' hidden' : ''}>${esc(t.title)}</button>`).join('')}</div>
-      <div class="st-row"><button type="button" class="st-btn" data-m="explore" aria-pressed="true">Explore</button><button type="button" class="st-btn" data-m="check" aria-pressed="false">Check yourself</button>
-        <label class="st-snd"><input type="checkbox" id="st-snd" checked> Sound on</label></div>
+      <div class="st-bar">
+        ${GROUPS.length ? `<div class="st-seg dark" role="group" aria-label="Parts">${GROUPS.map((g, i) => `<button type="button" class="st-btn st-grp" data-g="${i}" aria-pressed="${i === 0}">${esc(g)}</button>`).join('')}</div><span class="st-sep" aria-hidden="true">›</span>` : ''}
+        <div class="st-tabs" role="tablist" aria-label="Scales">${T.tabs.map((t, i) => `<button type="button" role="tab" class="st-btn st-tab" data-t="${i}" aria-selected="${i === 0}"${GROUPS.length && t.group !== GROUPS[0] ? ' hidden' : ''}>${esc(t.title)}</button>`).join('')}</div>
+        <div class="st-end"><div class="st-seg" role="group" aria-label="Mode"><button type="button" class="st-btn" data-m="explore" aria-pressed="true" title="Explore">👀 Explore</button><button type="button" class="st-btn" data-m="check" aria-pressed="false" title="Check yourself" aria-label="Check yourself">✏️ Check</button></div>
+        <label class="st-snd" title="Sound on or off"><input type="checkbox" id="st-snd" checked aria-label="Sound on"><span class="on" aria-hidden="true">🔊</span><span class="off" aria-hidden="true">🔇</span></label></div>
+      </div>
       <div class="st-card" id="st-body" aria-live="polite"></div></div>`;
     const $ = (s) => root.querySelector(s), body = $('#st-body'), snd = $('#st-snd');
     const speak = (t) => { if (snd.checked && root.isConnected) say(t); };

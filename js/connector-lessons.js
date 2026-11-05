@@ -177,8 +177,7 @@ function playScene(svg, S, ctx) {
 
 function exploreSigns(body, ctx) {
     let si = 0, cur = null;
-    body.innerHTML = `<p class="st-hint">Every connector is a road sign. Learn the nine signs first: when you meet a new connector, ask « which sign is it? ».</p>
-        <div class="cl-signbar" role="tablist" aria-label="Signs">${ORDER.map((k, i) => `<button type="button" role="tab" data-s="${i}" title="${esc(SIGNS[k].name)}">${signSvg(k)}<span>${esc(SIGNS[k].role)}</span></button>`).join('')}</div>
+    body.innerHTML = `<div class="cl-signbar" role="tablist" aria-label="Signs: every connector is a road sign" title="Every connector is a road sign: when you meet a new one, ask « which sign is it? »">${ORDER.map((k, i) => `<button type="button" role="tab" data-s="${i}" title="${esc(SIGNS[k].name)}">${signSvg(k)}<span>${esc(SIGNS[k].role)}</span></button>`).join('')}</div>
         <div id="cl-sign"></div>`;
     const show = (i, voice) => {
         if (cur) cur.stop();
@@ -468,11 +467,11 @@ const CSS = `
 .cl-signbar button svg{width:40px;height:40px}.cl-signbar button span{font-size:var(--fs-xs);font-weight:700;color:#475569}
 .cl-signbar button[aria-selected="true"]{border-color:#4f46e5;background:#eef2ff}
 @media(max-width:640px){.cl-signbar{grid-template-columns:repeat(5,1fr)}.cl-signbar button svg{width:34px;height:34px}}
-.cl-shead{display:flex;gap:14px;align-items:center;margin-top:10px}.cl-shead .cl-big{flex:none;width:76px;height:76px}
+.cl-shead{display:flex;gap:12px;align-items:center;margin-top:6px}.cl-shead .cl-big{flex:none;width:60px;height:60px}
 .cl-shead h3{margin:2px 0;font-size:var(--fs-xl)}.cl-shead h3 small{font-size:var(--fs-sm);color:#64748b;font-weight:600}.cl-shead p{margin:2px 0 0;font-size:var(--fs-base);color:#334155;line-height:1.45}
 .cl-kick{font-size:var(--fs-xs);font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:#4f46e5}
 .cl-road{width:100%;height:auto;max-height:max(240px,calc(100vh - 420px));display:block;margin-top:6px}.cl-ctrl{margin-top:10px}.cl-sgrid{display:grid;gap:8px}
-@media(min-width:1024px){.cl-sgrid{grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);grid-template-areas:'info road' 'text road';column-gap:20px;align-items:start}.cl-sinfo{grid-area:info}.cl-sgrid .cl-road{grid-area:road;align-self:center}.cl-stext{grid-area:text}.cl-nav{margin-left:0}}.cl-nav{margin-left:auto;display:flex;flex-wrap:wrap;gap:8px}.cl-road text{font-family:inherit}@media(max-width:640px){.cl-road .cl-t{font-size:28px}}
+@media(min-width:1024px){.cl-sgrid{grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);grid-template-areas:'info road' 'text road';column-gap:20px;align-items:start}.cl-sinfo{grid-area:info}.cl-sgrid .cl-road{grid-area:road;align-self:center}.cl-stext{grid-area:text}.cl-sgrid .cl-nav{display:none}}.cl-nav{margin-left:auto;display:flex;flex-wrap:wrap;gap:8px}.cl-road text{font-family:inherit}@media(max-width:640px){.cl-road .cl-t{font-size:28px}}
 .cl-sg{transform-box:fill-box;transform-origin:center}.cl-pop{animation:clpop .5s ease-out}
 @keyframes clpop{0%{transform:scale(.6)}70%{transform:scale(1.18)}100%{transform:scale(1)}}
 #arm{transform-box:fill-box;transform-origin:0 50%;transition:transform .8s ease-in-out}

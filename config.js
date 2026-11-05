@@ -461,6 +461,36 @@ const ProgressSync = (function () {
     return { push, start, KEYS };
 })();
 
+// ---------- A new version of the app ----------
+// The published site writes its version into every page (<meta name="app-version">) and into version.json.
+// A page left open while the app is updated would keep the old files: when you come back to it (or every
+// few minutes) it compares the two and offers « Reload » for the new version. APP_VERSION also goes on the
+// files a page loads later (?v=…), so the browser never reuses an old copy.
+const APP_VERSION = (document.querySelector('meta[name="app-version"]') || {}).content || '';
+(function () {
+    if (!APP_VERSION || location.protocol === 'file:') return;
+    let shown = false, last = 0;
+    async function check() {
+        if (shown || document.hidden || Date.now() - last < 60e3) return;
+        last = Date.now();
+        try {
+            const r = await fetch('version.json?t=' + Date.now(), { cache: 'no-store' });
+            const v = r.ok ? (await r.json()).v : '';
+            if (!v || v === APP_VERSION) return;
+            shown = true;
+            const bar = document.createElement('div');
+            bar.setAttribute('role', 'status');
+            bar.style.cssText = 'position:fixed;left:50%;bottom:16px;transform:translateX(-50%);z-index:9999;display:flex;gap:12px;align-items:center;background:#0f172a;color:#fff;padding:10px 12px 10px 16px;border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.25);font:600 16px/1.3 inherit;max-width:calc(100vw - 32px)';
+            bar.innerHTML = '<span>The app has been updated.</span><button type="button" style="min-height:40px;padding:0 14px;border-radius:10px;border:0;background:#6366f1;color:#fff;font:inherit;font-weight:800;cursor:pointer">Reload</button>';
+            bar.querySelector('button').addEventListener('click', () => location.reload());
+            document.body.appendChild(bar);
+        } catch (e) {}
+    }
+    document.addEventListener('visibilitychange', check);
+    window.addEventListener('focus', check);
+    setInterval(check, 5 * 60e3);
+})();
+
 // ---------- Install as an app (phones and computers) ----------
 // Registers sw.js (offline copies of the pages) and powers any [data-install] button:
 // Android / Chrome / Edge show their install prompt; on iPhone we explain Share > Add to Home Screen.

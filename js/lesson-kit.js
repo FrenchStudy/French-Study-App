@@ -266,7 +266,7 @@ const LessonKit = (function () {
     }
     // ---------- Practice ----------
     // An item is [question, answer] or [question, answer, rule]. A wrong answer gets a hint and a second try; after that
-    // the answer is shown next to yours (the difference marked) with its rule, and you type it once. The questions you
+    // the answer is shown next to yours (the difference marked) with its rule. The questions you
     // missed come first next time, marked « missed last time ».
     const MISSED_KEY = 'lessons_missed';
     const missedOf = (key) => (store.get(MISSED_KEY, {})[key] || []);
@@ -360,13 +360,9 @@ const LessonKit = (function () {
         box.innerHTML = `<div class="font-bold ${ok ? 'text-emerald-800' : 'text-rose-800'}">${head}</div>
             ${verdict === 'right' || verdict === 'hint' ? '' : `<div class="mt-1 font-semibold text-slate-900">${show} <button type="button" data-say="${escapeHtml(toText(ans))}" class="ml-1 text-indigo-600 text-sm" aria-label="Listen">🔊</button></div>`}
             ${verdict === 'wrong' && said ? `<div class="text-sm text-slate-600">You wrote: ${escapeHtml(said)}</div>` : ''}
-            ${!ok && rule ? `<div class="mt-1 text-sm text-slate-700 bg-white border border-slate-200 rounded-lg px-2 py-1">${rule}</div>` : ''}
-            ${!ok ? `<form data-drill-copy class="mt-2 flex flex-wrap gap-2 items-center"><label class="text-sm font-semibold text-slate-700">Now type it once:</label>
-                <input type="text" lang="fr" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Type the answer once" class="lk-drill-input flex-1 min-w-[10rem] text-base px-3 py-2 bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                <button type="submit" class="min-h-[40px] px-3 text-sm font-bold text-white bg-slate-800 hover:bg-slate-700 rounded-lg">OK</button><span data-copy-fb class="text-sm font-bold"></span></form>` : ''}
-            ${verdict === 'wrong' && said ? `<button type="button" data-drill-mine class="mt-2 min-h-[40px] px-3 text-sm font-semibold text-slate-700 bg-white border border-slate-200 hover:border-emerald-400 rounded-lg">My answer means the same: I was right</button>` : ''}`;
+            ${!ok && rule ? `<div class="mt-1 text-sm text-slate-700 bg-white border border-slate-200 rounded-lg px-2 py-1">${rule}</div>` : ''}`;
         box.classList.remove('hidden');
-        const copy = box.querySelector('[data-drill-copy] input'); if (copy) copy.focus({ preventScroll: true });
+        const next = [...li.closest('ol').querySelectorAll('[data-drill]')].find(x => !x.dataset.result); if (!ok && next) next.querySelector('input').focus({ preventScroll: true });
     }
 
     // Grammar topics 2, 3, 10 and 28 have a hand-built practice page shown inside them
@@ -418,7 +414,7 @@ const LessonKit = (function () {
     function loadScript(src) {
         return scripts[src] || (scripts[src] = new Promise((ok, fail) => {
             const s = document.createElement('script');
-            s.src = src; s.onload = ok; s.onerror = () => { delete scripts[src]; fail(new Error(src)); };
+            s.src = src + (typeof APP_VERSION !== 'undefined' && APP_VERSION ? '?v=' + APP_VERSION : ''); s.onload = ok; s.onerror = () => { delete scripts[src]; fail(new Error(src)); };
             document.head.appendChild(s);
         }));
     }
@@ -778,18 +774,6 @@ const LessonKit = (function () {
             const next = [...q('body').querySelectorAll('[data-drill]')].find(x => !x.dataset.result);
             if (next && li.dataset.result === 'right') next.querySelector('input').focus({ preventScroll: false });
         });
-        // « Now type it once »: copying the answer once, after a mistake (it does not change the score)
-        root.addEventListener('submit', (e) => {
-            const form = e.target.closest('[data-drill-copy]');
-            if (!form) return;
-            e.preventDefault();
-            const li = form.closest('[data-drill]'), input = form.querySelector('input'), fb = form.querySelector('[data-copy-fb]');
-            const v = judgeAnswer(input.value, li.querySelector('template[data-question]').innerHTML, li.querySelector('template[data-answer]').innerHTML);
-            if (v === 'empty') { input.focus(); return; }
-            if (v === 'right' || v === 'accents') { fb.className = 'text-sm font-bold text-emerald-700'; fb.textContent = '✓ That\'s it.'; input.readOnly = true; form.querySelector('button').classList.add('hidden');
-                const next = [...q('body').querySelectorAll('[data-drill]')].find(x => !x.dataset.result); if (next) next.querySelector('input').focus({ preventScroll: false }); }
-            else { fb.className = 'text-sm font-bold text-rose-700'; fb.textContent = 'Look at the answer again.'; input.select(); }
-        });
         root.addEventListener('focusin', (e) => { if (e.target.classList && e.target.classList.contains('lk-drill-input')) lastInput = e.target; });
         root.addEventListener('mousedown', (e) => { if (e.target.closest('[data-accent]')) e.preventDefault(); });   // keep the cursor in the box
         root.addEventListener('click', (e) => {
@@ -805,8 +789,6 @@ const LessonKit = (function () {
             }
             const show = e.target.closest('[data-drill-show]');
             if (show) { drillResult(show.closest('[data-drill]'), 'shown'); drillScore(); return; }
-            const mine = e.target.closest('[data-drill-mine]');
-            if (mine) { drillResult(mine.closest('[data-drill]'), 'self'); drillScore(); return; }
             const retry = e.target.closest('[data-drill-retry]');
             if (retry) {
                 const missed = [...q('body').querySelectorAll('[data-drill][data-result="wrong"]')];
