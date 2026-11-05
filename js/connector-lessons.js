@@ -145,19 +145,20 @@ function playScene(svg, S, ctx) {
         cars.forEach(c => put(c, c.frames[0][1]));
     };
     const sayAll = () => ctx.speak(S.fr.join('').replace(/^\s+/, ''));
+    const speak = (t) => { if (!quiet) ctx.speak(t); };
     const doEvent = (e) => {
-        if (e === 'say1') ctx.speak((S.fr[0] || '').trim());
-        if (e === 'word') { set('#cw', 1); svg.querySelectorAll('.cl-sg').forEach(g => g.classList.add('cl-pop')); ctx.speak(S.fr[1].replace(/'$/, 'e').trim()); }
+        if (e === 'say1') speak((S.fr[0] || '').trim());
+        if (e === 'word') { set('#cw', 1); svg.querySelectorAll('.cl-sg').forEach(g => g.classList.add('cl-pop')); speak(S.fr[1].replace(/'$/, 'e').trim()); }
         if (e === 'show1') { set('#t1', 1); set('#i1', 1); }
-        if (e === 'show2') { set('#t2', 1); set('#i2', 1); set('#ago', 1); set('#i3', 1); ctx.speak(S.fr[2].trim()); }
+        if (e === 'show2') { set('#t2', 1); set('#i2', 1); set('#ago', 1); set('#i3', 1); speak(S.fr[2].trim()); }
         if (e === 'lens') { const l = svg.querySelector('#lens'); l.setAttribute('opacity', 1); l.classList.add('cl-zoom'); }
         if (e === 'arm') { const a = svg.querySelector('#arm'); a.style.transform = 'rotate(-75deg)'; }
         if (e === 'tgt') svg.querySelector('#tgt').classList.add('cl-pulse');
     };
-    let raf = 0, timers = [];
+    let raf = 0, timers = [], quiet = false;
     const stop = () => { cancelAnimationFrame(raf); timers.forEach(clearTimeout); timers = []; };
-    const play = () => {
-        stop(); reset();
+    const play = (q) => {
+        stop(); reset(); quiet = !!q;
         const end = Math.max(...cars.map(c => c.frames[c.frames.length - 1][0]));
         S.events.forEach(([t, e]) => timers.push(setTimeout(() => { if (svg.isConnected) doEvent(e); }, t * 1000)));
         const hand = svg.querySelector('#hand'), t0 = performance.now();
@@ -179,17 +180,17 @@ function exploreSigns(body, ctx) {
     body.innerHTML = `<p class="st-hint">Every connector is a road sign. Learn the nine signs first: when you meet a new connector, ask « which sign is it? ».</p>
         <div class="cl-signbar" role="tablist" aria-label="Signs">${ORDER.map((k, i) => `<button type="button" role="tab" data-s="${i}" title="${esc(SIGNS[k].name)}">${signSvg(k)}<span>${esc(SIGNS[k].role)}</span></button>`).join('')}</div>
         <div id="cl-sign"></div>`;
-    const show = (i) => {
+    const show = (i, voice) => {
         if (cur) cur.stop();
         si = (i + ORDER.length) % ORDER.length; const k = ORDER[si], G = SIGNS[k], S = SCENES[k];
         body.querySelectorAll('.cl-signbar button').forEach((b, j) => b.setAttribute('aria-selected', j === si));
         const box = body.querySelector('#cl-sign');
-        box.innerHTML = `<div class="cl-shead">${signSvg(k, 'cl-big')}<div><div class="cl-kick">Sign ${si + 1} of ${ORDER.length} · ${esc(G.role)}</div><h3>${esc(G.name)} <small>${esc(G.en)}</small></h3><p>${esc(G.what)}</p></div></div>
+        // the buttons and the other words of the sign come first, then the road: no scrolling to drive again
+        box.innerHTML = `<div class="cl-sgrid"><div class="cl-sinfo"><div class="cl-shead">${signSvg(k, 'cl-big')}<div><div class="cl-kick">Sign ${si + 1} of ${ORDER.length} · ${esc(G.role)}</div><h3>${esc(G.name)} <small>${esc(G.en)}</small></h3><p>${esc(G.what)}</p></div></div>
+            <div class="st-row cl-ctrl"><button type="button" class="st-btn pri" id="cl-drive">▶ Drive again</button><button type="button" class="st-btn" id="cl-say">🔊 The sentence</button><span class="cl-nav"><button type="button" class="st-btn" id="cl-prev" aria-label="Previous sign">← ${esc(SIGNS[ORDER[(si + 8) % 9]].name)}</button><button type="button" class="st-btn" id="cl-next">Next: ${esc(SIGNS[ORDER[(si + 1) % 9]].name)} →</button></span></div>
+            <div class="cl-same"><b>Same sign:</b> ${G.words.map(w => `<button type="button" class="cl-wd" data-w="${esc(w)}" style="--c:${G.c}">${esc(w)}</button>`).join('')}<div class="cl-wdet" id="cl-wdet"></div></div></div>
             <svg class="cl-road" viewBox="0 0 720 300" role="img" aria-label="${esc(S.fr.join(''))}"><defs><filter id="clsh"><feDropShadow dx="0" dy="3" stdDeviation="3" flood-opacity=".18"/></filter></defs>${S.svg()}${S.cars.map(c => CAR(c.id)).join('')}</svg>
-            <div class="st-row"><button type="button" class="st-btn pri" id="cl-drive">▶ Drive again</button><button type="button" class="st-btn" id="cl-say">🔊 The sentence</button></div>
-            <div class="cl-sent">${esc(S.fr[0])}<span class="cl-c" style="background:${G.c}">${esc(S.fr[1])}</span>${esc(S.fr[2])}</div><div class="cl-en">${esc(S.en)}</div>
-            <div class="cl-same"><b>Same sign:</b> ${G.words.map(w => `<button type="button" class="cl-wd" data-w="${esc(w)}" style="--c:${G.c}">${esc(w)}</button>`).join('')}<div class="cl-wdet" id="cl-wdet"></div></div>
-            <div class="st-row"><button type="button" class="st-btn" id="cl-prev">← ${esc(SIGNS[ORDER[(si + 8) % 9]].name)}</button><button type="button" class="st-btn pri" id="cl-next">Next sign: ${esc(SIGNS[ORDER[(si + 1) % 9]].name)} →</button></div>`;
+            <div class="cl-stext"><div class="cl-sent">${esc(S.fr[0])}<span class="cl-c" style="background:${G.c}">${esc(S.fr[1])}</span>${esc(S.fr[2])}</div><div class="cl-en">${esc(S.en)}</div></div></div>`;
         const svg = box.querySelector('.cl-road');
         svg.querySelectorAll('.cl-car').forEach(c => c.setAttribute('filter', 'url(#clsh)'));
         cur = playScene(svg, S, ctx);
@@ -201,12 +202,14 @@ function exploreSigns(body, ctx) {
             d.innerHTML = w ? `<div class="cl-ex">${ctx.markWord(w.ex[0], w.fr)}<small>${esc(w.ex[1])}</small></div>` : '';
             ctx.speak(w ? w.fr.replace(/…/g, ',') + '. ' + w.ex[0] : b.dataset.w);
         }));
-        box.querySelector('#cl-prev').addEventListener('click', () => show(si - 1));
-        box.querySelector('#cl-next').addEventListener('click', () => { show(si + 1); body.scrollIntoView({ block: 'start', behavior: 'smooth' }); });
-        setTimeout(() => { if (svg.isConnected) cur.play(); }, 300);
+        box.querySelector('#cl-prev').addEventListener('click', () => show(si - 1, true));
+        box.querySelector('#cl-next').addEventListener('click', () => show(si + 1, true));
+        // when the page opens the cars drive without the voice (no page talks before you tap); a sign you pick speaks
+        if (voice) box.scrollIntoView({ block: 'start', behavior: 'smooth' });
+        setTimeout(() => { if (svg.isConnected) cur.play(!voice); }, 300);
     };
-    body.querySelectorAll('.cl-signbar button').forEach(b => b.addEventListener('click', () => show(Number(b.dataset.s))));
-    show(0);
+    body.querySelectorAll('.cl-signbar button').forEach(b => b.addEventListener('click', () => show(Number(b.dataset.s), true)));
+    show(0, false);
 }
 
 // ================= The comics =================
@@ -468,7 +471,8 @@ const CSS = `
 .cl-shead{display:flex;gap:14px;align-items:center;margin-top:10px}.cl-shead .cl-big{flex:none;width:76px;height:76px}
 .cl-shead h3{margin:2px 0;font-size:var(--fs-xl)}.cl-shead h3 small{font-size:var(--fs-sm);color:#64748b;font-weight:600}.cl-shead p{margin:2px 0 0;font-size:var(--fs-base);color:#334155;line-height:1.45}
 .cl-kick{font-size:var(--fs-xs);font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:#4f46e5}
-.cl-road{width:100%;height:auto;display:block;margin-top:6px}.cl-road text{font-family:inherit}@media(max-width:640px){.cl-road .cl-t{font-size:28px}}
+.cl-road{width:100%;height:auto;max-height:max(240px,calc(100vh - 420px));display:block;margin-top:6px}.cl-ctrl{margin-top:10px}.cl-sgrid{display:grid;gap:8px}
+@media(min-width:1024px){.cl-sgrid{grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);grid-template-areas:'info road' 'text road';column-gap:20px;align-items:start}.cl-sinfo{grid-area:info}.cl-sgrid .cl-road{grid-area:road;align-self:center}.cl-stext{grid-area:text}.cl-nav{margin-left:0}}.cl-nav{margin-left:auto;display:flex;flex-wrap:wrap;gap:8px}.cl-road text{font-family:inherit}@media(max-width:640px){.cl-road .cl-t{font-size:28px}}
 .cl-sg{transform-box:fill-box;transform-origin:center}.cl-pop{animation:clpop .5s ease-out}
 @keyframes clpop{0%{transform:scale(.6)}70%{transform:scale(1.18)}100%{transform:scale(1)}}
 #arm{transform-box:fill-box;transform-origin:0 50%;transition:transform .8s ease-in-out}
