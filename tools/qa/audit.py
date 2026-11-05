@@ -1,5 +1,7 @@
 # tools/qa/audit.py - a full check of the app on a phone and a desktop screen, before every pull request.
-#   python3 tools/qa/audit.py [--mock FILE] [--out DIR] [--quick]
+#   python3 tools/qa/audit.py [--mock FILE] [--out DIR] [--quick] [--workers N]
+# The screens are shared out between N browsers that work at the same time (default 4), and each screen waits
+# only until the page has finished loading (plus a short pause for animations), so a full check takes minutes.
 # Opens every page, every Vocab topic and every step of it (and each tab of the chart tools), and reports:
 #   errors       JavaScript errors on the page
 #   wide         the page is wider than the screen (sideways scrolling on a phone)
@@ -9,15 +11,16 @@
 #   inner scroll a box with its own scroll bar inside the page (sideways or up-down), except the page's main scroller and boxes marked data-scroll-ok (the picture pages on a phone: swipe sideways)
 #   twice        a word shown twice on the same step (a tool card and a word tile, or two tiles)
 #   first screen on a computer, a video (with its controls) does not fit in the first screen
-# Needs Python Playwright with Chromium. --mock FILE: a JavaScript file added after config.js that fakes the database
-# (topics 31-56 come from the database; without it they are skipped). Writes DIR/report.md, DIR/report.json and a
+# Needs Python Playwright with Chromium. --mock FILE: a JavaScript file added after config.js that fakes the database:
+# topics 31-56 come from the database, so they are checked with it (everything else is checked without it). Writes DIR/report.md, DIR/report.json and a
 # screenshot of each problem (DIR defaults to a folder in the system temp directory).
 import json, os, subprocess, sys, tempfile, time, argparse
+from multiprocessing import Pool
 from playwright.sync_api import sync_playwright
 
 R = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 ap = argparse.ArgumentParser()
-ap.add_argument('--mock'); ap.add_argument('--out'); ap.add_argument('--quick', action='store_true'); ap.add_argument('--port', type=int, default=8977)
+ap.add_argument('--mock'); ap.add_argument('--out'); ap.add_argument('--quick', action='store_true'); ap.add_argument('--port', type=int, default=8977); ap.add_argument('--workers', type=int, default=4)
 A = ap.parse_args()
 OUT = A.out or os.path.join(tempfile.gettempdir(), 'fs-audit')
 os.makedirs(OUT, exist_ok=True)
@@ -68,54 +71,94 @@ CHECK = r"""() => {
   return out;
 }""".replace('SCALE', 'new Set(' + json.dumps(sorted(SCALE)) + ')')
 
+VIEWS = {'phone': {'width': 375, 'height': 800}, 'desktop': {'width': 1280, 'height': 900}}
+MOCK = (open(os.path.join(R, 'config.js'), encoding='utf-8').read() + '\n' + open(A.mock, encoding='utf-8').read()) if A.mock else None
+
+def settle(pg, ms):
+    # until the page has stopped loading (at most 4 s), then a short pause for drawing and animations
+    try: pg.wait_for_load_state('networkidle', timeout=4000)
+    except Exception: pass
+    pg.wait_for_timeout(ms)
+
+def open_ctx(b, mode, vname):
+    ctx = b.new_context(viewport=VIEWS[vname])
+    if mode == 'mock': ctx.route('**/config.js', lambda r: r.fulfill(body=MOCK, content_type='application/javascript'))
+    ctx.route(lambda u: not u.startswith(B), lambda r: r.abort())
+    return ctx
+
+def topic_ids(b, mode):
+    ctx = open_ctx(b, mode, 'desktop'); pg = ctx.new_page()
+    pg.goto(B + 'vocab.html'); settle(pg, 600)
+    ids = pg.evaluate("() => TOPICS.filter(t => t.n || t.lesson).map(t => t.id)")
+    ctx.close(); return ids
+
+def run_jobs(jobs):
+    """One browser: a list of (mode, view, kind, target) → the rows of its screens."""
+    rows = []
+    with sync_playwright() as p:
+        b = p.chromium.launch()
+        cur, ctx, pg, errs = None, None, None, []
+        for mode, vname, kind, target in jobs:
+            if cur != (mode, vname):
+                if ctx: ctx.close()
+                ctx = open_ctx(b, mode, vname); pg = ctx.new_page(); errs = []
+                pg.on('pageerror', lambda e, errs=errs: errs.append(str(e)))
+                cur = (mode, vname)
+            def check(name, wait):
+                settle(pg, wait)
+                try: r = pg.evaluate(CHECK)
+                except Exception as e: r = {'tiny': [], 'off': [], 'wide': False, 'textLen': 1, 'fail': str(e)}
+                row = {'view': vname, 'where': name, 'errors': list(dict.fromkeys(errs)), **r}
+                errs.clear()
+                if row['errors'] or row['wide'] or row['tiny'] or row.get('fail') or row['textLen'] < 20:
+                    f = f"{vname}-{abs(hash(name)) % 10**8}.png"; row['shot'] = f
+                    try: pg.screenshot(path=os.path.join(OUT, f))
+                    except Exception: pass
+                rows.append(row)
+            try:
+                if kind == 'page':
+                    pg.goto(B + target); check(target, 500); continue
+                pg.goto(B + 'vocab.html?topic=' + target); settle(pg, 500)
+                steps = pg.evaluate("() => [...document.querySelectorAll('.step-tab')].filter(b => !b.classList.contains('hidden')).map(b => b.dataset.step)")
+                for st in steps or ['(one step)']:
+                    if st != '(one step)':
+                        try: pg.click(f'.step-tab[data-step="{st}"]', timeout=3000)
+                        except Exception: pass
+                    check(f'{target} · {st}', 600)
+                    tabs = pg.locator('.st-tab:visible')
+                    for i in range(1, tabs.count()):     # the chart tools: every tab
+                        try: tabs.nth(i).click(timeout=3000)
+                        except Exception: continue
+                        check(f'{target} · {st} · tab {i + 1}', 400)
+            except Exception as e:
+                rows.append({'view': vname, 'where': f'{target}', 'errors': [], 'tiny': [], 'off': [], 'wide': False, 'textLen': 1, 'fail': str(e)[:300]})
+        b.close()
+    return rows
+
 def main():
     srv = subprocess.Popen([sys.executable, '-m', 'http.server', str(A.port), '-d', R], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     time.sleep(1)
-    mock = (open(os.path.join(R, 'config.js'), encoding='utf-8').read() + '\n' + open(A.mock, encoding='utf-8').read()) if A.mock else None
-    rows = []
+    t0 = time.time()
     try:
         with sync_playwright() as p:
             b = p.chromium.launch()
-            for vname, vp in [('phone', {'width': 375, 'height': 800}), ('desktop', {'width': 1280, 'height': 900})]:
-                ctx = b.new_context(viewport=vp)
-                if mock: ctx.route('**/config.js', lambda r: r.fulfill(body=mock, content_type='application/javascript'))
-                ctx.route(lambda u: not u.startswith(B), lambda r: r.abort())
-                pg = ctx.new_page(); errs = []
-                pg.on('pageerror', lambda e: errs.append(str(e)))
-                def check(name, wait=900):
-                    pg.wait_for_timeout(wait)
-                    try: r = pg.evaluate(CHECK)
-                    except Exception as e: r = {'tiny': [], 'off': [], 'wide': False, 'textLen': 1, 'fail': str(e)}
-                    row = {'view': vname, 'where': name, 'errors': list(dict.fromkeys(errs)), **r}
-                    errs.clear()
-                    bad = row['errors'] or row['wide'] or row['tiny'] or row.get('fail') or row['textLen'] < 20
-                    if bad:
-                        f = f"{vname}-{len(rows)}.png"; row['shot'] = f
-                        try: pg.screenshot(path=os.path.join(OUT, f))
-                        except Exception: pass
-                    rows.append(row)
-                for u in PAGES:
-                    pg.goto(B + u); check(u, 1500)
-                # every Vocab topic and step
-                pg.goto(B + 'vocab.html'); pg.wait_for_timeout(1500)
-                ids = pg.evaluate("() => TOPICS.filter(t => t.n || t.lesson).map(t => t.id)")
-                if A.quick: ids = ids[:6]
-                for tid in ids:
-                    pg.goto(B + 'vocab.html?topic=' + tid); pg.wait_for_timeout(1500)
-                    steps = pg.evaluate("() => [...document.querySelectorAll('.step-tab')].filter(b => !b.classList.contains('hidden')).map(b => b.dataset.step)")
-                    for st in steps or ['(one step)']:
-                        if st != '(one step)':
-                            try: pg.click(f'.step-tab[data-step="{st}"]', timeout=3000)
-                            except Exception: pass
-                        check(f'{tid} · {st}', 1300)
-                        tabs = pg.locator('.st-tab:visible')
-                        for i in range(1, tabs.count()):     # the chart tools: every tab
-                            try: tabs.nth(i).click(timeout=3000)
-                            except Exception: continue
-                            check(f'{tid} · {st} · tab {i + 1}', 700)
-                ctx.close()
+            plain = topic_ids(b, 'plain')
+            mocked = [t for t in topic_ids(b, 'mock') if t not in plain] if MOCK else []
+            b.close()
+        if A.quick: plain, mocked = plain[:6], mocked[:2]
+        jobs = []
+        for vname in VIEWS:
+            jobs += [('plain', vname, 'page', u) for u in PAGES] + [('plain', vname, 'topic', t) for t in plain] + [('mock', vname, 'topic', t) for t in mocked]
+        n = max(1, A.workers)
+        # each browser takes every n-th job, so phone and computer, light and heavy screens are spread out
+        parts = [sorted(jobs[i::n], key=lambda j: (j[0], j[1])) for i in range(n)]
+        with Pool(n) as pool:
+            rows = [r for part in pool.map(run_jobs, parts) for r in part]
+        order = {('page', u): k for k, u in enumerate(PAGES)}
+        rows.sort(key=lambda r: (r['view'] != 'phone', r['where']))
     finally:
         srv.kill()
+    print(f'{len(rows)} screens in {time.time() - t0:.0f} s with {n} browsers')
     json.dump(rows, open(os.path.join(OUT, 'report.json'), 'w'), ensure_ascii=False, indent=1)
     probs = [r for r in rows if r['errors'] or r['wide'] or r['tiny'] or r.get('fail') or r['textLen'] < 20]
     offs = [r for r in rows if r['off']]
@@ -147,4 +190,5 @@ def main():
     open(os.path.join(OUT, 'report.md'), 'w').write('\n'.join(lines) + '\n')
     print('\n'.join(lines[:11])); print('report:', os.path.join(OUT, 'report.md'))
 
-main()
+if __name__ == '__main__':
+    main()
