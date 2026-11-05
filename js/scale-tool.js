@@ -11,7 +11,7 @@ const plain = (s) => String(s).toLowerCase().replace(/[.!?…\s]+$/g, '').replac
 const LEVEL_EN = { familier: 'slang, with friends', courant: 'everyday, with anyone', soutenu: 'formal, letters and offices' };
 
 const CSS = `
-.st{display:grid;gap:12px;max-width:820px}
+.st{display:grid;gap:12px}
 .st-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 /* tabs in groups (Connectors): the group buttons, then the tabs of the open group */
 .st .st-grp{font-weight:800}.st .st-grp[aria-pressed="true"]{background:#0f172a;border-color:#0f172a;color:#fff}

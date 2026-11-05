@@ -209,7 +209,7 @@ const PAGES = {
 };
 
 const CSS = `
-.vp{display:grid;gap:14px;max-width:820px}
+.vp{display:grid;gap:14px}
 .vp-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .vp-btn{font-weight:700;font-size:var(--fs-base);border:1px solid #e2e8f0;background:#fff;color:#0f172a;border-radius:12px;padding:8px 14px;min-height:44px;cursor:pointer}
 .vp-btn.pri{background:#4f46e5;border-color:#4f46e5;color:#fff}
@@ -217,7 +217,7 @@ const CSS = `
 .vp-btn:focus-visible,.vp-opt:focus-visible,.vp-ch:focus-visible{outline:3px solid #6366f1;outline-offset:2px}
 .vp-card{background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:14px;display:grid;gap:10px}
 .vp-card[hidden]{display:none}
-.vp-video{width:100%;aspect-ratio:16/9;border-radius:12px;background:#3E2723;display:block}
+.vp-video{width:min(100%,max(480px,calc((100vh - 420px)*16/9)));aspect-ratio:16/9;border-radius:12px;background:#3E2723;display:block}
 .vp-chs{display:flex;flex-wrap:wrap;gap:6px}
 .vp-ch{border:1px solid #e2e8f0;background:#f8fafc;border-radius:999px;padding:6px 12px;min-height:36px;font-size:var(--fs-sm);color:#334155;cursor:pointer}
 .vp-small{font-size:var(--fs-sm);color:#64748b}
@@ -230,7 +230,8 @@ const CSS = `
 .vp-opt{text-align:left;font-size:var(--fs-base);font-weight:600;border:1px solid #e2e8f0;background:#fff;border-radius:12px;padding:10px 14px;min-height:50px;cursor:pointer;color:#0f172a}
 .vp-opt.ok{background:#ecfdf5;border-color:#059669}.vp-opt.no{background:#fff1f2;border-color:#e11d48}
 .vp-note{background:#fffbeb;border:1px solid #fde68a;border-radius:12px;padding:10px 12px;font-size:var(--fs-base);color:#1e293b;line-height:1.5}
-.vp-fb{font-weight:800;margin:0}.vp-fb.ok{color:#047857}.vp-fb.no{color:#be123c}`;
+.vp-fb{font-weight:800;margin:0}.vp-fb.ok{color:#047857}.vp-fb.no{color:#be123c}
+@media (min-width:1024px){#vp-watch.vp-card{grid-template-columns:minmax(0,1fr) 320px;align-items:start;column-gap:18px}#vp-watch .vp-video{grid-column:1;grid-row:1 / span 6}#vp-watch>:not(video){grid-column:2}#vp-check:has(.vp-img){grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);align-items:start;column-gap:18px}#vp-check .vp-img{grid-column:1;grid-row:1 / span 6}#vp-check:has(.vp-img)>:not(.vp-img){grid-column:2}#vp-check .vp-opts{grid-template-columns:1fr}}`;
 function css() { if (!document.getElementById('vp-css')) { const s = document.createElement('style'); s.id = 'vp-css'; s.textContent = CSS; document.head.appendChild(s); } }
 
 function mount(P, root, { say, grade, words }) {

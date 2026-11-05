@@ -214,55 +214,81 @@ T19 = dict(name='Picture', next='Explore the clothes', title='Les vêtements', s
 # ---------------- 20 Body & Health: the body is drawn ----------------
 SKIN, SKIN2, HAIR = '#F3C9A6', '#E8B48C', '#4A2C1D'
 def face_scene():
+    # a friendly cartoon face: big shiny eyes, rosy cheeks, a small smile; the skin is shown in a zoom bubble at the side
     s = f'''<rect width="900" height="620" fill="#F1F7FD"/>
- <defs><radialGradient id="bd-face" cx=".45" cy=".4" r=".7"><stop offset="0" stop-color="#F8D7BB"/><stop offset="1" stop-color="{SKIN2}"/></radialGradient></defs>
- <path d="M300,620 Q300,520 450,505 Q600,520 600,620Z" fill="#5BA4D9"/>'''
+ <circle cx="120" cy="90" r="60" fill="#E3EEFA"/><circle cx="800" cy="560" r="80" fill="#E3EEFA"/>
+ <defs><radialGradient id="bd-face" cx=".45" cy=".42" r=".65"><stop offset="0" stop-color="#FBE0C8"/><stop offset="1" stop-color="#F0BF98"/></radialGradient>
+ <clipPath id="bd-zoom"><circle cx="790" cy="300" r="58"/></clipPath></defs>
+ <path d="M282,620 Q286,528 410,508 L490,508 Q614,528 618,620Z" fill="#5BA4D9"/><path d="M410,508 Q450,546 490,508" fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round"/>'''
+    HAIRL = '#6B4226'
+    face = 'M300,262 C300,372 368,444 450,444 C532,444 600,372 600,262 C600,226 596,200 588,182 Q560,206 520,170 Q488,200 446,166 Q404,198 366,170 Q334,200 310,184 C303,206 300,232 300,262Z'
     items = [
-        I('tête', 'la tête', 'f', 'head', 'x', d=f'<ellipse cx="450" cy="250" rx="168" ry="196" fill="#000" fill-opacity="0"/><path d="M282,240 Q280,52 450,46 Q620,52 618,240 Q600,120 450,112 Q300,120 282,240Z" fill="{HAIR}"/>', x=640, ly=78),
-        I('visage', 'le visage', 'm', 'face', 'x', d=f'<ellipse cx="450" cy="268" rx="150" ry="178" fill="url(#bd-face)"/>', x=450, ly=236),
-        I('oreille', "l'oreille", 'f', 'ear', 'x', d=f'<ellipse cx="296" cy="276" rx="22" ry="40" fill="{SKIN2}"/><path d="M296,252 q-10,24 4,44" stroke="#C98F6A" stroke-width="4" fill="none"/>', x=232, ly=280),
-        I('œil / les yeux', "l'œil / les yeux", 'm', 'eye / eyes', 'x', lines=["l'œil", 'les yeux'], lc=['m', 'm'], d='<ellipse cx="392" cy="236" rx="26" ry="18" fill="#fff"/><circle cx="392" cy="236" r="12" fill="#5B3A29"/><circle cx="395" cy="232" r="4" fill="#fff"/><ellipse cx="508" cy="236" rx="26" ry="18" fill="#fff"/><circle cx="508" cy="236" r="12" fill="#5B3A29"/><circle cx="511" cy="232" r="4" fill="#fff"/><path d="M364,210 q28,-16 56,0 M480,210 q28,-16 56,0" stroke="#4A2C1D" stroke-width="6" fill="none" stroke-linecap="round"/>', x=170, ly=196),
-        I('nez', 'le nez', 'm', 'nose', 'x', d='<path d="M450,248 q-6,40 -20,52 q20,12 40,0 q-14,-12 -20,-52" fill="#E3A57E"/>', x=640, ly=300),
-        I('bouche', 'la bouche', 'f', 'mouth', 'x', d='<path d="M396,350 Q450,410 504,350 Q450,366 396,350Z" fill="#B83B3B"/>', x=640, ly=372),
-        I('dents', 'les dents', 'f', 'teeth', 'x', pl=True, d='<path d="M410,354 Q450,364 490,354 L486,366 Q450,374 414,366Z" fill="#fff" stroke="#E5E7EB"/>', x=232, ly=372),
-        I('peau', 'la peau', 'f', 'skin', 'x', d='<circle cx="352" cy="316" r="26" fill="#F8D7BB" stroke="#94A3B8" stroke-width="4"/>' + ''.join(f'<circle cx="{340 + (k * 7) % 24}" cy="{306 + (k * 11) % 22}" r="1.6" fill="#D99B74"/>' for k in range(10)) + '<path d="M370,334 l16,16" stroke="#94A3B8" stroke-width="6" stroke-linecap="round"/>', x=170, ly=320),
-        I('cou', 'le cou', 'm', 'neck', 'x', d=f'<rect x="404" y="430" width="92" height="84" fill="{SKIN2}"/>', x=640, ly=470),
-        I('gorge', 'la gorge', 'f', 'throat', 'x', d='<path d="M430,462 q20,16 40,0 v20 q-20,14 -40,0z" fill="#D99B74"/>', x=232, ly=470),
+        I('tête', 'la tête', 'f', 'head', 'x', d=f'<ellipse cx="450" cy="250" rx="168" ry="196" fill="#000" fill-opacity="0"/><path d="M290,322 C262,190 300,58 450,52 C600,58 638,190 610,322 Q606,300 594,250 L306,250 Q294,300 290,322Z" fill="{HAIR}"/><path d="M340,96 Q400,64 470,72" stroke="{HAIRL}" stroke-width="8" fill="none" stroke-linecap="round" opacity=".6"/>', x=640, ly=78),
+        I('visage', 'le visage', 'm', 'face', 'x', d=f'<path d="{face}" fill="url(#bd-face)"/><ellipse cx="360" cy="338" rx="30" ry="18" fill="#F49A9A" opacity=".45"/><ellipse cx="540" cy="338" rx="30" ry="18" fill="#F49A9A" opacity=".45"/>', x=670, ly=196),
+        I('oreille', "l'oreille", 'f', 'ear', 'x', d=f'<ellipse cx="300" cy="286" rx="24" ry="34" fill="{SKIN2}"/><path d="M298,266 q-12,20 2,40" stroke="#D29A74" stroke-width="5" fill="none" stroke-linecap="round"/><ellipse cx="600" cy="286" rx="24" ry="34" fill="{SKIN2}"/><path d="M602,266 q12,20 -2,40" stroke="#D29A74" stroke-width="5" fill="none" stroke-linecap="round"/>', x=232, ly=290),
+        I('œil / les yeux', "l'œil / les yeux", 'm', 'eye / eyes', 'x', lines=["l'œil", 'les yeux'], lc=['m', 'm'], d=''.join(f'<ellipse cx="{x}" cy="266" rx="30" ry="34" fill="#fff"/><circle cx="{x + 3}" cy="270" r="21" fill="#7A4B2A"/><circle cx="{x + 3}" cy="270" r="11" fill="#2A1A10"/><circle cx="{x + 11}" cy="260" r="7" fill="#fff"/><circle cx="{x - 4}" cy="280" r="3.5" fill="#fff"/><path d="M{x - 30},258 Q{x},226 {x + 30},258" stroke="#3B2416" stroke-width="5" fill="none" stroke-linecap="round"/>' for x in (395, 505)) + f'<path d="M367,216 Q395,202 423,214 M477,214 Q505,202 533,216" stroke="{HAIR}" stroke-width="8" fill="none" stroke-linecap="round"/>', x=170, ly=196),
+        I('nez', 'le nez', 'm', 'nose', 'x', d='<ellipse cx="450" cy="312" rx="24" ry="22" fill="#000" fill-opacity="0"/><path d="M436,314 Q450,330 464,314" stroke="#D08E66" stroke-width="6" fill="none" stroke-linecap="round"/><ellipse cx="450" cy="306" rx="12" ry="9" fill="#fff" opacity=".35"/><path d="M642,286 L472,312" stroke="#94A3B8" stroke-width="1.5" stroke-dasharray="4 3"/>', x=680, ly=282),
+        I('bouche', 'la bouche', 'f', 'mouth', 'x', d='<path d="M412,356 Q450,402 488,356 Q450,366 412,356Z" fill="#A8323A"/><path d="M432,384 Q450,394 468,384 Q450,376 432,384Z" fill="#F08A96"/>', x=640, ly=372),
+        I('dents', 'les dents', 'f', 'teeth', 'x', pl=True, d='<path d="M422,360 Q450,368 478,360 L475,368 Q450,375 425,368Z" fill="#fff"/>', x=232, ly=372),
+        I('peau', 'la peau', 'f', 'skin', 'x', d='<path d="M554,342 L734,322" stroke="#94A3B8" stroke-width="2" stroke-dasharray="5 4"/><circle cx="540" cy="338" r="14" fill="none" stroke="#94A3B8" stroke-width="3"/><circle cx="790" cy="300" r="58" fill="#F6D2B4"/><g clip-path="url(#bd-zoom)">' + ''.join(f'<circle cx="{752 + (k * 23) % 78}" cy="{256 + (k * 37) % 90}" r="{2 + k % 3}" fill="#E2A47E" opacity=".7"/>' for k in range(16)) + '<path d="M740,330 q30,-14 60,0 q20,8 44,-4 M736,280 q30,-12 56,0 q22,8 46,-6" stroke="#E7B591" stroke-width="2" fill="none"/></g><circle cx="790" cy="300" r="58" fill="none" stroke="#64748B" stroke-width="7"/><path d="M832,342 l26,26" stroke="#64748B" stroke-width="12" stroke-linecap="round"/>', x=790, ly=398),
+        I('cou', 'le cou', 'm', 'neck', 'x', d=f'<path d="M412,428 Q450,456 488,428 L490,512 Q450,530 410,512Z" fill="{SKIN2}"/><ellipse cx="450" cy="454" rx="36" ry="9" fill="#D69A72" opacity=".55"/>', x=640, ly=470),
+        I('gorge', 'la gorge', 'f', 'throat', 'x', d='<ellipse cx="450" cy="476" rx="20" ry="14" fill="#E0A27B"/>', x=232, ly=470),
     ]
     # the face sits on top of the head, the parts on top of the face: order matters
     for it in items: it.pop('pic', None)
     leaders = '<g stroke="#94A3B8" stroke-width="1.5" stroke-dasharray="4 3">' + ''.join(f'<path d="{p}"/>' for p in [
-        'M600,80 L560,98', 'M200,200 L366,234', 'M262,284 L276,280', 'M600,302 L466,292', 'M600,374 L506,360', 'M262,376 L412,362', 'M200,322 L344,312', 'M600,472 L496,470', 'M262,474 L428,472']) + '</g>'
-    return dict(title='Le visage', w=900, h=620, minw=520, scene=s + leaders, items=items)
+        'M600,80 L566,100', 'M630,200 L592,214', 'M200,204 L364,262', 'M262,292 L276,290', 'M600,374 L490,368', 'M262,376 L424,364', 'M600,472 L490,470', 'M262,474 L430,476']) + '</g>'
+    return dict(title='Le visage', w=900, h=620, minw=520, center=True, scene=s + leaders, items=items)
 
 def body_scene():
-    c = '#5BA4D9'
-    s = '<rect width="900" height="700" fill="#F1F7FD"/>'
-    fig = lambda cx: dict(cx=cx)
+    # a friendly cartoon person: smiling face, T-shirt, shorts, trainers; on the right the same person from behind
+    c, c2, SH = '#5BA4D9', '#4F93C8', '#334155'
+    s = '<rect width="900" height="700" fill="#F1F7FD"/><ellipse cx="400" cy="632" rx="120" ry="12" fill="#DCE6F2"/><ellipse cx="780" cy="632" rx="100" ry="11" fill="#DCE6F2"/>'
+    legs = lambda: f'<path d="M344,356 h30 v236 q0,10 -10,10 h-10 q-10,0 -10,-10z M426,356 h30 v236 q0,10 -10,10 h-10 q-10,0 -10,-10z" fill="{SKIN}"/>'
+    shorts = f'<path d="M334,344 Q400,356 466,344 L472,440 Q446,448 418,440 L404,380 L396,380 L382,440 Q354,448 328,440Z" fill="{SH}"/>'
+    shoes = lambda: ''.join(f'<rect x="{x - 15}" y="588" width="30" height="12" rx="4" fill="#fff"/><path d="M{x - 18},600 h32 q{14 * d},0 {20 * d},14 v6 h-{52 if d > 0 else -52} q0,-10 0,-20z" transform="translate(0,0)" fill="#E2524A"/><path d="M{x - 18},614 h{52 * d if d > 0 else 0}" stroke="#fff" stroke-width="3"/>' for x, d in ((359, -1), (441, 1)))
     items = [
-        I('corps', 'le corps', 'm', 'body', 'x', d=f'<rect x="300" y="40" width="200" height="640" fill="#000" fill-opacity="0"/>', x=400, ly=30),
-        I('épaule', "l'épaule", 'f', 'shoulder', 'x', d=f'<circle cx="340" cy="178" r="26" fill="{c}"/><circle cx="460" cy="178" r="26" fill="{c}"/>', x=230, ly=150),
-        I('bras', 'le bras', 'm', 'arm', 'x', d=f'<path d="M322,182 Q296,260 300,330" stroke="{SKIN2}" stroke-width="34" stroke-linecap="round" fill="none"/><path d="M478,182 Q504,260 500,330" stroke="{SKIN2}" stroke-width="34" stroke-linecap="round" fill="none"/>', x=230, ly=262),
-        I('main', 'la main', 'f', 'hand', 'x', d=f'<ellipse cx="300" cy="352" rx="22" ry="26" fill="{SKIN}"/><ellipse cx="500" cy="352" rx="22" ry="26" fill="{SKIN}"/>', x=230, ly=358),
-        I('doigt', 'le doigt', 'm', 'finger', 'x', d=f'<path d="M286,370 v24 M296,374 v28 M306,374 v26 M316,368 v18" stroke="{SKIN}" stroke-width="8" stroke-linecap="round"/>', x=230, ly=420),
-        I('poitrine', 'la poitrine', 'f', 'chest', 'x', d=f'<path d="M340,170 Q400,158 460,170 L470,262 Q400,272 330,262Z" fill="{c}"/>', x=400, ly=0),
+        I('corps', 'le corps', 'm', 'body', 'x', d=f'<rect x="300" y="40" width="200" height="640" fill="#000" fill-opacity="0"/>', x=560, ly=56),
+        I('épaule', "l'épaule", 'f', 'shoulder', 'x', d=f'<circle cx="338" cy="184" r="28" fill="{c}"/><circle cx="462" cy="184" r="28" fill="{c}"/>', x=230, ly=150),
+        I('bras', 'le bras', 'm', 'arm', 'x', d=f'<path d="M318,204 Q302,262 304,326" stroke="{SKIN}" stroke-width="26" stroke-linecap="round" fill="none"/><path d="M482,204 Q498,262 496,326" stroke="{SKIN}" stroke-width="26" stroke-linecap="round" fill="none"/>', x=230, ly=262),
+        I('main', 'la main', 'f', 'hand', 'x', d=f'<ellipse cx="303" cy="348" rx="19" ry="21" fill="{SKIN}"/><ellipse cx="320" cy="344" rx="6" ry="11" fill="{SKIN}" transform="rotate(-25,320,344)"/><ellipse cx="497" cy="348" rx="19" ry="21" fill="{SKIN}"/><ellipse cx="480" cy="344" rx="6" ry="11" fill="{SKIN}" transform="rotate(25,480,344)"/>', x=230, ly=358),
+        I('doigt', 'le doigt', 'm', 'finger', 'x', d=f'<path d="M290,362 v16 M298,366 v18 M306,366 v17 M314,362 v12 M486,362 v12 M494,366 v17 M502,366 v18 M510,362 v16" stroke="{SKIN}" stroke-width="7" stroke-linecap="round"/><path d="M290,362 v16 M298,366 v18 M306,366 v17 M314,362 v12" stroke="{SKIN2}" stroke-width="1" stroke-linecap="round" opacity=".6"/>', x=230, ly=420),
+        I('poitrine', 'la poitrine', 'f', 'chest', 'x', d=f'<path d="M336,170 Q400,154 464,170 Q472,214 470,262 Q400,272 330,262 Q328,214 336,170Z" fill="{c}"/><path d="M380,160 Q400,182 420,160" stroke="#fff" stroke-width="6" fill="none" stroke-linecap="round"/>', x=400, ly=0),
         I('cœur', 'le cœur', 'm', 'heart', 'x', d='<image href="media/pictures/fe-anatomical-heart.webp" x="404" y="196" width="50" height="50"/>', x=620, ly=226),
-        I('ventre', 'le ventre', 'm', 'belly, stomach', 'x', d=f'<path d="M330,262 Q400,272 470,262 L466,352 Q400,362 334,352Z" fill="#4F93C8"/>', x=620, ly=316),
-        I('jambe', 'la jambe', 'f', 'leg', 'x', d='<path d="M338,350 L378,350 L372,610 L340,610Z M422,350 L462,350 L460,610 L428,610Z" fill="#334155"/>', x=230, ly=520),
-        I('genou', 'le genou', 'm', 'knee', 'x', d='<ellipse cx="356" cy="480" rx="18" ry="14" fill="#475569"/><ellipse cx="444" cy="480" rx="18" ry="14" fill="#475569"/>', x=620, ly=486),
-        I('pied', 'le pied', 'm', 'foot', 'x', d='<ellipse cx="350" cy="622" rx="34" ry="14" fill="#1E293B"/><ellipse cx="452" cy="622" rx="34" ry="14" fill="#1E293B"/>', x=620, ly=630),
+        I('ventre', 'le ventre', 'm', 'belly, stomach', 'x', d=f'<path d="M330,262 Q400,272 470,262 L468,344 Q400,358 332,344Z" fill="{c2}"/><path d="M334,338 Q400,350 466,338" stroke="#3F7FB3" stroke-width="3" fill="none"/>', x=620, ly=316),
+        I('jambe', 'la jambe', 'f', 'leg', 'x', d=legs() + shorts, x=230, ly=520),
+        I('genou', 'le genou', 'm', 'knee', 'x', d=f'<path d="M350,488 q9,7 18,0 M432,488 q9,7 18,0" stroke="#D29A74" stroke-width="3" fill="none" stroke-linecap="round"/><ellipse cx="359" cy="484" rx="15" ry="12" fill="{SKIN2}" opacity=".45"/><ellipse cx="441" cy="484" rx="15" ry="12" fill="{SKIN2}" opacity=".45"/>', x=620, ly=486),
+        I('pied', 'le pied', 'm', 'foot', 'x', d='<rect x="345" y="586" width="28" height="12" rx="4" fill="#fff"/><rect x="427" y="586" width="28" height="12" rx="4" fill="#fff"/><path d="M372,596 L344,596 Q328,598 326,612 Q326,622 336,622 L372,622Z" fill="#E2524A"/><path d="M428,596 L456,596 Q472,598 474,612 Q474,622 464,622 L428,622Z" fill="#E2524A"/><path d="M326,616 H372 M428,616 H474" stroke="#fff" stroke-width="3"/>', x=620, ly=630),
     ]
-    head = f'<rect x="384" y="122" width="32" height="40" fill="{SKIN2}"/><circle cx="400" cy="100" r="46" fill="{SKIN}"/><path d="M354,96 Q352,48 400,46 Q448,48 446,96 Q430,70 400,68 Q370,70 354,96Z" fill="{HAIR}"/><circle cx="384" cy="102" r="4" fill="#333"/><circle cx="416" cy="102" r="4" fill="#333"/><path d="M388,122 q12,8 24,0" stroke="#B83B3B" stroke-width="3" fill="none" stroke-linecap="round"/>'
-    # the back, seen from behind, on the right
-    back = f'<g transform="translate(400,0)"><rect x="384" y="122" width="32" height="40" fill="{SKIN2}"/><circle cx="400" cy="100" r="46" fill="{HAIR}"/><path d="M340,170 Q400,158 460,170 L466,352 Q400,362 334,352Z" fill="{c}"/><path d="M322,182 Q296,260 300,330 M478,182 Q504,260 500,330" stroke="{SKIN2}" stroke-width="30" stroke-linecap="round" fill="none"/><path d="M338,350 L378,350 L372,610 L340,610Z M422,350 L462,350 L460,610 L428,610Z" fill="#334155"/><text x="400" y="668" text-anchor="middle" font-size="14" fill="#64748B">de dos (from behind)</text></g>'
-    items.insert(1, I('dos', 'le dos', 'm', 'back', 'x', d=f'<g transform="translate(400,0)"><path d="M344,176 Q400,166 456,176 L462,346 Q400,356 338,346Z" fill="#3E86C2"/></g>', x=800, ly=262))
+    face = f'''<defs><radialGradient id="bd-hd" cx=".45" cy=".42" r=".65"><stop offset="0" stop-color="#FBE0C8"/><stop offset="1" stop-color="#F0BF98"/></radialGradient></defs>
+ <rect x="388" y="138" width="24" height="26" rx="6" fill="{SKIN2}"/>
+ <path d="M348,112 C340,60 368,40 400,40 C432,40 460,60 452,112 Z" fill="{HAIR}"/>
+ <ellipse cx="350" cy="104" rx="9" ry="13" fill="{SKIN2}"/><ellipse cx="450" cy="104" rx="9" ry="13" fill="{SKIN2}"/>
+ <path d="M352,100 C352,128 372,148 400,148 C428,148 448,128 448,100 C448,88 446,80 443,74 Q430,84 416,70 Q402,84 386,70 Q372,84 357,74 C354,82 352,90 352,100Z" fill="url(#bd-hd)"/>
+ <ellipse cx="383" cy="100" rx="8" ry="9" fill="#fff"/><circle cx="384" cy="101" r="5.5" fill="#3B2416"/><circle cx="386" cy="98" r="2" fill="#fff"/>
+ <ellipse cx="417" cy="100" rx="8" ry="9" fill="#fff"/><circle cx="418" cy="101" r="5.5" fill="#3B2416"/><circle cx="420" cy="98" r="2" fill="#fff"/>
+ <path d="M374,86 q9,-5 18,0 M408,86 q9,-5 18,0" stroke="{HAIR}" stroke-width="3" fill="none" stroke-linecap="round"/>
+ <ellipse cx="372" cy="118" rx="8" ry="5" fill="#F49A9A" opacity=".5"/><ellipse cx="428" cy="118" rx="8" ry="5" fill="#F49A9A" opacity=".5"/>
+ <path d="M396,112 q4,4 8,0" stroke="#D08E66" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+ <path d="M387,124 Q400,138 413,124 Q400,128 387,124Z" fill="#A8323A"/>'''
+    # the back, seen from behind, on the right: hair over the whole head, ears, T-shirt, shorts, trainers
+    back = (f'<g transform="translate(780,20) scale(.9) translate(-400,0)"><rect x="388" y="138" width="24" height="28" rx="6" fill="{SKIN2}"/>'
+            f'<ellipse cx="350" cy="104" rx="9" ry="13" fill="{SKIN2}"/><ellipse cx="450" cy="104" rx="9" ry="13" fill="{SKIN2}"/>'
+            f'<path d="M352,104 C346,58 370,40 400,40 C430,40 454,58 448,104 C446,128 430,144 400,146 C370,144 354,128 352,104Z" fill="{HAIR}"/><path d="M380,60 q20,-10 40,4" stroke="#6B4226" stroke-width="5" fill="none" stroke-linecap="round" opacity=".6"/>'
+            f'<circle cx="338" cy="184" r="28" fill="{c}"/><circle cx="462" cy="184" r="28" fill="{c}"/>'
+            f'<path d="M318,204 Q302,262 304,326 M482,204 Q498,262 496,326" stroke="{SKIN}" stroke-width="26" stroke-linecap="round" fill="none"/>'
+            f'<ellipse cx="303" cy="348" rx="19" ry="21" fill="{SKIN}"/><ellipse cx="497" cy="348" rx="19" ry="21" fill="{SKIN}"/>'
+            + legs() + shorts +
+            '<rect x="345" y="586" width="28" height="12" rx="4" fill="#fff"/><rect x="427" y="586" width="28" height="12" rx="4" fill="#fff"/><rect x="340" y="596" width="38" height="26" rx="10" fill="#E2524A"/><rect x="422" y="596" width="38" height="26" rx="10" fill="#E2524A"/>'
+            '<text x="400" y="668" text-anchor="middle" font-size="14" fill="#64748B">de dos (from behind)</text></g>')
+    items.insert(1, I('dos', 'le dos', 'm', 'back', 'x', d=f'<g transform="translate(780,20) scale(.9) translate(-400,0)"><path d="M336,170 Q400,154 464,170 Q472,214 470,262 L468,344 Q400,358 332,344 L330,262 Q328,214 336,170Z" fill="#3E86C2"/><path d="M382,164 Q400,170 418,164" stroke="#2F6FA3" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M400,176 V330" stroke="#2F6FA3" stroke-width="2" opacity=".5"/></g>', x=780, ly=262))
     # order: corps (invisible box) first, then the drawn parts; the head and the back figure are scenery
-    s += head + back
+    s += face + back
     for it in items: it.pop('pic', None)
     poit = next(i for i in items if i['key'] == 'poitrine'); poit['x'], poit['ly'] = 620, 196
     leaders = '<g stroke="#94A3B8" stroke-width="1.5" stroke-dasharray="4 3">' + ''.join(f'<path d="{p}"/>' for p in [
-        'M262,150 L316,176', 'M262,262 L304,262', 'M262,358 L280,354', 'M262,420 L290,398', 'M580,196 L462,206', 'M580,226 L452,222', 'M580,316 L466,312', 'M262,520 L340,520', 'M580,486 L462,482', 'M580,630 L486,624', 'M760,262 L846,262']) + '</g>'
-    return dict(title='Le corps', w=900, h=700, minw=560, scene=s + leaders, items=items)
+        'M520,60 L466,74', 'M262,150 L314,176', 'M262,262 L306,262', 'M262,358 L284,352', 'M262,420 L288,376', 'M580,196 L462,206', 'M580,226 L452,222', 'M580,316 L466,312', 'M262,520 L342,520', 'M580,486 L456,484', 'M580,630 L474,616']) + '</g>'
+    return dict(title='Le corps', w=900, h=700, minw=560, center=True, scene=s + leaders, items=items)
 
 T20 = dict(name='Picture', next='Explore the body', title='Le corps', scenes=[
  face_scene(), body_scene(),
@@ -407,7 +433,7 @@ def item_js(w):
 def page_js(n, label, T):
     sc = []
     for s in T['scenes']:
-        sc.append(f"        {{ title: {q(s['title'])}, w: {s['w']}, h: {s['h']}, minw: {s['minw']}, scene: `{js(s['scene'])}`, items: [\n" + '\n'.join(item_js(w) for w in s['items']) + '\n        ] },')
+        sc.append(f"        {{ title: {q(s['title'])}, w: {s['w']}, h: {s['h']}, minw: {s['minw']}, {'center: true, ' if s.get('center') else ''}scene: `{js(s['scene'])}`, items: [\n" + '\n'.join(item_js(w) for w in s['items']) + '\n        ] },')
     return (f"// ---------------- {n} {label} (made by tools/picture-pages/topics.py) ----------------\n"
             f"PAGES[{n}] = {{\n    name: {q(T['name'])}, next: {q(T['next'])}, title: {q(T['title'])},\n    credit: '3D pictures: Microsoft Fluent Emoji (MIT licence)',\n    scenes: [\n" + '\n'.join(sc) + '\n    ],\n};\n')
 
