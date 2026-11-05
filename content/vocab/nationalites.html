@@ -5,39 +5,39 @@
     .nat [data-g="m"] { --g:var(--m); --gs:var(--m-soft); }
     .nat [data-g="f"] { --g:var(--f); --gs:var(--f-soft); }
     .nat [data-g="pl"] { --g:var(--pl); --gs:var(--pl-soft); }
-    .nat-key { display:flex; flex-wrap:wrap; gap:10px; font-size:11px; color:var(--muted); }
+    .nat-key { display:flex; flex-wrap:wrap; gap:10px; font-size:var(--fs-xs); color:var(--muted); }
     .nat-key i { display:inline-block; width:10px; height:10px; border-radius:3px; margin-right:4px; vertical-align:-1px; }
     .nat-m { color:var(--m); font-weight:700; } .nat-f { color:var(--f); font-weight:700; }
     .nat-rules { display:grid; grid-template-columns:repeat(auto-fit, minmax(min(100%, 230px), 1fr)); gap:10px; }
     .nat-rule { background:#fff; border:1px solid var(--line); border-radius:12px; padding:12px; display:grid; gap:8px; align-content:start; }
-    .nat-rule h5 { margin:0; font-size:13px; font-weight:800; color:var(--ink); }
-    .nat-rule p { margin:0; color:var(--muted); font-size:11px; }
+    .nat-rule h5 { margin:0; font-size:var(--fs-sm); font-weight:800; color:var(--ink); }
+    .nat-rule p { margin:0; color:var(--muted); font-size:var(--fs-xs); }
     .nat-ex { background:#fff; border:1px solid var(--line); border-radius:12px; padding:16px; display:grid; gap:12px; }
-    .nat-q { font-size:17px; color:var(--ink); line-height:1.5; }
+    .nat-q { font-size:var(--fs-base); color:var(--ink); line-height:1.5; }
     .nat-q .gap { display:inline-block; min-width:80px; border-bottom:2px solid #6366f1; text-align:center; font-weight:800; }
     .nat-opts { display:grid; grid-template-columns:repeat(auto-fit, minmax(130px, 1fr)); gap:8px; }
-    .nat-opt { appearance:none; font:inherit; font-size:14px; cursor:pointer; border:1px solid var(--line); background:#f8fafc; border-radius:10px; padding:10px; color:var(--ink); }
+    .nat-opt { appearance:none; font:inherit; font-size:var(--fs-sm); cursor:pointer; border:1px solid var(--line); background:#f8fafc; border-radius:10px; padding:10px; color:var(--ink); }
     .nat-opt:hover:not(:disabled) { border-color:#6366f1; background:#eef2ff; }
     .nat-opt.ok { background:#d1fae5; border-color:var(--ok); } .nat-opt.no { background:#ffe4e6; border-color:var(--bad); }
     .nat-opt:disabled { cursor:default; }
     .nat-fb { font-weight:700; min-height:1.3em; } .nat-fb.ok { color:var(--ok); } .nat-fb.no { color:var(--bad); }
-    .nat-btn { appearance:none; font:inherit; font-size:13px; font-weight:700; border:0; border-radius:999px; padding:8px 16px; background:#4f46e5; color:#fff; cursor:pointer; justify-self:start; }
+    .nat-btn { appearance:none; font:inherit; font-size:var(--fs-sm); font-weight:700; border:0; border-radius:999px; padding:8px 16px; background:#4f46e5; color:#fff; cursor:pointer; justify-self:start; }
     .nat-btn.ghost { background:#eef2ff; color:#4338ca; }
-    .nat-row { display:flex; flex-wrap:wrap; gap:8px; align-items:center; justify-content:space-between; font-size:12px; color:var(--muted); }
+    .nat-row { display:flex; flex-wrap:wrap; gap:8px; align-items:center; justify-content:space-between; font-size:var(--fs-xs); color:var(--muted); }
     .nat-meter { height:6px; background:#e2e8f0; border-radius:99px; overflow:hidden; flex:1 1 120px; max-width:220px; }
     .nat-meter span { display:block; height:100%; background:#059669; width:0; transition:width .3s; }
     @media (prefers-reduced-motion: reduce) { .nat-meter span { transition:none; } }
     .nat-list { columns:2 250px; column-gap:20px; }
     .nat-group { margin-bottom:12px; }
-    .nat-group h5 { margin:0 0 4px; font-size:13px; font-weight:800; color:var(--ink); break-after:avoid; }
+    .nat-group h5 { margin:0 0 4px; font-size:var(--fs-sm); font-weight:800; color:var(--ink); break-after:avoid; }
     .nat-li { break-inside:avoid; }
     .nat-li { display:grid; grid-template-columns:1fr auto; gap:1px 8px; padding:6px 0; border-bottom:1px solid var(--line); }
     .nat-w { appearance:none; border:0; background:none; font:inherit; color:inherit; cursor:pointer; padding:1px 4px; margin:-1px -4px; border-radius:6px; text-align:left; }
     .nat-w:hover { background:var(--gs, #eef2ff); }
     .nat-w:focus-visible { outline:2px solid #6366f1; outline-offset:1px; }
-    .nat-li .cn { font-size:13px; font-weight:700; color:var(--ink); } .nat-li .cn .art { color:var(--g); }
-    .nat-li .pp { font-size:12px; color:var(--muted); justify-self:end; }
-    .nat-li .nt { grid-column:1/-1; font-size:12px; }
+    .nat-li .cn { font-size:var(--fs-sm); font-weight:700; color:var(--ink); } .nat-li .cn .art { color:var(--g); }
+    .nat-li .pp { font-size:var(--fs-xs); color:var(--muted); justify-self:end; }
+    .nat-li .nt { grid-column:1/-1; font-size:var(--fs-xs); }
     .nat-chip:focus-visible, .nat-opt:focus-visible, .nat-btn:focus-visible { outline:2px solid #6366f1; outline-offset:2px; }
 
 </style>
@@ -50,7 +50,7 @@
     </div>
 
     <div class="space-y-2">
-        <h4 class="font-bold uppercase tracking-wider text-slate-400 text-[10px]">Les pays et les nationalités</h4>
+        <h4 class="font-bold uppercase tracking-wider text-slate-400 text-xs">Les pays et les nationalités</h4>
         <div class="nat-key">
             <span><i style="background:var(--m)"></i>masculine · au</span>
             <span><i style="background:var(--f)"></i>feminine · en</span>
@@ -60,17 +60,17 @@
     </div>
 
     <div class="bg-amber-50 border border-amber-200/60 p-4 rounded-xl space-y-1">
-        <h4 class="font-bold text-amber-900 uppercase tracking-wide text-[11px]">💡 Règle d'accord</h4>
+        <h4 class="font-bold text-amber-900 uppercase tracking-wide text-xs">💡 Règle d'accord</h4>
         <p class="text-amber-800 leading-relaxed">En règle générale, pour former le féminin d'une nationalité, on ajoute un <strong class="text-amber-950">« e »</strong> à la fin du masculin (ex: <em>il est américain</em> ➔ <em>elle est américaine</em>). Une nationalité s'écrit avec une minuscule (<em>il est français</em>), mais une personne prend une majuscule (<em>un Français, une Française</em>).</p>
     </div>
 
     <div class="space-y-2">
-        <h4 class="font-bold uppercase tracking-wider text-slate-400 text-[10px]">Masculin ➔ féminin : touchez pour entendre « il est… / elle est… »</h4>
+        <h4 class="font-bold uppercase tracking-wider text-slate-400 text-xs">Masculin ➔ féminin : touchez pour entendre « il est… / elle est… »</h4>
         <div class="nat-rules" id="nat-rules"></div>
     </div>
 
     <div class="space-y-2">
-        <h4 class="font-bold uppercase tracking-wider text-slate-400 text-[10px]">Vérifiez : il / elle est…, en / au / aux</h4>
+        <h4 class="font-bold uppercase tracking-wider text-slate-400 text-xs">Vérifiez : il / elle est…, en / au / aux</h4>
         <div class="nat-ex" id="nat-ex"></div>
     </div>
 </div>

@@ -62,8 +62,8 @@ PAGES[15] = {
             { key: 'maison', fr: "la maison", g: 'f', en: 'house', x: 75, ly: 150, d: `<image href="media/pictures/maison.webp" x="20" y="18" width="110" height="110"/>` },
             { key: 'toit', fr: "le toit", g: 'm', en: 'roof', x: 690, ly: 112, d: `<path d="M150,196 L460,52 L770,196Z M214,188 L460,96 L706,188Z" fill-rule="evenodd" fill="#B5543A"/><path d="M150,196 L460,52 L770,196" fill="none" stroke="#8E3E29" stroke-width="5" stroke-linejoin="round"/>` },
             { key: 'grenier', fr: "le grenier", g: 'm', en: 'attic', x: 460, ly: 162, d: `<path d="M214,188 L460,96 L706,188Z" fill="#EBDDC6"/><rect x="560" y="164" width="34" height="24" fill="#C79A64"/><rect x="598" y="170" width="26" height="18" fill="#B38655"/><rect x="300" y="168" width="30" height="20" fill="#C79A64"/>` },
-            { key: 'premier étage', fr: "le premier étage", g: 'm', en: 'first floor', x: 85, ly: 254, fs: 13, d: `<rect x="12" y="200" width="146" height="118" rx="12" fill="#EEF2FF" stroke="#A5B4FC" stroke-width="2"/><path d="M158,259 L170,259" stroke="#A5B4FC" stroke-width="2"/>` },
-            { key: 'rez-de-chaussée', fr: "le rez-de-chaussée", g: 'm', en: 'ground floor', x: 85, ly: 395, fs: 13, d: `<rect x="12" y="330" width="146" height="138" rx="12" fill="#EEF2FF" stroke="#A5B4FC" stroke-width="2"/><path d="M158,399 L170,399" stroke="#A5B4FC" stroke-width="2"/>` },
+            { key: 'premier étage', fr: "le premier étage", g: 'm', en: 'first floor', x: 85, ly: 254, fs: 14, d: `<rect x="12" y="200" width="146" height="118" rx="12" fill="#EEF2FF" stroke="#A5B4FC" stroke-width="2"/><path d="M158,259 L170,259" stroke="#A5B4FC" stroke-width="2"/>` },
+            { key: 'rez-de-chaussée', fr: "le rez-de-chaussée", g: 'm', en: 'ground floor', x: 85, ly: 395, fs: 14, d: `<rect x="12" y="330" width="146" height="138" rx="12" fill="#EEF2FF" stroke="#A5B4FC" stroke-width="2"/><path d="M158,399 L170,399" stroke="#A5B4FC" stroke-width="2"/>` },
             { key: 'chambre', fr: "la chambre", g: 'f', en: 'bedroom', x: 287, ly: 224, d: `<rect x="182" y="198" width="148" height="122" fill="#F6E7EF"/><rect x="252" y="292" width="70" height="24" rx="5" fill="#8FB3D9"/><rect x="252" y="284" width="20" height="12" rx="4" fill="#fff"/>` },
             { key: 'fenêtre', fr: "la fenêtre", g: 'f', en: 'window', x: 218, ly: 282, fs: 14, d: `<rect x="193" y="210" width="50" height="50" rx="3" fill="#BFE3F7" stroke="#fff" stroke-width="5"/><path d="M218,212 V258 M195,235 H241" stroke="#fff" stroke-width="3"/>` },
             { key: 'salle de bains', fr: "la salle de bains", g: 'f', en: 'bathroom', x: 457, ly: 222, lines: ["la salle", "de bains"], fs: 14, d: `<rect x="392" y="198" width="130" height="122" fill="#E3F2FB"/><path d="M410,296 h70 v6 q0,14 -14,14 h-42 q-14,0 -14,-14z" fill="#fff" stroke="#9CC7DE" stroke-width="2"/>` },
@@ -72,7 +72,7 @@ PAGES[15] = {
             { key: 'entrée', fr: "l'entrée", g: 'f', en: 'entrance hall', x: 230, ly: 344, fs: 14, d: `<rect x="182" y="328" width="102" height="142" fill="#F3EAD9"/>` },
             { key: 'porte', fr: "la porte", g: 'f', en: 'door', x: 230, ly: 374, fs: 14, d: `<rect x="208" y="394" width="44" height="74" rx="3" fill="#8C5A35"/><rect x="214" y="400" width="32" height="28" rx="2" fill="#A06A42"/><circle cx="244" cy="434" r="3.5" fill="#F2C94C"/>` },
             { key: 'couloir', fr: "le couloir", g: 'm', en: 'corridor, hallway', x: 322, ly: 344, fs: 14, d: `<rect x="288" y="328" width="104" height="142" fill="#EFE6D6"/>` },
-            { key: 'escalier', fr: "l'escalier", g: 'm', en: 'stairs', x: 362, ly: 456, fs: 13, nobox: true, d: `<path d="M288,470 L392,330 L392,470Z" fill="#B98B5E"/><path d="M288,470.0 h13 v17.5" fill="none" stroke="#8C6440" stroke-width="2"/><path d="M301,452.5 h13 v17.5" fill="none" stroke="#8C6440" stroke-width="2"/><path d="M314,435.0 h13 v17.5" fill="none" stroke="#8C6440" stroke-width="2"/><path d="M327,417.5 h13 v17.5" fill="none" stroke="#8C6440" stroke-width="2"/><path d="M340,400.0 h13 v17.5" fill="none" stroke="#8C6440" stroke-width="2"/><path d="M353,382.5 h13 v17.5" fill="none" stroke="#8C6440" stroke-width="2"/><path d="M366,365.0 h13 v17.5" fill="none" stroke="#8C6440" stroke-width="2"/><path d="M379,347.5 h13 v17.5" fill="none" stroke="#8C6440" stroke-width="2"/>` },
+            { key: 'escalier', fr: "l'escalier", g: 'm', en: 'stairs', x: 362, ly: 456, fs: 14, nobox: true, d: `<path d="M288,470 L392,330 L392,470Z" fill="#B98B5E"/><path d="M288,470.0 h13 v17.5" fill="none" stroke="#8C6440" stroke-width="2"/><path d="M301,452.5 h13 v17.5" fill="none" stroke="#8C6440" stroke-width="2"/><path d="M314,435.0 h13 v17.5" fill="none" stroke="#8C6440" stroke-width="2"/><path d="M327,417.5 h13 v17.5" fill="none" stroke="#8C6440" stroke-width="2"/><path d="M340,400.0 h13 v17.5" fill="none" stroke="#8C6440" stroke-width="2"/><path d="M353,382.5 h13 v17.5" fill="none" stroke="#8C6440" stroke-width="2"/><path d="M366,365.0 h13 v17.5" fill="none" stroke="#8C6440" stroke-width="2"/><path d="M379,347.5 h13 v17.5" fill="none" stroke="#8C6440" stroke-width="2"/>` },
             { key: 'salon', fr: "le salon", g: 'm', en: 'living room', x: 472, ly: 346, d: `<rect x="396" y="328" width="156" height="142" fill="#E8F0FB"/><rect x="420" y="430" width="100" height="30" rx="8" fill="#6F8FCF"/><rect x="420" y="416" width="100" height="18" rx="7" fill="#88A6E0"/>` },
             { key: 'salle à manger', fr: "la salle à manger", g: 'f', en: 'dining room', x: 602, ly: 346, lines: ["la salle", "à manger"], fs: 14, d: `<rect x="556" y="328" width="94" height="142" fill="#FBEEDD"/><rect x="572" y="436" width="62" height="6" fill="#8C6440"/><rect x="576" y="442" width="5" height="26" fill="#8C6440"/><rect x="625" y="442" width="5" height="26" fill="#8C6440"/>` },
             { key: 'cuisine', fr: "la cuisine", g: 'f', en: 'kitchen', x: 694, ly: 346, fs: 14, d: `<rect x="654" y="328" width="84" height="142" fill="#F1F7E8"/><rect x="664" y="430" width="64" height="38" fill="#fff" stroke="#AAB" stroke-width="1.5"/><circle cx="680" cy="438" r="4" fill="#556"/><circle cx="712" cy="438" r="4" fill="#556"/>` },
@@ -153,8 +153,8 @@ PAGES[17] = {
     credit: '3D pictures: Microsoft Fluent Emoji (MIT licence)',
     scenes: [
         { title: "Papiers et sacs", w: 900, h: 884, minw: 560, scene: `<rect width="900" height="884" fill="#F3EFE6"/><rect x="16" y="16" width="164" height="204" rx="16" fill="#FFFFFF"/><rect x="192" y="16" width="164" height="204" rx="16" fill="#FFFFFF"/><rect x="368" y="16" width="164" height="204" rx="16" fill="#FFFFFF"/><rect x="544" y="16" width="164" height="204" rx="16" fill="#FFFFFF"/><rect x="720" y="16" width="164" height="204" rx="16" fill="#FFFFFF"/><rect x="16" y="232" width="164" height="204" rx="16" fill="#FFFFFF"/><rect x="192" y="232" width="164" height="204" rx="16" fill="#FFFFFF"/><rect x="368" y="232" width="164" height="204" rx="16" fill="#FFFFFF"/><rect x="544" y="232" width="164" height="204" rx="16" fill="#FFFFFF"/><rect x="720" y="232" width="164" height="204" rx="16" fill="#FFFFFF"/><rect x="16" y="448" width="164" height="204" rx="16" fill="#FFFFFF"/><rect x="192" y="448" width="164" height="204" rx="16" fill="#FFFFFF"/><rect x="368" y="448" width="164" height="204" rx="16" fill="#FFFFFF"/><rect x="544" y="448" width="164" height="204" rx="16" fill="#FFFFFF"/><rect x="720" y="448" width="164" height="204" rx="16" fill="#FFFFFF"/><rect x="16" y="664" width="164" height="204" rx="16" fill="#FFFFFF"/>`, items: [
-            { key: "carte d'identité", fr: "la carte d'identité", g: 'f', en: "identity card", x: 98.0, ly: 166, fs: 13, d: `<image href="media/pictures/fe-identification-card.webp" x="38.0" y="26" width="120" height="120"/>` },
-            { key: "permis de conduire", fr: "le permis de conduire", g: 'm', en: "driving licence", x: 274.0, ly: 166, fs: 13, d: `<g transform="translate(214.0,26)"><defs><linearGradient id="dw-lc" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#F9A8D4"/><stop offset="1" stop-color="#EC4899"/></linearGradient></defs><rect x="8" y="26" width="104" height="68" rx="10" fill="url(#dw-lc)"/><rect x="8" y="26" width="104" height="68" rx="10" fill="none" stroke="#000" stroke-opacity=".08" stroke-width="2"/><rect x="16" y="36" width="30" height="36" rx="4" fill="#FCE7F3"/><circle cx="31" cy="49" r="7" fill="#9D174D" opacity=".6"/><path d="M21,68 q10,-12 20,0" fill="#9D174D" opacity=".6"/><path d="M60,46 h42 M60,58 h34" stroke="#fff" stroke-width="5" stroke-linecap="round"/><path d="M62,82 h30 l-4,-8 h-22z" fill="#fff"/><circle cx="68" cy="84" r="4" fill="#9D174D"/><circle cx="86" cy="84" r="4" fill="#9D174D"/></g>` },
+            { key: "carte d'identité", fr: "la carte d'identité", g: 'f', en: "identity card", x: 98.0, ly: 166, fs: 14, d: `<image href="media/pictures/fe-identification-card.webp" x="38.0" y="26" width="120" height="120"/>` },
+            { key: "permis de conduire", fr: "le permis de conduire", g: 'm', en: "driving licence", x: 274.0, ly: 166, fs: 14, d: `<g transform="translate(214.0,26)"><defs><linearGradient id="dw-lc" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#F9A8D4"/><stop offset="1" stop-color="#EC4899"/></linearGradient></defs><rect x="8" y="26" width="104" height="68" rx="10" fill="url(#dw-lc)"/><rect x="8" y="26" width="104" height="68" rx="10" fill="none" stroke="#000" stroke-opacity=".08" stroke-width="2"/><rect x="16" y="36" width="30" height="36" rx="4" fill="#FCE7F3"/><circle cx="31" cy="49" r="7" fill="#9D174D" opacity=".6"/><path d="M21,68 q10,-12 20,0" fill="#9D174D" opacity=".6"/><path d="M60,46 h42 M60,58 h34" stroke="#fff" stroke-width="5" stroke-linecap="round"/><path d="M62,82 h30 l-4,-8 h-22z" fill="#fff"/><circle cx="68" cy="84" r="4" fill="#9D174D"/><circle cx="86" cy="84" r="4" fill="#9D174D"/></g>` },
             { key: "carte bancaire", fr: "la carte bancaire", g: 'f', en: "bank card", x: 450.0, ly: 166, d: `<image href="media/pictures/fe-credit-card.webp" x="390.0" y="26" width="120" height="120"/>` },
             { key: "formulaire", fr: "le formulaire", g: 'm', en: "form", x: 626.0, ly: 166, d: `<image href="media/pictures/fe-clipboard.webp" x="566.0" y="26" width="120" height="120"/>` },
             { key: "adresse", fr: "l'adresse", g: 'f', en: "address", x: 802.0, ly: 166, d: `<g transform="translate(742.0,26)"><defs><linearGradient id="dw-en" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#E2E8F0"/></linearGradient></defs><rect x="8" y="26" width="104" height="70" rx="6" fill="url(#dw-en)" stroke="#CBD5E1" stroke-width="2"/><path d="M8,30 L60,64 L112,30" fill="none" stroke="#CBD5E1" stroke-width="2"/><rect x="84" y="32" width="18" height="20" rx="2" fill="#F87171"/><path d="M34,74 h52 M34,84 h38" stroke="#334155" stroke-width="4" stroke-linecap="round"/></g>` },
@@ -428,16 +428,16 @@ PAGES[32] = {
 const CSS = `
 .pp{display:grid;gap:10px;max-width:820px}
 .pp-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
-.pp-btn{font-weight:700;font-size:15px;border:1px solid #e2e8f0;background:#fff;color:#0f172a;border-radius:12px;padding:8px 14px;min-height:44px;cursor:pointer}
+.pp-btn{font-weight:700;font-size:var(--fs-base);border:1px solid #e2e8f0;background:#fff;color:#0f172a;border-radius:12px;padding:8px 14px;min-height:44px;cursor:pointer}
 .pp-btn.pri{background:#4f46e5;border-color:#4f46e5;color:#fff}
 .pp-btn[aria-pressed="true"]{background:#eef2ff;border-color:#6366f1;color:#3730a3}
 .pp-btn:focus-visible,.pp-opt:focus-visible{outline:3px solid #6366f1;outline-offset:2px}
-.pp-en{margin-left:auto;display:flex;align-items:center;gap:8px;font-size:14px;color:#475569;cursor:pointer;min-height:44px}
+.pp-en{margin-left:auto;display:flex;align-items:center;gap:8px;font-size:var(--fs-sm);color:#475569;cursor:pointer;min-height:44px}
 .pp-en input{width:18px;height:18px;accent-color:#4f46e5}
-.pp-leg{font-size:13px;color:#64748b}
+.pp-leg{font-size:var(--fs-sm);color:#64748b}
 .pp-card{background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:10px;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch}
-.pp-swipe{display:none;font-size:12px;color:#64748b;margin:0 0 4px}
-@media (max-width:640px){.pp-swipe.on{display:block}}
+.pp-swipe{display:none;font-size:var(--fs-xs);color:#64748b;margin:0 0 4px}
+@media (max-width:640px){.pp-swipe.on{display:block}.pp-svg{min-width:var(--minw)}}
 .pp-svg{width:100%;height:auto;display:block;border-radius:10px;touch-action:manipulation}
 .pp-svg .obj{cursor:pointer;outline:none}
 .pp-svg .obj:hover>.shape,.pp-svg .obj:focus-visible>.shape,.pp-svg .obj.hl>.shape{filter:drop-shadow(0 0 6px #6366f1)}
@@ -445,12 +445,12 @@ const CSS = `
 .pp-svg .obj.no>.shape{filter:drop-shadow(0 0 8px #e11d48)}
 .pp-svg .lab{cursor:pointer}
 .pp-svg .lab text{paint-order:stroke;stroke:#fff;stroke-width:4px;stroke-linejoin:round}
-.pp-panel{background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:12px 14px;min-height:56px;font-size:15px;color:#1e293b}
-.pp-big{font-size:1.3rem;font-weight:900}
-.pp-small{font-size:13px;color:#64748b}
+.pp-panel{background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:12px 14px;min-height:56px;font-size:var(--fs-base);color:#1e293b}
+.pp-big{font-size:var(--fs-xl);font-weight:900}
+.pp-small{font-size:var(--fs-sm);color:#64748b}
 .pp-opts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
 @media (max-width:340px){.pp-opts{grid-template-columns:1fr}}
-.pp-opt{text-align:left;font-size:17px;font-weight:700;border:1px solid #e2e8f0;background:#fff;border-radius:12px;padding:10px 14px;min-height:48px;cursor:pointer}
+.pp-opt{text-align:left;font-size:var(--fs-base);font-weight:700;border:1px solid #e2e8f0;background:#fff;border-radius:12px;padding:10px 14px;min-height:48px;cursor:pointer}
 .pp-opt.ok{background:#ecfdf5;border-color:#059669}.pp-opt.no{background:#fff1f2;border-color:#e11d48}
 .pp-fb{font-weight:700;color:#be123c}
 .pp-tab[aria-selected="true"]{background:#4f46e5;border-color:#4f46e5;color:#fff}
@@ -470,7 +470,8 @@ function mount(page, root, opts) {
     root.querySelectorAll('.pp-tab').forEach(b => b.addEventListener('click', () => show(Number(b.dataset.s))));
     show(0);
 }
-let showEnglish = true;
+// English labels: on by default on wide screens; on phones the picture is already busy (tap a word to see its English)
+let showEnglish = !window.matchMedia('(max-width: 640px)').matches;
 function mountScene(page, root, { say, grade, words }) {
     const W = page.items;
     root.innerHTML = `<div class="pp">
@@ -481,7 +482,7 @@ function mountScene(page, root, { say, grade, words }) {
         <label class="pp-en"><input type="checkbox" id="pp-en" ${showEnglish ? 'checked' : ''}> English</label>
       </div>
       <div class="pp-leg">${page.legend || `<b style="color:${CO.m}">blue = le</b> (masculine) · <b style="color:${CO.f}">pink = la</b> (feminine) · before a vowel it is l', and the colour tells you which`}</div>
-      <div class="pp-card">${page.minw ? '<p class="pp-swipe on">Swipe sideways to see the whole picture.</p>' : ''}<svg class="pp-svg" viewBox="0 0 ${page.w} ${page.h}" role="img" aria-label="${esc(page.title)}"${page.minw ? ` style="min-width:${page.minw}px"` : ''}>${page.scene}<g class="objs"></g><g class="labs"></g></svg></div>
+      <div class="pp-card"><p class="pp-swipe on">Swipe sideways to see the whole picture.</p><svg class="pp-svg" viewBox="0 0 ${page.w} ${page.h}" role="img" aria-label="${esc(page.title)}" style="--minw:${Math.max(page.minw || 0, Math.round(page.w * 0.85))}px">${page.scene}<g class="objs"></g><g class="labs"></g></svg></div>
       <div class="pp-panel" id="pp-pn" aria-live="polite"></div>
       ${page.credit ? `<p class="pp-small">${esc(page.credit)}</p>` : ''}</div>`;
     const $ = (s) => root.querySelector(s);
@@ -506,7 +507,7 @@ function mountScene(page, root, { say, grade, words }) {
         const en = showEnglish = $('#pp-en').checked;
         labs.innerHTML = W.map((w, i) => {
             const lines = w.lines || [w.fr], fs = w.fs || 15;
-            return `<g class="lab" data-i="${i}">${lines.map((t, k) => `<text x="${w.x}" y="${w.ly + k * (fs + 1)}" text-anchor="middle" font-size="${fs}" font-weight="800" fill="${CO[w.lc ? w.lc[k] : w.g]}">${esc(t)}</text>`).join('')}${en ? `<text x="${w.x}" y="${w.ly + lines.length * (fs + 1) - 1}" text-anchor="middle" font-size="${fs - 3}" fill="#475569">${esc(w.en)}</text>` : ''}</g>`;
+            return `<g class="lab" data-i="${i}">${lines.map((t, k) => `<text x="${w.x}" y="${w.ly + k * (fs + 1)}" text-anchor="middle" font-size="${fs}" font-weight="800" fill="${CO[w.lc ? w.lc[k] : w.g]}">${esc(t)}</text>`).join('')}${en ? `<text x="${w.x}" y="${w.ly + lines.length * (fs + 1) + 1}" text-anchor="middle" font-size="${fs - 1}" fill="#475569">${esc(w.en)}</text>` : ''}</g>`;
         }).join('');
         labs.querySelectorAll('.lab').forEach(l => l.addEventListener('click', () => tap(Number(l.dataset.i))));
     }

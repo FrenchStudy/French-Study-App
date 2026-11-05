@@ -2,6 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
+/* One text scale for the whole app: the same steps as Tailwind's text-xs … text-3xl.
+   The tools (js/*.js) and lesson pages use these variables, so nothing is smaller than 12px. */
+@layer base {
+    :root { --fs-xs: 0.75rem; --fs-sm: 0.875rem; --fs-base: 1rem; --fs-lg: 1.125rem; --fs-xl: 1.25rem; --fs-2xl: 1.5rem; --fs-3xl: 1.875rem; }
+}
+
 /* Vocab flashcard: a picture stage (soft green to sand), the picture pops in and floats */
 @layer components {
     .vc-stage { background: linear-gradient(160deg, #dcefe0 0%, #f6f0dc 100%); }

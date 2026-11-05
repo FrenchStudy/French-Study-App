@@ -25,7 +25,7 @@
     <main class="flex-1 max-w-6xl mx-auto px-4 py-5 sm:py-6 w-full">
         <div id="loading" class="text-sm text-slate-400 animate-pulse">Loading your day…</div>
 
-        <div id="today" class="hidden space-y-5">
+        <div id="today" class="hidden flex flex-col gap-5 md:block md:space-y-5">
             <!-- Greeting and progress -->
             <section class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
                 <div>
@@ -40,7 +40,7 @@
             </section>
 
             <!-- Your progress (this device) -->
-            <section aria-labelledby="prog-h" class="bg-white border border-slate-200 rounded-2xl p-4 space-y-4">
+            <section aria-labelledby="prog-h" class="order-last md:order-none bg-white border border-slate-200 rounded-2xl p-4 space-y-4">
                 <div class="flex flex-wrap items-baseline justify-between gap-2">
                     <h2 id="prog-h" class="text-sm font-black uppercase tracking-wide text-slate-500">Your progress</h2>
                     <span id="prog-streak" class="text-sm text-slate-500"></span>

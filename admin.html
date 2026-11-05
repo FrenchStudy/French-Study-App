@@ -136,7 +136,7 @@
                         <span class="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-1 hidden group-hover:block group-focus:block whitespace-nowrap text-xs font-semibold bg-slate-900 text-white rounded-md px-2 py-1 z-10">${dayLabel(days[i])}: ${v}</span>
                     </div>`).join('')}
                 </div>
-                <div class="flex justify-between text-[11px] text-slate-400"><span>${dayLabel(days[0])}</span><span>${dayLabel(days[7])}</span><span>Today</span></div>
+                <div class="flex justify-between text-xs text-slate-400"><span>${dayLabel(days[0])}</span><span>${dayLabel(days[7])}</span><span>Today</span></div>
                 <details class="text-xs"><summary class="cursor-pointer text-slate-500 hover:text-indigo-700">Show as a table</summary>
                     <table class="mt-2 w-full"><tbody>${days.map((d, i) => `<tr class="border-t border-slate-100"><td class="py-1 text-slate-500">${dayLabel(d)}</td><td class="py-1 text-right font-semibold">${vals[i]}</td></tr>`).join('')}</tbody></table></details>`;
         }
@@ -180,7 +180,7 @@
             const when = (t) => t ? new Date(t).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : '';
             const table = (head, rows) => rows.length ? `<table class="w-full text-sm"><thead><tr class="text-left text-xs text-slate-500">${head.map(h => `<th class="py-1 pr-3 font-semibold">${h}</th>`).join('')}</tr></thead><tbody>${rows.join('')}</tbody></table>` : '<p class="text-sm text-slate-400">Nothing yet.</p>';
             const who = (r) => `<span class="font-semibold text-slate-900">${esc(r.name || '—')}</span><span class="block text-xs text-slate-500">${esc(r.email || '')}</span>`;
-            const prem = (r) => r.premium ? ' <span class="text-[11px] font-bold text-violet-700 bg-violet-50 px-1.5 py-0.5 rounded-full">Premium</span>' : '';
+            const prem = (r) => r.premium ? ' <span class="text-xs font-bold text-violet-700 bg-violet-50 px-1.5 py-0.5 rounded-full">Premium</span>' : '';
             $('latest').innerHTML = table(['Student', 'Level', 'Goal', 'Joined'], (d.latest || []).map(r => `<tr class="border-t border-slate-100"><td class="py-1.5 pr-3">${who(r)}</td><td class="pr-3">${esc(r.level || '—')}${prem(r)}</td><td class="pr-3">${esc(GOALS[r.goal] || r.goal || '—')}</td><td class="text-slate-500 whitespace-nowrap">${when(r.created_at)}</td></tr>`));
             $('top-ai').innerHTML = table(['Student', 'AI uses'], (d.top_ai_users || []).map(r => `<tr class="border-t border-slate-100"><td class="py-1.5 pr-3">${who(r)}${prem(r)}</td><td class="font-semibold ${!r.premium && r.uses >= (d.free_uses || 5) ? 'text-amber-600' : ''}">${n(r.uses)}</td></tr>`));
             const sk = d.skills_done || {};

@@ -347,7 +347,7 @@
                             ${done ? '<span class="shrink-0 text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">✓ Done</span>' : ''}
                         </span>
                         <span class="block text-sm text-slate-500">${escapeHtml(s.name)}, ${escapeHtml(s.role)}</span>
-                        <span class="inline-block mt-1.5 text-[11px] font-bold uppercase tracking-wide ${suits ? 'text-indigo-700 bg-indigo-50' : 'text-slate-500 bg-slate-100'} px-2 py-0.5 rounded-full">${escapeHtml(s.level)}${suits ? ' · your level' : ''}</span>
+                        <span class="inline-block mt-1.5 text-xs font-bold uppercase tracking-wide ${suits ? 'text-indigo-700 bg-indigo-50' : 'text-slate-500 bg-slate-100'} px-2 py-0.5 rounded-full">${escapeHtml(s.level)}${suits ? ' · your level' : ''}</span>
                     </span></a>`;
             }).join('');
         }
@@ -691,7 +691,7 @@ Give at most 4 corrections, only for real mistakes (an empty list if there are n
         }
         function mineCard(t) {
             return `<a href="speaking.html?task=${encodeURIComponent(t.id)}" data-task="${escapeHtml(t.id)}" class="group flex flex-col gap-1.5 bg-white border border-slate-200 hover:border-indigo-400 hover:shadow-md transition rounded-2xl p-4">
-                <span class="flex items-center justify-between gap-2"><span class="text-[11px] font-bold uppercase tracking-wide text-violet-700 bg-violet-50 px-2 py-0.5 rounded-full">${escapeHtml(t.level)} · ${escapeHtml(t.source === 'posted' ? 'Your question' : t.kindLabel)}</span>${statusHtml(t.id)}</span>
+                <span class="flex items-center justify-between gap-2"><span class="text-xs font-bold uppercase tracking-wide text-violet-700 bg-violet-50 px-2 py-0.5 rounded-full">${escapeHtml(t.level)} · ${escapeHtml(t.source === 'posted' ? 'Your question' : t.kindLabel)}</span>${statusHtml(t.id)}</span>
                 <span class="font-bold text-slate-900 leading-snug group-hover:text-indigo-700">${escapeHtml(t.title)}</span>
                 <span class="text-sm text-slate-500 line-clamp-2">${escapeHtml(t.en || t.fr)}</span></a>`;
         }
@@ -896,7 +896,7 @@ Only list real mistakes, at most 10, in order. "wrong" must be copied exactly fr
             corrections.forEach((c, i) => {
                 const wrong = String(c.wrong || ''), at = wrong ? text.indexOf(wrong, pos) : -1;
                 if (at < 0) return;
-                html += escapeHtml(text.slice(pos, at)) + `<span><span class="fix-del text-rose-700">${escapeHtml(wrong)}</span> <span class="font-semibold text-emerald-700 bg-emerald-50 rounded px-0.5">${escapeHtml(c.right || '')}</span><sup class="text-[10px] font-bold text-slate-400 ml-0.5">${i + 1}</sup></span>`;
+                html += escapeHtml(text.slice(pos, at)) + `<span><span class="fix-del text-rose-700">${escapeHtml(wrong)}</span> <span class="font-semibold text-emerald-700 bg-emerald-50 rounded px-0.5">${escapeHtml(c.right || '')}</span><sup class="text-xs font-bold text-slate-400 ml-0.5">${i + 1}</sup></span>`;
                 pos = at + wrong.length;
             });
             return html + escapeHtml(text.slice(pos));
