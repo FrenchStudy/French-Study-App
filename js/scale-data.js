@@ -269,37 +269,37 @@ window.SCALE_DATA = {
 // ---------------- 2 Question Words ----------------
 2: { name: 'Rule chart', next: 'Which question word?', tabs: [
   { type: 'groups', title: 'Qui ? Où ? Quand ?', hint: 'Each question word asks for one kind of answer. Tap a word to see and hear it in a sentence.', ask: 'What does it ask about?', groups: [
-    { name: 'Une personne', en: 'a person', color: '#4f46e5', rule: '— C\'est ma sœur.', words: [
+    { name: 'Une personne', en: 'a person', q: 'Who?', color: '#4f46e5', rule: '— C\'est ma sœur.', words: [
       { key: 'qui', fr: 'qui ?', en: 'who?', ex: ['Qui est-ce ? — C\'est mon frère.', 'Who is it? — It is my brother.'] },
     ] },
-    { name: 'Une chose', en: 'a thing, an action', color: '#0891b2', rule: '— C\'est un livre. / — Je travaille.', words: [
+    { name: 'Une chose', en: 'a thing, an action', q: 'What?', color: '#0891b2', rule: '— C\'est un livre. / — Je travaille.', words: [
       { key: 'que / qu\'', fr: 'que ?', en: 'what?', ex: ['Que faites-vous ?', 'What are you doing?'], note: 'Que at the start; quoi at the end (tu fais quoi ?).' },
       { key: 'quoi', fr: 'quoi ?', en: 'what? (spoken, at the end)', ex: ['Tu fais quoi ce soir ?', 'What are you doing tonight?'] },
       { key: 'qu\'est-ce que c\'est ?', fr: 'Qu\'est-ce que c\'est ?', en: 'What is it?', ex: ['Qu\'est-ce que c\'est ? — C\'est un cadeau.', 'What is it? — It is a present.'] },
       { key: 'c\'est quoi ?', fr: 'C\'est quoi ?', en: 'What is it? (spoken)', ex: ['C\'est quoi, ce bruit ?', 'What is that noise?'] },
       { key: 'qu\'est-ce que vous faites ?', fr: 'Qu\'est-ce que vous faites ?', en: 'What do you do?', ex: ['Qu\'est-ce que vous faites dans la vie ?', 'What do you do for a living?'] },
     ] },
-    { name: 'Un lieu', en: 'a place', color: '#059669', rule: '— À Paris. / — Dans la cuisine.', words: [
+    { name: 'Un lieu', en: 'a place', q: 'Where?', color: '#059669', rule: '— À Paris. / — Dans la cuisine.', words: [
       { key: 'où', fr: 'où ?', en: 'where?', ex: ['Où habites-tu ? — À Lyon.', 'Where do you live? — In Lyon.'] },
       { key: 'où est… ?', fr: 'Où est… ?', en: 'Where is…?', ex: ['Où est la gare, s\'il vous plaît ?', 'Where is the station, please?'] },
     ] },
-    { name: 'Un moment', en: 'a time', color: '#d97706', rule: '— Demain. / — À huit heures.', words: [
+    { name: 'Un moment', en: 'a time', q: 'When?', color: '#d97706', rule: '— Demain. / — À huit heures.', words: [
       { key: 'quand', fr: 'quand ?', en: 'when?', ex: ['Quand pars-tu ? — Demain.', 'When are you leaving? — Tomorrow.'] },
       { key: 'quand est-ce que… ?', fr: 'Quand est-ce que… ?', en: 'When…?', ex: ['Quand est-ce que le cours commence ?', 'When does the class start?'] },
       { key: 'à quelle heure… ?', fr: 'À quelle heure… ?', en: 'At what time…?', ex: ['À quelle heure part le train ?', 'What time does the train leave?'] },
       { key: 'quelle heure est-il ?', fr: 'Quelle heure est-il ?', en: 'What time is it?', ex: ['Quelle heure est-il ? — Il est midi.', 'What time is it? — It is noon.'] },
     ] },
-    { name: 'Une raison', en: 'a reason', color: '#e11d48', rule: '— Parce que…', words: [
+    { name: 'Une raison', en: 'a reason', q: 'Why?', color: '#e11d48', rule: '— Parce que…', words: [
       { key: 'pourquoi', fr: 'pourquoi ?', en: 'why?', ex: ['Pourquoi tu ris ? — Parce que c\'est drôle !', 'Why are you laughing? — Because it is funny!'] },
     ] },
-    { name: 'Une manière', en: 'how', color: '#7c3aed', rule: '— En bus. / — Bien, merci.', words: [
+    { name: 'Une manière', en: 'a way', q: 'How?', color: '#7c3aed', rule: '— En bus. / — Bien, merci.', words: [
       { key: 'comment', fr: 'comment ?', en: 'how?', ex: ['Comment vas-tu au travail ? — En bus.', 'How do you get to work? — By bus.'], note: 'Also: Comment ? = Pardon? (I did not hear).' },
     ] },
-    { name: 'Un nombre', en: 'how many, how much', color: '#0f766e', rule: '— Trois. / — Dix euros.', words: [
+    { name: 'Un nombre', en: 'a number, an amount', q: 'How many? How much?', color: '#0f766e', rule: '— Trois. / — Dix euros.', words: [
       { key: 'combien', fr: 'combien ?', en: 'how much? how many?', ex: ['Combien de frères as-tu ? — Deux.', 'How many brothers do you have? — Two.'] },
       { key: 'combien ça coûte ?', fr: 'Combien ça coûte ?', en: 'How much is it?', ex: ['Combien ça coûte ? — Douze euros.', 'How much is it? — Twelve euros.'] },
     ] },
-    { name: 'Un choix', en: 'which (+ noun)', color: '#be185d', rule: 'quel + noun: quel âge, quelle couleur', words: [
+    { name: 'Un choix', en: 'a choice (+ noun)', q: 'Which? What?', color: '#be185d', rule: 'quel + noun: quel âge, quelle couleur', words: [
       { key: 'quel / quelle', fr: 'quel ? quelle ?', en: 'which? what?', ex: ['Quelle couleur préfères-tu ?', 'Which colour do you prefer?'] },
       { key: 'quel âge avez-vous ?', fr: 'Quel âge avez-vous ?', en: 'How old are you?', ex: ['Quel âge avez-vous ? — J\'ai trente ans.', 'How old are you? — I am thirty.'], note: 'Avoir: j\'ai trente ans (not « je suis »).' },
     ] },
@@ -328,13 +328,13 @@ window.SCALE_DATA = {
 // ---------------- 3 Connectors & Small Words ----------------
 3: { name: 'Connectors', next: 'Join ideas and put things in order', tabs: [
   // Teaching first (js/connector-lessons.js): the road signs, the comics, the dress code, the doors; then practice (js/connectors-data.js)
-  { type: 'signs', title: 'Les panneaux', hint: '' },
-  { type: 'comics', title: 'Les histoires', hint: '' },
-  { type: 'dress', title: 'Le dress code', hint: '' },
-  { type: 'doors', title: 'Les portes', hint: '' },
-  { type: 'link', title: 'Le lien', hint: 'Practice: first decide what the second idea does (which sign?), then pick the word that says it.' },
-  { type: 'text', title: 'Le texte', hint: 'Practice: connectors hold a whole text together. Fill each gap in order, then listen to the text.' },
-  { type: 'sequence', title: 'Dans l\'ordre', hint: 'First, then, finally: the steps of a story. Tap a step, or play the whole story.', note: 'Ensuite, puis and après are the middle steps: you can swap them. D\'abord starts, enfin ends.', steps: [
+  { type: 'signs', title: 'Les panneaux', group: "Apprendre", hint: '' },
+  { type: 'comics', title: 'Les histoires', group: "Apprendre", hint: '' },
+  { type: 'dress', title: 'Le dress code', group: "Apprendre", hint: '' },
+  { type: 'doors', title: 'Les portes', group: "Apprendre", hint: '' },
+  { type: 'link', title: 'Le lien', group: "S'entraîner", hint: 'Practice: first decide what the second idea does (which sign?), then pick the word that says it.' },
+  { type: 'text', title: 'Le texte', group: "S'entraîner", hint: 'Practice: connectors hold a whole text together. Fill each gap in order, then listen to the text.' },
+  { type: 'sequence', title: 'Dans l\'ordre', group: 'Petits mots', hint: 'First, then, finally: the steps of a story. Tap a step, or play the whole story.', note: 'Ensuite, puis and après are the middle steps: you can swap them. D\'abord starts, enfin ends.', steps: [
     { key: 'd\'abord', fr: 'd\'abord', en: 'first' },
     { key: 'ensuite', fr: 'ensuite', en: 'next' },
     { key: 'puis', fr: 'puis', en: 'then' },
@@ -364,13 +364,13 @@ window.SCALE_DATA = {
       ['fe-pancakes', 'Enfin, on mange !', 'Finally, we eat!'],
     ] },
   ] },
-  { type: 'scale', title: 'Combien ?', hint: 'From a little (left) to too much (right).', left: 'peu', right: 'trop', color: '#d97706', ask: 'Which one is more?', stops: [
+  { type: 'scale', title: 'Combien ?', group: 'Petits mots', hint: 'From a little (left) to too much (right).', left: 'peu', right: 'trop', color: '#d97706', ask: 'Which one is more?', stops: [
     { p: 0, key: 'peu', fr: 'peu', en: 'not much, little', ex: ['Il mange peu.', 'He does not eat much.'] },
     { p: 33, key: 'assez', fr: 'assez', en: 'enough; quite', ex: ['J\'ai assez d\'argent.', 'I have enough money.'] },
     { p: 66, key: 'beaucoup', fr: 'beaucoup', en: 'a lot', ex: ['Merci beaucoup !', 'Thank you very much!'], note: 'Beaucoup de + noun: beaucoup de gens (never « très de »).' },
     { p: 100, key: 'trop', fr: 'trop', en: 'too, too much', ex: ['C\'est trop cher !', 'It is too expensive!'], note: 'Trop = more than you want: a problem.' },
   ] },
-  { type: 'groups', title: 'Petits mots', hint: 'Where? With whom? How much? Tap a word to see and hear it in a sentence.', ask: 'What does it say?', groups: [
+  { type: 'groups', title: 'Où ? Avec qui ?', group: 'Petits mots', hint: 'Where? With whom? How much? Tap a word to see and hear it in a sentence.', ask: 'What does it say?', groups: [
     { name: 'Où ?', en: 'place', color: '#059669', words: [
       { key: 'sur', fr: 'sur', en: 'on', ex: ['Le livre est sur la table.', 'The book is on the table.'] },
       { key: 'sous', fr: 'sous', en: 'under', ex: ['Le chat est sous le lit.', 'The cat is under the bed.'] },

@@ -13,8 +13,9 @@ const LEVEL_EN = { familier: 'slang, with friends', courant: 'everyday, with any
 const CSS = `
 .st{display:grid;gap:12px;max-width:820px}
 .st-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
-/* phones: many tabs scroll sideways in one line instead of filling the screen */
-@media(max-width:640px){.st-row[role=tablist]{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin:0 -2px;padding:2px}.st-row[role=tablist] .st-tab{flex:none}}
+/* tabs in groups (Connectors): the group buttons, then the tabs of the open group */
+.st .st-grp{font-weight:800}.st .st-grp[aria-pressed="true"]{background:#0f172a;border-color:#0f172a;color:#fff}
+.st-tab[hidden]{display:none}
 .st-btn{font-weight:700;font-size:var(--fs-base);border:1px solid #e2e8f0;background:#fff;color:#0f172a;border-radius:12px;padding:8px 14px;min-height:44px;cursor:pointer}
 .st-btn.pri{background:#4f46e5;border-color:#4f46e5;color:#fff}
 .st-btn[aria-pressed="true"]{background:#eef2ff;border-color:#6366f1;color:#3730a3}
@@ -127,8 +128,10 @@ function css() { if (!document.getElementById('st-css')) { const s = document.cr
 function mount(T, root, { say, grade, words }) {
     css();
     let tabI = 0, mode = 'explore', timer = null;
+    const GROUPS = [...new Set(T.tabs.map(t => t.group).filter(Boolean))];
     root.innerHTML = `<div class="st">
-      <div class="st-row" role="tablist" aria-label="Scales">${T.tabs.map((t, i) => `<button type="button" role="tab" class="st-btn st-tab" data-t="${i}" aria-selected="${i === 0}">${esc(t.title)}</button>`).join('')}</div>
+      ${GROUPS.length ? `<div class="st-row" role="group" aria-label="Parts">${GROUPS.map((g, i) => `<button type="button" class="st-btn st-grp" data-g="${i}" aria-pressed="${i === 0}">${esc(g)}</button>`).join('')}</div>` : ''}
+      <div class="st-row" role="tablist" aria-label="Scales">${T.tabs.map((t, i) => `<button type="button" role="tab" class="st-btn st-tab" data-t="${i}" aria-selected="${i === 0}"${GROUPS.length && t.group !== GROUPS[0] ? ' hidden' : ''}>${esc(t.title)}</button>`).join('')}</div>
       <div class="st-row"><button type="button" class="st-btn" data-m="explore" aria-pressed="true">Explore</button><button type="button" class="st-btn" data-m="check" aria-pressed="false">Check yourself</button>
         <label class="st-snd"><input type="checkbox" id="st-snd" checked> Sound on</label></div>
       <div class="st-card" id="st-body" aria-live="polite"></div></div>`;
@@ -251,7 +254,7 @@ function mount(T, root, { say, grade, words }) {
         const r = d.getBoundingClientRect(); if (r.bottom > innerHeight) d.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
     }
     function exploreGroups(t) {
-        body.innerHTML = `<p class="st-hint">${esc(t.hint)}</p><div class="st-groups">${t.groups.map((g, gi) => `<div class="st-group" style="background:${g.color}"><h4>${esc(g.name)}</h4><small>${esc(g.en)}</small>${g.rule ? `<div class="st-rule">${esc(g.rule)}</div>` : ''}${g.words.map((w, wi) => `<button type="button" class="st-chip" data-g="${gi}" data-w="${wi}" aria-expanded="false">${esc(w.fr)}</button>`).join('')}</div>`).join('')}</div>`;
+        body.innerHTML = `<p class="st-hint">${esc(t.hint)}</p><div class="st-groups">${t.groups.map((g, gi) => `<div class="st-group" style="background:${g.color}"><h4>${esc(g.name)}</h4><small>${esc(g.en)}${g.q ? ` · <b>${esc(g.q)}</b>` : ''}</small>${g.rule ? `<div class="st-rule">${esc(g.rule)}</div>` : ''}${g.words.map((w, wi) => `<button type="button" class="st-chip" data-g="${gi}" data-w="${wi}" aria-expanded="false">${esc(w.fr)}</button>`).join('')}</div>`).join('')}</div>`;
         body.querySelectorAll('.st-group .st-chip').forEach(c => c.addEventListener('click', () => {
             const g = t.groups[Number(c.dataset.g)], w = g.words[Number(c.dataset.w)];
             body.querySelectorAll('.st-group .st-det').forEach(d => { if (d.parentElement !== c.parentElement) d.remove(); });
@@ -729,6 +732,12 @@ function mount(T, root, { say, grade, words }) {
         ({ scale: exploreScale, pairs: explorePairs, groups: exploreGroups, register: exploreRegister, cards: exploreCards, joiner: exploreJoiner, sequence: exploreSequence, link: exploreLink, ladder: exploreLadder, follows: exploreFollows, text: exploreText })[t.type](t);
     }
     root.querySelectorAll('.st-tab').forEach(b => b.addEventListener('click', () => { tabI = Number(b.dataset.t); show(); }));
+    root.querySelectorAll('.st-grp').forEach(b => b.addEventListener('click', () => {
+        const g = GROUPS[Number(b.dataset.g)];
+        root.querySelectorAll('.st-grp').forEach(x => x.setAttribute('aria-pressed', x === b));
+        root.querySelectorAll('.st-tab').forEach(t => { t.hidden = T.tabs[Number(t.dataset.t)].group !== g; });
+        tabI = T.tabs.findIndex(t => t.group === g); show();
+    }));
     root.querySelectorAll('[data-m]').forEach(b => b.addEventListener('click', () => { mode = b.dataset.m; show(); }));
     show();
 }
