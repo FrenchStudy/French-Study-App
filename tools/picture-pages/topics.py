@@ -70,7 +70,7 @@ def grid(title, bg, tile, items, cols=5):
         scene += f'<rect x="{x0:g}" y="{y0}" width="{TW:g}" height="{TH}" rx="16" fill="{tile}"/>'
         w = dict(it); w['x'] = round(cx, 1); w['ly'] = y0 + 150
         w['d'] = tile_art(it, cx, y0 + 10)
-        if 'fs' not in w and (max(len(t) for t in (w.get('lines') or [w['fr']])) > 18): w['fs'] = 13
+        if 'fs' not in w and (max(len(t) for t in (w.get('lines') or [w['fr']])) > 18): w['fs'] = 14   # long labels a little smaller (14 is the smallest that stays 12px on a phone)
         out.append(w)
     return dict(title=title, w=W, h=H, minw=560, scene=scene, items=out)
 
