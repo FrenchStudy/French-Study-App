@@ -848,7 +848,9 @@
         function renderLearn() {
             rescueToolParts();
             const onCard = wordsIn(topic) ? toolWords() : new Set();
-            const asTile = (ws) => ws.filter(w => !onCard.has(w));
+            // A tool with a data-tiles box (Calendar) takes the other words there; the chapters below keep only their story and count
+            const slot = wordsIn(topic) ? document.querySelector('#step-palace [data-tiles]') : null;
+            const asTile = (ws) => slot ? [] : ws.filter(w => !onCard.has(w));
             const chapters = deck.chapters;
             $('learn-words').classList.toggle('hidden', !deck.words.length);
             $('chapter-nav').classList.toggle('hidden', !chapters);
@@ -893,6 +895,11 @@
                     ${asTile(c.words).length ? `<div class="${TILE_GRID}">${asTile(c.words).map(w => tileHtml(w, false)).join('')}</div>` : ''}
                 </section>`).join('');
             renderEasy();
+            if (slot) {
+                const rest = deck.words.filter(w => !onCard.has(w));
+                slot.innerHTML = rest.length ? `<div class="${TILE_GRID}">${rest.map(w => tileHtml(w, false)).join('')}</div>` : '';
+                slot.closest('.vc5-more, [data-tiles-box]')?.classList.toggle('hidden', !rest.length);
+            }
             placeToolParts();
             decorateToolWords();
             Story.repaint();   // a story that is playing keeps its highlight after the page is redrawn
