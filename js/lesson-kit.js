@@ -364,7 +364,7 @@ const LessonKit = (function () {
             ${!ok ? `<form data-drill-copy class="mt-2 flex flex-wrap gap-2 items-center"><label class="text-sm font-semibold text-slate-700">Now type it once:</label>
                 <input type="text" lang="fr" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Type the answer once" class="lk-drill-input flex-1 min-w-[10rem] text-base px-3 py-2 bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
                 <button type="submit" class="min-h-[40px] px-3 text-sm font-bold text-white bg-slate-800 hover:bg-slate-700 rounded-lg">OK</button><span data-copy-fb class="text-sm font-bold"></span></form>` : ''}
-            ${verdict === 'wrong' && said ? `<button type="button" data-drill-mine class="mt-2 min-h-[40px] px-3 text-sm font-semibold text-slate-700 bg-white border border-slate-200 hover:border-emerald-400 rounded-lg">My answer means the same: I was right</button>` : ''}`;
+            ${verdict === 'wrong' && said ? `<button type="button" data-drill-mine class="mt-1 min-h-[40px] text-sm text-slate-500 underline underline-offset-2 hover:text-slate-800" title="For an answer the checker does not know, for example another correct word order">My answer is also correct: count it</button>` : ''}`;
         box.classList.remove('hidden');
         const copy = box.querySelector('[data-drill-copy] input'); if (copy) copy.focus({ preventScroll: true });
     }
@@ -418,7 +418,7 @@ const LessonKit = (function () {
     function loadScript(src) {
         return scripts[src] || (scripts[src] = new Promise((ok, fail) => {
             const s = document.createElement('script');
-            s.src = src; s.onload = ok; s.onerror = () => { delete scripts[src]; fail(new Error(src)); };
+            s.src = src + (typeof APP_VERSION !== 'undefined' && APP_VERSION ? '?v=' + APP_VERSION : ''); s.onload = ok; s.onerror = () => { delete scripts[src]; fail(new Error(src)); };
             document.head.appendChild(s);
         }));
     }

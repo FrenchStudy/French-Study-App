@@ -88,9 +88,9 @@
             </div>
 
             <!-- ===== ONE TOPIC ===== -->
-            <div id="topic-view" class="hidden space-y-4">
+            <div id="topic-view" class="hidden space-y-3">
                 <div class="flex items-center justify-between gap-2">
-                    <button id="topic-back" type="button" aria-label="All topics" class="min-h-[44px] px-1 text-sm font-semibold text-slate-600 hover:text-indigo-600">← <span class="lbl-long">All topics</span><span class="lbl-short">Topics</span></button>
+                    <div class="flex items-center gap-3 min-w-0"><button id="topic-back" type="button" aria-label="All topics" class="min-h-[44px] px-1 text-sm font-semibold text-slate-600 hover:text-indigo-600">← <span class="lbl-long">All topics</span><span class="lbl-short">Topics</span></button><span id="topic-crumb-md" class="hidden md:inline text-xs font-bold px-2 py-1 rounded-full bg-slate-100 text-slate-600" aria-hidden="true"></span></div>
                     <!-- Prev / Topic 3 of 7 ▾ / Next: the button opens this level's topics as a drop-down -->
                     <div class="relative">
                         <div id="topic-nav-top" class="flex items-center gap-1"></div>
@@ -101,8 +101,8 @@
                 <div class="space-y-4 min-w-0">
                 <div class="flex flex-col md:flex-row md:items-end gap-3 md:gap-8">
                     <div class="min-w-0 flex-1">
-                        <span id="topic-crumb" class="text-xs font-bold px-2 py-1 rounded-full bg-slate-100 text-slate-600"></span>
-                        <h1 id="deck-title" class="text-2xl lg:text-3xl font-black text-slate-900 leading-tight mt-2"></h1>
+                        <span id="topic-crumb" class="md:hidden text-xs font-bold px-2 py-1 rounded-full bg-slate-100 text-slate-600"></span>
+                        <h1 id="deck-title" class="text-2xl lg:text-3xl font-black text-slate-900 leading-tight mt-2 md:mt-0"></h1>
                     </div>
                     <div id="topic-progress" class="md:w-96 space-y-1.5">
                         <div class="flex items-center justify-between text-sm"><span id="progress-label" class="font-semibold text-slate-700 whitespace-nowrap">Your progress</span><span id="deck-counts" class="text-slate-500 flex flex-wrap justify-end gap-x-3 gap-y-1"></span></div>
@@ -111,9 +111,9 @@
                             <div id="bar-learning" class="h-full bg-amber-400" style="width:0%"></div>
                         </div>
                         <div id="progress-legend" class="flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-500">
-                            <span><span class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500 align-middle"></span> Known</span>
-                            <span><span class="inline-block w-2.5 h-2.5 rounded-full bg-amber-400 align-middle"></span> Learning</span>
-                            <span><span class="inline-block w-2.5 h-2.5 rounded-full bg-slate-200 align-middle"></span> New</span>
+                            <span class="md:hidden"><span class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500 align-middle"></span> Known</span>
+                            <span class="md:hidden"><span class="inline-block w-2.5 h-2.5 rounded-full bg-amber-400 align-middle"></span> Learning</span>
+                            <span class="md:hidden"><span class="inline-block w-2.5 h-2.5 rounded-full bg-slate-200 align-middle"></span> New</span>
                             <span class="sm:ml-auto"><span class="text-sky-700 font-bold">blue</span> = masculine · <span class="text-rose-600 font-bold">red</span> = feminine</span>
                         </div>
                     </div>
@@ -1601,9 +1601,10 @@
             $('topics-view').classList.add('hidden');
             $('topic-view').classList.remove('hidden');
             const st = lvStyle(tp.level);
-            $('topic-crumb').className = `text-xs font-bold px-2 py-1 rounded-full ${tp.level ? st[1] + ' ' + st[0] : 'bg-slate-100 text-slate-600'}`;
+            $('topic-crumb').className = `md:hidden text-xs font-bold px-2 py-1 rounded-full ${tp.level ? st[1] + ' ' + st[0] : 'bg-slate-100 text-slate-600'}`;
             $('topic-back').textContent = tp.tcf ? '← Back to the questions' : '← All topics';
             $('topic-crumb').textContent = tp.tcf ? 'Exam-style questions · theme words' : tp.id === 'review' ? 'Words due today' : tp.freq ? `Most common words · Set ${tp.set || ''}` : `Vocab · ${tp.level}${tp.no ? ' · Topic ' + tp.no : ''}`;
+            $('topic-crumb-md').className = $('topic-crumb').className.replace('md:hidden ', '') + ' hidden md:inline'; $('topic-crumb-md').textContent = $('topic-crumb').textContent;
             $('deck-title').textContent = tp.lesson && !tp.n ? `${tp.emoji || ''} ${tp.title}`.trim() : tp.title;
             document.title = `${tp.title} - Vocabulary`;
             // The hands-on lesson, if this topic has one

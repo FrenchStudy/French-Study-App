@@ -39,3 +39,21 @@ if '__SUPABASE_URL__' not in s or '__SUPABASE_ANON_KEY__' not in s:
 open(p, 'w', encoding='utf-8', newline='').write(s.replace('__SUPABASE_URL__', url).replace('__SUPABASE_ANON_KEY__', key))
 print('config.js filled in')
 PY
+# The version of this build (the commit): written into every page and into version.json, and put on the
+# app's own scripts and styles (?v=…) so that a browser never keeps an old copy after an update
+VERSION="${GITHUB_SHA:-$(git rev-parse HEAD 2>/dev/null || date +%s)}"; VERSION="${VERSION:0:12}"
+python3 - "$OUT" "$VERSION" <<'PY'
+import os, re, sys, json
+out, v = sys.argv[1], sys.argv[2]
+json.dump({'v': v}, open(os.path.join(out, 'version.json'), 'w'))
+n = 0
+for name in os.listdir(out):
+    if not name.endswith('.html'): continue
+    p = os.path.join(out, name)
+    s = open(p, encoding='utf-8', newline='').read()
+    s = re.sub(r'((?:src|href)="(?:\./)?(?:js|css)/[^"?#]+\.(?:js|css))"', lambda m: f'{m.group(1)}?v={v}"', s)
+    s = re.sub(r'((?:src|href)="(?:\./)?config\.js)"', lambda m: f'{m.group(1)}?v={v}"', s)
+    if '<meta name="app-version"' not in s: s = s.replace('<head>', f'<head>\n    <meta name="app-version" content="{v}">', 1)
+    open(p, 'w', encoding='utf-8', newline='').write(s); n += 1
+print(f'version {v} on {n} pages')
+PY
