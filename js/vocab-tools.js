@@ -236,9 +236,9 @@ function relative(d, today) {
 }
 const relEn = { "avant-hier": 'the day before yesterday', hier: 'yesterday', "aujourd'hui": 'today', demain: 'tomorrow', 'après-demain': 'the day after tomorrow' };
 
-// The calendar page, in four parts that teach before the practice. Each part sits just before the words of
-// its chapter on the page (data-place, see vocab.html): 1 La semaine, 2 Les mois, 3 La date (the calendar,
-// Find the date, Listen and tap), 4 Avant, après (hier, demain, la semaine dernière…).
+// The calendar page, in four parts that teach before the practice, all at the top of the page (data-place, see vocab.html):
+// 1 La semaine, 2 Les mois, 3 Avant, après (hier, demain, la semaine dernière…, then the other words of the topic as tiles:
+// data-tiles), 4 La date (the calendar, Find the date, Listen and tap). The day, month and hier/demain cards are the words' cards.
 const PIC = (n) => `media/pictures/fe-${n}.webp`;
 // Each day is named after a planet (a Roman god); dimanche is « le jour du Seigneur »
 const DAY_HOOKS = [
@@ -280,6 +280,7 @@ const CAL_CSS = `
 .vc5-rel b{font-size:var(--fs-base);color:#0f172a}.vc5-rel span{font-size:var(--fs-sm);color:#475569}.vc5-rel small{font-size:var(--fs-xs);color:#64748b}
 .vc5-rel.now{border-color:#4f46e5;background:#eef2ff}.vc5-rel.past{background:#fafaf9}
 .tw-wrap{display:flex;flex-direction:column;gap:4px;min-width:0}.tw-wrap>button{flex:1}
+.vc5-more{display:grid;gap:10px;border-top:1px solid #e2e8f0;padding-top:12px}.vc5-more h4{margin:0;font-size:var(--fs-lg);font-weight:900;color:#0f172a}.vc5-more h4 small{display:block;font-size:var(--fs-sm);font-weight:600;color:#64748b;margin-top:2px}
 .vc5-arrow{display:flex;justify-content:space-between;font-size:var(--fs-xs);font-weight:800;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em}
 `;
 function mountCalendar(root, { say }) {
@@ -303,7 +304,7 @@ function mountCalendar(root, { say }) {
           <li>All the days are masculine: <b>un</b> lundi, <b>le</b> week-end.</li>
         </ul>
       </section>
-      <section class="vc5-sec" data-place="chapter-2" id="vc5-year">
+      <section class="vc5-sec" data-place="chapter-1" id="vc5-year">
         <h3>2 · Les mois <small>Twelve months, coloured by season, each with a French moment. Tap a month.</small></h3>
         <div class="vc5-key">${Object.entries(SEASON_COL).map(([s, c]) => `<span style="--c:${c}">${s === 'été' ? "l'été" : s === 'hiver' ? "l'hiver" : s === 'automne' ? "l'automne" : 'le printemps'}</span>`).join('')}</div>
         <div class="vc5-mons">${MONTHS.map((m, i) => `<button type="button" class="vc5-mon" data-mon="${i}" data-word="${m}" style="--c:${SEASON_COL[SEASON_OF[i]]}"><img src="${PIC(MONTH_HOOKS[i][0])}" alt=""><b>${m}</b><small>${esc(MONTH_HOOKS[i][1])}</small></button>`).join('')}</div>
@@ -313,8 +314,21 @@ function mountCalendar(root, { say }) {
           <li>Seasons: <b>au</b> printemps, but <b>en</b> été, <b>en</b> automne, <b>en</b> hiver.</li>
         </ul>
       </section>
-      <section class="vc5-sec" data-place="chapter-3" id="vc5-date">
-        <h3>3 · La date <small>Le + day + number + month (+ year). Only the 1st is different: le premier.</small></h3>
+      <section class="vc5-sec" data-place="chapter-1" id="vc5-rel">
+        <h3>3 · Avant, après <small>From today: yesterday was, tomorrow will be. Tap a card.</small></h3>
+        <div class="vc5-arrow"><span>← avant (passé)</span><span>après (futur) →</span></div>
+        <div class="vc5-line" id="vc5-days5"></div>
+        <div class="vc5-line three" id="vc5-weeks"></div>
+        <div class="vc5-line three" id="vc5-years"></div>
+        <div class="vc5-out" id="vc5-rout">Tap a card. <small>Listen to the verb: c'était (past), c'est (now), ce sera (future).</small></div>
+        <ul class="vc5-rules">
+          <li><b>il y a</b> deux jours = two days ago (avant-hier) · <b>dans</b> deux jours = in two days (après-demain).</li>
+          <li>la semaine <b>dernière</b> · cette semaine · la semaine <b>prochaine</b>; the same with le mois, l'année.</li>
+        </ul>
+        <div class="vc5-more"><h4>More words of the topic <small>la semaine, le jour, ce matin… Tick « Know » for the ones you already know.</small></h4><div data-tiles></div></div>
+      </section>
+      <section class="vc5-sec" data-place="chapter-1" id="vc5-date">
+        <h3>4 · La date <small>Le + day + number + month (+ year). Only the 1st is different: le premier.</small></h3>
         <div class="vt-row" role="group" aria-label="Mode">
           <button type="button" class="vt-btn" data-mode="explore" aria-pressed="true">Explore</button>
           <button type="button" class="vt-btn" data-mode="find" aria-pressed="false">Find the date</button>
@@ -335,18 +349,6 @@ function mountCalendar(root, { say }) {
           </div>
           <div class="vt-card" id="vt-side" aria-live="polite"></div>
         </div>
-      </section>
-      <section class="vc5-sec" data-place="chapter-3" id="vc5-rel">
-        <h3>4 · Avant, après <small>From today: yesterday was, tomorrow will be. Tap a card.</small></h3>
-        <div class="vc5-arrow"><span>← avant (passé)</span><span>après (futur) →</span></div>
-        <div class="vc5-line" id="vc5-days5"></div>
-        <div class="vc5-line three" id="vc5-weeks"></div>
-        <div class="vc5-line three" id="vc5-years"></div>
-        <div class="vc5-out" id="vc5-rout">Tap a card. <small>Listen to the verb: c'était (past), c'est (now), ce sera (future).</small></div>
-        <ul class="vc5-rules">
-          <li><b>il y a</b> deux jours = two days ago (avant-hier) · <b>dans</b> deux jours = in two days (après-demain).</li>
-          <li>la semaine <b>dernière</b> · cette semaine · la semaine <b>prochaine</b>; the same with le mois, l'année.</li>
-        </ul>
       </section>
     </div>`;
     const secs = [...root.querySelectorAll('.vc5-sec')];
