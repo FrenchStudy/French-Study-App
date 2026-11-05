@@ -47,7 +47,8 @@ function dayWord(h) {
 }
 
 const CSS = `
-.tl{display:grid;gap:14px;max-width:760px}
+.tl{display:grid;gap:14px}
+@media (min-width:1024px){.tl{grid-template-columns:1fr 1fr;align-items:start}.tl-top{grid-column:1 / -1;margin-bottom:-10px}}
 .tl-card{background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:16px}
 .tl-card h3{font-size:var(--fs-base);font-weight:800;color:#0f172a;margin:0}
 .tl-hint{font-size:var(--fs-sm);color:#64748b;margin-top:2px}

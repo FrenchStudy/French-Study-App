@@ -296,10 +296,10 @@ async function picker(root, opts) {
     const label = 'text-xs font-bold uppercase tracking-wide text-slate-500';
     root.innerHTML = `<div class="space-y-2">
             <div class="${label}">Type</div>
-            <div data-pk-types class="flex gap-2 overflow-x-auto pb-1" role="tablist" aria-label="Type of question"></div>
+            <div data-pk-types class="flex flex-wrap gap-2 pb-1" role="tablist" aria-label="Type of question"></div>
             <div data-pk-topicbox class="space-y-2 pt-1">
                 <div class="${label}">Topic</div>
-                <div data-pk-topics class="flex gap-2 overflow-x-auto pb-1" role="tablist" aria-label="Topic"></div>
+                <div data-pk-topics class="flex flex-wrap gap-2 pb-1" role="tablist" aria-label="Topic"></div>
             </div>
             <div data-pk-note class="text-sm text-slate-600 pt-1"></div>
             <div data-pk-list class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>

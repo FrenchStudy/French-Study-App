@@ -141,7 +141,7 @@ window.Nationalites = (function () {
 
     // ================= Step 2: the World map =================
     const MAP_CSS = `
-.wm-scene{background:#e0ecf7}
+.wm-scene{background:#e0ecf7;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}.wm-scene::-webkit-scrollbar{display:none}
 .wm-scene svg{display:block;width:100%;min-width:780px;height:auto;touch-action:manipulation}
 .wm-c{fill:#f1f3f0;stroke:#b8c2cf;stroke-width:.6;vector-effect:non-scaling-stroke}
 .wm-c.v{cursor:pointer}
@@ -195,7 +195,7 @@ window.Nationalites = (function () {
                 </div>
             </div>
             <div class="mp-grid">
-                <div><div class="mp-scene wm-scene"><svg class="wm-world" role="img" aria-label="World map of the countries in this topic"></svg></div>
+                <div><div class="mp-scene wm-scene" data-scroll-ok><svg class="wm-world" role="img" aria-label="World map of the countries in this topic"></svg></div>
                     <p class="mp-hint">Tap a coloured country to see and hear it. Use <b>Europe</b> for the small countries, and + and − or ⤢ Enlarge to make the map bigger; slide it sideways on a phone.</p>
                     <div class="wm-key"><span><i style="background:#2563eb"></i>masculine · le · au</span><span><i style="background:#db2759"></i>feminine · la / l' · en</span><span><i style="background:#7c3aed"></i>plural · les · aux</span></div>
                 </div>

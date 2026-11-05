@@ -426,7 +426,7 @@ const LessonKit = (function () {
             <div class="lk-list space-y-4">
                 ${opts.intro || ''}
                 <div class="flex flex-col md:flex-row md:items-center gap-3">
-                    <div class="lk-levels flex gap-1 p-1 bg-slate-200/70 rounded-xl overflow-x-auto" role="tablist" aria-label="Level"></div>
+                    <div class="lk-levels flex flex-wrap gap-1 p-1 bg-slate-200/70 rounded-xl" role="tablist" aria-label="Level"></div>
                     <input type="search" class="lk-search md:ml-auto w-full md:w-72 text-base md:text-sm px-3 py-2.5 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="${escapeHtml(opts.searchPlaceholder || 'Search, e.g. subjonctif')}">
                 </div>
                 <div class="lk-results hidden space-y-5"></div>

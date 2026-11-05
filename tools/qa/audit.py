@@ -6,6 +6,8 @@
 #   tiny         text smaller than 12px (on SVG pictures: the size as drawn on screen)
 #   off-scale    text in a size outside the app's scale (12 14 16 18 20 24 30 and the big display sizes)
 #   empty        a step that shows nothing
+#   inner scroll a box with its own scroll bar inside the page (sideways or up-down), except the page's main scroller and boxes marked data-scroll-ok (the picture pages on a phone: swipe sideways)
+#   first screen on a computer, a video (with its controls) does not fit in the first screen
 # Needs Python Playwright with Chromium. --mock FILE: a JavaScript file added after config.js that fakes the database
 # (topics 31-56 come from the database; without it they are skipped). Writes DIR/report.md, DIR/report.json and a
 # screenshot of each problem (DIR defaults to a folder in the system temp directory).
@@ -27,7 +29,7 @@ PAGES = ['index.html', 'vocab.html', 'lesson.html', 'conjugations.html', 'readin
 
 CHECK = r"""() => {
   const emojiOnly = (t) => !/[\p{L}\p{N}]/u.test(t);
-  const out = { tiny: [], off: [], wide: document.documentElement.scrollWidth > innerWidth + 1, textLen: 0 };
+  const out = { tiny: [], off: [], wide: document.documentElement.scrollWidth > innerWidth + 1 || [...document.querySelectorAll('#scroller')].some(m => m.scrollWidth > m.clientWidth + 1), textLen: 0 };
   const seen = new Set();
   for (const el of document.querySelectorAll('body *')) {
     const cs = getComputedStyle(el);
@@ -44,6 +46,18 @@ CHECK = r"""() => {
     if (px < 11.5) out.tiny.push(key);
     else if (!svg && !SCALE.has(Math.round(px))) out.off.push(key);
   }
+  out.scroll = [];
+  for (const el of document.querySelectorAll('body *')) {
+    if (el.id === 'scroller' || el.closest('svg') || el.matches('textarea,select,input,[data-scroll-ok]')) continue;
+    const cs = getComputedStyle(el); if (cs.display === 'none' || cs.visibility === 'hidden') continue;
+    const r = el.getBoundingClientRect(); if (!r.width || !r.height) continue;
+    const sx = /(auto|scroll)/.test(cs.overflowX) && el.scrollWidth > el.clientWidth + 2;
+    const sy = /(auto|scroll)/.test(cs.overflowY) && el.scrollHeight > el.clientHeight + 2;
+    if (sx || sy) out.scroll.push((sx ? '↔ ' : '↕ ') + (el.id ? '#' + el.id : el.tagName.toLowerCase() + '.' + [...el.classList].slice(0, 2).join('.')));
+  }
+  out.scroll = [...new Set(out.scroll)];
+  const main = document.querySelector('.vp-video,.wv-video');   // a video's controls must be on the first screen; a picture may start there and go on
+  if (main && innerWidth >= 1024) { const r = main.getBoundingClientRect(), top = document.querySelector('#scroller'); const off = top ? top.getBoundingClientRect().top : 0; out.below = r.bottom - off - (top ? top.clientHeight : innerHeight) > 4 ? Math.round(r.bottom) : 0; } else out.below = 0;
   return out;
 }""".replace('SCALE', 'new Set(' + json.dumps(sorted(SCALE)) + ')')
 
@@ -100,7 +114,8 @@ def main():
     offs = [r for r in rows if r['off']]
     lines = [f'# App check: {len(rows)} screens ({sum(r["view"] == "phone" for r in rows)} on a phone, {sum(r["view"] == "desktop" for r in rows)} on a desktop)', '',
              f'- JavaScript errors: {sum(bool(r["errors"]) for r in rows)} screens', f'- Wider than the screen: {sum(r["wide"] for r in rows)}',
-             f'- Text under 12px: {sum(bool(r["tiny"]) for r in rows)}', f'- Text outside the size scale: {len(offs)}', f'- Empty screens: {sum(r["textLen"] < 20 for r in rows)}', '']
+             f'- Text under 12px: {sum(bool(r["tiny"]) for r in rows)}', f'- Text outside the size scale: {len(offs)}', f'- Empty screens: {sum(r["textLen"] < 20 for r in rows)}',
+             f'- Boxes with their own scroll bar: {sum(bool(r.get("scroll")) for r in rows)}', f'- Main picture or video not in the first screen (computer): {sum(bool(r.get("below")) for r in rows)}', '']
     for r in probs:
         lines.append(f'## {r["view"]} · {r["where"]}')
         if r['errors']: lines.append('- errors: ' + '; '.join(r['errors'])[:400])
@@ -109,10 +124,15 @@ def main():
         if r['textLen'] < 20: lines.append('- empty')
         if r.get('shot'): lines.append(f'- screenshot: {r["shot"]}')
         lines.append('')
+    sc = [r for r in rows if r.get('scroll') or r.get('below')]
+    if sc:
+        lines.append('## Inner scroll bars and first screen')
+        for r in sc[:80]: lines.append(f'- {r["view"]} · {r["where"]}: ' + ' '.join(r.get('scroll') or []) + (f' · main tool ends at {r["below"]}px' if r.get('below') else ''))
+        lines.append('')
     if offs:
         lines.append('## Text outside the scale')
         for r in offs[:40]: lines.append(f'- {r["view"]} · {r["where"]}: ' + ' | '.join(r['off'][:4]))
     open(os.path.join(OUT, 'report.md'), 'w').write('\n'.join(lines) + '\n')
-    print('\n'.join(lines[:8])); print('report:', os.path.join(OUT, 'report.md'))
+    print('\n'.join(lines[:10])); print('report:', os.path.join(OUT, 'report.md'))
 
 main()

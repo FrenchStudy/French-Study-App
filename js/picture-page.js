@@ -146,7 +146,6 @@ PAGES[11] = {
         ] },
     ],
 };
-
 // ---------------- 17 The Survival 50 Nouns (made by tools/picture-pages/topics.py) ----------------
 PAGES[17] = {
     name: "Picture", next: "Explore the everyday things", title: "Les objets de tous les jours",
@@ -207,7 +206,6 @@ PAGES[17] = {
         ] },
     ],
 };
-
 // ---------------- 19 Clothing & Shopping (made by tools/picture-pages/topics.py) ----------------
 PAGES[19] = {
     name: "Picture", next: "Explore the clothes", title: "Les vêtements",
@@ -248,39 +246,50 @@ PAGES[19] = {
         ] },
     ],
 };
-
 // ---------------- 20 Body Parts & Health (made by tools/picture-pages/topics.py) ----------------
 PAGES[20] = {
     name: "Picture", next: "Explore the body", title: "Le corps",
     credit: '3D pictures: Microsoft Fluent Emoji (MIT licence)',
     scenes: [
-        { title: "Le visage", w: 900, h: 620, minw: 520, scene: `<rect width="900" height="620" fill="#F1F7FD"/>
- <defs><radialGradient id="bd-face" cx=".45" cy=".4" r=".7"><stop offset="0" stop-color="#F8D7BB"/><stop offset="1" stop-color="#E8B48C"/></radialGradient></defs>
- <path d="M300,620 Q300,520 450,505 Q600,520 600,620Z" fill="#5BA4D9"/><g stroke="#94A3B8" stroke-width="1.5" stroke-dasharray="4 3"><path d="M600,80 L560,98"/><path d="M200,200 L366,234"/><path d="M262,284 L276,280"/><path d="M600,302 L466,292"/><path d="M600,374 L506,360"/><path d="M262,376 L412,362"/><path d="M200,322 L344,312"/><path d="M600,472 L496,470"/><path d="M262,474 L428,472"/></g>`, items: [
-            { key: "tête", fr: "la tête", g: 'f', en: "head", x: 640, ly: 78, d: `<ellipse cx="450" cy="250" rx="168" ry="196" fill="#000" fill-opacity="0"/><path d="M282,240 Q280,52 450,46 Q620,52 618,240 Q600,120 450,112 Q300,120 282,240Z" fill="#4A2C1D"/>` },
-            { key: "visage", fr: "le visage", g: 'm', en: "face", x: 450, ly: 236, d: `<ellipse cx="450" cy="268" rx="150" ry="178" fill="url(#bd-face)"/>` },
-            { key: "oreille", fr: "l'oreille", g: 'f', en: "ear", x: 232, ly: 280, d: `<ellipse cx="296" cy="276" rx="22" ry="40" fill="#E8B48C"/><path d="M296,252 q-10,24 4,44" stroke="#C98F6A" stroke-width="4" fill="none"/>` },
-            { key: "œil / les yeux", fr: "l'œil / les yeux", g: 'm', en: "eye / eyes", x: 170, ly: 196, lines: ["l'œil", "les yeux"], lc: ['m', 'm'], d: `<ellipse cx="392" cy="236" rx="26" ry="18" fill="#fff"/><circle cx="392" cy="236" r="12" fill="#5B3A29"/><circle cx="395" cy="232" r="4" fill="#fff"/><ellipse cx="508" cy="236" rx="26" ry="18" fill="#fff"/><circle cx="508" cy="236" r="12" fill="#5B3A29"/><circle cx="511" cy="232" r="4" fill="#fff"/><path d="M364,210 q28,-16 56,0 M480,210 q28,-16 56,0" stroke="#4A2C1D" stroke-width="6" fill="none" stroke-linecap="round"/>` },
-            { key: "nez", fr: "le nez", g: 'm', en: "nose", x: 640, ly: 300, d: `<path d="M450,248 q-6,40 -20,52 q20,12 40,0 q-14,-12 -20,-52" fill="#E3A57E"/>` },
-            { key: "bouche", fr: "la bouche", g: 'f', en: "mouth", x: 640, ly: 372, d: `<path d="M396,350 Q450,410 504,350 Q450,366 396,350Z" fill="#B83B3B"/>` },
-            { key: "dents", fr: "les dents", g: 'f', en: "teeth", x: 232, ly: 372, pl: true, d: `<path d="M410,354 Q450,364 490,354 L486,366 Q450,374 414,366Z" fill="#fff" stroke="#E5E7EB"/>` },
-            { key: "peau", fr: "la peau", g: 'f', en: "skin", x: 170, ly: 320, d: `<circle cx="352" cy="316" r="26" fill="#F8D7BB" stroke="#94A3B8" stroke-width="4"/><circle cx="340" cy="306" r="1.6" fill="#D99B74"/><circle cx="347" cy="317" r="1.6" fill="#D99B74"/><circle cx="354" cy="306" r="1.6" fill="#D99B74"/><circle cx="361" cy="317" r="1.6" fill="#D99B74"/><circle cx="344" cy="306" r="1.6" fill="#D99B74"/><circle cx="351" cy="317" r="1.6" fill="#D99B74"/><circle cx="358" cy="306" r="1.6" fill="#D99B74"/><circle cx="341" cy="317" r="1.6" fill="#D99B74"/><circle cx="348" cy="306" r="1.6" fill="#D99B74"/><circle cx="355" cy="317" r="1.6" fill="#D99B74"/><path d="M370,334 l16,16" stroke="#94A3B8" stroke-width="6" stroke-linecap="round"/>` },
-            { key: "cou", fr: "le cou", g: 'm', en: "neck", x: 640, ly: 470, d: `<rect x="404" y="430" width="92" height="84" fill="#E8B48C"/>` },
-            { key: "gorge", fr: "la gorge", g: 'f', en: "throat", x: 232, ly: 470, d: `<path d="M430,462 q20,16 40,0 v20 q-20,14 -40,0z" fill="#D99B74"/>` },
+        { title: "Le visage", w: 900, h: 620, minw: 520, center: true, scene: `<rect width="900" height="620" fill="#F1F7FD"/>
+ <circle cx="120" cy="90" r="60" fill="#E3EEFA"/><circle cx="800" cy="560" r="80" fill="#E3EEFA"/>
+ <defs><radialGradient id="bd-face" cx=".45" cy=".42" r=".65"><stop offset="0" stop-color="#FBE0C8"/><stop offset="1" stop-color="#F0BF98"/></radialGradient>
+ <clipPath id="bd-zoom"><circle cx="790" cy="300" r="58"/></clipPath></defs>
+ <path d="M282,620 Q286,528 410,508 L490,508 Q614,528 618,620Z" fill="#5BA4D9"/><path d="M410,508 Q450,546 490,508" fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round"/><g stroke="#94A3B8" stroke-width="1.5" stroke-dasharray="4 3"><path d="M600,80 L566,100"/><path d="M630,200 L592,214"/><path d="M200,204 L364,262"/><path d="M262,292 L276,290"/><path d="M600,374 L490,368"/><path d="M262,376 L424,364"/><path d="M600,472 L490,470"/><path d="M262,474 L430,476"/></g>`, items: [
+            { key: "tête", fr: "la tête", g: 'f', en: "head", x: 640, ly: 78, d: `<ellipse cx="450" cy="250" rx="168" ry="196" fill="#000" fill-opacity="0"/><path d="M290,322 C262,190 300,58 450,52 C600,58 638,190 610,322 Q606,300 594,250 L306,250 Q294,300 290,322Z" fill="#4A2C1D"/><path d="M340,96 Q400,64 470,72" stroke="#6B4226" stroke-width="8" fill="none" stroke-linecap="round" opacity=".6"/>` },
+            { key: "visage", fr: "le visage", g: 'm', en: "face", x: 670, ly: 196, d: `<path d="M300,262 C300,372 368,444 450,444 C532,444 600,372 600,262 C600,226 596,200 588,182 Q560,206 520,170 Q488,200 446,166 Q404,198 366,170 Q334,200 310,184 C303,206 300,232 300,262Z" fill="url(#bd-face)"/><ellipse cx="360" cy="338" rx="30" ry="18" fill="#F49A9A" opacity=".45"/><ellipse cx="540" cy="338" rx="30" ry="18" fill="#F49A9A" opacity=".45"/>` },
+            { key: "oreille", fr: "l'oreille", g: 'f', en: "ear", x: 232, ly: 290, d: `<ellipse cx="300" cy="286" rx="24" ry="34" fill="#E8B48C"/><path d="M298,266 q-12,20 2,40" stroke="#D29A74" stroke-width="5" fill="none" stroke-linecap="round"/><ellipse cx="600" cy="286" rx="24" ry="34" fill="#E8B48C"/><path d="M602,266 q12,20 -2,40" stroke="#D29A74" stroke-width="5" fill="none" stroke-linecap="round"/>` },
+            { key: "œil / les yeux", fr: "l'œil / les yeux", g: 'm', en: "eye / eyes", x: 170, ly: 196, lines: ["l'œil", "les yeux"], lc: ['m', 'm'], d: `<ellipse cx="395" cy="266" rx="30" ry="34" fill="#fff"/><circle cx="398" cy="270" r="21" fill="#7A4B2A"/><circle cx="398" cy="270" r="11" fill="#2A1A10"/><circle cx="406" cy="260" r="7" fill="#fff"/><circle cx="391" cy="280" r="3.5" fill="#fff"/><path d="M365,258 Q395,226 425,258" stroke="#3B2416" stroke-width="5" fill="none" stroke-linecap="round"/><ellipse cx="505" cy="266" rx="30" ry="34" fill="#fff"/><circle cx="508" cy="270" r="21" fill="#7A4B2A"/><circle cx="508" cy="270" r="11" fill="#2A1A10"/><circle cx="516" cy="260" r="7" fill="#fff"/><circle cx="501" cy="280" r="3.5" fill="#fff"/><path d="M475,258 Q505,226 535,258" stroke="#3B2416" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M367,216 Q395,202 423,214 M477,214 Q505,202 533,216" stroke="#4A2C1D" stroke-width="8" fill="none" stroke-linecap="round"/>` },
+            { key: "nez", fr: "le nez", g: 'm', en: "nose", x: 680, ly: 282, d: `<ellipse cx="450" cy="312" rx="24" ry="22" fill="#000" fill-opacity="0"/><path d="M436,314 Q450,330 464,314" stroke="#D08E66" stroke-width="6" fill="none" stroke-linecap="round"/><ellipse cx="450" cy="306" rx="12" ry="9" fill="#fff" opacity=".35"/><path d="M642,286 L472,312" stroke="#94A3B8" stroke-width="1.5" stroke-dasharray="4 3"/>` },
+            { key: "bouche", fr: "la bouche", g: 'f', en: "mouth", x: 640, ly: 372, d: `<path d="M412,356 Q450,402 488,356 Q450,366 412,356Z" fill="#A8323A"/><path d="M432,384 Q450,394 468,384 Q450,376 432,384Z" fill="#F08A96"/>` },
+            { key: "dents", fr: "les dents", g: 'f', en: "teeth", x: 232, ly: 372, pl: true, d: `<path d="M422,360 Q450,368 478,360 L475,368 Q450,375 425,368Z" fill="#fff"/>` },
+            { key: "peau", fr: "la peau", g: 'f', en: "skin", x: 790, ly: 398, d: `<path d="M554,342 L734,322" stroke="#94A3B8" stroke-width="2" stroke-dasharray="5 4"/><circle cx="540" cy="338" r="14" fill="none" stroke="#94A3B8" stroke-width="3"/><circle cx="790" cy="300" r="58" fill="#F6D2B4"/><g clip-path="url(#bd-zoom)"><circle cx="752" cy="256" r="2" fill="#E2A47E" opacity=".7"/><circle cx="775" cy="293" r="3" fill="#E2A47E" opacity=".7"/><circle cx="798" cy="330" r="4" fill="#E2A47E" opacity=".7"/><circle cx="821" cy="277" r="2" fill="#E2A47E" opacity=".7"/><circle cx="766" cy="314" r="3" fill="#E2A47E" opacity=".7"/><circle cx="789" cy="261" r="4" fill="#E2A47E" opacity=".7"/><circle cx="812" cy="298" r="2" fill="#E2A47E" opacity=".7"/><circle cx="757" cy="335" r="3" fill="#E2A47E" opacity=".7"/><circle cx="780" cy="282" r="4" fill="#E2A47E" opacity=".7"/><circle cx="803" cy="319" r="2" fill="#E2A47E" opacity=".7"/><circle cx="826" cy="266" r="3" fill="#E2A47E" opacity=".7"/><circle cx="771" cy="303" r="4" fill="#E2A47E" opacity=".7"/><circle cx="794" cy="340" r="2" fill="#E2A47E" opacity=".7"/><circle cx="817" cy="287" r="3" fill="#E2A47E" opacity=".7"/><circle cx="762" cy="324" r="4" fill="#E2A47E" opacity=".7"/><circle cx="785" cy="271" r="2" fill="#E2A47E" opacity=".7"/><path d="M740,330 q30,-14 60,0 q20,8 44,-4 M736,280 q30,-12 56,0 q22,8 46,-6" stroke="#E7B591" stroke-width="2" fill="none"/></g><circle cx="790" cy="300" r="58" fill="none" stroke="#64748B" stroke-width="7"/><path d="M832,342 l26,26" stroke="#64748B" stroke-width="12" stroke-linecap="round"/>` },
+            { key: "cou", fr: "le cou", g: 'm', en: "neck", x: 640, ly: 470, d: `<path d="M412,428 Q450,456 488,428 L490,512 Q450,530 410,512Z" fill="#E8B48C"/><ellipse cx="450" cy="454" rx="36" ry="9" fill="#D69A72" opacity=".55"/>` },
+            { key: "gorge", fr: "la gorge", g: 'f', en: "throat", x: 232, ly: 470, d: `<ellipse cx="450" cy="476" rx="20" ry="14" fill="#E0A27B"/>` },
         ] },
-        { title: "Le corps", w: 900, h: 700, minw: 560, scene: `<rect width="900" height="700" fill="#F1F7FD"/><rect x="384" y="122" width="32" height="40" fill="#E8B48C"/><circle cx="400" cy="100" r="46" fill="#F3C9A6"/><path d="M354,96 Q352,48 400,46 Q448,48 446,96 Q430,70 400,68 Q370,70 354,96Z" fill="#4A2C1D"/><circle cx="384" cy="102" r="4" fill="#333"/><circle cx="416" cy="102" r="4" fill="#333"/><path d="M388,122 q12,8 24,0" stroke="#B83B3B" stroke-width="3" fill="none" stroke-linecap="round"/><g transform="translate(400,0)"><rect x="384" y="122" width="32" height="40" fill="#E8B48C"/><circle cx="400" cy="100" r="46" fill="#4A2C1D"/><path d="M340,170 Q400,158 460,170 L466,352 Q400,362 334,352Z" fill="#5BA4D9"/><path d="M322,182 Q296,260 300,330 M478,182 Q504,260 500,330" stroke="#E8B48C" stroke-width="30" stroke-linecap="round" fill="none"/><path d="M338,350 L378,350 L372,610 L340,610Z M422,350 L462,350 L460,610 L428,610Z" fill="#334155"/><text x="400" y="668" text-anchor="middle" font-size="14" fill="#64748B">de dos (from behind)</text></g><g stroke="#94A3B8" stroke-width="1.5" stroke-dasharray="4 3"><path d="M262,150 L316,176"/><path d="M262,262 L304,262"/><path d="M262,358 L280,354"/><path d="M262,420 L290,398"/><path d="M580,196 L462,206"/><path d="M580,226 L452,222"/><path d="M580,316 L466,312"/><path d="M262,520 L340,520"/><path d="M580,486 L462,482"/><path d="M580,630 L486,624"/><path d="M760,262 L846,262"/></g>`, items: [
-            { key: "corps", fr: "le corps", g: 'm', en: "body", x: 400, ly: 30, d: `<rect x="300" y="40" width="200" height="640" fill="#000" fill-opacity="0"/>` },
-            { key: "dos", fr: "le dos", g: 'm', en: "back", x: 800, ly: 262, d: `<g transform="translate(400,0)"><path d="M344,176 Q400,166 456,176 L462,346 Q400,356 338,346Z" fill="#3E86C2"/></g>` },
-            { key: "épaule", fr: "l'épaule", g: 'f', en: "shoulder", x: 230, ly: 150, d: `<circle cx="340" cy="178" r="26" fill="#5BA4D9"/><circle cx="460" cy="178" r="26" fill="#5BA4D9"/>` },
-            { key: "bras", fr: "le bras", g: 'm', en: "arm", x: 230, ly: 262, d: `<path d="M322,182 Q296,260 300,330" stroke="#E8B48C" stroke-width="34" stroke-linecap="round" fill="none"/><path d="M478,182 Q504,260 500,330" stroke="#E8B48C" stroke-width="34" stroke-linecap="round" fill="none"/>` },
-            { key: "main", fr: "la main", g: 'f', en: "hand", x: 230, ly: 358, d: `<ellipse cx="300" cy="352" rx="22" ry="26" fill="#F3C9A6"/><ellipse cx="500" cy="352" rx="22" ry="26" fill="#F3C9A6"/>` },
-            { key: "doigt", fr: "le doigt", g: 'm', en: "finger", x: 230, ly: 420, d: `<path d="M286,370 v24 M296,374 v28 M306,374 v26 M316,368 v18" stroke="#F3C9A6" stroke-width="8" stroke-linecap="round"/>` },
-            { key: "poitrine", fr: "la poitrine", g: 'f', en: "chest", x: 620, ly: 196, d: `<path d="M340,170 Q400,158 460,170 L470,262 Q400,272 330,262Z" fill="#5BA4D9"/>` },
+        { title: "Le corps", w: 900, h: 700, minw: 560, center: true, scene: `<rect width="900" height="700" fill="#F1F7FD"/><ellipse cx="400" cy="632" rx="120" ry="12" fill="#DCE6F2"/><ellipse cx="780" cy="632" rx="100" ry="11" fill="#DCE6F2"/><defs><radialGradient id="bd-hd" cx=".45" cy=".42" r=".65"><stop offset="0" stop-color="#FBE0C8"/><stop offset="1" stop-color="#F0BF98"/></radialGradient></defs>
+ <rect x="388" y="138" width="24" height="26" rx="6" fill="#E8B48C"/>
+ <path d="M348,112 C340,60 368,40 400,40 C432,40 460,60 452,112 Z" fill="#4A2C1D"/>
+ <ellipse cx="350" cy="104" rx="9" ry="13" fill="#E8B48C"/><ellipse cx="450" cy="104" rx="9" ry="13" fill="#E8B48C"/>
+ <path d="M352,100 C352,128 372,148 400,148 C428,148 448,128 448,100 C448,88 446,80 443,74 Q430,84 416,70 Q402,84 386,70 Q372,84 357,74 C354,82 352,90 352,100Z" fill="url(#bd-hd)"/>
+ <ellipse cx="383" cy="100" rx="8" ry="9" fill="#fff"/><circle cx="384" cy="101" r="5.5" fill="#3B2416"/><circle cx="386" cy="98" r="2" fill="#fff"/>
+ <ellipse cx="417" cy="100" rx="8" ry="9" fill="#fff"/><circle cx="418" cy="101" r="5.5" fill="#3B2416"/><circle cx="420" cy="98" r="2" fill="#fff"/>
+ <path d="M374,86 q9,-5 18,0 M408,86 q9,-5 18,0" stroke="#4A2C1D" stroke-width="3" fill="none" stroke-linecap="round"/>
+ <ellipse cx="372" cy="118" rx="8" ry="5" fill="#F49A9A" opacity=".5"/><ellipse cx="428" cy="118" rx="8" ry="5" fill="#F49A9A" opacity=".5"/>
+ <path d="M396,112 q4,4 8,0" stroke="#D08E66" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+ <path d="M387,124 Q400,138 413,124 Q400,128 387,124Z" fill="#A8323A"/><g transform="translate(780,20) scale(.9) translate(-400,0)"><rect x="388" y="138" width="24" height="28" rx="6" fill="#E8B48C"/><ellipse cx="350" cy="104" rx="9" ry="13" fill="#E8B48C"/><ellipse cx="450" cy="104" rx="9" ry="13" fill="#E8B48C"/><path d="M352,104 C346,58 370,40 400,40 C430,40 454,58 448,104 C446,128 430,144 400,146 C370,144 354,128 352,104Z" fill="#4A2C1D"/><path d="M380,60 q20,-10 40,4" stroke="#6B4226" stroke-width="5" fill="none" stroke-linecap="round" opacity=".6"/><circle cx="338" cy="184" r="28" fill="#5BA4D9"/><circle cx="462" cy="184" r="28" fill="#5BA4D9"/><path d="M318,204 Q302,262 304,326 M482,204 Q498,262 496,326" stroke="#F3C9A6" stroke-width="26" stroke-linecap="round" fill="none"/><ellipse cx="303" cy="348" rx="19" ry="21" fill="#F3C9A6"/><ellipse cx="497" cy="348" rx="19" ry="21" fill="#F3C9A6"/><path d="M344,356 h30 v236 q0,10 -10,10 h-10 q-10,0 -10,-10z M426,356 h30 v236 q0,10 -10,10 h-10 q-10,0 -10,-10z" fill="#F3C9A6"/><path d="M334,344 Q400,356 466,344 L472,440 Q446,448 418,440 L404,380 L396,380 L382,440 Q354,448 328,440Z" fill="#334155"/><rect x="345" y="586" width="28" height="12" rx="4" fill="#fff"/><rect x="427" y="586" width="28" height="12" rx="4" fill="#fff"/><rect x="340" y="596" width="38" height="26" rx="10" fill="#E2524A"/><rect x="422" y="596" width="38" height="26" rx="10" fill="#E2524A"/><text x="400" y="668" text-anchor="middle" font-size="14" fill="#64748B">de dos (from behind)</text></g><g stroke="#94A3B8" stroke-width="1.5" stroke-dasharray="4 3"><path d="M520,60 L466,74"/><path d="M262,150 L314,176"/><path d="M262,262 L306,262"/><path d="M262,358 L284,352"/><path d="M262,420 L288,376"/><path d="M580,196 L462,206"/><path d="M580,226 L452,222"/><path d="M580,316 L466,312"/><path d="M262,520 L342,520"/><path d="M580,486 L456,484"/><path d="M580,630 L474,616"/></g>`, items: [
+            { key: "corps", fr: "le corps", g: 'm', en: "body", x: 560, ly: 56, d: `<rect x="300" y="40" width="200" height="640" fill="#000" fill-opacity="0"/>` },
+            { key: "dos", fr: "le dos", g: 'm', en: "back", x: 780, ly: 262, d: `<g transform="translate(780,20) scale(.9) translate(-400,0)"><path d="M336,170 Q400,154 464,170 Q472,214 470,262 L468,344 Q400,358 332,344 L330,262 Q328,214 336,170Z" fill="#3E86C2"/><path d="M382,164 Q400,170 418,164" stroke="#2F6FA3" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M400,176 V330" stroke="#2F6FA3" stroke-width="2" opacity=".5"/></g>` },
+            { key: "épaule", fr: "l'épaule", g: 'f', en: "shoulder", x: 230, ly: 150, d: `<circle cx="338" cy="184" r="28" fill="#5BA4D9"/><circle cx="462" cy="184" r="28" fill="#5BA4D9"/>` },
+            { key: "bras", fr: "le bras", g: 'm', en: "arm", x: 230, ly: 262, d: `<path d="M318,204 Q302,262 304,326" stroke="#F3C9A6" stroke-width="26" stroke-linecap="round" fill="none"/><path d="M482,204 Q498,262 496,326" stroke="#F3C9A6" stroke-width="26" stroke-linecap="round" fill="none"/>` },
+            { key: "main", fr: "la main", g: 'f', en: "hand", x: 230, ly: 358, d: `<ellipse cx="303" cy="348" rx="19" ry="21" fill="#F3C9A6"/><ellipse cx="320" cy="344" rx="6" ry="11" fill="#F3C9A6" transform="rotate(-25,320,344)"/><ellipse cx="497" cy="348" rx="19" ry="21" fill="#F3C9A6"/><ellipse cx="480" cy="344" rx="6" ry="11" fill="#F3C9A6" transform="rotate(25,480,344)"/>` },
+            { key: "doigt", fr: "le doigt", g: 'm', en: "finger", x: 230, ly: 420, d: `<path d="M290,362 v16 M298,366 v18 M306,366 v17 M314,362 v12 M486,362 v12 M494,366 v17 M502,366 v18 M510,362 v16" stroke="#F3C9A6" stroke-width="7" stroke-linecap="round"/><path d="M290,362 v16 M298,366 v18 M306,366 v17 M314,362 v12" stroke="#E8B48C" stroke-width="1" stroke-linecap="round" opacity=".6"/>` },
+            { key: "poitrine", fr: "la poitrine", g: 'f', en: "chest", x: 620, ly: 196, d: `<path d="M336,170 Q400,154 464,170 Q472,214 470,262 Q400,272 330,262 Q328,214 336,170Z" fill="#5BA4D9"/><path d="M380,160 Q400,182 420,160" stroke="#fff" stroke-width="6" fill="none" stroke-linecap="round"/>` },
             { key: "cœur", fr: "le cœur", g: 'm', en: "heart", x: 620, ly: 226, d: `<image href="media/pictures/fe-anatomical-heart.webp" x="404" y="196" width="50" height="50"/>` },
-            { key: "ventre", fr: "le ventre", g: 'm', en: "belly, stomach", x: 620, ly: 316, d: `<path d="M330,262 Q400,272 470,262 L466,352 Q400,362 334,352Z" fill="#4F93C8"/>` },
-            { key: "jambe", fr: "la jambe", g: 'f', en: "leg", x: 230, ly: 520, d: `<path d="M338,350 L378,350 L372,610 L340,610Z M422,350 L462,350 L460,610 L428,610Z" fill="#334155"/>` },
-            { key: "genou", fr: "le genou", g: 'm', en: "knee", x: 620, ly: 486, d: `<ellipse cx="356" cy="480" rx="18" ry="14" fill="#475569"/><ellipse cx="444" cy="480" rx="18" ry="14" fill="#475569"/>` },
-            { key: "pied", fr: "le pied", g: 'm', en: "foot", x: 620, ly: 630, d: `<ellipse cx="350" cy="622" rx="34" ry="14" fill="#1E293B"/><ellipse cx="452" cy="622" rx="34" ry="14" fill="#1E293B"/>` },
+            { key: "ventre", fr: "le ventre", g: 'm', en: "belly, stomach", x: 620, ly: 316, d: `<path d="M330,262 Q400,272 470,262 L468,344 Q400,358 332,344Z" fill="#4F93C8"/><path d="M334,338 Q400,350 466,338" stroke="#3F7FB3" stroke-width="3" fill="none"/>` },
+            { key: "jambe", fr: "la jambe", g: 'f', en: "leg", x: 230, ly: 520, d: `<path d="M344,356 h30 v236 q0,10 -10,10 h-10 q-10,0 -10,-10z M426,356 h30 v236 q0,10 -10,10 h-10 q-10,0 -10,-10z" fill="#F3C9A6"/><path d="M334,344 Q400,356 466,344 L472,440 Q446,448 418,440 L404,380 L396,380 L382,440 Q354,448 328,440Z" fill="#334155"/>` },
+            { key: "genou", fr: "le genou", g: 'm', en: "knee", x: 620, ly: 486, d: `<path d="M350,488 q9,7 18,0 M432,488 q9,7 18,0" stroke="#D29A74" stroke-width="3" fill="none" stroke-linecap="round"/><ellipse cx="359" cy="484" rx="15" ry="12" fill="#E8B48C" opacity=".45"/><ellipse cx="441" cy="484" rx="15" ry="12" fill="#E8B48C" opacity=".45"/>` },
+            { key: "pied", fr: "le pied", g: 'm', en: "foot", x: 620, ly: 630, d: `<rect x="345" y="586" width="28" height="12" rx="4" fill="#fff"/><rect x="427" y="586" width="28" height="12" rx="4" fill="#fff"/><path d="M372,596 L344,596 Q328,598 326,612 Q326,622 336,622 L372,622Z" fill="#E2524A"/><path d="M428,596 L456,596 Q472,598 474,612 Q474,622 464,622 L428,622Z" fill="#E2524A"/><path d="M326,616 H372 M428,616 H474" stroke="#fff" stroke-width="3"/>` },
         ] },
         { title: "La santé", w: 900, h: 668, minw: 560, scene: `<rect width="900" height="668" fill="#EAF4EA"/><rect x="16" y="16" width="164" height="204" rx="16" fill="#FFFFFF"/><rect x="192" y="16" width="164" height="204" rx="16" fill="#FFFFFF"/><rect x="368" y="16" width="164" height="204" rx="16" fill="#FFFFFF"/><rect x="544" y="16" width="164" height="204" rx="16" fill="#FFFFFF"/><rect x="720" y="16" width="164" height="204" rx="16" fill="#FFFFFF"/><rect x="16" y="232" width="164" height="204" rx="16" fill="#FFFFFF"/><rect x="192" y="232" width="164" height="204" rx="16" fill="#FFFFFF"/><rect x="368" y="232" width="164" height="204" rx="16" fill="#FFFFFF"/><rect x="544" y="232" width="164" height="204" rx="16" fill="#FFFFFF"/><rect x="720" y="232" width="164" height="204" rx="16" fill="#FFFFFF"/><rect x="16" y="448" width="164" height="204" rx="16" fill="#FFFFFF"/><rect x="192" y="448" width="164" height="204" rx="16" fill="#FFFFFF"/><rect x="368" y="448" width="164" height="204" rx="16" fill="#FFFFFF"/>`, items: [
             { key: "douleur", fr: "la douleur", g: 'f', en: "pain", x: 98.0, ly: 166, d: `<image href="media/pictures/fe-face-with-head-bandage.webp" x="38.0" y="26" width="120" height="120"/>` },
@@ -299,7 +308,6 @@ PAGES[20] = {
         ] },
     ],
 };
-
 // ---------------- 28 Technology & Communication (made by tools/picture-pages/topics.py) ----------------
 PAGES[28] = {
     name: "Picture", next: "Explore the devices", title: "La technologie",
@@ -332,7 +340,6 @@ PAGES[28] = {
         ] },
     ],
 };
-
 // ---------------- 29 Animals & Nature (made by tools/picture-pages/topics.py) ----------------
 PAGES[29] = {
     name: "Picture", next: "Explore animals and nature", title: "Les animaux et la nature",
@@ -389,7 +396,6 @@ PAGES[29] = {
         ] },
     ],
 };
-
 // ---------------- 32 Sport & Fitness (made by tools/picture-pages/topics.py) ----------------
 PAGES[32] = {
     name: "Picture", next: "Explore sport", title: "Le sport",
@@ -424,9 +430,9 @@ PAGES[32] = {
         ] },
     ],
 };
-
 const CSS = `
-.pp{display:grid;gap:10px;max-width:820px}
+.pp{display:grid;gap:10px}
+@media (min-width:1024px){.pp>.pp-panel{position:sticky;bottom:10px;z-index:2;box-shadow:0 6px 24px rgba(15,23,42,.14)}}   /* on a computer the picture uses the full width; the word card stays in sight at the bottom */
 .pp-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .pp-btn{font-weight:700;font-size:var(--fs-base);border:1px solid #e2e8f0;background:#fff;color:#0f172a;border-radius:12px;padding:8px 14px;min-height:44px;cursor:pointer}
 .pp-btn.pri{background:#4f46e5;border-color:#4f46e5;color:#fff}
@@ -435,7 +441,8 @@ const CSS = `
 .pp-en{margin-left:auto;display:flex;align-items:center;gap:8px;font-size:var(--fs-sm);color:#475569;cursor:pointer;min-height:44px}
 .pp-en input{width:18px;height:18px;accent-color:#4f46e5}
 .pp-leg{font-size:var(--fs-sm);color:#64748b}
-.pp-card{background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:10px;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch}
+.pp-card{background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:10px;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.pp-card::-webkit-scrollbar{display:none}
 .pp-swipe{display:none;font-size:var(--fs-xs);color:#64748b;margin:0 0 4px}
 @media (max-width:640px){.pp-swipe.on{display:block}.pp-svg{min-width:var(--minw)}}
 .pp-svg{width:100%;height:auto;display:block;border-radius:10px;touch-action:manipulation}
@@ -482,11 +489,13 @@ function mountScene(page, root, { say, grade, words }) {
         <label class="pp-en"><input type="checkbox" id="pp-en" ${showEnglish ? 'checked' : ''}> English</label>
       </div>
       <div class="pp-leg">${page.legend || `<b style="color:${CO.m}">blue = le</b> (masculine) · <b style="color:${CO.f}">pink = la</b> (feminine) · before a vowel it is l', and the colour tells you which`}</div>
-      <div class="pp-card"><p class="pp-swipe on">Swipe sideways to see the whole picture.</p><svg class="pp-svg" viewBox="0 0 ${page.w} ${page.h}" role="img" aria-label="${esc(page.title)}" style="--minw:${Math.max(page.minw || 0, Math.round(page.w * 0.85))}px">${page.scene}<g class="objs"></g><g class="labs"></g></svg></div>
+      <div class="pp-card" data-scroll-ok><p class="pp-swipe on">Swipe sideways to see the whole picture →</p><svg class="pp-svg" viewBox="0 0 ${page.w} ${page.h}" role="img" aria-label="${esc(page.title)}" style="--minw:${Math.max(page.minw || 0, Math.round(page.w * 0.85))}px">${page.scene}<g class="objs"></g><g class="labs"></g></svg></div>
       <div class="pp-panel" id="pp-pn" aria-live="polite"></div>
       ${page.credit ? `<p class="pp-small">${esc(page.credit)}</p>` : ''}</div>`;
     const $ = (s) => root.querySelector(s);
     const objs = $('.objs'), labs = $('.labs'), pn = $('#pp-pn');
+    // a drawn person (the face, the body) starts in the middle on a phone, so the face is on the screen
+    if (page.center) requestAnimationFrame(() => { const cd = $('.pp-card'); if (cd) cd.scrollLeft = (cd.scrollWidth - cd.clientWidth) / 2; });
     objs.innerHTML = W.map((w, i) => `<g class="obj" data-i="${i}" role="button" tabindex="0" aria-label="${esc(w.fr)}"><g class="shape">${w.d}</g></g>`).join('');
     // a bigger tap area: the box around each object, so a tap in a gap (between the carrot and the broccoli) still counts
     objs.querySelectorAll('.obj').forEach(o => {

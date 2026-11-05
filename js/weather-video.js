@@ -44,7 +44,7 @@ const Q = [
 ];
 
 const CSS = `
-.wv{display:grid;gap:14px;max-width:820px}
+.wv{display:grid;gap:14px}
 .wv-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .wv-btn{font-weight:700;font-size:var(--fs-base);border:1px solid #e2e8f0;background:#fff;color:#0f172a;border-radius:12px;padding:8px 14px;min-height:44px;cursor:pointer}
 .wv-btn.pri{background:#4f46e5;border-color:#4f46e5;color:#fff}
@@ -52,7 +52,7 @@ const CSS = `
 .wv-btn:focus-visible,.wv-opt:focus-visible,.wv-ch:focus-visible{outline:3px solid #6366f1;outline-offset:2px}
 .wv-card{background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:14px;display:grid;gap:10px}
 .wv-card[hidden]{display:none}
-.wv-video{width:100%;aspect-ratio:16/9;border-radius:12px;background:#0E1631;display:block}
+.wv-video{width:min(100%,max(480px,calc((100vh - 420px)*16/9)));aspect-ratio:16/9;border-radius:12px;background:#0E1631;display:block}
 .wv-chs{display:flex;flex-wrap:wrap;gap:6px}
 .wv-ch{border:1px solid #e2e8f0;background:#f8fafc;border-radius:999px;padding:6px 12px;min-height:36px;font-size:var(--fs-sm);color:#334155;cursor:pointer}
 .wv-small{font-size:var(--fs-sm);color:#64748b}
@@ -65,7 +65,8 @@ const CSS = `
 .wv-note{background:#fffbeb;border:1px solid #fde68a;border-radius:12px;padding:10px 12px;font-size:var(--fs-base);color:#1e293b;line-height:1.5}
 .wv-fb{font-weight:800}.wv-fb.ok{color:#047857}.wv-fb.no{color:#be123c}
 .wv-rules{display:grid;gap:6px;font-size:var(--fs-base);color:#1e293b}
-.wv-rules div{background:#f8fafc;border-radius:10px;padding:8px 10px}`;
+.wv-rules div{background:#f8fafc;border-radius:10px;padding:8px 10px}
+@media (min-width:1024px){#wv-watch.wv-card{grid-template-columns:minmax(0,1fr) 320px;align-items:start;column-gap:18px}#wv-watch .wv-video{grid-column:1;grid-row:1 / span 6}#wv-watch>:not(video){grid-column:2}#wv-check:has(.wv-img){grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);align-items:start;column-gap:18px}#wv-check .wv-img{grid-column:1;grid-row:1 / span 6}#wv-check:has(.wv-img)>:not(.wv-img){grid-column:2}#wv-check .wv-opts{grid-template-columns:1fr}}`;
 function css() { if (!document.getElementById('wv-css')) { const s = document.createElement('style'); s.id = 'wv-css'; s.textContent = CSS; document.head.appendChild(s); } }
 
 function mount(root, { say, grade, words }) {
