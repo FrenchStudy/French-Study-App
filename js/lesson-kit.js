@@ -664,7 +664,7 @@ const LessonKit = (function () {
             q('side').innerHTML = `
                 <div class="bg-white border border-slate-200 rounded-2xl p-3">
                     <div class="text-xs font-bold uppercase tracking-wide ${st.text} px-1 pb-2">${escapeHtml(name)}</div>
-                    <div class="max-h-[70vh] overflow-y-auto divide-y divide-slate-100">
+                    <div class="divide-y divide-slate-100">
                         ${list.map(x => `<a href="${url(x)}" data-open="${escapeHtml(String(x))}" class="flex items-center gap-2 px-1 py-2 text-sm rounded-lg ${x === id ? `${st.soft} font-bold text-slate-900` : 'text-slate-700 hover:bg-slate-50'}">
                             <span class="shrink-0 w-6 h-6 rounded-full text-xs font-bold flex items-center justify-center ${isDone(section, x) ? 'bg-emerald-500 text-white' : x === id ? `${st.solid} text-white` : 'bg-slate-100 text-slate-600'}">${isDone(section, x) ? '✓' : escapeHtml(String(nodeLabel(x, sec.get(x))))}</span>
                             <span class="truncate">${escapeHtml(sec.get(x).title)}</span></a>`).join('')}
