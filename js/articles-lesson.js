@@ -22,7 +22,7 @@ const PAIRS = [
 const COL = { au: '#2563eb', aux: '#7c3aed', du: '#0891b2', des: '#c026d3', stay: '#64748b' };
 // nouns: m (le), f (la), v (l', before a vowel or a silent h), p (les)
 const NOUNS = [['marché', 'm'], ['parc', 'm'], ['cinéma', 'm'], ['musée', 'm'], ['bureau', 'm'], ['piscine', 'f'], ['gare', 'f'], ['plage', 'f'], ['boulangerie', 'f'], ['banque', 'f'],
-    ['hôtel', 'v'], ['école', 'v'], ['aéroport', 'v'], ['hôpital', 'v'], ['magasins', 'p'], ['toilettes', 'p'], ['États-Unis', 'p'], ['Pays-Bas', 'p']];
+    ['hôtel', 'v'], ['école', 'v'], ['aéroport', 'v'], ['hôpital', 'v'], ['magasins', 'p'], ['toilettes', 'p'], ['urgences', 'p'], ['champs', 'p']];
 const FORM = { à: { m: 'au', f: 'à la', v: 'à l\'', p: 'aux' }, de: { m: 'du', f: 'de la', v: 'de l\'', p: 'des' } };
 const WRONG = { à: { m: 'à le', p: 'à les' }, de: { m: 'de le', p: 'de les' } };
 const ART = { m: 'le', f: 'la', v: 'l\'', p: 'les' };
