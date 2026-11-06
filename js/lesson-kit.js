@@ -370,7 +370,7 @@ const LessonKit = (function () {
     // (and lesson 27 for countries) without any exercises, so it is no longer shown.
     function embeddedPractice() { return ''; }
     // explore: [script, global]; mounted with { say } when the lesson opens
-    const EXPLORE = { articles: [['js/articles-lesson.js'], 'ArticlesLesson'], place: [['js/grammar-practice.js', 'js/place-lesson.js'], 'PlaceLesson'], avoir: [['js/grammar-practice.js', 'js/avoir-lesson.js'], 'AvoirLesson'] };
+    const EXPLORE = { articles: [['js/articles-lesson.js'], 'ArticlesLesson'], place: [['js/grammar-practice.js', 'js/place-lesson.js'], 'PlaceLesson'], avoir: [['js/grammar-practice.js', 'js/avoir-lesson.js'], 'AvoirLesson'], negation: [['js/grammar-practice.js', 'js/negation-lesson.js'], 'NegationLesson'] };
     // « Now type them »: from the practice to the typing part of the page
     const toTyping = () => { const t = document.getElementById('lk-type'); if (!t) return; t.scrollIntoView({ behavior: 'smooth', block: 'start' }); const i = t.querySelector('[data-drill] input'); if (i) i.focus({ preventScroll: true }); };
     async function mountExplore(container) {
