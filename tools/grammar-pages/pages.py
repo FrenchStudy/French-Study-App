@@ -688,6 +688,11 @@ P['14'] = dict(
            ["Let's go!", 'Allons-y ! / On y va !', "Let's = the nous form: <b>Allons-y !</b>"], ["Don't be late (tu)", 'Ne sois pas en retard !', 'être → <b>sois</b>; the no goes round it.'],
            ['Tell a friend: eat!', 'Mange !', '-er verbs drop the -s: <b>Mange !</b>'], ['Tell two friends: listen!', 'Écoutez !', 'More than one person: the vous form, <b>Écoutez !</b>']])
 
+# the other levels, one file each, written with the same helpers (C, B, S, T, CARD, FLIP, VOC) into P
+for lvl in ['a2', 'b1', 'b2', 'c1', 'c2']:
+    fp = os.path.join(os.path.dirname(os.path.abspath(__file__)), lvl + '.py')
+    if os.path.exists(fp): exec(open(fp, encoding='utf-8').read(), globals())
+
 out = os.path.join(R, 'js', 'grammar-pages.js')
 with open(out, 'w', encoding='utf-8') as f:
     f.write('// js/grammar-pages.js - the interactive grammar pages: the rule in one line, the See-it steps, the practice and the typing.\n'

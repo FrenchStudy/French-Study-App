@@ -29,7 +29,7 @@ SCALE = {12, 14, 16, 18, 20, 24, 30, 36, 48, 60, 72, 96, 128}
 
 PAGES = ['index.html', 'vocab.html', 'lesson.html', 'conjugations.html', 'reading.html', 'listening.html', 'writing.html', 'speaking.html',
          'translator.html', 'syllabus.html', 'exam.html', 'welcome.html', 'login.html', 'contact.html', 'terms.html', 'privacy.html',
-         'lesson.html?i=lheure-prix', 'lesson.html?i=lalphabet', 'lesson.html?g=2', 'lesson.html?g=10', 'lesson.html?g=12', 'lesson.html?g=6'] + ['lesson.html?g=' + g for g in ['1', '27', '3', '4', '29', 'v1', 'v2', '5', 'v3', 'v6', '7', '8', '9', '11', '13', '14']]
+         'lesson.html?i=lheure-prix', 'lesson.html?i=lalphabet', 'lesson.html?g=2', 'lesson.html?g=10', 'lesson.html?g=12', 'lesson.html?g=6'] + ['lesson.html?g=' + g for g in ['1', '27', '3', '4', '29', 'v1', 'v2', '5', 'v3', 'v6', '7', '8', '9', '11', '13', '14', '24', '21', '19', '20', '30', '31', 'v10', '15', '18', '25', '22', '26', '16', '17', '28', '23', 'v17']]
 
 CHECK = r"""() => {
   const emojiOnly = (t) => !/[\p{L}\p{N}]/u.test(t);
