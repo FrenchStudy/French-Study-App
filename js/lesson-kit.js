@@ -42,8 +42,8 @@ const LessonKit = (function () {
         49: [28], 50: [30], 52: [32], 59: [29] };
     // Teaching order per level: numbers are grammar lessons, "vN" are verb lessons of their own
     const ORDER = [
-        // countries (27) right after the articles they use (au, aux); stressed pronouns (29) right after subject pronouns
-        [1, 2, 27, 3, 4, 29, 'v1', 'v2', 5, 'v3', 'v6', 6, 7, 8, 9, 10, 11, 12, 13, 14],
+        // countries and cities (27) before the articles; stressed pronouns (29) right after subject pronouns
+        [1, 27, 2, 3, 4, 29, 'v1', 'v2', 5, 'v3', 'v6', 6, 7, 8, 9, 10, 11, 12, 13, 14],
         ['v10', 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 'v17', 25, 26, 28, 30, 31],
         [32, 33, 34, 35, 'v25', 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46],
         [47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 'v33'],
