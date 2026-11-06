@@ -1,7 +1,7 @@
 // grammar-tools.js - the « See it » parts of a grammar page, drawn from data (js/grammar-pages.js), then its practice.
 // A page is { steps: [ { tool, title, sub, … } ], practice: { choose, build, spot } }. The tools:
 //   conj   a verb by person: tap je / tu / il…; the ending lights up, silent endings are marked; a no and a sentence
-//          { verbs: [ { inf, en, stem, forms: [6], tail?, silent?: [6 booleans], pasAt?: n } ], neg?: true }
+//          { verbs: [ { inf, en, stem, forms: [6], tail?, silent?: [6 booleans], pasAt?: n or [6] } ], neg?: true, pre?: 'Il faut que' }
 //   swap   one sentence before and after a change (make it a no, a question, a pronoun…); new tiles slide in
 //          { button: [to b, to a], items: [ { label, en: [a, b], a: [tiles], b: [tiles], note } ], legend?: [[colour, label]] }
 //          a tile is [key, text, kind]; kind v (blue), n (red), x (amber), p (violet)
@@ -103,9 +103,12 @@ const TOOLS = {
         const draw = (speak) => {
             const v = st.verbs[vi], f = v.forms[pi];
             const s = subj(pi, f), ne = neg ? (elides(f) ? 'n\'' : 'ne ') : '';
-            const sCap = s.charAt(0).toUpperCase() + s.slice(1);
+            // pre: a lead-in such as « Il faut que »: que + il → qu'il, que + j' stays que j'
+            const lead = st.pre ? (/que$/.test(st.pre) && /^[aeiouéèêh]/i.test(s) && s !== 'j\'' ? st.pre.slice(0, -1) + '\'' : st.pre + ' ') : '';
+            const sCap = lead ? lead + s : s.charAt(0).toUpperCase() + s.slice(1);
             // pasAt: in a compound form (ai mangé), pas goes after that many words: n'ai pas mangé
-            const cut = neg && v.pasAt ? f.split(' ') : null, fa = cut ? cut.slice(0, v.pasAt).join(' ') : f, fb = cut ? cut.slice(v.pasAt).join(' ') : '';
+            const at = Array.isArray(v.pasAt) ? v.pasAt[pi] : v.pasAt;   // a number, or one per person (nous nous étions | levés)
+            const cut = neg && at ? f.split(' ') : null, fa = cut ? cut.slice(0, at).join(' ') : f, fb = cut ? cut.slice(at).join(' ') : '';
             box.querySelector('.gt-big').innerHTML = `${esc(sCap)}${neg ? `<span class="gt-end">${esc(ne)}</span>` : ''}${cut ? esc(fa) : ending(v, f, pi)}${neg ? ' <span class="gt-end">pas</span>' : ''}${fb ? ' ' + esc(fb) : ''}${v.tail ? ' ' + esc(v.tail) : ''}.`;
             box.querySelector('.gt-en').innerHTML = v.mute && v.silent ? '' : (v.silent && v.silent[pi] ? 'The grey ending is written but not heard.' : '');
             box.querySelectorAll('[data-p]').forEach((b, i) => { const ff = v.forms[i]; b.innerHTML = i === 0 && elides(ff) ? `j'<b>${ending(v, ff, i)}</b>` : `${esc(PERSONS[i])} <b>${ending(v, ff, i)}</b>`; });
