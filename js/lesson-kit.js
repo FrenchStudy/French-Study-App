@@ -42,9 +42,9 @@ const LessonKit = (function () {
         49: [28], 50: [30], 52: [32], 59: [29] };
     // Teaching order per level: numbers are grammar lessons, "vN" are verb lessons of their own
     const ORDER = [
-        // countries (27) right after the articles they use (au, aux); stressed pronouns (29) right after subject pronouns
-        [1, 2, 27, 3, 4, 29, 'v1', 'v2', 5, 'v3', 'v6', 6, 7, 8, 9, 10, 11, 12, 13, 14],
-        ['v10', 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 'v17', 25, 26, 28, 30, 31],
+        // countries and cities (27) before the articles; stressed pronouns (29) right after subject pronouns
+        [1, 27, 2, 3, 4, 29, 'v1', 'v2', 5, 'v3', 'v6', 6, 7, 8, 9, 10, 11, 12, 13, 14],
+        [24, 21, 19, 20, 30, 31, 'v10', 15, 18, 25, 22, 26, 16, 17, 28, 23, 'v17'],
         [32, 33, 34, 35, 'v25', 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46],
         [47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 'v33'],
         ['v34', 'v35', 61, 64, 65, 67, 'v39', 68, 'v36', 'v37', 'v38', 69, 70, 'v40'],
@@ -166,7 +166,7 @@ const LessonKit = (function () {
             <td class="px-3 py-2 text-slate-500 whitespace-nowrap">${escapeHtml(r0.cp)}</td>
             ${cols.map((col, j) => {
                 const r = col[i];
-                return r ? `<td class="px-3 py-2 whitespace-nowrap"><button type="button" data-say="${escapeHtml(r.say)}" class="text-left font-semibold text-slate-900 hover:text-indigo-700">${C.highlight(verbs[j], t.tense, i, r.cf)}</button></td>` : '<td></td>';
+                return r ? `<td class="px-3 py-2"><button type="button" data-say="${escapeHtml(r.say)}" class="text-left font-semibold text-slate-900 hover:text-indigo-700">${C.highlight(verbs[j], t.tense, i, r.cf)}</button></td>` : '<td></td>';
             }).join('')}</tr>`).join('');
         // Phones: one small card per verb, side by side when they fit, so nothing scrolls sideways
         const cards = verbs.length < 2 ? '' : `<div class="sm:hidden grid grid-cols-[repeat(auto-fill,minmax(9.5rem,1fr))] gap-2">${verbs.map((v, j) => `
