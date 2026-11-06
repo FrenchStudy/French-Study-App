@@ -42,8 +42,9 @@ const LessonKit = (function () {
         49: [28], 50: [30], 52: [32], 59: [29] };
     // Teaching order per level: numbers are grammar lessons, "vN" are verb lessons of their own
     const ORDER = [
-        [1, 2, 3, 4, 'v1', 'v2', 5, 'v3', 'v6', 6, 7, 8, 9, 10, 11, 12, 13, 14],
-        ['v10', 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 'v17', 25, 26, 27, 28, 29, 30, 31],
+        // countries (27) right after the articles they use (au, aux); stressed pronouns (29) right after subject pronouns
+        [1, 2, 27, 3, 4, 29, 'v1', 'v2', 5, 'v3', 'v6', 6, 7, 8, 9, 10, 11, 12, 13, 14],
+        ['v10', 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 'v17', 25, 26, 28, 30, 31],
         [32, 33, 34, 35, 'v25', 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46],
         [47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 'v33'],
         ['v34', 'v35', 61, 64, 65, 67, 'v39', 68, 'v36', 'v37', 'v38', 69, 70, 'v40'],
@@ -147,9 +148,12 @@ const LessonKit = (function () {
                 ? `<td class="px-2 sm:px-3 py-2 align-top${nowrap}"><button type="button" data-say="${escapeHtml(toText(cell))}" class="text-left font-semibold text-slate-900 hover:text-indigo-700">${cell}</button></td>`
                 : `<td class="px-2 sm:px-3 py-2 align-top text-slate-600${nowrap}">${cell}</td>`;
         }).join('')}</tr>`).join('');
+        // Phones: a table of 3 or more columns becomes one small card per row (column name: value), so nothing scrolls sideways
+        const cell = (c, i) => fr.has(i) && String(c).trim() ? `<button type="button" data-say="${escapeHtml(toText(c))}" class="text-left font-semibold text-slate-900 hover:text-indigo-700">${c}</button>` : `<span class="text-slate-700">${c}</span>`;
+        const cards = (t.head || []).length >= 3 ? `<div class="sm:hidden space-y-2">${t.rows.map(r => `<dl class="border border-slate-200 rounded-xl px-3 py-2 text-sm space-y-1">${r.map((c, i) => String(c).trim() ? `<div><dt class="inline text-slate-500">${t.head[i] || ''}${t.head[i] ? ': ' : ''}</dt><dd class="inline">${cell(c, i)}</dd></div>` : '').join('')}</dl>`).join('')}</div>` : '';
         return `<figure class="space-y-1">
             ${t.cap ? `<figcaption class="text-sm font-bold text-slate-800">${escapeHtml(t.cap)}</figcaption>` : ''}
-            <div class="overflow-x-auto border border-slate-200 rounded-xl"><table class="w-full text-sm sm:text-sm">${head}<tbody>${body}</tbody></table></div>
+            ${cards}<div class="${cards ? 'hidden sm:block ' : ''}overflow-x-auto border border-slate-200 rounded-xl"><table class="w-full text-sm sm:text-sm">${head}<tbody>${body}</tbody></table></div>
         </figure>`;
     }
 
@@ -370,14 +374,14 @@ const LessonKit = (function () {
     // (and lesson 27 for countries) without any exercises, so it is no longer shown.
     function embeddedPractice() { return ''; }
     // explore: [script, global]; mounted with { say } when the lesson opens
-    const EXPLORE = { articles: [['js/articles-lesson.js'], 'ArticlesLesson'], place: [['js/grammar-practice.js', 'js/place-lesson.js'], 'PlaceLesson'], avoir: [['js/grammar-practice.js', 'js/avoir-lesson.js'], 'AvoirLesson'], negation: [['js/grammar-practice.js', 'js/negation-lesson.js'], 'NegationLesson'] };
+    const EXPLORE = { articles: [['js/articles-lesson.js'], 'ArticlesLesson'], place: [['js/grammar-practice.js', 'js/place-lesson.js'], 'PlaceLesson'], avoir: [['js/grammar-practice.js', 'js/avoir-lesson.js'], 'AvoirLesson'], negation: [['js/grammar-practice.js', 'js/negation-lesson.js'], 'NegationLesson'], tools: [['js/grammar-practice.js', 'js/grammar-tools.js'], 'GrammarTools'] };
     // « Now type them »: from the practice to the typing part of the page
     const toTyping = () => { const t = document.getElementById('lk-type'); if (!t) return; t.scrollIntoView({ behavior: 'smooth', block: 'start' }); const i = t.querySelector('[data-drill] input'); if (i) i.focus({ preventScroll: true }); };
     async function mountExplore(container) {
         for (const box of container.querySelectorAll('[data-explore]')) {
             const [srcs, name] = EXPLORE[box.dataset.explore] || [];
             if (!srcs) continue;
-            try { if (!window[name]) for (const src of srcs) await loadScript(src); window[name].mount(box, { say: (t) => window.speakText(t), done: toTyping }); }
+            try { if (!window[name]) for (const src of srcs) await loadScript(src); window[name].mount(box, { say: (t) => window.speakText(t), done: toTyping, page: window.GRAMMAR_PAGES && window.GRAMMAR_PAGES[box.dataset.page] }); }
             catch (err) { box.innerHTML = '<p class="text-sm text-rose-700">This part could not be loaded. Check your connection and try again.</p>'; }
         }
     }
@@ -399,13 +403,16 @@ const LessonKit = (function () {
     // explanation, the tables and the examples wait under « More detail »
     function stepsBody(section, id, t) {
         const parts = [card('The rule', `<p class="text-lg text-slate-900 leading-relaxed">${t.line}</p>${t.words ? `<p class="text-sm text-slate-600">${t.words}</p>` : ''}`)];
-        parts.push(card('See it and practise', `<div data-explore="${t.explore}"></div>`));
+        parts.push(card('See it and practise', `<div data-explore="${t.explore}" data-page="${escapeHtml(String(id))}"></div>`));
         if (t.drill && t.drill.length) parts.push(`<div id="lk-type">${card('Now type them', drillBlock(t.drill, `${section}:${id}`))}</div>`);
-        parts.push(`<details class="bg-white border border-slate-200 rounded-2xl p-4 group"><summary class="cursor-pointer text-sm font-bold uppercase tracking-wide text-slate-500 min-h-[28px]">More detail: the full rule, tables and examples</summary><div class="mt-3 space-y-4">${lessonParts(t, 'The rule in full').join('')}</div></details>`);
+        parts.push(`<details class="bg-white border border-slate-200 rounded-2xl p-4 group"><summary class="cursor-pointer text-sm font-bold uppercase tracking-wide text-slate-500 min-h-[28px]">More detail: the full rule, tables and examples</summary><div class="mt-3 space-y-4">${lessonParts(t, 'The rule in full').join('')}${(t.forms || []).map(f => `<h3 class="pt-2 text-lg font-black text-slate-900">${escapeHtml(f.title)}</h3>${lessonParts(f, 'How to form it').join('')}`).join('')}</div></details>`);
         parts.push(seeAlsoHtml(id, t));
         return parts.join('');
     }
     function topicBody(section, id, t) {
+        // a page written in js/grammar-pages.js: its rule line, words, drill and See-it steps replace the old ones
+        const gp = window.GRAMMAR_PAGES && window.GRAMMAR_PAGES[String(id)];
+        if (gp) return stepsBody(section, id, { ...t, page: 'steps', explore: 'tools', line: gp.line, words: gp.words, drill: gp.drill || t.drill });
         if (t.page === 'steps' && t.explore && EXPLORE[t.explore]) return stepsBody(section, id, t);
         const parts = lessonParts(t, 'The rule');
         parts.push(embeddedPractice(section, id));
