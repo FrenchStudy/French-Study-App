@@ -370,12 +370,14 @@ const LessonKit = (function () {
     // (and lesson 27 for countries) without any exercises, so it is no longer shown.
     function embeddedPractice() { return ''; }
     // explore: [script, global]; mounted with { say } when the lesson opens
-    const EXPLORE = { articles: ['js/articles-lesson.js', 'ArticlesLesson'] };
+    const EXPLORE = { articles: [['js/articles-lesson.js'], 'ArticlesLesson'], place: [['js/grammar-practice.js', 'js/place-lesson.js'], 'PlaceLesson'] };
+    // « Now type them »: from the practice to the typing part of the page
+    const toTyping = () => { const t = document.getElementById('lk-type'); if (!t) return; t.scrollIntoView({ behavior: 'smooth', block: 'start' }); const i = t.querySelector('[data-drill] input'); if (i) i.focus({ preventScroll: true }); };
     async function mountExplore(container) {
         for (const box of container.querySelectorAll('[data-explore]')) {
-            const [src, name] = EXPLORE[box.dataset.explore] || [];
-            if (!src) continue;
-            try { if (!window[name]) await loadScript(src); window[name].mount(box, { say: (t) => window.speakText(t) }); }
+            const [srcs, name] = EXPLORE[box.dataset.explore] || [];
+            if (!srcs) continue;
+            try { if (!window[name]) for (const src of srcs) await loadScript(src); window[name].mount(box, { say: (t) => window.speakText(t), done: toTyping }); }
             catch (err) { box.innerHTML = '<p class="text-sm text-rose-700">This part could not be loaded. Check your connection and try again.</p>'; }
         }
     }
@@ -393,7 +395,18 @@ const LessonKit = (function () {
         return parts;
     }
 
+    // An interactive page (t.page = 'steps'): the rule in one line, See it and Practise, then Type; the long
+    // explanation, the tables and the examples wait under « More detail »
+    function stepsBody(section, id, t) {
+        const parts = [card('The rule', `<p class="text-lg text-slate-900 leading-relaxed">${t.line}</p>${t.words ? `<p class="text-sm text-slate-600">${t.words}</p>` : ''}`)];
+        parts.push(card('See it and practise', `<div data-explore="${t.explore}"></div>`));
+        if (t.drill && t.drill.length) parts.push(`<div id="lk-type">${card('Now type them', drillBlock(t.drill, `${section}:${id}`))}</div>`);
+        parts.push(`<details class="bg-white border border-slate-200 rounded-2xl p-4 group"><summary class="cursor-pointer text-sm font-bold uppercase tracking-wide text-slate-500 min-h-[28px]">More detail: the full rule, tables and examples</summary><div class="mt-3 space-y-4">${lessonParts(t, 'The rule in full').join('')}</div></details>`);
+        parts.push(seeAlsoHtml(id, t));
+        return parts.join('');
+    }
     function topicBody(section, id, t) {
+        if (t.page === 'steps' && t.explore && EXPLORE[t.explore]) return stepsBody(section, id, t);
         const parts = lessonParts(t, 'The rule');
         parts.push(embeddedPractice(section, id));
         // A lesson with something to play with before typing (t.explore: the script that draws it)
