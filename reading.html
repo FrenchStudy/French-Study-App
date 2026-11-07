@@ -57,19 +57,17 @@
                         <p class="text-sm text-slate-500">Every text is new, made for you in seconds.</p>
                     </div>
                     <nav class="flex gap-0 sm:gap-6 px-2 sm:px-5 mt-2 text-sm font-semibold overflow-hidden shadow-[inset_0_-1px_0_#e2e8f0]" role="tablist" aria-label="Where the text comes from">
-                        <button type="button" role="tab" data-about="library" class="mk-tab flex-1 sm:flex-none flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1.5 min-h-[52px] sm:min-h-[44px] px-0.5 sm:px-0 pb-1 sm:pb-0 border-b-2 border-transparent text-slate-500 hover:text-slate-800 whitespace-nowrap">📖 <span class="hidden sm:inline">Library</span><span class="sm:hidden">Library</span></button>
-                        <button type="button" role="tab" data-about="theme" class="mk-tab flex-1 sm:flex-none flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1.5 min-h-[52px] sm:min-h-[44px] px-0.5 sm:px-0 pb-1 sm:pb-0 border-b-2 border-transparent text-slate-500 hover:text-slate-800 whitespace-nowrap"><span class="mk-ai">AI</span> <span class="hidden sm:inline">A theme</span><span class="sm:hidden">Theme</span></button>
-                        <button type="button" role="tab" data-about="random" class="mk-tab flex-1 sm:flex-none flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1.5 min-h-[52px] sm:min-h-[44px] px-0.5 sm:px-0 pb-1 sm:pb-0 border-b-2 border-transparent text-slate-500 hover:text-slate-800 whitespace-nowrap"><span class="mk-ai">AI</span> <span class="hidden sm:inline">Topic generator</span><span class="sm:hidden">Generator</span></button>
-                        <button type="button" role="tab" data-about="lessons" class="mk-tab flex-1 sm:flex-none flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1.5 min-h-[52px] sm:min-h-[44px] px-0.5 sm:px-0 pb-1 sm:pb-0 border-b-2 border-transparent text-slate-500 hover:text-slate-800 whitespace-nowrap"><span class="mk-ai">AI</span> <span class="hidden sm:inline">My lessons</span><span class="sm:hidden">Lessons</span></button>
+                        <button type="button" role="tab" data-about="library" class="mk-tab flex-1 sm:flex-none flex items-center justify-center gap-1.5 min-h-[44px] px-0.5 sm:px-0 border-b-2 border-transparent text-slate-500 hover:text-slate-800 whitespace-nowrap">📖 Library</button>
+                        <button type="button" role="tab" data-about="theme" class="mk-tab flex-1 sm:flex-none flex items-center justify-center gap-1.5 min-h-[44px] px-0.5 sm:px-0 border-b-2 border-transparent text-slate-500 hover:text-slate-800 whitespace-nowrap"><span class="mk-ai">AI</span> Topics</button>
+                        <button type="button" role="tab" data-about="lessons" class="mk-tab flex-1 sm:flex-none flex items-center justify-center gap-1.5 min-h-[44px] px-0.5 sm:px-0 border-b-2 border-transparent text-slate-500 hover:text-slate-800 whitespace-nowrap"><span class="mk-ai">AI</span> My lessons</button>
                     </nav>
                     <div class="p-4 sm:p-5 space-y-4">
                         <div id="mk-lessons" class="hidden space-y-2 text-sm text-slate-700"></div>
                         <div id="mk-theme" class="hidden space-y-2">
-                            <p class="text-sm text-slate-600">Pick a theme or type your own subject:</p>
-                            <div id="mk-themes" class="flex flex-wrap gap-2" role="group" aria-label="Theme"></div>
+                            <p class="text-sm text-slate-600">Pick a topic, or type your own:</p>
+                            <div id="mk-themes" class="flex flex-wrap gap-2" role="group" aria-label="Topic"></div>
                             <input id="mk-own" type="text" maxlength="80" placeholder="✏️ …or type your own subject, e.g. a night train to Nice" class="w-full min-h-[44px] px-3 text-base bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
                         </div>
-                        <p id="mk-random" class="hidden text-sm text-slate-600">No subject needed: the AI picks one for you. Just choose the level and the format.</p>
                         <div id="mk-ai" class="space-y-3">
                             <div class="grid grid-cols-2 gap-2 sm:max-w-md">
                                 <select id="mk-level" class="mk-sel" aria-label="Level"></select>
@@ -227,7 +225,7 @@
             };
             { const all = list.length + topicsFor(level).length, done = list.filter(t => result(t.id)).length + topicsFor(level).filter(tp => { const t = topicText(tp); return t && result(t.id); }).length;
               $('texts-heading').textContent = all ? `${all} texts for ${level} · ${done} done` : ''; }
-            $('text-grid').innerHTML = (list.length || topicsFor(level).length) ? topicsFor(level).map(topicCard).join('') + list.map(t => textCard(t, st)).join('') : '<p class="text-sm text-slate-500">No ready-made texts at this level yet. Let the AI write one: pick A theme or Topic generator.</p>';
+            $('text-grid').innerHTML = (list.length || topicsFor(level).length) ? topicsFor(level).map(topicCard).join('') + list.map(t => textCard(t, st)).join('') : '<p class="text-sm text-slate-500">No ready-made texts at this level yet. Let the AI write one in the Topics tab.</p>';
             $('lib-note').textContent = '';   // (the shared library state is for the admin page, not for learners)
         }
         function textCard(t, st) {
@@ -374,13 +372,15 @@
 
         // ---------- New texts ----------
         // ---------- ✨ A new text, written for you ----------
-        // Tabs: 📖 Library (texts already in the app) · AI A theme (or your own subject) · AI Topic generator (the AI picks)
+        // Tabs: 📖 Library (texts already in the app) · AI Topics (🎲 Any topic, a theme, or your own subject)
         // · AI My lessons (your last Vocab topic and Grammar lesson). The tab is remembered; the level is picked for each text.
         const THEMES = [['🏠', 'Daily life'], ['👨‍👩‍👧', 'Family and friends'], ['🍽️', 'Food'], ['✈️', 'Travel'], ['🏡', 'Home'], ['💼', 'Work'],
             ['🎓', 'Studies'], ['🩺', 'Health and sport'], ['🎨', 'Free time'], ['🛍️', 'Shopping'], ['🤖', 'Technology'], ['🌍', 'Environment'], ['🎭', 'Culture and media'], ['🏛️', 'Society']];
         const FORMATS = ['Story', 'Message / email', 'Article', 'Advert', 'Blog post'];
-        const ABOUTS = ['library', 'theme', 'random', 'lessons'];
-        const mk = { about: ABOUTS.includes(store.get('reading_about', '')) ? store.get('reading_about', '') : '', theme: THEMES.some(t => t[1] === store.get('reading_theme', '')) ? store.get('reading_theme', '') : 'Travel', allThemes: false, level: '', format: '', vocab: null, grammar: null, busy: false };
+        const ABOUTS = ['library', 'theme', 'lessons'];
+        const savedAbout = store.get('reading_about', '') === 'random' ? 'theme' : store.get('reading_about', '');
+        // 🎲 Any topic is picked each time the page opens
+        const mk = { about: ABOUTS.includes(savedAbout) ? savedAbout : '', theme: '🎲', allThemes: false, level: '', format: '', vocab: null, grammar: null, busy: false };
         function lessonPicks() {
             const v = RecentLessons.list('vocab'), g = RecentLessons.list('grammar');
             if (!mk.vocab || !v.some(x => String(x.id) === String(mk.vocab))) mk.vocab = v[0] ? String(v[0].id) : '';
@@ -394,7 +394,6 @@
                 ['border-indigo-600', 'text-indigo-700'].forEach(c => b.classList.toggle(c, on)); ['border-transparent', 'text-slate-500', 'hover:text-slate-800'].forEach(c => b.classList.toggle(c, !on)); });
             $('mk-lessons').classList.toggle('hidden', mk.about !== 'lessons');
             $('mk-theme').classList.toggle('hidden', mk.about !== 'theme');
-            $('mk-random').classList.toggle('hidden', mk.about !== 'random');
             $('mk-ai').classList.toggle('hidden', mk.about === 'library');
             $('ready').classList.toggle('hidden', mk.about !== 'library');
             if (mk.about === 'lessons') {
@@ -410,7 +409,8 @@
             }
             if (mk.about === 'theme') {
                 const list = mk.allThemes ? THEMES : THEMES.slice(0, 6);
-                $('mk-themes').innerHTML = list.map(([e, n]) => `<button type="button" class="mk-chip" data-theme="${escapeHtml(n)}" aria-pressed="${mk.theme === n && !$('mk-own').value.trim()}">${e} ${escapeHtml(n)}</button>`).join('')
+                $('mk-themes').innerHTML = `<button type="button" class="mk-chip" data-theme="🎲" aria-pressed="${mk.theme === '🎲' && !$('mk-own').value.trim()}">🎲 Any topic</button>`
+                    + list.map(([e, n]) => `<button type="button" class="mk-chip" data-theme="${escapeHtml(n)}" aria-pressed="${mk.theme === n && !$('mk-own').value.trim()}">${e} ${escapeHtml(n)}</button>`).join('')
                     + (mk.allThemes ? '' : `<button type="button" class="mk-chip text-slate-500" data-mk-more>+ ${THEMES.length - 6} more</button>`);
             }
             if (!$('mk-level').options.length) {
@@ -418,7 +418,7 @@
                 $('mk-format').innerHTML = '<option value="">Any format</option>' + FORMATS.map(f => `<option>${escapeHtml(f)}</option>`).join('');
             }
             $('mk-level').classList.toggle('on', !!mk.level);
-            const subjectLabel = mk.about === 'lessons' ? (hasLessons ? 'my lessons' : '') : mk.about === 'random' ? 'new topic' : ($('mk-own').value.trim() || mk.theme);
+            const subjectLabel = mk.about === 'lessons' ? (hasLessons ? 'my lessons' : '') : ($('mk-own').value.trim() || (mk.theme === '🎲' ? 'any topic' : mk.theme));
             const ready = mk.level && subjectLabel;
             const go = $('mk-go');
             go.disabled = !ready || mk.busy;
@@ -441,12 +441,13 @@
                 subject = L.vocab ? L.vocab.title : 'everyday life';
                 focus = { words: L.vocab ? L.vocab.words || [] : [], grammar: L.grammar ? `${L.grammar.title}${L.grammar.rule ? ' (' + L.grammar.rule + ')' : ''}` : '',
                     label: [L.vocab && L.vocab.title, L.grammar && L.grammar.title].filter(Boolean).join(' · ') };
-            } else if (mk.about === 'random') {
-                // the AI picks the topic: one of the app's themes as a broad area, the exact subject is its choice
-                const area = THEMES[Math.floor(Math.random() * THEMES.length)][1];
+            } else if ($('mk-own').value.trim()) subject = $('mk-own').value.trim();
+            else {
+                // 🎲 Any topic: a random area. In every case the AI picks the exact angle, so a theme never gives the same text twice
+                const area = mk.theme === '🎲' ? THEMES[Math.floor(Math.random() * THEMES.length)][1] : mk.theme;
                 subject = area;
-                focus = { note: 'Choose the exact topic yourself, inside this area: something specific and interesting, not the obvious one.', label: '🎲 ' + area };
-            } else subject = $('mk-own').value.trim() || mk.theme;
+                focus = { note: 'Choose the exact topic yourself, inside this area: something specific and interesting, not the obvious one.', label: (mk.theme === '🎲' ? '🎲 ' : '') + area };
+            }
             const kind = mk.format || 'whichever fits the subject best (story, message, article, advert, blog post…)';
             mk.busy = true; renderMaker(); $('mk-error').classList.add('hidden');
             try {
@@ -512,7 +513,7 @@
             const ab = e.target.closest('[data-about]');
             if (ab) { mk.about = ab.dataset.about; mk.changing = false; store.set('reading_about', mk.about); renderMaker(); return; }
             const th = e.target.closest('[data-theme]');
-            if (th) { mk.theme = th.dataset.theme; $('mk-own').value = ''; store.set('reading_theme', mk.theme); renderMaker(); return; }
+            if (th) { mk.theme = th.dataset.theme; $('mk-own').value = ''; renderMaker(); return; }
             if (e.target.closest('[data-mk-more]')) { mk.allThemes = true; renderMaker(); return; }
             if (e.target.closest('[data-mk-change]')) { mk.changing = true; renderMaker(); return; }
             if (e.target.closest('[data-mk-done]')) { mk.changing = false; renderMaker(); return; }
