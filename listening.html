@@ -19,6 +19,7 @@
     <script src="js/conjugate.js"></script>
     <script src="js/texts.js"></script>
     <script src="js/library.js"></script>
+    <script src="js/ai-maker.js"></script>
     <style>
         .w { cursor: pointer; border-radius: 4px; transition: background-color .12s; }
         .w:hover { background: #e0e7ff; }
@@ -36,49 +37,38 @@
         <div class="max-w-6xl mx-auto px-4 py-5 space-y-4">
 
             <!-- ===== ALL TEXTS ===== -->
-            <div id="list-view" class="space-y-4">
+            <div id="list-view" class="space-y-5">
                 <div>
                     <h1 class="text-2xl font-black text-slate-900">Listening</h1>
-                    <p class="text-sm text-slate-500 mt-1">Listen sentence by sentence, answer the questions, then check the transcript. Or write what you hear in Dictation.</p>
+                    <p class="text-sm text-slate-500 mt-1">The AI writes a recording for you. Listen sentence by sentence, answer the questions, then check the transcript, or write what you hear in Dictation.</p>
                 </div>
-                <div class="flex flex-wrap gap-1.5 sm:gap-2">
-                    <button id="open-ai" type="button" class="min-h-[44px] px-3 sm:px-4 text-sm sm:text-base bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl">✨ New<span class="hidden sm:inline"> recording</span></button>
-                    <button id="open-post" type="button" class="min-h-[44px] px-3 sm:px-4 text-sm sm:text-base bg-white border border-slate-200 hover:border-indigo-300 disabled:opacity-50 font-bold rounded-xl">📋 Paste<span class="hidden sm:inline"> your own</span></button>
-                    <button id="random-btn" type="button" class="min-h-[44px] px-3 sm:px-4 text-sm sm:text-base bg-white border border-slate-200 hover:border-indigo-300 disabled:opacity-50 font-bold rounded-xl">🎲 Random</button>
-                </div>
-                <p id="list-error" class="hidden text-sm text-rose-700"></p>
-
-                <section class="space-y-2 pt-1">
-                    <h2 class="text-lg font-black text-slate-900">Choose a recording</h2>
+                <!-- ===== ✨ AI WRITES A NEW RECORDING FOR YOU · and the Library (js/ai-maker.js) ===== -->
+                <section id="maker" aria-label="AI writes a new recording for you"></section>
+                <!-- 📖 Library: recordings already in the app, no AI needed -->
+                <div id="ready" class="space-y-2">
                     <div id="levels" class="flex flex-wrap gap-1.5 pb-1" role="tablist" aria-label="Level"></div>
                     <div class="flex items-baseline justify-between gap-2">
                         <p id="texts-heading" class="text-sm text-slate-500"></p>
                         <span id="lib-note" class="shrink-0 text-xs text-slate-400"></span>
                     </div>
+                    <p id="list-error" class="hidden text-sm text-rose-700"></p>
                     <div id="text-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+                </div>
+
+                <!-- ===== YOUR RECORDINGS ===== -->
+                <section class="space-y-2">
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                        <h2 class="text-lg font-black text-slate-900">Your recordings</h2>
+                        <button id="open-post" type="button" class="min-h-[40px] px-3 text-sm bg-white border border-slate-200 hover:border-indigo-300 font-bold rounded-xl">📋 Paste your own text</button>
+                    </div>
+                    <div id="made-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
                 </section>
 
-                <!-- New recording (AI) and Your own text: a panel over the page (from the bottom on phones) -->
+                <!-- Your own text: a panel over the page (from the bottom on phones) -->
                 <div id="sheet" class="hidden fixed inset-0 z-[60] flex items-end sm:items-start justify-center sm:pt-20 bg-slate-900/40" role="dialog" aria-modal="true" aria-labelledby="sheet-title">
                     <div class="w-full sm:max-w-lg bg-white rounded-t-2xl sm:rounded-2xl p-5 space-y-3 max-h-[90vh] overflow-y-auto shadow-xl">
-                        <div id="sheet-ai" class="space-y-3">
-                            <h2 id="sheet-title" class="text-lg font-black text-slate-900">✨ New recording</h2>
-                            <p class="text-sm text-slate-500">The AI writes a new recording with questions. It is shared with other students at the same level.</p>
-                            <label class="block"><span class="block text-sm font-semibold text-slate-700 mb-1">Level</span>
-                                <select id="ai-level" class="w-full text-base px-3 py-2.5 bg-white border border-slate-200 rounded-xl"></select></label>
-                            <label class="block"><span class="block text-sm font-semibold text-slate-700 mb-1">Subject</span>
-                                <select id="ai-subject" class="w-full text-base px-3 py-2.5 bg-white border border-slate-200 rounded-xl"></select></label>
-                            <input id="subject-other" type="text" maxlength="80" placeholder="…or type any subject" class="w-full text-base px-3 py-2.5 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                            <label class="block"><span class="block text-sm font-semibold text-slate-700 mb-1">Type of text</span>
-                                <select id="ai-kind" class="w-full text-base px-3 py-2.5 bg-white border border-slate-200 rounded-xl"></select></label>
-                            <div class="flex flex-wrap gap-2 pt-1">
-                                <button id="gen-btn" type="button" class="min-h-[48px] px-5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-bold rounded-xl">Write me a recording</button>
-                                <button type="button" data-sheet-close class="min-h-[48px] px-4 bg-white border border-slate-200 font-semibold rounded-xl">Cancel</button>
-                            </div>
-                            <p id="gen-error" class="hidden text-sm text-rose-700"></p>
-                        </div>
-                        <div id="sheet-post" class="hidden space-y-3">
-                            <h2 class="text-lg font-black text-slate-900">📋 Your own text</h2>
+                        <div id="sheet-post" class="space-y-3">
+                            <h2 id="sheet-title" class="text-lg font-black text-slate-900">📋 Your own text</h2>
                             <p class="text-sm text-slate-500">Paste any French text and listen to it read aloud. It stays on this device.</p>
                             <textarea id="paste-text" rows="6" maxlength="6000" lang="fr" placeholder="Paste a French text here…" class="w-full text-base p-3 bg-white border border-slate-200 rounded-xl resize-y focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
                             <div class="flex flex-wrap gap-2">
@@ -192,20 +182,17 @@
             A1: ['text-emerald-700', 'bg-emerald-50'], A2: ['text-teal-700', 'bg-teal-50'], B1: ['text-sky-700', 'bg-sky-50'],
             B2: ['text-indigo-700', 'bg-indigo-50'], C1: ['text-purple-700', 'bg-purple-50'], C2: ['text-rose-700', 'bg-rose-50']
         };
-        const SUBJECTS = ['Daily life', 'Family and friends', 'Food', 'Travel', 'Home', 'Work', 'Studies', 'Health and sport',
-            'Free time', 'Shopping', 'Technology', 'Environment', 'Culture and media', 'Society'];
-        const KINDS = ['Dialogue', 'Phone call', 'Voicemail', 'Announcement', 'Radio news', 'Story', 'Interview'];
+        const FORMATS = ['Dialogue', 'Phone call', 'Voicemail', 'Announcement', 'Radio report', 'Interview', 'Story'];
         const ACCENTS = ['é', 'è', 'ê', 'à', 'â', 'ç', 'ù', 'û', 'î', 'ï', 'ô', 'œ', 'ë', 'É', 'À'];
         const PAGE = 'listening';
-        let pick = store.get('listening_pick', { subject: 'Daily life', kind: 'Dialogue' });
         let dbTopics = [];          // your listening_topics: shown at their own level, at the bottom
         let libTexts = {};
         let text = null, sents = [], answers = {}, tab = 'questions', unlocked = false;
         let cur = 0, playing = false, rate = Number(store.get('listening_rate', 0.85)) || 0.85;
         let dict = { i: 0, results: {} };   // dictation: sentence index, sentence -> score 0..1
 
-        // The list filter: a level, or 'mine' (your own texts, all levels)
-        const filterOn = () => store.get('listening_level', null) === 'mine' ? 'mine' : currentLevel();
+        // The Library's level (your pasted texts are in « Your recordings »)
+        const filterOn = () => currentLevel();
         function currentLevel() {
             const saved = store.get('listening_level', null);
             if (LEVELS.includes(saved)) return saved;
@@ -228,14 +215,13 @@
         function renderList() {
             const level = currentLevel();
             const chip = (on) => `shrink-0 min-h-[40px] px-3 rounded-xl text-sm font-semibold border whitespace-nowrap transition ${on ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-white border-slate-200 text-slate-700 hover:border-indigo-300'}`;
-            const f = filterOn(), mineN = LIB.mine().length;
+            const f = filterOn();
             $('levels').innerHTML = LEVELS.map(lv => {
                 const list = textsFor(lv), tps = topicsFor(lv);
                 const n = list.filter(t => result(t.id)).length + tps.filter(tp => { const t = topicText(tp); return t && result(t.id); }).length;
                 const on = lv === f;
                 return `<button type="button" role="tab" aria-selected="${on}" data-level="${lv}" class="${chip(on)}">${lv} <span class="text-xs font-medium ${on ? 'text-indigo-100' : 'text-slate-400'}">${n}/${list.length + tps.length}</span></button>`;
-            }).join('') + (mineN || f === 'mine' ? `<button type="button" role="tab" aria-selected="${f === 'mine'}" data-level="mine" class="${chip(f === 'mine')}">Mine <span class="text-xs font-medium ${f === 'mine' ? 'text-indigo-100' : 'text-slate-400'}">${mineN}</span></button>` : '');
-            if (f === 'mine') { renderMine(); return; }
+            }).join('');
             const st = LEVEL_STYLE[level];
             const list = textsFor(level);
             const topicCard = (tp) => {
@@ -253,7 +239,7 @@
             };
             { const all = list.length + topicsFor(level).length, done = list.filter(t => result(t.id)).length + topicsFor(level).filter(tp => { const t = topicText(tp); return t && result(t.id); }).length;
               $('texts-heading').textContent = all ? `${all} recordings for ${level} · ${done} done` : ''; }
-            $('text-grid').innerHTML = (list.length || topicsFor(level).length) ? topicsFor(level).map(topicCard).join('') + list.map(t => textCard(t, st)).join('') : '<p class="text-sm text-slate-500">No recordings yet at this level. Tap ✨ New recording above.</p>';
+            $('text-grid').innerHTML = (list.length || topicsFor(level).length) ? topicsFor(level).map(topicCard).join('') + list.map(t => textCard(t, st)).join('') : '<p class="text-sm text-slate-500">No recordings yet at this level. Let the AI write one in the Topics tab.</p>';
             $('lib-note').textContent = '';   // (the shared library state is for the admin page, not for learners)
         }
         function textCard(t, st) {
@@ -270,47 +256,12 @@
                 <span class="text-xs text-slate-500">${escapeHtml([filterOn() === 'mine' ? t.level : '', t.source === 'mine' ? '' : t.subject, n + ' sentences', '≈ ' + (secs >= 60 ? Math.round(secs / 60) + ' min' : secs + ' s')].filter(Boolean).join(' · '))}</span>
             </a>`;
         }
-        function renderMine() {
-            const list = LIB.mine();
-            $('texts-heading').textContent = list.length ? 'Texts you pasted, kept on this device' : '';
-            $('text-grid').innerHTML = list.length ? list.map(t => textCard(t, LEVEL_STYLE[t.level] || ['text-slate-600', 'bg-slate-100'])).join('')
-                : '<p class="text-sm text-slate-500">Nothing here yet. Tap 📋 Paste to add a French text of your own.</p>';
-            $('lib-note').textContent = '';
-        }
-        // 🎲 Random: one you have not done yet at this level (or in Mine)
-        function randomText() {
-            $('list-error').classList.add('hidden');
-            const f = filterOn();
-            if (f === 'mine') {
-                const list = LIB.mine(), todo = list.filter(t => !result(t.id));
-                const pool = todo.length ? todo : list;
-                if (!pool.length) { openSheet('post'); return; }
-                openText(pool[Math.floor(Math.random() * pool.length)].id, true); return;
-            }
-            const list = textsFor(f), todo = list.filter(t => !result(t.id));
-            const newTopics = topicsFor(f).filter(tp => !topicText(tp));
-            const doneTopics = topicsFor(f).map(topicText).filter(t => t && !result(t.id));
-            const pool = [...todo, ...doneTopics];
-            if (pool.length) { openText(pool[Math.floor(Math.random() * pool.length)].id, true); return; }
-            if (newTopics.length) { const tp = newTopics[Math.floor(Math.random() * newTopics.length)]; openTopic(tp.id, document.querySelector(`[data-topic="${tp.id}"]`)); return; }
-            if (list.length) { openText(list[Math.floor(Math.random() * list.length)].id, true); return; }
-            openSheet('ai');
-        }
 
-        // ---------- The panel: New recording (AI) and Your own text ----------
-        const LEVEL_NAME = { A1: 'Beginner', A2: 'Elementary', B1: 'Intermediate', B2: 'Upper intermediate', C1: 'Advanced', C2: 'Mastery' };
-        function openSheet(which) {
+        // ---------- The panel: Your own text ----------
+        function openSheet() {
             $('sheet').classList.remove('hidden');
-            $('sheet-ai').classList.toggle('hidden', which !== 'ai');
-            $('sheet-post').classList.toggle('hidden', which !== 'post');
-            $('gen-error').classList.add('hidden'); $('paste-error').classList.add('hidden');
-            if (which === 'ai') {
-                const lv = currentLevel();
-                $('ai-level').innerHTML = LEVELS.map(l => `<option value="${l}" ${l === lv ? 'selected' : ''}>${l} · ${LEVEL_NAME[l]}</option>`).join('');
-                $('ai-subject').innerHTML = SUBJECTS.map(x => `<option ${x === pick.subject ? 'selected' : ''}>${escapeHtml(x)}</option>`).join('');
-                $('ai-kind').innerHTML = KINDS.map(x => `<option ${x === pick.kind ? 'selected' : ''}>${escapeHtml(x)}</option>`).join('');
-                setTimeout(() => $('gen-btn').focus(), 0);
-            } else setTimeout(() => $('paste-text').focus(), 0);
+            $('paste-error').classList.add('hidden');
+            setTimeout(() => $('paste-text').focus(), 0);
         }
         const closeSheet = () => $('sheet').classList.add('hidden');
         async function loadLevel(lv) {
@@ -376,7 +327,7 @@
             if (push) history.pushState({}, '', 'listening.html');
             $('text-view').classList.add('hidden');
             $('list-view').classList.remove('hidden');
-            renderList();
+            renderList(); maker.render(); renderMade();
         }
         function setTab(name) {
             tab = name;
@@ -509,20 +460,32 @@
             if (vals.length === sents.length) LIB.saveResult(text.id, 'dictation', Math.round(vals.reduce((a, b) => a + b, 0)), sents.length);
         }
 
-        // ---------- New recordings ----------
-        async function generateText() {
-            const subject = $('subject-other').value.trim() || $('ai-subject').value || pick.subject;
-            $('gen-error').classList.add('hidden');
-            $('gen-btn').disabled = true; $('gen-btn').textContent = 'Writing…';
-            try {
-                const t = await LIB.generate({ subject, kind: $('ai-kind').value || pick.kind, level: $('ai-level').value, purpose: PAGE });
-                $('subject-other').value = ''; closeSheet(); store.set('listening_level', t.level);
+        // ---------- ✨ AI writes a new recording for you (the card is in js/ai-maker.js) ----------
+        const maker = AIMaker.mount($('maker'), {
+            key: 'listening', noun: 'recording', title: '✨ AI writes a new recording for you', sub: 'Every recording is new, made for you in seconds, with questions and a dictation.',
+            formats: FORMATS, anyFormat: 'whichever fits the subject best (dialogue, phone call, voicemail, announcement, radio report, interview…)', freeNoun: 'recordings', library: $('ready'),
+            async write({ subject, focus, level, format }) {
+                const t = await LIB.generate({ subject, kind: format, level, purpose: PAGE, focus });
+                store.set('listening_level', t.level);
                 if (t.source === 'library') libTexts[t.level] = [t, ...(libTexts[t.level] || []).filter(x => x.id !== t.id)];
                 openText(t.id, true);
-            } catch (err) {
-                $('gen-error').textContent = err.message; $('gen-error').classList.remove('hidden');
             }
-            $('gen-btn').disabled = false; $('gen-btn').textContent = 'Write me a recording';
+        });
+        // Your recordings: the ones the AI wrote for you, then the texts you pasted
+        function renderMade() {
+            const list = [...LIB.made(PAGE), ...LIB.mine().filter(t => t.source === 'mine' && t.kind === 'Your text')];
+            $('made-grid').innerHTML = list.length ? list.slice(0, 12).map(madeCard).join('')
+                : '<p class="text-sm text-slate-500">The recordings the AI writes for you appear here, so you can listen again.</p>';
+        }
+        function madeCard(t) {
+            const r = result(t.id), st = LEVEL_STYLE[t.level] || ['text-slate-600', 'bg-slate-100'];
+            const n = LIB.allSentences(t.fr).length, secs = Math.round((String(t.fr).match(/[\p{L}]+/gu) || []).length / 2.2);
+            const tag = t.kind === 'Your text' ? '📋 Yours' : `✨ AI · ${t.level}`;
+            return `<a href="listening.html?text=${encodeURIComponent(t.id)}" data-text="${escapeHtml(t.id)}" class="group flex flex-col gap-1.5 bg-white border border-slate-200 hover:border-indigo-400 hover:shadow-md transition rounded-2xl p-4">
+                <span class="flex items-center justify-between gap-2"><span class="text-xs font-bold px-2 py-0.5 rounded-full ${st[0]} ${st[1]}">${escapeHtml(tag)}</span>${r ? `<span class="shrink-0 text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">✓ ${r.score}/${r.total}</span>` : ''}</span>
+                <span class="font-bold text-slate-900 group-hover:text-indigo-700 leading-snug">🎧 ${escapeHtml(t.title)}</span>
+                <span class="text-xs text-slate-500">${escapeHtml([t.kind === 'Your text' ? t.level : (t.about || t.subject), t.kind === 'Your text' ? '' : t.kind, n + ' sentences', '≈ ' + (secs >= 60 ? Math.round(secs / 60) + ' min' : secs + ' s')].filter(Boolean).join(' · '))}</span>
+            </a>`;
         }
         async function pasteText() {
             const fr = $('paste-text').value.trim();
@@ -530,7 +493,7 @@
             if (fr.length < 40) { $('paste-error').textContent = 'Paste a longer text (at least a few sentences).'; $('paste-error').classList.remove('hidden'); return; }
             $('paste-btn').disabled = true; $('paste-btn').textContent = 'Preparing questions…';
             const t = await LIB.fromPasted(fr, currentLevel());
-            $('paste-text').value = ''; closeSheet(); store.set('listening_level', 'mine');
+            $('paste-text').value = ''; closeSheet();
             $('paste-btn').disabled = false; $('paste-btn').textContent = 'Listen to my text';
             openText(t.id, true);
         }
@@ -538,7 +501,7 @@
         // ---------- Events ----------
         document.addEventListener('click', (e) => {
             const lv = e.target.closest('[data-level]');
-            if (lv) { store.set('listening_level', lv.dataset.level); $('list-error').classList.add('hidden'); renderList(); if (lv.dataset.level !== 'mine' && !libTexts[lv.dataset.level]) loadLevel(lv.dataset.level); return; }
+            if (lv) { store.set('listening_level', lv.dataset.level); $('list-error').classList.add('hidden'); renderList(); if (!libTexts[lv.dataset.level]) loadLevel(lv.dataset.level); return; }
             const tpc = e.target.closest('[data-topic]');
             if (tpc && !e.metaKey && !e.ctrlKey) { e.preventDefault(); openTopic(tpc.dataset.topic, tpc); return; }
             const card = e.target.closest('[data-text]');
@@ -591,12 +554,7 @@
         });
         $('t-unlock').addEventListener('click', () => { unlocked = true; renderTranscript(); });
         $('back').addEventListener('click', () => showList(true));
-        $('gen-btn').addEventListener('click', generateText);
-        $('open-ai').addEventListener('click', () => openSheet('ai'));
-        $('open-post').addEventListener('click', () => openSheet('post'));
-        $('random-btn').addEventListener('click', randomText);
-        $('ai-subject').addEventListener('change', () => { pick.subject = $('ai-subject').value; $('subject-other').value = ''; store.set('listening_pick', pick); });
-        $('ai-kind').addEventListener('change', () => { pick.kind = $('ai-kind').value; store.set('listening_pick', pick); });
+        $('open-post').addEventListener('click', () => openSheet());
         document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('sheet').classList.contains('hidden')) closeSheet(); });
         $('paste-btn').addEventListener('click', pasteText);
         $('btn-retry').addEventListener('click', () => { answers = {}; renderQuestions(); });
@@ -614,6 +572,7 @@
         if (startId && LIB.find(startId)) openText(startId, false);
         else if (startId) { renderList(); LIB.fetchOne(startId).then(t => { if (t) openText(t.id, false); }); }
         else renderList();
+        renderMade();
         loadLevel(currentLevel());
         loadDbTopics();
     </script>
