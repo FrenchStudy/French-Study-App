@@ -169,9 +169,9 @@ P['4'] = dict(
     steps=[
         dict(tool='sort', title='tu or vous?', sub='Who are you talking to? Tap the box.',
              boxes=[dict(k='tu', label='tu', sub='one person you know well'), dict(k='vous', label='vous', sub='polite, or more than one')],
-             cards=[CARD('your best friend', 'tu', 'A friend: <b>tu</b>.'), CARD('your boss', 'vous', 'Polite: <b>vous</b>.'), CARD('a child', 'tu', 'A child: <b>tu</b>.'),
-                    CARD('a waiter in a café', 'vous', 'Someone you do not know: <b>vous</b>.'), CARD('your mother', 'tu', 'Family: <b>tu</b>.'),
-                    CARD('two friends together', 'vous', 'More than one person: <b>vous</b>, even friends.'), CARD('a doctor', 'vous', 'Polite: <b>vous</b>.')]),
+             cards=[CARD('your best friend', 'tu', 'A friend: <b>tu</b>.', say='Salut ! Tu vas bien ?'), CARD('your boss', 'vous', 'Polite: <b>vous</b>.', say='Bonjour Madame, vous allez bien ?'), CARD('a child', 'tu', 'A child: <b>tu</b>.', say='Tu as quel âge ?'),
+                    CARD('a waiter in a café', 'vous', 'Someone you do not know: <b>vous</b>.', say="Vous avez une table, s'il vous plaît ?"), CARD('your mother', 'tu', 'Family: <b>tu</b>.', say='Maman, tu viens ?'),
+                    CARD('two friends together', 'vous', 'More than one person: <b>vous</b>, even friends.', say='Salut ! Vous venez ?'), CARD('a doctor', 'vous', 'Polite: <b>vous</b>.', say='Bonjour docteur, vous allez bien ?')]),
         dict(tool='sort', title='il, elle, ils or elles?', sub='Tap the pronoun for each one.',
              boxes=[dict(k='il', label='il'), dict(k='elle', label='elle'), dict(k='ils', label='ils'), dict(k='elles', label='elles')],
              cards=[CARD('Paul', 'il'), CARD('Marie', 'elle'), CARD('Marie et Julie', 'elles', 'Only women: <b>elles</b>.'), CARD('Marie et Paul', 'ils', 'One man is enough: <b>ils</b>.'),
