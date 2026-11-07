@@ -1,0 +1,776 @@
+{
+ "id": "listening-1",
+ "part": "listening",
+ "title": "Compréhension orale · Test 1",
+ "minutes": 35,
+ "note": "Each recording is heard once. In every question the first option is the right one; the page shuffles them. Voices: f = woman, m = man, n = announcer.",
+ "questions": [
+  {
+   "kind": "Annonce en gare",
+   "lines": [
+    [
+     "n",
+     "Mesdames et messieurs, le train pour Ottawa partira de la voie six. Je répète : le train pour Ottawa partira de la voie six."
+    ]
+   ],
+   "q": "De quelle voie part le train pour Ottawa ?",
+   "o": [
+    "Voie 6",
+    "Voie 2",
+    "Voie 3",
+    "Voie 10"
+   ],
+   "why": "« partira de la voie six »."
+  },
+  {
+   "kind": "À la boulangerie",
+   "lines": [
+    [
+     "f",
+     "Bonjour, je voudrais deux croissants et une baguette, s'il vous plaît."
+    ],
+    [
+     "m",
+     "Voilà, madame. Ça fait quatre dollars cinquante."
+    ]
+   ],
+   "q": "Combien la cliente paie-t-elle ?",
+   "o": [
+    "4,50 $",
+    "2,50 $",
+    "4,15 $",
+    "5,40 $"
+   ],
+   "why": "« quatre dollars cinquante » = 4.50 $."
+  },
+  {
+   "kind": "Message vocal",
+   "lines": [
+    [
+     "m",
+     "Salut Julie, c'est Marc. Je ne peux pas venir au restaurant ce soir, je suis malade. On se voit samedi ? Bisous."
+    ]
+   ],
+   "q": "Pourquoi Marc ne vient-il pas au restaurant ?",
+   "o": [
+    "Il est malade.",
+    "Il travaille.",
+    "Il part en voyage.",
+    "Il n'aime pas ce restaurant."
+   ],
+   "why": "« je suis malade »."
+  },
+  {
+   "kind": "Dans la rue",
+   "lines": [
+    [
+     "f",
+     "Excusez-moi, monsieur, où est la poste ?"
+    ],
+    [
+     "m",
+     "C'est tout droit, puis la deuxième rue à gauche. Elle est à côté de la banque."
+    ]
+   ],
+   "q": "Où est la poste ?",
+   "o": [
+    "À côté de la banque",
+    "À côté de la gare",
+    "Dans la première rue à droite",
+    "En face de l'école"
+   ],
+   "why": "« Elle est à côté de la banque », after « la deuxième rue à gauche »."
+  },
+  {
+   "kind": "Au téléphone",
+   "lines": [
+    [
+     "f",
+     "Cabinet du docteur Roy, bonjour."
+    ],
+    [
+     "m",
+     "Bonjour, je voudrais un rendez-vous cette semaine, si possible."
+    ],
+    [
+     "f",
+     "Le docteur n'est pas là jeudi. Je peux vous proposer mercredi à quinze heures, ou vendredi à neuf heures."
+    ],
+    [
+     "m",
+     "Vendredi matin, c'est parfait."
+    ]
+   ],
+   "q": "Quand l'homme a-t-il rendez-vous ?",
+   "o": [
+    "Vendredi à 9 h",
+    "Mercredi à 15 h",
+    "Jeudi à 9 h",
+    "Vendredi à 15 h"
+   ],
+   "why": "He chooses « Vendredi matin », and the offer was « vendredi à neuf heures »."
+  },
+  {
+   "kind": "Météo à la radio",
+   "lines": [
+    [
+     "n",
+     "Demain, la matinée sera fraîche et nuageuse sur Montréal, avec des températures autour de huit degrés. Le soleil reviendra en après-midi, et le thermomètre montera jusqu'à dix-sept degrés. Attention : de la pluie est prévue en soirée."
+    ]
+   ],
+   "q": "Quel temps fera-t-il demain après-midi ?",
+   "o": [
+    "Il y aura du soleil.",
+    "Il pleuvra.",
+    "Il fera froid et nuageux.",
+    "Il neigera."
+   ],
+   "why": "« Le soleil reviendra en après-midi ». Clouds are in the morning, rain in the evening."
+  },
+  {
+   "kind": "Entre amis",
+   "lines": [
+    [
+     "m",
+     "Tu as fait quoi ce week-end ?"
+    ],
+    [
+     "f",
+     "Samedi, j'ai aidé ma sœur à déménager. On a porté des cartons toute la journée ! Et dimanche, je me suis reposée à la maison."
+    ]
+   ],
+   "q": "Qu'est-ce que la femme a fait samedi ?",
+   "o": [
+    "Elle a aidé sa sœur à déménager.",
+    "Elle s'est reposée à la maison toute la journée.",
+    "Elle a acheté des cartons pour son déménagement.",
+    "Elle a visité un nouvel appartement avec sa sœur."
+   ],
+   "why": "« Samedi, j'ai aidé ma sœur à déménager ». She rested on Sunday."
+  },
+  {
+   "kind": "Annonce en magasin",
+   "lines": [
+    [
+     "n",
+     "Chers clients, notre magasin fermera dans quinze minutes. Nous vous invitons à vous diriger vers les caisses. Aujourd'hui seulement, tous les vêtements d'hiver sont à moins trente pour cent."
+    ]
+   ],
+   "q": "Qu'est-ce qui est en promotion aujourd'hui ?",
+   "o": [
+    "Les vêtements d'hiver",
+    "Tous les articles du magasin jusqu'à la fermeture",
+    "Les chaussures et les bottes pour toute la famille",
+    "Les vêtements d'été, pendant quinze minutes"
+   ],
+   "why": "« tous les vêtements d'hiver sont à moins trente pour cent »."
+  },
+  {
+   "kind": "Inscription",
+   "lines": [
+    [
+     "f",
+     "Bonjour, je cherche un cours de natation pour mon fils de sept ans."
+    ],
+    [
+     "m",
+     "Nous avons un groupe le mardi à dix-sept heures et un autre le samedi matin. Le samedi est complet, mais il reste deux places le mardi."
+    ],
+    [
+     "f",
+     "D'accord, je l'inscris le mardi, alors."
+    ]
+   ],
+   "q": "Pourquoi la mère choisit-elle le mardi ?",
+   "o": [
+    "Il n'y a plus de place le samedi.",
+    "Le cours du mardi est moins cher que celui du samedi.",
+    "Son fils préfère nager le soir, après l'école.",
+    "Elle travaille le samedi matin et ne peut pas l'emmener."
+   ],
+   "why": "« Le samedi est complet » = Saturday is full."
+  },
+  {
+   "kind": "Au magasin",
+   "lines": [
+    [
+     "m",
+     "Bonjour, j'ai acheté ce téléphone ici la semaine dernière, mais l'écran ne s'allume plus."
+    ],
+    [
+     "f",
+     "Vous avez votre reçu ?"
+    ],
+    [
+     "m",
+     "Oui, le voici."
+    ],
+    [
+     "f",
+     "Très bien. Il est encore sous garantie : nous allons vous l'échanger."
+    ]
+   ],
+   "q": "Que va faire la vendeuse ?",
+   "o": [
+    "Échanger le téléphone",
+    "Rembourser le client",
+    "Faire payer la réparation de l'écran",
+    "Refuser, car il n'y a pas de reçu"
+   ],
+   "why": "« nous allons vous l'échanger »: it is still under warranty."
+  },
+  {
+   "kind": "Conversation",
+   "lines": [
+    [
+     "m",
+     "Alors, ce nouveau travail ?"
+    ],
+    [
+     "f",
+     "Le poste est intéressant et mes collègues sont sympas. Le seul problème, c'est le trajet : je mets plus d'une heure en autobus le matin. Je pense acheter une voiture, mais avec le prix de l'essence et du stationnement, je ne suis pas sûre que ce soit une bonne idée."
+    ]
+   ],
+   "q": "Qu'est-ce qui pose problème à la femme dans son nouvel emploi ?",
+   "o": [
+    "Le temps de trajet",
+    "Ses nouveaux collègues de bureau",
+    "Son salaire, plus bas qu'avant",
+    "Ses tâches, qu'elle trouve ennuyeuses"
+   ],
+   "why": "« Le seul problème, c'est le trajet : je mets plus d'une heure en autobus »."
+  },
+  {
+   "kind": "Nouvelles locales",
+   "lines": [
+    [
+     "n",
+     "La ville de Gatineau lance cette semaine une consultation publique sur l'avenir du parc de la Rivière. Les citoyens peuvent donner leur avis en ligne jusqu'au trente mai, ou participer à l'une des trois réunions organisées dans les centres communautaires. Parmi les projets proposés : une piscine extérieure, de nouveaux sentiers et un jardin collectif."
+    ]
+   ],
+   "q": "Comment les citoyens peuvent-ils donner leur avis ?",
+   "o": [
+    "En ligne ou lors de réunions",
+    "Seulement par téléphone, avant le 30 mai",
+    "En votant au centre communautaire le 30 mai",
+    "En écrivant directement au maire de la ville"
+   ],
+   "why": "« en ligne jusqu'au trente mai, ou participer à l'une des trois réunions »."
+  },
+  {
+   "kind": "Entre étudiants",
+   "lines": [
+    [
+     "f",
+     "Tu viens à la fête de Karim samedi ?"
+    ],
+    [
+     "m",
+     "J'aimerais bien, mais j'ai un examen lundi et je suis vraiment en retard dans mes révisions. Je vais peut-être passer une heure en début de soirée, pour lui souhaiter bon anniversaire."
+    ]
+   ],
+   "q": "Que va probablement faire l'homme samedi ?",
+   "o": [
+    "Passer rapidement à la fête",
+    "Rester toute la soirée à la fête",
+    "Ne pas aller à la fête du tout",
+    "Organiser la fête"
+   ],
+   "why": "« Je vais peut-être passer une heure en début de soirée »: a short visit."
+  },
+  {
+   "kind": "Message vocal",
+   "lines": [
+    [
+     "m",
+     "Bonjour, ici Thomas Gagnon, de la Banque du Nord. Je vous appelle au sujet de votre demande de carte de crédit. Il manque une preuve de revenu dans votre dossier : un relevé de paie récent suffira. Vous pouvez le déposer en succursale ou le téléverser dans votre espace client. Sans ce document, nous ne pourrons pas traiter votre demande."
+    ]
+   ],
+   "q": "Pourquoi Thomas Gagnon appelle-t-il ?",
+   "o": [
+    "Il manque un document dans la demande.",
+    "Sa demande de carte de crédit a été refusée.",
+    "Sa nouvelle carte de crédit est prête en succursale.",
+    "Il veut lui proposer un prêt pour un achat important."
+   ],
+   "why": "« Il manque une preuve de revenu dans votre dossier »."
+  },
+  {
+   "kind": "Entrevue",
+   "lines": [
+    [
+     "f",
+     "Pourquoi avez-vous choisi de ne cuisiner qu'avec des produits locaux ?"
+    ],
+    [
+     "m",
+     "Au départ, c'était pour réduire nos coûts de transport. Mais très vite, j'ai découvert que les légumes cueillis la veille avaient beaucoup plus de goût. Aujourd'hui, c'est surtout pour ça que je continue : pour la qualité."
+    ]
+   ],
+   "q": "Quelle est aujourd'hui la principale raison de son choix ?",
+   "o": [
+    "La qualité des produits",
+    "La baisse des coûts",
+    "La protection de l'environnement",
+    "L'aide aux agriculteurs"
+   ],
+   "why": "Costs were the reason « Au départ »; « Aujourd'hui, c'est surtout… pour la qualité »."
+  },
+  {
+   "kind": "Au bureau des passeports",
+   "lines": [
+    [
+     "m",
+     "Bonjour, je voudrais renouveler mon passeport. Combien de temps ça prend ?"
+    ],
+    [
+     "f",
+     "En général, une dizaine de jours ouvrables si vous faites la demande en personne. Par la poste, comptez plutôt vingt jours. Si vous partez bientôt, apportez votre billet d'avion : on pourra accélérer le traitement."
+    ]
+   ],
+   "q": "Que conseille l'employée à quelqu'un qui part bientôt ?",
+   "o": [
+    "D'apporter son billet d'avion",
+    "De faire la demande par la poste",
+    "De revenir dans dix jours",
+    "De payer un supplément"
+   ],
+   "why": "« Si vous partez bientôt, apportez votre billet d'avion »."
+  },
+  {
+   "kind": "Conseil",
+   "lines": [
+    [
+     "f",
+     "Le médecin m'a dit de faire plus de sport, mais je n'ai vraiment pas le temps."
+    ],
+    [
+     "m",
+     "Tu n'as pas besoin d'aller au gym. Moi, je descends de l'autobus deux arrêts plus tôt et je marche vingt minutes. Et au bureau, je prends toujours l'escalier."
+    ]
+   ],
+   "q": "Que suggère l'homme ?",
+   "o": [
+    "Bouger davantage dans ses déplacements de tous les jours",
+    "S'inscrire dans une salle de sport près du bureau",
+    "Demander l'avis d'un autre médecin sur le sport",
+    "Acheter un vélo pour aller travailler chaque jour"
+   ],
+   "why": "He walks from an earlier bus stop and takes the stairs: activity in daily life, not the gym."
+  },
+  {
+   "kind": "Annonce au musée",
+   "lines": [
+    [
+     "n",
+     "Bienvenue au Musée des beaux-arts. L'exposition temporaire se trouve au deuxième étage. Les photos sont autorisées dans les salles permanentes, mais interdites dans l'exposition temporaire. Une visite guidée gratuite part de l'accueil toutes les heures."
+    ]
+   ],
+   "q": "Où est-il interdit de prendre des photos ?",
+   "o": [
+    "Dans l'exposition temporaire",
+    "Dans les salles permanentes du premier étage",
+    "À l'accueil, au départ de la visite guidée",
+    "Partout dans le musée, sauf au deuxième étage"
+   ],
+   "why": "« interdites dans l'exposition temporaire »."
+  },
+  {
+   "kind": "Conversation",
+   "lines": [
+    [
+     "m",
+     "Tu as l'air fatiguée."
+    ],
+    [
+     "f",
+     "Oui, mes voisins du dessus font des travaux depuis deux semaines, et ça commence à sept heures du matin ! Je leur ai parlé, ils se sont excusés, mais ça continue. Je vais écrire au propriétaire."
+    ]
+   ],
+   "q": "Qu'est-ce que la femme va faire ?",
+   "o": [
+    "Écrire au propriétaire",
+    "Parler encore une fois avec ses voisins",
+    "Appeler la police à sept heures du matin",
+    "Chercher un autre appartement plus calme"
+   ],
+   "why": "She already spoke to the neighbours; next: « Je vais écrire au propriétaire »."
+  },
+  {
+   "kind": "Entrevue à la radio",
+   "lines": [
+    [
+     "f",
+     "Vous dites que le télétravail a changé le visage des centres-villes."
+    ],
+    [
+     "m",
+     "Absolument. Les tours de bureaux sont à moitié vides, et les restaurants du midi en souffrent. Mais je ne crois pas que ce soit une catastrophe. Plusieurs villes envisagent de transformer une partie de ces bureaux en logements. Ce n'est pas simple techniquement, mais c'est une occasion de faire revivre les centres-villes le soir et le week-end."
+    ]
+   ],
+   "q": "Comment l'expert voit-il la situation ?",
+   "o": [
+    "Comme une occasion de transformer les centres-villes",
+    "Comme une catastrophe pour les restaurants du midi",
+    "Comme un phénomène passager qui va vite disparaître",
+    "Comme un problème surtout technique pour les tours de bureaux"
+   ],
+   "why": "« je ne crois pas que ce soit une catastrophe… c'est une occasion de faire revivre les centres-villes »."
+  },
+  {
+   "kind": "Débat",
+   "lines": [
+    [
+     "m",
+     "Je trouve qu'on devrait rendre les transports en commun gratuits. Ça inciterait les gens à laisser leur voiture."
+    ],
+    [
+     "f",
+     "L'intention est bonne, mais les études montrent que la gratuité attire surtout des piétons et des cyclistes, pas des automobilistes. Ce qui fait vraiment changer les habitudes, c'est la fréquence et la fiabilité du service."
+    ]
+   ],
+   "q": "Quel argument la femme oppose-t-elle à l'homme ?",
+   "o": [
+    "La gratuité ne pousse pas vraiment les automobilistes à changer.",
+    "Les transports gratuits coûteraient beaucoup trop cher à la ville.",
+    "Les piétons et les cyclistes ne veulent pas de transports gratuits.",
+    "Le service est déjà gratuit pour la plupart des automobilistes."
+   ],
+   "why": "« la gratuité attire surtout des piétons et des cyclistes, pas des automobilistes »."
+  },
+  {
+   "kind": "Bulletin de nouvelles",
+   "lines": [
+    [
+     "n",
+     "Selon un sondage publié ce matin, sept Canadiens sur dix déclarent avoir réduit leurs dépenses alimentaires au cours de la dernière année. Ils achètent davantage de marques maison et cuisinent plus souvent. Les banques alimentaires, elles, constatent une hausse inédite de leur fréquentation, notamment chez des personnes qui ont un emploi, ce qui était rare il y a encore cinq ans."
+    ]
+   ],
+   "q": "Quel phénomène nouveau les banques alimentaires observent-elles ?",
+   "o": [
+    "Des personnes qui travaillent viennent y chercher de l'aide.",
+    "Beaucoup moins de personnes viennent les voir cette année.",
+    "Elles reçoivent surtout des dons de produits de marques maison.",
+    "Les familles qui les fréquentent cuisinent moins souvent."
+   ],
+   "why": "« notamment chez des personnes qui ont un emploi, ce qui était rare »."
+  },
+  {
+   "kind": "Au travail",
+   "lines": [
+    [
+     "f",
+     "Écoute, ton rapport est bon sur le fond, mais il est beaucoup trop long pour la direction. Ils n'auront jamais le temps de lire trente pages. Fais-moi une synthèse de deux pages avec les trois recommandations principales, et mets le reste en annexe."
+    ],
+    [
+     "m",
+     "D'accord, je te l'envoie demain."
+    ]
+   ],
+   "q": "Que demande la gestionnaire ?",
+   "o": [
+    "Une version courte, avec les détails en annexe",
+    "De refaire entièrement le rapport, qui n'est pas bon sur le fond",
+    "D'ajouter d'autres recommandations pour la direction",
+    "De présenter le rapport à l'oral pendant la réunion de demain"
+   ],
+   "why": "« une synthèse de deux pages… et mets le reste en annexe ». The content is good (« bon sur le fond »)."
+  },
+  {
+   "kind": "Entrevue",
+   "lines": [
+    [
+     "m",
+     "On entend souvent qu'il faut dormir huit heures par nuit."
+    ],
+    [
+     "f",
+     "C'est une moyenne, pas une règle. Certaines personnes vont très bien avec sept heures, d'autres ont besoin de neuf. Le meilleur indicateur, c'est la façon dont vous vous sentez dans la journée. Ce qui compte surtout, c'est la régularité : se coucher et se lever à des heures semblables, même le week-end."
+    ]
+   ],
+   "q": "Selon la chercheuse, qu'est-ce qui compte le plus ?",
+   "o": [
+    "Avoir des heures de sommeil régulières",
+    "Dormir exactement huit heures chaque nuit, comme on le dit",
+    "Dormir plus longtemps le week-end pour récupérer",
+    "Dormir au moins neuf heures pour se sentir bien"
+   ],
+   "why": "« Ce qui compte surtout, c'est la régularité »."
+  },
+  {
+   "kind": "Service à la clientèle",
+   "lines": [
+    [
+     "m",
+     "Ça fait trois semaines que j'attends le technicien pour Internet. On m'a donné deux rendez-vous, et personne n'est venu."
+    ],
+    [
+     "f",
+     "Je suis vraiment désolée, monsieur. Je vois dans votre dossier qu'il y a eu une erreur dans votre adresse. Je vous propose un rendez-vous prioritaire demain matin, et je vous offre un mois d'abonnement gratuit pour le dérangement."
+    ]
+   ],
+   "q": "Qu'est-ce qui explique le problème du client ?",
+   "o": [
+    "Une erreur dans son adresse",
+    "Le technicien était malade.",
+    "Le client était absent.",
+    "Une panne générale d'Internet"
+   ],
+   "why": "« il y a eu une erreur dans votre adresse »."
+  },
+  {
+   "kind": "Balado",
+   "lines": [
+    [
+     "f",
+     "Ce qui m'a frappée en arrivant au Québec, c'est que le français que j'avais appris en France ne me suffisait pas toujours. Pas pour les mots compliqués, mais pour les expressions de tous les jours : ici, on ne dit pas « faire les courses », mais « faire l'épicerie », et on « magasine » au lieu de faire du shopping. Au début, j'étais un peu perdue. Maintenant, c'est moi qui corrige ma famille quand elle vient me voir !"
+    ]
+   ],
+   "q": "Qu'est-ce qui a surpris la femme en arrivant au Québec ?",
+   "o": [
+    "Des différences dans le vocabulaire de tous les jours",
+    "Les mots techniques et compliqués de la vie au travail",
+    "Les Québécois ne comprenaient pas toujours son accent.",
+    "Les gens lui parlaient surtout en anglais au début."
+   ],
+   "why": "« Pas pour les mots compliqués, mais pour les expressions de tous les jours »."
+  },
+  {
+   "kind": "Conférence",
+   "lines": [
+    [
+     "m",
+     "Les épisodes de chaleur extrême se multiplient, et nos villes n'ont pas été conçues pour y faire face. L'asphalte et le béton accumulent la chaleur, si bien qu'il peut faire jusqu'à dix degrés de plus en ville qu'à la campagne voisine. Planter des arbres reste la mesure la plus efficace, mais elle met des années à produire ses effets. En attendant, des solutions plus rapides existent : toits blancs, fontaines publiques, piscines ouvertes la nuit."
+    ]
+   ],
+   "q": "Quel inconvénient l'orateur voit-il à la plantation d'arbres ?",
+   "o": [
+    "Ses effets mettent longtemps à apparaître.",
+    "Elle coûte beaucoup plus cher que les toits blancs.",
+    "Elle est moins efficace que les fontaines publiques.",
+    "Elle fait augmenter la chaleur dans les quartiers denses."
+   ],
+   "why": "« la mesure la plus efficace, mais elle met des années à produire ses effets »."
+  },
+  {
+   "kind": "Conversation",
+   "lines": [
+    [
+     "f",
+     "Tu as accepté l'offre de l'entreprise de Calgary ?"
+    ],
+    [
+     "m",
+     "Pas encore. Le salaire est nettement meilleur, c'est vrai. Mais ma femme vient de commencer un nouvel emploi ici, et les enfants sont attachés à leur école. J'ai demandé à l'entreprise si elle pouvait m'accorder un an de télétravail, le temps qu'on s'organise. J'attends leur réponse."
+    ]
+   ],
+   "q": "Qu'est-ce que l'homme a demandé à l'entreprise ?",
+   "o": [
+    "De travailler à distance pendant un an",
+    "Un salaire encore plus élevé que celui qu'on lui offre",
+    "Un poste dans l'entreprise pour sa femme à Calgary",
+    "De commencer seulement après la fin de l'année scolaire"
+   ],
+   "why": "« si elle pouvait m'accorder un an de télétravail »."
+  },
+  {
+   "kind": "Information",
+   "lines": [
+    [
+     "n",
+     "Un nouveau règlement entre en vigueur dans les parcs nationaux : pendant la haute saison, du quinze juin au quinze septembre, les visiteurs devront réserver leur entrée en ligne. L'objectif n'est pas de limiter l'accès, assure l'agence, mais de mieux répartir la fréquentation au cours de la journée, pour éviter les embouteillages à l'entrée et protéger les milieux naturels les plus fragiles."
+    ]
+   ],
+   "q": "Selon l'agence, quel est le but principal du nouveau règlement ?",
+   "o": [
+    "Mieux répartir les visiteurs dans la journée",
+    "Réduire fortement le nombre total de visiteurs en été",
+    "Augmenter le prix d'entrée pendant la haute saison",
+    "Fermer les parcs les plus fragiles du 15 juin au 15 septembre"
+   ],
+   "why": "« L'objectif n'est pas de limiter l'accès… mais de mieux répartir la fréquentation au cours de la journée »."
+  },
+  {
+   "kind": "Conférence",
+   "lines": [
+    [
+     "m",
+     "On présente souvent la procrastination comme un problème de gestion du temps. Or, la recherche montre qu'il s'agit surtout d'un problème de gestion des émotions. Nous ne remettons pas à plus tard parce que nous sommes paresseux ou mal organisés, mais parce que la tâche suscite en nous un malaise : peur d'échouer, ennui, sentiment d'incompétence. Remettre à plus tard nous soulage immédiatement, au prix d'un stress accru ensuite. Les agendas et les applications n'y changent donc pas grand-chose tant qu'on ne s'attaque pas à cette dimension émotionnelle."
+    ]
+   ],
+   "q": "Selon l'orateur, pourquoi les outils d'organisation aident-ils peu contre la procrastination ?",
+   "o": [
+    "Ils ne traitent pas la cause émotionnelle du problème.",
+    "Ils sont trop compliqués pour la plupart des gens.",
+    "Ils augmentent le stress au lieu de le diminuer.",
+    "La procrastination vient surtout de la paresse."
+   ],
+   "why": "« n'y changent donc pas grand-chose tant qu'on ne s'attaque pas à cette dimension émotionnelle »."
+  },
+  {
+   "kind": "Débat",
+   "lines": [
+    [
+     "f",
+     "Densifier les quartiers, c'est la seule façon de freiner l'étalement urbain et de protéger les terres agricoles."
+    ],
+    [
+     "m",
+     "Sur le principe, je vous suis. Mais quand on construit des tours sans prévoir d'écoles, de parcs ni de transports, on ne fait que déplacer le problème. La densité n'est acceptable pour les habitants que si elle s'accompagne de services. Sinon, vous aurez une opposition systématique à chaque projet."
+    ]
+   ],
+   "q": "Quelle est la position de l'homme ?",
+   "o": [
+    "Il accepte la densification, à condition qu'elle s'accompagne de services.",
+    "Il refuse toute densification des quartiers existants.",
+    "Il préfère l'étalement urbain, qui laisse plus d'espace.",
+    "Il veut d'abord construire des écoles, puis des tours."
+   ],
+   "why": "« Sur le principe, je vous suis. Mais… La densité n'est acceptable… que si elle s'accompagne de services »."
+  },
+  {
+   "kind": "Chronique",
+   "lines": [
+    [
+     "f",
+     "Les étiquettes « sans sucre ajouté » se multiplient dans les rayons. Méfiance, toutefois : un produit peut afficher cette mention tout en étant très sucré, soit parce qu'il contient naturellement du sucre, comme les jus de fruits, soit parce que le fabricant a utilisé des concentrés de fruits, qui ne sont pas juridiquement considérés comme du sucre ajouté. Bref, la mention est exacte, mais elle n'informe pas vraiment sur la teneur en sucre."
+    ]
+   ],
+   "q": "Que reproche la chroniqueuse à la mention « sans sucre ajouté » ?",
+   "o": [
+    "Elle est exacte, mais elle peut tromper le consommateur.",
+    "Elle est illégale pour les jus de fruits vendus au Canada.",
+    "Elle est trop rare dans les rayons des épiceries.",
+    "Elle ne concerne que les produits sans concentrés de fruits."
+   ],
+   "why": "« la mention est exacte, mais elle n'informe pas vraiment sur la teneur en sucre »."
+  },
+  {
+   "kind": "Entrevue",
+   "lines": [
+    [
+     "m",
+     "Votre essai fait l'éloge de l'ennui. C'est provocateur !"
+    ],
+    [
+     "f",
+     "Moins qu'il n'y paraît. Je ne défends pas l'ennui pour lui-même, mais ce qu'il permet. Quand l'esprit n'est sollicité par rien, il se met à vagabonder, à relier des idées éloignées. Beaucoup de créateurs racontent avoir eu leurs meilleures idées sous la douche ou en marchant. En comblant chaque minute vide avec notre téléphone, nous nous privons de ces moments-là, sans même nous en rendre compte."
+    ]
+   ],
+   "q": "Que défend en réalité l'autrice ?",
+   "o": [
+    "Les moments de vide qui favorisent la créativité",
+    "L'ennui comme une fin en soi, pour se reposer",
+    "L'usage du téléphone pour combler les pauses",
+    "Les longues douches et les promenades quotidiennes"
+   ],
+   "why": "« Je ne défends pas l'ennui pour lui-même, mais ce qu'il permet »: the wandering mind that links ideas."
+  },
+  {
+   "kind": "Analyse",
+   "lines": [
+    [
+     "m",
+     "Le gouvernement présente la hausse du salaire minimum comme une victoire pour les travailleurs. Les associations patronales, elles, prédisent des fermetures de petits commerces. Les économistes sont plus partagés que ne le laissent croire ces deux discours : les études récentes montrent que des hausses modérées ont peu d'effet sur l'emploi, mais l'effet d'une hausse importante, dans une région où les salaires sont bas, reste mal connu."
+    ]
+   ],
+   "q": "Que dit l'analyste au sujet des économistes ?",
+   "o": [
+    "Leur avis est plus nuancé que celui des deux camps.",
+    "Ils soutiennent tous la hausse décidée par le gouvernement.",
+    "Ils prédisent, comme les patrons, des fermetures de commerces.",
+    "Ils pensent qu'une forte hausse ne présente aucun risque."
+   ],
+   "why": "« plus partagés que ne le laissent croire ces deux discours »: moderate rises have little effect, large ones are « mal connu »."
+  },
+  {
+   "kind": "Conférence",
+   "lines": [
+    [
+     "f",
+     "On croit souvent que le numérique conserve tout, pour toujours. C'est l'inverse. Un manuscrit du Moyen Âge se lit encore aujourd'hui ; un fichier enregistré il y a vingt-cinq ans sur une disquette est souvent illisible, faute d'appareil ou de logiciel capable de l'ouvrir. La conservation numérique n'est pas un geste, c'est un travail permanent : il faut sans cesse recopier, convertir, vérifier."
+    ]
+   ],
+   "q": "Quelle idée reçue l'oratrice veut-elle corriger ?",
+   "o": [
+    "Que le numérique garantit une conservation durable",
+    "Que les manuscrits du Moyen Âge sont trop fragiles",
+    "Que les disquettes restent un support moderne",
+    "Que la conservation numérique coûte beaucoup trop cher"
+   ],
+   "why": "« On croit souvent que le numérique conserve tout, pour toujours. C'est l'inverse. »"
+  },
+  {
+   "kind": "Réflexion à la radio",
+   "lines": [
+    [
+     "m",
+     "Nous vivons dans une époque qui célèbre l'authenticité : « soyez vous-même », répète la publicité. Mais il y a quelque chose de paradoxal dans une injonction à être spontané. Dès lors que l'authenticité devient une norme sociale, une image à produire et à mettre en scène sur les réseaux, elle cesse précisément d'être authentique. On finit par jouer le naturel, ce qui est sans doute la forme la plus raffinée de l'artifice."
+    ]
+   ],
+   "q": "Quel paradoxe l'orateur souligne-t-il ?",
+   "o": [
+    "Exiger l'authenticité la transforme en mise en scène.",
+    "La publicité refuse de parler d'authenticité aujourd'hui.",
+    "Les réseaux sociaux rendent les gens plus spontanés qu'avant.",
+    "L'artifice finit toujours par se voir, même chez les plus habiles."
+   ],
+   "why": "« Dès lors que l'authenticité devient une norme… elle cesse précisément d'être authentique. On finit par jouer le naturel »."
+  },
+  {
+   "kind": "Entrevue",
+   "lines": [
+    [
+     "f",
+     "Peut-on tirer des leçons de l'histoire ?"
+    ],
+    [
+     "m",
+     "Je me méfie de la formule. L'histoire ne se répète pas, et ceux qui y cherchent des recettes finissent souvent par plaquer le passé sur le présent, ce qui conduit à de graves contresens. En revanche, elle nous apprend quelque chose de plus modeste, et peut-être de plus précieux : que ce qui nous paraît évident aujourd'hui ne l'a pas toujours été, et ne le sera peut-être plus demain."
+    ]
+   ],
+   "q": "Selon l'historien, qu'est-ce que l'histoire peut réellement nous apporter ?",
+   "o": [
+    "La conscience que nos évidences sont relatives",
+    "Des recettes pour agir avec sagesse dans le présent",
+    "La capacité de prévoir les crises avant qu'elles arrivent",
+    "La preuve que les mêmes événements finissent par se répéter"
+   ],
+   "why": "« ce qui nous paraît évident aujourd'hui ne l'a pas toujours été, et ne le sera peut-être plus demain ». He rejects « recettes »."
+  },
+  {
+   "kind": "Chronique scientifique",
+   "lines": [
+    [
+     "f",
+     "On parle souvent de l'effet placebo comme d'une illusion, voire d'une tromperie. Pourtant, des essais ont montré que des patients étaient parfois soulagés par un placebo même lorsqu'on leur avait dit qu'il s'agissait d'un comprimé sans principe actif. Ce n'est donc pas seulement la croyance qui agit, mais le rituel du soin lui-même : la consultation, l'attention, le geste de prendre un médicament. Voilà qui devrait nous inciter à revaloriser, en médecine, la part relationnelle, trop souvent sacrifiée au nom de l'efficacité."
+    ]
+   ],
+   "q": "Quelle conclusion la chroniqueuse tire-t-elle de ces essais ?",
+   "o": [
+    "La relation de soin a un effet réel qu'il faudrait valoriser.",
+    "Le placebo n'agit que si le patient croit prendre un vrai médicament.",
+    "Les médecins devraient remplacer les médicaments par des placebos.",
+    "Ces essais prouvent que l'effet placebo n'est qu'une illusion."
+   ],
+   "why": "Patients improved even when told it was a placebo, so « le rituel du soin » acts: « revaloriser… la part relationnelle »."
+  },
+  {
+   "kind": "Lecture d'un récit",
+   "lines": [
+    [
+     "f",
+     "Mon grand-père ne parlait jamais de la guerre. Enfant, je prenais ce silence pour de l'indifférence ; plus tard, pour de la pudeur. Ce n'est qu'en vidant sa maison, après sa mort, que j'ai trouvé les lettres : des dizaines, adressées à un camarade disparu, jamais envoyées. Il n'avait pas oublié. Il avait simplement choisi de ne confier sa mémoire qu'au papier, comme si les mots dits à voix haute risquaient d'abîmer ce qu'ils devaient garder."
+    ]
+   ],
+   "q": "Qu'est-ce que la narratrice comprend en découvrant les lettres ?",
+   "o": [
+    "Le silence de son grand-père cachait une mémoire très vive.",
+    "Son grand-père était indifférent à ce qu'il avait vécu.",
+    "Le camarade disparu avait répondu à toutes ses lettres.",
+    "Son grand-père voulait publier ces lettres après sa mort."
+   ],
+   "why": "« Il n'avait pas oublié. Il avait simplement choisi de ne confier sa mémoire qu'au papier »."
+  }
+ ]
+}

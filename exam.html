@@ -17,6 +17,7 @@
     <script src="config.js"></script>
     <script src="js/ai.js"></script>
     <script src="js/tcf.js"></script>
+    <script src="js/nclc.js"></script>
 </head>
 <body class="h-full bg-slate-100 flex flex-col overflow-hidden font-sans text-slate-800">
 
@@ -28,6 +29,9 @@
                 <h1 class="text-2xl font-black text-slate-900">Exam guide</h1>
                 <p class="text-sm text-slate-500 mt-1">How a French exam is built, and where to practise each part. The questions live in each skill's page: in Writing, pick <b>Writing 1, 2 or 3</b> and a topic; in Speaking, open the <b>🎯 Questions</b> tab.</p>
             </div>
+
+            <!-- Your four skills as NCLC levels (js/nclc.js) -->
+            <section id="nclc" class="bg-white border border-slate-200 rounded-2xl p-4 space-y-3" aria-labelledby="nclc-title"></section>
 
             <!-- Your progress -->
             <section class="order-last sm:order-none bg-white border border-slate-200 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center gap-3">
@@ -62,7 +66,7 @@
                     <span class="text-sm font-semibold text-indigo-600 group-open:hidden">Show</span><span class="text-sm font-semibold text-indigo-600 hidden group-open:inline">Hide</span>
                 </summary>
                 <div class="px-4 pb-4 space-y-3 text-sm text-slate-700 leading-relaxed">
-                    <p>The tasks here follow the <b>TCF</b> format: writing in 60 minutes (3 tasks) and speaking in about 12 minutes (3 tasks).</p>
+                    <p>The tasks here follow the <b>TCF</b> format: listening (39 questions, 35 minutes), reading (39 questions, 60 minutes), writing in 60 minutes (3 tasks) and speaking in about 12 minutes (3 tasks).</p>
                     <p>The <b>TEF</b> is built differently, but most of the practice carries over:</p>
                     <ul class="list-disc pl-5 space-y-1">
                         <li><b>Speaking, section A</b> (a phone call about an advert, about 10 questions): practise with <b>Speaking 2 · Role-play</b>.</li>
@@ -97,13 +101,50 @@
         const skill = (emoji, name, note, body) => `<div class="bg-white border border-slate-200 rounded-2xl p-4 space-y-3">
             <div class="flex items-center gap-3"><span class="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-xl">${emoji}</span>
             <div><h3 class="font-black text-slate-900">${name}</h3><p class="text-xs text-slate-500">${note}</p></div></div>${body}</div>`;
-        const later = (page, what) => `<p class="text-sm text-slate-600">Multiple-choice questions on short ${what}. Exam-style questions are coming later.</p>
-            <a href="${page}" class="inline-flex items-center min-h-[40px] px-3 rounded-xl bg-white border border-slate-200 hover:border-indigo-300 text-sm font-semibold">Practise in ${page === 'reading.html' ? 'Reading' : 'Listening'} meanwhile →</a>`;
+        const timed = (part, what, extra) => `<p class="text-sm text-slate-600">${what}</p>
+            <div class="flex flex-wrap gap-2"><a href="exam-test.html?part=${part}" class="inline-flex items-center min-h-[40px] px-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold">⏱️ Timed test</a>
+            <a href="${part}.html" class="inline-flex items-center min-h-[40px] px-3 rounded-xl bg-white border border-slate-200 hover:border-indigo-300 text-sm font-semibold">Practise in ${part === 'reading' ? 'Reading' : 'Listening'} →</a></div>`;
         $('skills').innerHTML =
-            skill('✍️', 'Writing', '3 tasks · about 60 minutes', `<div class="space-y-2">${['W1', 'W2', 'W3'].map(taskRow).join('')}</div>`) +
+            skill('✍️', 'Writing', '3 tasks · 60 minutes', `<div class="space-y-2">${['W1', 'W2', 'W3'].map(taskRow).join('')}</div>
+                <a href="exam-test.html?part=writing" class="inline-flex items-center min-h-[40px] px-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold">⏱️ All 3 tasks in 60 minutes</a>`) +
             skill('🗣️', 'Speaking', '3 tasks · about 12 minutes', `<div class="space-y-2">${['S1', 'S2', 'S3'].map(taskRow).join('')}</div>`) +
-            skill('📖', 'Reading', 'about 40 questions · about 60 minutes', later('reading.html', 'texts: notices, emails, articles')) +
-            skill('🎧', 'Listening', 'about 40 questions · about 35 minutes', later('listening.html', 'recordings: messages, conversations, interviews'));
+            skill('📖', 'Reading', '39 questions · 60 minutes', timed('reading', 'Notices, emails, articles, essays and a literary text, from A1 to C2. Four answers each.')) +
+            skill('🎧', 'Listening', '39 questions · 35 minutes', timed('listening', 'Announcements, conversations, interviews and talks, from A1 to C2. Each recording is heard once.'));
+
+        // ---------- Your four skills (NCLC) ----------
+        (function drawNclc() {
+            const S = NCLC.summary();
+            const SK = [['listening', '🎧', 'Listening', 'exam-test.html?part=listening'], ['reading', '📖', 'Reading', 'exam-test.html?part=reading'],
+                ['writing', '✍️', 'Writing', 'exam-test.html?part=writing'], ['speaking', '🗣️', 'Speaking', 'speaking.html?mode=questions']];
+            const have = SK.filter(([k]) => S[k]);
+            const low = have.length ? Math.min(...have.map(([k]) => S[k].nclc)) : null;
+            const bar = (k) => {
+                const r = S[k], n = r ? r.nclc : 0, pct = r ? Math.max(6, n / 10 * 100) : 0;
+                const col = !r ? 'bg-slate-200' : n >= 7 ? 'bg-emerald-500' : n >= 6 ? 'bg-amber-400' : 'bg-rose-500';
+                return `<div class="relative mt-1 h-3 bg-slate-100 rounded-full"><div class="h-full rounded-full ${col}" style="width:${pct}%"></div>
+                    <div class="absolute top-0 bottom-0 bg-slate-900" style="left:70%;width:2px" title="NCLC 7"></div></div>`;
+            };
+            $('nclc').innerHTML = `
+                <div class="flex flex-wrap items-baseline justify-between gap-2"><h2 id="nclc-title" class="font-black text-slate-900">Your four skills · NCLC</h2>
+                <span class="text-xs text-slate-500">The black line is NCLC 7. Your level is your <b>weakest</b> skill.</span></div>
+                <div class="space-y-3">${SK.map(([k, e, name, href]) => { const r = S[k], weak = r && have.length > 1 && r.nclc === low && low < 7;
+                    return `<a href="${href}" class="block rounded-xl px-2 py-1.5 ${weak ? 'bg-rose-50 border border-rose-200' : 'hover:bg-slate-50'}">
+                        <div class="flex flex-wrap items-baseline gap-x-2 text-sm"><span class="font-bold text-slate-900">${e} ${name}</span>
+                        ${r ? `<span class="text-xs font-bold ${NCLC.tone(r.nclc)} px-2 py-0.5 rounded-full">≈ ${NCLC.label(r.nclc)}</span><span class="text-xs text-slate-500">${escapeHtml(r.detail)}</span>` : '<span class="text-xs text-slate-400">No result yet: tap to start</span>'}
+                        ${weak ? '<span class="text-xs font-bold text-rose-700">Weakest skill</span>' : ''}</div>${bar(k)}</a>`; }).join('')}</div>
+                <p class="text-sm text-slate-600">${have.length < 4 ? 'Take a timed test (or answer exam-style questions) in each skill to see all four.'
+                    : low >= 7 ? `All four skills at NCLC 7 or above. Keep it up until the test day.` : `To reach NCLC 7 overall, work first on the skill in red.`}
+                    Writing and speaking use your last three exam-style answers; listening and reading your last timed test. These are estimates, not official results.</p>
+                <details class="group"><summary class="list-none cursor-pointer text-sm font-semibold text-indigo-600 [&::-webkit-details-marker]:hidden">How a full mock exam works</summary>
+                    <ol class="mt-2 list-decimal pl-5 space-y-1 text-sm text-slate-700">
+                        <li><a class="font-semibold text-indigo-700 hover:underline" href="exam-test.html?part=listening">Listening</a>: 39 questions, 35 minutes.</li>
+                        <li><a class="font-semibold text-indigo-700 hover:underline" href="exam-test.html?part=reading">Reading</a>: 39 questions, 60 minutes.</li>
+                        <li><a class="font-semibold text-indigo-700 hover:underline" href="exam-test.html?part=writing">Writing</a>: 3 tasks, 60 minutes.</li>
+                        <li><a class="font-semibold text-indigo-700 hover:underline" href="speaking.html?mode=questions">Speaking</a>: one Speaking 1, 2 and 3 question in a row (about 12 minutes; Speaking 2 has 2 minutes to prepare).</li>
+                    </ol>
+                    <p class="mt-2 text-sm text-slate-600">Do one about once a month, then every two weeks in the last two months before the test. The AI marks speaking from what the microphone hears, not your pronunciation: have a tutor or a language partner listen to you as well.</p>
+                </details>`;
+        })();
 
         TCF.index().then(ix => {
             const total = ix.themes.length * 60, n = TCF.practised().size;

@@ -19,6 +19,7 @@
     <script src="js/writing-tasks.js"></script>
     <script src="js/task-angles.js"></script>
     <script src="js/tcf.js"></script>
+    <script src="js/nclc.js"></script>
     <script src="js/ai-maker.js"></script>
     <style>
         .fix-del { text-decoration: line-through; text-decoration-thickness: 2px; }
@@ -195,7 +196,7 @@
         const badge = (cls, text) => `<span class="text-xs font-bold uppercase tracking-wide ${cls} px-2 py-0.5 rounded-full">${escapeHtml(text)}</span>`;
         function statusHtml(id) {
             const r = results[id];
-            if (r) return `<span class="shrink-0 text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">✓ ${r.score}/20</span>`;
+            if (r) return `<span class="shrink-0 flex flex-wrap justify-end gap-1"><span class="text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">✓ ${r.score}/20</span>${id.startsWith('tcf-') ? NCLC.badge20(r.score) : ''}</span>`;
             if (drafts[id]) return '<span class="shrink-0 text-xs font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full">Draft</span>';
             return '';
         }
@@ -451,7 +452,7 @@
             $('feedback').innerHTML = '<div class="bg-white border border-slate-200 rounded-2xl p-4 text-sm text-indigo-600 animate-pulse">Reading your text…</div>';
             try {
                 const open = task.tcf || task.noLevel;   // exam-style and pasted questions: no level is assumed
-                const who = task.tcf ? `This is an exam-style task (TCF/TEF, ${task.type}). Mark it as an examiner would, whatever the student's level.`
+                const who = task.tcf ? `This is an exam-style task (TCF/TEF, ${task.type}). Mark it as a TCF Canada examiner would, whatever the student's level. On the TCF scale, 4-5/20 is A2, 6-9 B1, 10-13 B2, 14-15 C1, 16-20 C2: a text that shows solid B1 French gets at most 9, even if it does the task well.`
                     : open ? 'The student pasted this question; nothing is assumed about their level.'
                     : `The student is at CEFR level ${task.level}.`;
                 const fb = await askAI([
@@ -528,6 +529,7 @@ Only list real mistakes, at most 12, in the order they appear. "wrong" must be c
                     </div>
                     <div class="min-w-0 space-y-1">
                         <h2 class="font-black text-slate-900">Your feedback</h2>
+                        ${task.tcf ? `<p class="text-sm font-semibold text-slate-900">${score}/20 ≈ <b>${NCLC.label(NCLC.from20(score))}</b> <span class="font-normal text-slate-500">(TCF Canada: NCLC 7 starts at 10/20)</span></p>` : ''}
                         ${fb.level ? `<p class="text-sm font-semibold text-indigo-700">Your text is at about <b>${escapeHtml(fb.level)}</b> level.</p>` : ''}
                         <p class="text-sm text-slate-700">${escapeHtml(fb.summary || '')}</p>
                         ${(fb.strengths || []).length ? `<ul class="text-sm text-emerald-800 space-y-0.5">${fb.strengths.map(s => `<li>✓ ${escapeHtml(s)}</li>`).join('')}</ul>` : ''}

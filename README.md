@@ -19,6 +19,7 @@ A browser-based French learning suite backed by Supabase (schema `French-schema`
 | `speaking.html` | Speaking: Conversation (12 AI characters or your own scene, voice or text, hints, report), Shadowing (7 tracks, listen and repeat with a word check, no AI) and Exam task (AI task or your own question, speak with a timer, score and corrections). |
 | `terms.html`, `privacy.html` | Terms of use and Privacy policy (Canada: PIPEDA and Quebec Law 25), linked in every page's footer and at sign-up; brand and date come from `SITE` in `config.js` |
 | `contact.html` | Contact form (no email address shown): messages go to the `contact_messages` table, admins read them on the Admin page; needs `supabase/contact/01_contact.sql` |
+| `exam-test.html` | Timed TCF Canada parts: `?part=reading` (39 questions, 60 min) and `?part=listening` (39 questions, 35 min, each recording heard once), scored with the usual TCF points per level (3 for A1 … 33 for C2, total 699) and shown as an estimated NCLC level; `?part=writing` (the 3 writing tasks with one 60-minute timer, marked by the AI /20 ≈ NCLC). Tests: `content/tcf/tests/` (first option = right answer, shown shuffled) |
 | `translator.html` | Translator French ⇄ English with grammar notes, a tutor chat and Save to Vocab; one visit counts as one AI use |
 | `admin.html` | Admins only: AI status and a dashboard (students, activity, AI use); needs `supabase/admin/01_dashboard.sql` |
 
@@ -44,6 +45,7 @@ secrets `SUPABASE_URL` and `SUPABASE_ANON_KEY` into `config.js`. Settings → Pa
 | File | Purpose |
 | --- | --- |
 | `lessons-index.js` | Course order and topic titles/levels only, for Home (generated) |
+| `nclc.js` | TCF Canada scores as NCLC levels (IRCC table: /20 for writing and speaking, /699 for reading and listening), the test results (`tcf_tests`) and the four-skill summary on exam.html (`NCLC.summary()`) |
 | `ai.js` | `askAI()` for every AI call (through the server, see `AIServer` in config.js), `escapeHtml()`, `speakFrench()` |
 | `word-memory.js` | Free memory aids for Vocab: `WordMemory.picture(word)` (emoji for about 1,460 words you can picture) `WordMemory.tips(word)` (false friends, words that look like English, gender by ending) and `WordMemory.hook(word)` (about 780 written memory hooks for the most common words and the A1–A2 topics) |
 | `memory-palace.js` | The Memory palace step in Vocab: a place cut open (house, station, street of shops), drawn as rooms of big picture tiles, each word in the room where it happens; on a phone the rooms stack, three tiles a row, and the word card stays at the bottom of the screen. Explore, Walk through and Quiz (quiz answers count in reviews). `MemoryPalace.has(themeId)`, `MemoryPalace.mount(el, themeId, words, { say, grade })`. Palace data: `palaces-data.js` (A1–A2) and `palaces-data-2.js` (B1–C2) |
