@@ -45,6 +45,8 @@ function mount(root, { items, say, done }) {
         root.querySelectorAll('.gp-tab').forEach(t => t.setAttribute('aria-selected', t.dataset.k === k));
         ask();
     };
+    // what is read out: no notes in brackets, only the French after an arrow, no English label such as « Futur: »
+    const spoken = (t) => t.replace(/\s*\([^)]*\)/g, '').split('→').pop().replace(/^[^:]*\S:\s+/, '').trim();
     const top = () => `<div class="gp-top"><span>${qi + 1} / ${set.length}</span><span>${score} right first time</span></div>`;
     const box = (html) => { card.querySelector('.gp-fb').innerHTML = html; };
     function right(it, sentence) {
@@ -77,7 +79,7 @@ function mount(root, { items, say, done }) {
                 <div class="gp-opts">${shuffle(it.opts).map(o => `<button type="button" class="gp-b" data-o="${esc(o)}">${esc(o)}</button>`).join('')}</div><div class="gp-fb"></div>`;
             card.querySelectorAll('.gp-opts .gp-b').forEach(b => b.addEventListener('click', () => {
                 if (card.querySelector('.gp-opts .ok')) return;
-                if (b.dataset.o === it.a) { b.classList.add('ok'); card.querySelector('.gap').textContent = it.a; right(it, it.say || joinTiles([before.trim(), it.a, (after || '').trim()])); return; }
+                if (b.dataset.o === it.a) { b.classList.add('ok'); card.querySelector('.gap').textContent = it.a; right(it, it.say || spoken(joinTiles([before.trim(), it.a, (after || '').trim()]))); return; }
                 b.classList.add('no'); b.disabled = true;
                 wrong(`Not « ${esc(b.dataset.o)} ». ${it.why || it.hint || ''}`);
             }));

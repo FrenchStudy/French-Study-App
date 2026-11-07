@@ -48,7 +48,7 @@ const LessonKit = (function () {
         [43, 44, 45, 37, 38, 36, 32, 42, 33, 34, 41, 39, 40, 35, 'v25', 46],
         [48, 49, 60, 47, 53, 54, 50, 51, 55, 56, 58, 52, 57, 59, 'v33'],
         ['v34', 'v35', 'v39', 67, 68, 'v36', 'v37', 'v38', 64, 65, 61, 69, 70, 'v40'],
-        [71, 'v43', 72, 73, 'v41', 74, 75, 76, 'v42', 'v44', 78]
+        ['v41', 'v42', 'v43', 71, 72, 73, 74, 75, 76, 'v44', 78]
     ];
     // C1 lessons that repeated a B2 one now live inside it, as its "Going further" part
     const MERGED_INTO = { 62: 55, 63: 51, 66: 57, 77: 69 };   // 77 (Quebec French) was removed: the app teaches France French

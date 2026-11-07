@@ -9,7 +9,7 @@
 //   agree  switch masculine / feminine / plural; what changes lights up   { cols: [labels], rows: [ { forms: [per col], en } ] }
 //   join   two words slide together into one, or stay apart   { pairs: [ { a, b, res, stay, ex, en } ] }
 //   line   a time line: tap a point   { marks: [ { at (-1 … 1, 0 = now), label, fr, en } ] }
-//   flip   cards that turn into their other form when tapped   { cards: [ { a, b, en, tag } ] }
+//   flip   cards that turn into their other form when tapped   { cards: [ { a, b, en, tag } ], en?: 'a' | 'b' (that side is English: not spoken) }
 //   pairs  two ways to say it side by side; tap one to hear it   { cap: [left, right], rows: [ { l, r, en } ] }
 // window.GrammarTools.mount(el, { page, say, done })
 (function () {
@@ -80,7 +80,7 @@ const CSS = `
 .gt-pr{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;align-items:center;border:1px solid #e2e8f0;border-radius:12px;padding:8px 10px;background:#fff}
 @media(max-width:520px){.gt-pr{grid-template-columns:1fr}}
 .gt-pr button{font:inherit;text-align:left;border:0;background:none;cursor:pointer;padding:4px;min-height:40px;font-size:var(--fs-lg);font-weight:800;color:#0f172a}
-.gt-pr button small{display:block;font-size:var(--fs-xs);font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:#64748b}
+.gt-pr-en{padding:4px;font-size:var(--fs-base);font-weight:600;color:#334155}.gt-pr-en small,.gt-pr button small{display:block;font-size:var(--fs-xs);font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:#64748b}
 @media (prefers-reduced-motion:reduce){.gt-t.in,.gt-stage.stay .ja,.gt-stage.stay .jb{animation:none}.gt-jt{transition:none}}`;
 
 // ---------- the tools: each draws into box and wires itself; say(t) speaks only on a tap ----------
@@ -152,7 +152,7 @@ const TOOLS = {
                 if (!c) return;
                 if (bin.dataset.b === c.box) {
                     if (!tries) right++;
-                    placed[c.box].push(c.t); say(c.say || c.t);
+                    placed[c.box].push(c.t); say(c.say || c.t.replace(/\s*\([^)]*\)/g, ''));   // a note in brackets is not read out
                     const why = c.why;
                     ci++; tries = 0; draw();
                     if (why) box.querySelector('.gt-fbx').innerHTML = `<div class="gt-fb ok">« ${esc(c.t)} »: ${why}</div>`;
@@ -218,12 +218,12 @@ const TOOLS = {
             const c = st.cards[Number(b.dataset.f)], on = !b.classList.contains('on');
             b.classList.toggle('on', on); b.setAttribute('aria-pressed', on);
             b.querySelector('b').textContent = on ? c.b : c.a;
-            say(on ? c.b : c.a);
+            say(st.en === 'a' ? c.b : st.en === 'b' ? c.a : on ? c.b : c.a);   // en: the side in English is never spoken; the French one is
         }));
     },
     pairs(box, st) {
-        // the buttons carry data-say: the lesson page speaks them when tapped
-        box.innerHTML = `<div class="gt-rows">${st.rows.map(r => `<div class="gt-pr"><button type="button" data-say="${esc(r.l)}"><small>${esc(st.cap[0])}</small>${esc(r.l)}</button><button type="button" data-say="${esc(r.r)}"><small>${esc(st.cap[1])}${r.en ? ' · ' + esc(r.en) : ''}</small>${esc(r.r)}</button></div>`).join('')}</div>`;
+        // the buttons carry data-say: the lesson page speaks them when tapped. right: 'en' = the right side is English (or a wrong form): shown, never spoken
+        box.innerHTML = `<div class="gt-rows">${st.rows.map(r => `<div class="gt-pr"><button type="button" data-say="${esc(r.l)}"><small>${esc(st.cap[0])}</small>${esc(r.l)}</button>${st.right === 'en' ? `<div class="gt-pr-en"><small>${esc(st.cap[1])}${r.en ? ' · ' + esc(r.en) : ''}</small>${esc(r.r)}</div>` : `<button type="button" data-say="${esc(r.r)}"><small>${esc(st.cap[1])}${r.en ? ' · ' + esc(r.en) : ''}</small>${esc(r.r)}</button>`}</div>`).join('')}</div>`;
     },
 };
 
