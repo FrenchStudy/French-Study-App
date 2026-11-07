@@ -317,7 +317,8 @@ async function picker(root, opts) {
         q('[data-pk-topics]').innerHTML = `<button type="button" role="tab" aria-selected="${slug === 'all'}" data-pk-slug="all" class="${chip(slug === 'all')}">All topics</button>` +
             ix.themes.map(t => `<button type="button" role="tab" aria-selected="${t.slug === slug}" data-pk-slug="${esc(t.slug)}" class="${chip(t.slug === slug)}" title="${esc(t.fr)}">${t.emoji} ${esc(shortTheme(t))}</button>`).join('');
         const on = q('[data-pk-topics] [aria-selected="true"]');
-        if (on) on.scrollIntoView({ block: 'nearest', inline: 'center' });
+        // centre the chosen topic in its row (sideways only: never scroll the page)
+        if (on) { const row = on.parentElement; row.scrollLeft = on.offsetLeft - row.offsetLeft - (row.clientWidth - on.offsetWidth) / 2; }
     }
     const status = (id, done) => (opts.status && opts.status(id)) || (done.has(id) ? '<span class="shrink-0 text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">✓ Practised</span>' : '');
     async function drawList() {

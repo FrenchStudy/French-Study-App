@@ -19,6 +19,7 @@
     <script src="js/writing-tasks.js"></script>
     <script src="js/task-angles.js"></script>
     <script src="js/tcf.js"></script>
+    <script src="js/ai-maker.js"></script>
     <style>
         .fix-del { text-decoration: line-through; text-decoration-thickness: 2px; }
         details > summary { list-style: none; } details > summary::-webkit-details-marker { display: none; }
@@ -33,17 +34,11 @@
         <div class="max-w-6xl mx-auto px-4 py-5 space-y-4">
 
             <!-- ===== ALL TASKS ===== -->
-            <div id="list-view" class="space-y-4">
+            <div id="list-view" class="space-y-5">
                 <div>
                     <h1 class="text-2xl font-black text-slate-900">Writing</h1>
-                    <p class="text-sm text-slate-500 mt-1">Choose a question, write, and get your text corrected.</p>
+                    <p class="text-sm text-slate-500 mt-1">The AI writes a question for you. Write your answer and the AI corrects it.</p>
                 </div>
-                <div class="flex flex-wrap gap-1.5 sm:gap-2">
-                    <button id="open-ai" type="button" class="min-h-[44px] px-3 sm:px-4 text-sm sm:text-base bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl">✨ New<span class="hidden sm:inline"> question</span></button>
-                    <button id="open-post" type="button" class="min-h-[44px] px-3 sm:px-4 text-sm sm:text-base bg-white border border-slate-200 hover:border-indigo-300 font-bold rounded-xl">📝 Paste<span class="hidden sm:inline"> your own</span></button>
-                    <button id="random-btn" type="button" class="min-h-[44px] px-3 sm:px-4 text-sm sm:text-base bg-white border border-slate-200 hover:border-indigo-300 disabled:opacity-50 font-bold rounded-xl">🎲 Random</button>
-                </div>
-                <p id="random-error" class="hidden text-sm text-rose-700"></p>
                 <!-- Your last unfinished text -->
                 <a id="continue" href="#" class="hidden flex items-center gap-3 bg-amber-50 border border-amber-200 hover:border-amber-400 rounded-2xl p-3">
                     <span class="text-2xl" aria-hidden="true">✏️</span>
@@ -55,34 +50,26 @@
                     <span class="text-xl" aria-hidden="true">🚀</span><span id="nudge-text" class="flex-1"></span>
                     <button id="nudge-close" type="button" class="shrink-0 min-h-[32px] px-2 font-bold text-emerald-800 hover:text-emerald-950" aria-label="Hide this tip">✕</button>
                 </div>
-                <section class="space-y-2 pt-1">
-                    <h2 class="text-lg font-black text-slate-900">Choose a question</h2>
-                    <div id="picker"><p class="text-sm text-slate-400 animate-pulse">Loading the questions…</p></div>
+                <!-- ===== ✨ AI WRITES A NEW QUESTION FOR YOU · and the Library (js/ai-maker.js) ===== -->
+                <section id="maker" aria-label="AI writes a new question for you"></section>
+                <!-- 📖 Library: the exam-style and everyday questions already in the app -->
+                <div id="picker"><p class="text-sm text-slate-400 animate-pulse">Loading the questions…</p></div>
+
+                <!-- ===== YOUR QUESTIONS ===== -->
+                <section class="space-y-2">
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                        <h2 class="text-lg font-black text-slate-900">Your questions</h2>
+                        <button id="open-post" type="button" class="min-h-[40px] px-3 text-sm bg-white border border-slate-200 hover:border-indigo-300 font-bold rounded-xl">📝 Paste your own question</button>
+                    </div>
+                    <div id="made-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
                 </section>
             </div>
 
-            <!-- New question (AI) and Your own question: a panel over the page (from the bottom on phones) -->
+            <!-- Your own question: a panel over the page (from the bottom on phones) -->
             <div id="sheet" class="hidden fixed inset-0 z-[60] flex items-end sm:items-start justify-center sm:pt-20 bg-slate-900/40" role="dialog" aria-modal="true" aria-labelledby="sheet-title">
                 <div class="w-full sm:max-w-lg bg-white rounded-t-2xl sm:rounded-2xl p-5 space-y-3 max-h-[90vh] overflow-y-auto shadow-xl">
-                    <div id="sheet-ai" class="space-y-3">
-                        <h2 id="sheet-title" class="text-lg font-black text-slate-900">✨ New question</h2>
-                        <p class="text-sm text-slate-500">The AI writes a new question for you. A different one every time.</p>
-                        <label class="block"><span class="block text-sm font-semibold text-slate-700 mb-1">Level</span>
-                            <select id="ai-level" class="w-full text-base px-3 py-2.5 bg-white border border-slate-200 rounded-xl"></select>
-                            <span id="ai-level-note" class="block text-xs text-slate-500 mt-1"></span></label>
-                        <label class="block"><span class="block text-sm font-semibold text-slate-700 mb-1">Subject</span>
-                            <select id="ai-subject" class="w-full text-base px-3 py-2.5 bg-white border border-slate-200 rounded-xl"></select></label>
-                        <input id="subject-other" type="text" maxlength="80" placeholder="…or type any subject" class="w-full text-base px-3 py-2.5 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                        <label class="block"><span class="block text-sm font-semibold text-slate-700 mb-1">Format</span>
-                            <select id="ai-format" class="w-full text-base px-3 py-2.5 bg-white border border-slate-200 rounded-xl"></select></label>
-                        <div class="flex flex-wrap gap-2 pt-1">
-                            <button id="gen-btn" type="button" class="min-h-[48px] px-5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-bold rounded-xl">Write me a question</button>
-                            <button type="button" data-sheet-close class="min-h-[48px] px-4 bg-white border border-slate-200 font-semibold rounded-xl">Cancel</button>
-                        </div>
-                        <p id="gen-error" class="hidden text-sm text-rose-700"></p>
-                    </div>
-                    <div id="sheet-post" class="hidden space-y-3">
-                        <h2 class="text-lg font-black text-slate-900">📝 Your own question</h2>
+                    <div id="sheet-post" class="space-y-3">
+                        <h2 id="sheet-title" class="text-lg font-black text-slate-900">📝 Your own question</h2>
                         <p class="text-sm text-slate-500">Paste a question from a book, an exam or your teacher, in French or English.</p>
                         <textarea id="post-text" rows="5" maxlength="1200" placeholder="e.g. Vous avez passé un week-end chez des amis. Écrivez-leur pour les remercier…" class="w-full text-base p-3 bg-white border border-slate-200 rounded-xl resize-y focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
                         <div class="flex flex-wrap gap-2">
@@ -184,12 +171,9 @@
         let ownTasks = store.get('writing_own', []);      // AI questions and your own questions
         let samples = store.get('writing_samples', {});   // task id -> { fr, en } sample reply written by the AI
         const WORDS = { A1: [40, 60], A2: [60, 90], B1: [100, 140], B2: [160, 220], C1: [220, 280], C2: [280, 350] };
-        const SUBJECTS = ['Daily life', 'Family and friends', 'Food', 'Travel', 'Home', 'Work', 'Studies', 'Health and sport',
-            'Free time', 'Shopping', 'Technology', 'Environment', 'Culture and media', 'Society'];
         const FORMATS = [['message', 'Message to a friend'], ['email', 'Formal email or letter'], ['story', 'Story'],
             ['article', 'Article or blog'], ['opinion', 'Opinion'], ['essay', 'Essay']];
         const DEFAULT_FORMAT = { A1: 'message', A2: 'message', B1: 'opinion', B2: 'essay', C1: 'essay', C2: 'essay' };
-        let pick = store.get('writing_pick', { subject: 'Daily life', format: null });
         const kindLabel = (t) => t.source === 'posted' ? 'Your question' : t.own ? 'AI question' : t.type;
         let task = null;
         const allTasks = () => [...window.WRITING_TASKS, ...ownTasks];
@@ -227,21 +211,19 @@
         }
         const everyday = () => window.WRITING_TASKS.slice().sort((a, b) => LEVELS.indexOf(a.level) - LEVELS.indexOf(b.level));
         const EXTRA = [
-            { key: 'everyday', label: 'Everyday', sub: 'A1–C2', note: () => 'Everyday writing: messages, postcards, descriptions and opinions, easiest first. Each card shows its level.', html: () => everyday().map(card).join('') },
-            { key: 'mine', label: 'Mine', count: () => ownTasks.length,
-              note: () => ownTasks.length ? 'Questions the AI wrote for you and questions you pasted, newest first.' : '',
-              html: () => ownTasks.length ? ownTasks.map(card).join('') : '<p class="text-sm text-slate-500 sm:col-span-2 lg:col-span-3">No questions yet. Tap <b>✨ New question</b> or <b>📝 Paste your own</b> above.</p>' }
+            { key: 'everyday', label: 'Everyday', sub: 'A1–C2', note: () => 'Everyday writing: messages, postcards, descriptions and opinions, easiest first. Each card shows its level.', html: () => everyday().map(card).join('') }
         ];
         let picker = null;
         async function initPicker(type, slug) {
             if (picker) { if (type || slug) await picker.set(type, slug); else picker.redraw(); return; }
             picker = await TCF.picker($('picker'), { kind: 'writing', extra: EXTRA, status: statusHtml,
                 href: (id) => `writing.html?task=${encodeURIComponent(id)}`, say: (t) => speakFrench(t, 0.9),
-                askAI: (th) => openSheet('ai', th.en) });
+                askAI: (th) => maker.set({ about: 'theme', own: th.en }) });
             if (picker && (type || slug)) await picker.set(type, slug);
         }
         function renderList() {
             if (picker) picker.redraw();
+            maker.render(); renderMade();
             renderContinue();
             renderNudge();
         }
@@ -267,33 +249,33 @@
             $('nudge-text').innerHTML = m && m[1] !== '3'
                 ? `Three scores of 16/20 or more in a row! Try <button type="button" data-nudge-type="W${Number(m[1]) + 1}" class="font-bold underline">Writing ${Number(m[1]) + 1}</button>.`
                 : lv === 'C2' ? 'Three scores of 16/20 or more in a row: excellent work!'
-                : `Three scores of 16/20 or more in a row! Try a <b>${next}</b> question: pick it in <button type="button" data-nudge-ai="${next}" class="font-bold underline">✨ New question</button> or in <button type="button" data-nudge-type="everyday" class="font-bold underline">Everyday</button>.`;
+                : `Three scores of 16/20 or more in a row! Try a <b>${next}</b> question: ask the <button type="button" data-nudge-ai="${next}" class="font-bold underline">✨ AI for one</button> or pick one in <button type="button" data-nudge-type="everyday" class="font-bold underline">Everyday</button>.`;
             box.classList.remove('hidden');
         }
 
-        // ---------- The panel: New question (AI) and Your own question ----------
-        function openSheet(which, subject) {
+        // ---------- The panel: Your own question ----------
+        function openSheet() {
             $('sheet').classList.remove('hidden');
-            $('sheet-ai').classList.toggle('hidden', which !== 'ai');
-            $('sheet-post').classList.toggle('hidden', which !== 'post');
-            $('gen-error').classList.add('hidden'); $('post-error').classList.add('hidden');
-            if (which === 'ai') {
-                const lv = typeof subject === 'object' && subject && subject.level ? subject.level : suggestedLevel();
-                $('ai-level').innerHTML = LEVELS.map(l => `<option value="${l}" ${l === lv ? 'selected' : ''}>${l} · ${LEVEL_NAME[l]}</option>`).join('');
-                const est = lastEstimate();
-                $('ai-level-note').textContent = est ? `Your latest text was about ${est}.` : 'Not sure? Start here: after your first correction, the AI suggests your level.';
-                $('ai-subject').innerHTML = SUBJECTS.map(x => `<option ${x === pick.subject ? 'selected' : ''}>${escapeHtml(x)}</option>`).join('');
-                $('subject-other').value = typeof subject === 'string' ? subject : '';
-                drawFormats();
-                setTimeout(() => $('gen-btn').focus(), 0);
-            } else setTimeout(() => $('post-text').focus(), 0);
-        }
-        const LEVEL_NAME = { A1: 'Beginner', A2: 'Elementary', B1: 'Intermediate', B2: 'Upper intermediate', C1: 'Advanced', C2: 'Mastery' };
-        function drawFormats() {
-            const fmt = pick.format || DEFAULT_FORMAT[$('ai-level').value];
-            $('ai-format').innerHTML = FORMATS.map(([k, label]) => `<option value="${k}" ${k === fmt ? 'selected' : ''}>${escapeHtml(label)}</option>`).join('');
+            $('post-error').classList.add('hidden');
+            setTimeout(() => $('post-text').focus(), 0);
         }
         const closeSheet = () => $('sheet').classList.add('hidden');
+
+        // ---------- ✨ AI writes a new question for you (the card is in js/ai-maker.js) ----------
+        const maker = AIMaker.mount($('maker'), {
+            key: 'writing', noun: 'question', title: '✨ AI writes a new question for you', sub: 'Every question is new, made for you in seconds. Then the AI corrects what you write.',
+            formats: FORMATS.map(([, label]) => label), freeNoun: 'questions', library: $('picker'),
+            async write({ subject, focus, level, formatName }) {
+                const format = formatName ? FORMATS.find(([, label]) => label === formatName)[0] : DEFAULT_FORMAT[level];
+                const q = await generateQuestion(subject, format, level, focus);
+                openTask(q.id, true);
+            }
+        });
+        // Your questions: the ones the AI wrote for you and the ones you pasted, newest first
+        function renderMade() {
+            $('made-grid').innerHTML = ownTasks.length ? ownTasks.slice(0, 12).map(card).join('')
+                : '<p class="text-sm text-slate-500">The questions the AI writes for you appear here, so you can come back to them.</p>';
+        }
 
         // ---------- One task ----------
         function openTask(id, push) {
@@ -591,10 +573,14 @@ Only list real mistakes, at most 12, in the order they appear. "wrong" must be c
             ownTasks = [t, ...ownTasks.filter(x => x.id !== t.id)].slice(0, 40);
             store.set('writing_own', ownTasks);
         }
-        async function generateQuestion(subject, format, level) {
+        // focus (from the card): { words, grammar } from « My lessons », { note } for a theme or Any topic
+        async function generateQuestion(subject, format, level, focus) {
+            const f = focus || {};
             const fmtLabel = (FORMATS.find(([k]) => k === format) || [, format])[1];
             const earlier = ownTasks.filter(x => x.subject === subject).slice(0, 8);
-            const angle = pickTaskAngle(subject, level, earlier.map(x => x.angle).filter(Boolean));
+            const angle = (f.words || f.grammar) ? null : pickTaskAngle(subject, level, earlier.map(x => x.angle).filter(Boolean));
+            const focusLines = [(f.words || []).length ? `Build the task so the learner naturally uses some of these words (put 4-6 of them in the bank): ${f.words.slice(0, 24).join(', ')}` : '',
+                f.grammar ? `The task should make the learner use this grammar point: ${f.grammar}` : '', !angle && f.note ? f.note : ''].filter(Boolean).join('\n');
             const topic = angle ? `${subject}, and more precisely: ${angle}` : subject;
             const messages = [
                 { role: 'system', content: `${window.FRANCE_FR || ''} You write French writing tasks in the style of the DELF and TCF exams, for CEFR level ${level}.
@@ -608,7 +594,7 @@ Reply with JSON only:
  "include": ["3 or 4 short English checklist items, specific to this task"],
  "bank": [["useful French phrase", "English meaning"], ... 8 items suited to ${level} and this task],
  "plan": ["4 short English steps"]}` },
-                { role: 'user', content: `Topic: ${topic}\nFormat: ${fmtLabel}\nLength: ${WORDS[level][0]}-${WORDS[level][1]} words${earlier.length ? '\nMake it different from these earlier questions: ' + earlier.slice(0, 6).map(x => x.title).join('; ') : ''}` }
+                { role: 'user', content: `Topic: ${topic}\nFormat: ${fmtLabel}\nLength: ${WORDS[level][0]}-${WORDS[level][1]} words${focusLines ? '\n' + focusLines : ''}${earlier.length ? '\nMake it different from these earlier questions: ' + earlier.slice(0, 6).map(x => x.title).join('; ') : ''}` }
             ];
             // Both attempts share one session, so a retry does not cost the student a second free use
             const session = 'writing-question-' + Date.now().toString(36);
@@ -681,9 +667,9 @@ Reply with JSON only:
             if (pk) { e.preventDefault(); openAny(pk.dataset.pkOpen, true); return; }
             if (e.target.closest('[data-sheet-close]') || e.target.id === 'sheet') { closeSheet(); return; }
             const nt = e.target.closest('[data-nudge-type]');
-            if (nt && picker) { picker.set(nt.dataset.nudgeType); $('picker').scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
+            if (nt && picker) { maker.set({ about: 'library' }); picker.set(nt.dataset.nudgeType); return; }
             const na = e.target.closest('[data-nudge-ai]');
-            if (na) { openSheet('ai', { level: na.dataset.nudgeAi }); return; }
+            if (na) { maker.set({ about: 'theme', level: na.dataset.nudgeAi }); return; }
         });
         $('text').addEventListener('input', () => { updateCount(); clearTimeout(saveTimer); saveTimer = setTimeout(saveDraft, 400); });
         $('back').addEventListener('click', () => {
@@ -702,41 +688,11 @@ Reply with JSON only:
             if ($('text').value.trim() && !confirm('Clear your text?')) return;
             $('text').value = ''; updateCount(); saveDraft();
         });
-        $('gen-btn').addEventListener('click', () => {
-            const typed = $('subject-other').value.trim();
-            const level = $('ai-level').value, subject = $('ai-subject').value, format = $('ai-format').value;
-            pick = { subject, format }; store.set('writing_pick', pick);
-            const showError = (m) => { $('gen-error').textContent = m; $('gen-error').classList.toggle('hidden', !m); };
-            onGenerate($('gen-btn'), showError, typed || subject, format, level);
-        });
-        $('ai-level').addEventListener('change', () => { if (!pick.format) drawFormats(); });
-        $('ai-subject').addEventListener('change', () => { $('subject-other').value = ''; });
-        $('open-ai').addEventListener('click', () => openSheet('ai'));
-        $('open-post').addEventListener('click', () => openSheet('post'));
+        $('open-post').addEventListener('click', () => openSheet());
         document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('sheet').classList.contains('hidden')) closeSheet(); });
         $('nudge-close').addEventListener('click', () => {
             const at = Math.max(0, ...Object.values(results).map(r => r.at || 0));
             store.set('writing_nudge_off', at); $('nudge').classList.add('hidden');
-        });
-        // Random: a question you haven't done yet, from the type and topic you are looking at
-        $('random-btn').addEventListener('click', async () => {
-            const btn = $('random-btn'), err = $('random-error');
-            err.classList.add('hidden');
-            const st = picker ? picker.state() : { type: 'W1', slug: 'all', isBank: true };
-            try {
-                btn.disabled = true;
-                let id = null;
-                if (st.isBank) id = await TCF.randomId(st.type, st.slug);
-                else {
-                    const list = st.type === 'mine' ? ownTasks : everyday();
-                    const fresh = list.filter(t => !results[t.id]);
-                    const from = fresh.length ? fresh : list;
-                    id = from.length ? from[Math.floor(Math.random() * from.length)].id : null;
-                }
-                if (!id) throw new Error(st.type === 'mine' ? 'You have no questions of your own yet.' : 'No question found.');
-                await openAny(id, true);
-            } catch (e) { err.textContent = e.message; err.classList.remove('hidden'); }
-            finally { btn.disabled = false; }
         });
         // Open any question by its id, loading exam-style questions from the bank first
         async function openAny(id, push) {
@@ -746,7 +702,6 @@ Reply with JSON only:
             }
             if (findTask(id)) openTask(id, push);
         }
-        $('subject-other').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('gen-btn').click(); });
         $('post-btn').addEventListener('click', postQuestion);
         $('continue').addEventListener('click', (e) => { e.preventDefault(); openAny($('continue').dataset.task, true); });
         $('btn-sample').addEventListener('click', () => showSample(false));
@@ -764,6 +719,7 @@ Reply with JSON only:
             if (id && !findTask(id) && TCF.parseId(id)) {
                 try { const t = await TCF.taskFromId(id); if (t) examTasks = [t, ...examTasks.filter(x => x.id !== t.id)]; } catch (e) { console.warn(e); }
             }
+            if (type || slug) maker.set({ about: 'library', scroll: false });   // back from an exam question: its list
             if (id && findTask(id)) openTask(id, false); else showList(false);
             initPicker(type, slug);
         }
