@@ -31,6 +31,7 @@
         .mk-chip[aria-pressed="true"] { background: #4f46e5; border-color: #4f46e5; color: #fff; }
         .mk-sel { min-height: 48px; width: 100%; padding: 0 10px; border-radius: 12px; border: 1px solid #e2e8f0; background: #fff; font-weight: 800; color: #334155; font-size: 1rem; }
         .mk-sel.on { border-color: #4f46e5; color: #3730a3; background: #eef2ff; }
+        .mk-ai { display: inline-block; font-size: .75rem; line-height: 1; font-weight: 900; letter-spacing: .02em; padding: 3px 4px; border-radius: 6px; background: linear-gradient(90deg, #7c3aed, #4f46e5); color: #fff; vertical-align: 2px; }
         .mk-pill { display: inline-flex; align-items: center; gap: 4px; min-height: 40px; padding: 0 12px; border-radius: 999px; border: 1px solid #c7d2fe; background: #fff; font-weight: 600; color: #334155; }
         .mk-pill[aria-pressed="true"] { background: #4f46e5; border-color: #4f46e5; color: #fff; }
     </style>
@@ -49,33 +50,48 @@
                     <p class="text-sm text-slate-500 mt-1">The AI writes a text for you. Tap any word for its meaning, then answer the questions.</p>
                 </div>
 
-                <!-- ===== A NEW TEXT, WRITTEN FOR YOU ===== -->
-                <section id="maker" class="bg-white border-2 border-indigo-200 rounded-2xl p-4 sm:p-5 space-y-4 shadow-sm" aria-labelledby="maker-title">
-                    <div class="flex flex-wrap items-center justify-between gap-2">
-                        <h2 id="maker-title" class="text-lg font-black text-slate-900">✨ A new text, written for you</h2>
-                        <span id="mk-free" class="hidden text-xs font-bold px-2.5 py-1 rounded-full bg-amber-100 text-amber-800"></span>
+                <!-- ===== ✨ AI WRITES A NEW TEXT FOR YOU · and the Library ===== -->
+                <section id="maker" class="bg-white border-2 border-indigo-200 rounded-2xl shadow-sm" aria-labelledby="maker-title">
+                    <div class="px-4 sm:px-5 pt-4">
+                        <h2 id="maker-title" class="text-lg font-black text-slate-900">✨ AI writes a new text for you</h2>
+                        <p class="text-sm text-slate-500">Every text is new, made for you in seconds.</p>
                     </div>
-                    <div class="space-y-2">
-                        <div class="text-sm font-bold text-slate-700">1 · About</div>
-                        <div class="grid grid-cols-2 gap-2 sm:max-w-md" role="group" aria-label="About">
-                            <button type="button" data-about="lessons" class="mk-chip mk-big">📚 My lessons</button>
-                            <button type="button" data-about="theme" class="mk-chip mk-big">🗂️ A theme</button>
-                        </div>
-                        <div id="mk-lessons" class="hidden rounded-xl bg-indigo-50 border border-indigo-100 p-3 text-sm text-slate-700"></div>
+                    <nav class="flex gap-0 sm:gap-6 px-2 sm:px-5 mt-2 text-sm font-semibold overflow-hidden shadow-[inset_0_-1px_0_#e2e8f0]" role="tablist" aria-label="Where the text comes from">
+                        <button type="button" role="tab" data-about="library" class="mk-tab flex-1 sm:flex-none flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1.5 min-h-[52px] sm:min-h-[44px] px-0.5 sm:px-0 pb-1 sm:pb-0 border-b-2 border-transparent text-slate-500 hover:text-slate-800 whitespace-nowrap">📖 <span class="hidden sm:inline">Library</span><span class="sm:hidden">Library</span></button>
+                        <button type="button" role="tab" data-about="theme" class="mk-tab flex-1 sm:flex-none flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1.5 min-h-[52px] sm:min-h-[44px] px-0.5 sm:px-0 pb-1 sm:pb-0 border-b-2 border-transparent text-slate-500 hover:text-slate-800 whitespace-nowrap"><span class="mk-ai">AI</span> <span class="hidden sm:inline">A theme</span><span class="sm:hidden">Theme</span></button>
+                        <button type="button" role="tab" data-about="random" class="mk-tab flex-1 sm:flex-none flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1.5 min-h-[52px] sm:min-h-[44px] px-0.5 sm:px-0 pb-1 sm:pb-0 border-b-2 border-transparent text-slate-500 hover:text-slate-800 whitespace-nowrap"><span class="mk-ai">AI</span> <span class="hidden sm:inline">Topic generator</span><span class="sm:hidden">Generator</span></button>
+                        <button type="button" role="tab" data-about="lessons" class="mk-tab flex-1 sm:flex-none flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1.5 min-h-[52px] sm:min-h-[44px] px-0.5 sm:px-0 pb-1 sm:pb-0 border-b-2 border-transparent text-slate-500 hover:text-slate-800 whitespace-nowrap"><span class="mk-ai">AI</span> <span class="hidden sm:inline">My lessons</span><span class="sm:hidden">Lessons</span></button>
+                    </nav>
+                    <div class="p-4 sm:p-5 space-y-4">
+                        <div id="mk-lessons" class="hidden space-y-2 text-sm text-slate-700"></div>
                         <div id="mk-theme" class="hidden space-y-2">
+                            <p class="text-sm text-slate-600">Pick a theme or type your own subject:</p>
                             <div id="mk-themes" class="flex flex-wrap gap-2" role="group" aria-label="Theme"></div>
                             <input id="mk-own" type="text" maxlength="80" placeholder="✏️ …or type your own subject, e.g. a night train to Nice" class="w-full min-h-[44px] px-3 text-base bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
                         </div>
-                    </div>
-                    <div class="space-y-2">
-                        <div class="text-sm font-bold text-slate-700">2 · Level and format</div>
-                        <div class="grid grid-cols-2 gap-2 sm:max-w-md">
-                            <select id="mk-level" class="mk-sel" aria-label="Level"></select>
-                            <select id="mk-format" class="mk-sel" aria-label="Format"></select>
+                        <p id="mk-random" class="hidden text-sm text-slate-600">No subject needed: the AI picks one for you. Just choose the level and the format.</p>
+                        <div id="mk-ai" class="space-y-3">
+                            <div class="grid grid-cols-2 gap-2 sm:max-w-md">
+                                <select id="mk-level" class="mk-sel" aria-label="Level"></select>
+                                <select id="mk-format" class="mk-sel" aria-label="Format"></select>
+                            </div>
+                            <div class="flex flex-wrap items-center gap-3">
+                                <button id="mk-go" type="button" class="w-full sm:w-auto min-h-[52px] px-6 rounded-xl font-black text-base"></button>
+                                <span id="mk-free" class="hidden text-xs font-bold px-2.5 py-1 rounded-full bg-amber-100 text-amber-800"></span>
+                            </div>
+                            <p id="mk-error" class="hidden text-sm text-rose-700"></p>
+                        </div>
+                        <!-- 📖 Library: texts already in the app, no AI needed -->
+                        <div id="ready" class="hidden space-y-2">
+                            <div id="levels" class="flex flex-wrap gap-1.5 pb-1" role="tablist" aria-label="Level"></div>
+                            <div class="flex items-baseline justify-between gap-2">
+                                <p id="texts-heading" class="text-sm text-slate-500"></p>
+                                <span id="lib-note" class="shrink-0 text-xs text-slate-400"></span>
+                            </div>
+                            <p id="list-error" class="hidden text-sm text-rose-700"></p>
+                            <div id="text-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
                         </div>
                     </div>
-                    <button id="mk-go" type="button" class="w-full sm:w-auto min-h-[52px] px-6 rounded-xl font-black text-base"></button>
-                    <p id="mk-error" class="hidden text-sm text-rose-700"></p>
                 </section>
 
                 <!-- ===== YOUR TEXTS ===== -->
@@ -86,20 +102,6 @@
                     </div>
                     <div id="made-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
                 </section>
-
-                <!-- ===== READY-MADE TEXTS (no AI) ===== -->
-                <details id="ready" class="bg-white border border-slate-200 rounded-2xl p-4 group">
-                    <summary class="cursor-pointer font-bold text-slate-700 min-h-[28px]">📚 Ready-made texts <span id="ready-note" class="font-normal text-slate-400">· A1 to C2 · no AI needed</span></summary>
-                    <div class="pt-3 space-y-2">
-                        <div id="levels" class="flex flex-wrap gap-1.5 pb-1" role="tablist" aria-label="Level"></div>
-                        <div class="flex items-baseline justify-between gap-2">
-                            <p id="texts-heading" class="text-sm text-slate-500"></p>
-                            <span id="lib-note" class="shrink-0 text-xs text-slate-400"></span>
-                        </div>
-                        <p id="list-error" class="hidden text-sm text-rose-700"></p>
-                        <div id="text-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
-                    </div>
-                </details>
 
                 <!-- New text (AI) and Your own text: a panel over the page (from the bottom on phones) -->
                 <div id="sheet" class="hidden fixed inset-0 z-[60] flex items-end sm:items-start justify-center sm:pt-20 bg-slate-900/40" role="dialog" aria-modal="true" aria-labelledby="post-title">
@@ -225,7 +227,7 @@
             };
             { const all = list.length + topicsFor(level).length, done = list.filter(t => result(t.id)).length + topicsFor(level).filter(tp => { const t = topicText(tp); return t && result(t.id); }).length;
               $('texts-heading').textContent = all ? `${all} texts for ${level} · ${done} done` : ''; }
-            $('text-grid').innerHTML = (list.length || topicsFor(level).length) ? topicsFor(level).map(topicCard).join('') + list.map(t => textCard(t, st)).join('') : '<p class="text-sm text-slate-500">No ready-made texts at this level yet. Use ✨ A new text, written for you, above.</p>';
+            $('text-grid').innerHTML = (list.length || topicsFor(level).length) ? topicsFor(level).map(topicCard).join('') + list.map(t => textCard(t, st)).join('') : '<p class="text-sm text-slate-500">No ready-made texts at this level yet. Let the AI write one: pick A theme or Topic generator.</p>';
             $('lib-note').textContent = '';   // (the shared library state is for the admin page, not for learners)
         }
         function textCard(t, st) {
@@ -372,12 +374,13 @@
 
         // ---------- New texts ----------
         // ---------- ✨ A new text, written for you ----------
-        // About: « My lessons » (your last Vocab topic and Grammar lesson) or « A theme » (or your own subject).
-        // The level is picked for each text and never stored; the About choice is.
+        // Tabs: 📖 Library (texts already in the app) · AI A theme (or your own subject) · AI Topic generator (the AI picks)
+        // · AI My lessons (your last Vocab topic and Grammar lesson). The tab is remembered; the level is picked for each text.
         const THEMES = [['🏠', 'Daily life'], ['👨‍👩‍👧', 'Family and friends'], ['🍽️', 'Food'], ['✈️', 'Travel'], ['🏡', 'Home'], ['💼', 'Work'],
             ['🎓', 'Studies'], ['🩺', 'Health and sport'], ['🎨', 'Free time'], ['🛍️', 'Shopping'], ['🤖', 'Technology'], ['🌍', 'Environment'], ['🎭', 'Culture and media'], ['🏛️', 'Society']];
         const FORMATS = ['Story', 'Message / email', 'Article', 'Advert', 'Blog post'];
-        const mk = { about: store.get('reading_about', ''), theme: store.get('reading_theme', 'Travel'), allThemes: false, level: '', format: '', vocab: null, grammar: null, busy: false };
+        const ABOUTS = ['library', 'theme', 'random', 'lessons'];
+        const mk = { about: ABOUTS.includes(store.get('reading_about', '')) ? store.get('reading_about', '') : '', theme: THEMES.some(t => t[1] === store.get('reading_theme', '')) ? store.get('reading_theme', '') : 'Travel', allThemes: false, level: '', format: '', vocab: null, grammar: null, busy: false };
         function lessonPicks() {
             const v = RecentLessons.list('vocab'), g = RecentLessons.list('grammar');
             if (!mk.vocab || !v.some(x => String(x.id) === String(mk.vocab))) mk.vocab = v[0] ? String(v[0].id) : '';
@@ -386,25 +389,28 @@
         }
         function renderMaker() {
             const L = lessonPicks(), hasLessons = !!(L.vocab || L.grammar);
-            if (!mk.about) mk.about = hasLessons ? 'lessons' : 'theme';
-            document.querySelectorAll('[data-about]').forEach(b => b.setAttribute('aria-pressed', b.dataset.about === mk.about));
+            if (!mk.about) mk.about = hasLessons ? 'lessons' : 'library';
+            document.querySelectorAll('.mk-tab').forEach(b => { const on = b.dataset.about === mk.about; b.setAttribute('aria-selected', on);
+                ['border-indigo-600', 'text-indigo-700'].forEach(c => b.classList.toggle(c, on)); ['border-transparent', 'text-slate-500', 'hover:text-slate-800'].forEach(c => b.classList.toggle(c, !on)); });
             $('mk-lessons').classList.toggle('hidden', mk.about !== 'lessons');
             $('mk-theme').classList.toggle('hidden', mk.about !== 'theme');
+            $('mk-random').classList.toggle('hidden', mk.about !== 'random');
+            $('mk-ai').classList.toggle('hidden', mk.about === 'library');
+            $('ready').classList.toggle('hidden', mk.about !== 'library');
             if (mk.about === 'lessons') {
                 const pill = (x, kind) => `<button type="button" class="mk-pill" data-pick="${kind}" data-id="${escapeHtml(String(x.id))}" aria-pressed="${String(x.id) === (kind === 'vocab' ? mk.vocab : mk.grammar)}">${kind === 'vocab' ? '📖' : '✍️'} ${escapeHtml(x.title)}</button>`;
                 $('mk-lessons').innerHTML = !hasLessons
-                    ? 'Open a <a class="font-semibold text-indigo-700 underline" href="vocab.html">Vocab topic</a> or a <a class="font-semibold text-indigo-700 underline" href="lesson.html">Grammar lesson</a> first: the text will use its words and its grammar. Or pick a theme.'
+                    ? '<p class="rounded-xl bg-indigo-50 border border-indigo-100 p-3">Open a <a class="font-semibold text-indigo-700 underline" href="vocab.html">Vocab topic</a> or a <a class="font-semibold text-indigo-700 underline" href="lesson.html">Grammar lesson</a> first: the AI will write a text with its words and its grammar.</p>'
                     : mk.changing
                         ? `<div class="space-y-2">${L.v.length ? `<div class="text-xs font-bold uppercase tracking-wide text-slate-500">Words from</div><div class="flex flex-wrap gap-2">${L.v.slice(0, 6).map(x => pill(x, 'vocab')).join('')}</div>` : ''}
                            ${L.g.length ? `<div class="text-xs font-bold uppercase tracking-wide text-slate-500">Grammar</div><div class="flex flex-wrap gap-2">${L.g.slice(0, 6).map(x => pill(x, 'grammar')).join('')}</div>` : ''}
                            <button type="button" data-mk-done class="min-h-[40px] px-3 font-bold text-indigo-700">✓ Done</button></div>`
-                        : `<div class="flex flex-wrap items-center gap-2">${L.vocab ? `<span class="mk-pill">📖 <b>${escapeHtml(L.vocab.title)}</b></span>` : ''}${L.grammar ? `<span class="mk-pill">✍️ <b>${escapeHtml(L.grammar.title)}</b></span>` : ''}
+                        : `<p class="text-slate-600">A text that uses what you studied last:</p><div class="flex flex-wrap items-center gap-2">${L.vocab ? `<span class="mk-pill">📖 <b>${escapeHtml(L.vocab.title)}</b></span>` : ''}${L.grammar ? `<span class="mk-pill">✍️ <b>${escapeHtml(L.grammar.title)}</b></span>` : ''}
                            ${L.v.length + L.g.length > 1 ? '<button type="button" data-mk-change class="min-h-[40px] px-1 font-semibold text-indigo-700 underline">Change</button>' : ''}</div>`;
             }
             if (mk.about === 'theme') {
                 const list = mk.allThemes ? THEMES : THEMES.slice(0, 6);
-                $('mk-themes').innerHTML = `<button type="button" class="mk-chip" data-theme="🎲" aria-pressed="${mk.theme === '🎲'}">🎲 Surprise me</button>`
-                    + list.map(([e, n]) => `<button type="button" class="mk-chip" data-theme="${escapeHtml(n)}" aria-pressed="${mk.theme === n && !$('mk-own').value.trim()}">${e} ${escapeHtml(n)}</button>`).join('')
+                $('mk-themes').innerHTML = list.map(([e, n]) => `<button type="button" class="mk-chip" data-theme="${escapeHtml(n)}" aria-pressed="${mk.theme === n && !$('mk-own').value.trim()}">${e} ${escapeHtml(n)}</button>`).join('')
                     + (mk.allThemes ? '' : `<button type="button" class="mk-chip text-slate-500" data-mk-more>+ ${THEMES.length - 6} more</button>`);
             }
             if (!$('mk-level').options.length) {
@@ -412,12 +418,13 @@
                 $('mk-format').innerHTML = '<option value="">Any format</option>' + FORMATS.map(f => `<option>${escapeHtml(f)}</option>`).join('');
             }
             $('mk-level').classList.toggle('on', !!mk.level);
-            const subjectLabel = mk.about === 'lessons' ? (hasLessons ? 'my lessons' : '') : ($('mk-own').value.trim() || (mk.theme === '🎲' ? 'Surprise' : mk.theme));
+            const subjectLabel = mk.about === 'lessons' ? (hasLessons ? 'my lessons' : '') : mk.about === 'random' ? 'new topic' : ($('mk-own').value.trim() || mk.theme);
             const ready = mk.level && subjectLabel;
             const go = $('mk-go');
             go.disabled = !ready || mk.busy;
             go.className = 'w-full sm:w-auto min-h-[52px] px-6 rounded-xl font-black text-base ' + (ready ? 'bg-indigo-600 hover:bg-indigo-700 text-white' : 'bg-slate-200 text-slate-500');
-            go.textContent = mk.busy ? 'Writing your text…' : !mk.level ? 'Pick a level to start' : !subjectLabel ? 'Pick a theme' : `✨ Write my text · ${mk.level} · ${subjectLabel}`;
+            go.innerHTML = mk.busy ? '✨ AI is writing your text…' : !mk.level ? 'Pick a level to start' : !subjectLabel ? (mk.about === 'lessons' ? 'Open a lesson first' : 'Pick a theme')
+                : `✨ AI, write my text · ${mk.level}<span class="hidden sm:inline"> · ${escapeHtml(subjectLabel)}</span>`;
             renderFree();
         }
         // Free AI uses: shown to students on the free plan (the count comes from the AI server)
@@ -434,7 +441,12 @@
                 subject = L.vocab ? L.vocab.title : 'everyday life';
                 focus = { words: L.vocab ? L.vocab.words || [] : [], grammar: L.grammar ? `${L.grammar.title}${L.grammar.rule ? ' (' + L.grammar.rule + ')' : ''}` : '',
                     label: [L.vocab && L.vocab.title, L.grammar && L.grammar.title].filter(Boolean).join(' · ') };
-            } else subject = $('mk-own').value.trim() || (mk.theme === '🎲' ? THEMES[Math.floor(Math.random() * THEMES.length)][1] : mk.theme);
+            } else if (mk.about === 'random') {
+                // the AI picks the topic: one of the app's themes as a broad area, the exact subject is its choice
+                const area = THEMES[Math.floor(Math.random() * THEMES.length)][1];
+                subject = area;
+                focus = { note: 'Choose the exact topic yourself, inside this area: something specific and interesting, not the obvious one.', label: '🎲 ' + area };
+            } else subject = $('mk-own').value.trim() || mk.theme;
             const kind = mk.format || 'whichever fits the subject best (story, message, article, advert, blog post…)';
             mk.busy = true; renderMaker(); $('mk-error').classList.add('hidden');
             try {
@@ -443,7 +455,7 @@
                 mk.busy = false; openText(t.id, true);
             } catch (err) {
                 mk.busy = false;
-                $('mk-error').textContent = err.code === 'signin' || /sign in/i.test(err.message) ? 'Sign in to get your free AI texts. Meanwhile, the ready-made texts below work without AI.' : err.message;
+                $('mk-error').textContent = err.code === 'signin' || /sign in/i.test(err.message) ? 'Sign in to get your free AI texts. Meanwhile, the texts in the 📖 Library work without AI.' : err.message;
                 $('mk-error').classList.remove('hidden');
             }
             renderMaker(); renderFree();
