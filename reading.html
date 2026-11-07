@@ -19,21 +19,13 @@
     <script src="js/conjugate.js"></script>
     <script src="js/texts.js"></script>
     <script src="js/library.js"></script>
+    <script src="js/ai-maker.js"></script>
     <style>
         .w { cursor: pointer; border-radius: 4px; transition: background-color .12s; }
         .w:hover { background: #e0e7ff; }
         .w.on { background: #c7d2fe; color: #1e1b4b; }
         .sent.playing { background: #fef3c7; border-radius: 4px; }
         #text-body p + p { margin-top: 1rem; }
-        .mk-chip { min-height: 44px; padding: 0 14px; border-radius: 12px; border: 1px solid #e2e8f0; background: #fff; font-weight: 700; color: #334155; }
-        .mk-chip:hover { border-color: #a5b4fc; }
-        .mk-chip.mk-big { min-height: 52px; font-size: var(--fs-base, 1rem); }
-        .mk-chip[aria-pressed="true"] { background: #4f46e5; border-color: #4f46e5; color: #fff; }
-        .mk-sel { min-height: 48px; width: 100%; padding: 0 10px; border-radius: 12px; border: 1px solid #e2e8f0; background: #fff; font-weight: 800; color: #334155; font-size: 1rem; }
-        .mk-sel.on { border-color: #4f46e5; color: #3730a3; background: #eef2ff; }
-        .mk-ai { display: inline-block; font-size: .75rem; line-height: 1; font-weight: 900; letter-spacing: .02em; padding: 3px 4px; border-radius: 6px; background: linear-gradient(90deg, #7c3aed, #4f46e5); color: #fff; vertical-align: 2px; }
-        .mk-pill { display: inline-flex; align-items: center; gap: 4px; min-height: 40px; padding: 0 12px; border-radius: 999px; border: 1px solid #c7d2fe; background: #fff; font-weight: 600; color: #334155; }
-        .mk-pill[aria-pressed="true"] { background: #4f46e5; border-color: #4f46e5; color: #fff; }
     </style>
 </head>
 <body class="h-full bg-slate-100 flex flex-col overflow-hidden font-sans text-slate-800">
@@ -50,47 +42,18 @@
                     <p class="text-sm text-slate-500 mt-1">The AI writes a text for you. Tap any word for its meaning, then answer the questions.</p>
                 </div>
 
-                <!-- ===== ✨ AI WRITES A NEW TEXT FOR YOU · and the Library ===== -->
-                <section id="maker" class="bg-white border-2 border-indigo-200 rounded-2xl shadow-sm" aria-labelledby="maker-title">
-                    <div class="px-4 sm:px-5 pt-4">
-                        <h2 id="maker-title" class="text-lg font-black text-slate-900">✨ AI writes a new text for you</h2>
-                        <p class="text-sm text-slate-500">Every text is new, made for you in seconds.</p>
+                <!-- ===== ✨ AI WRITES A NEW TEXT FOR YOU · and the Library (js/ai-maker.js) ===== -->
+                <section id="maker" aria-label="AI writes a new text for you"></section>
+                <!-- 📖 Library: texts already in the app, no AI needed -->
+                <div id="ready" class="space-y-2">
+                    <div id="levels" class="flex flex-wrap gap-1.5 pb-1" role="tablist" aria-label="Level"></div>
+                    <div class="flex items-baseline justify-between gap-2">
+                        <p id="texts-heading" class="text-sm text-slate-500"></p>
+                        <span id="lib-note" class="shrink-0 text-xs text-slate-400"></span>
                     </div>
-                    <nav class="flex gap-0 sm:gap-6 px-2 sm:px-5 mt-2 text-sm font-semibold overflow-hidden shadow-[inset_0_-1px_0_#e2e8f0]" role="tablist" aria-label="Where the text comes from">
-                        <button type="button" role="tab" data-about="library" class="mk-tab flex-1 sm:flex-none flex items-center justify-center gap-1.5 min-h-[44px] px-0.5 sm:px-0 border-b-2 border-transparent text-slate-500 hover:text-slate-800 whitespace-nowrap">📖 Library</button>
-                        <button type="button" role="tab" data-about="theme" class="mk-tab flex-1 sm:flex-none flex items-center justify-center gap-1.5 min-h-[44px] px-0.5 sm:px-0 border-b-2 border-transparent text-slate-500 hover:text-slate-800 whitespace-nowrap"><span class="mk-ai">AI</span> Topics</button>
-                        <button type="button" role="tab" data-about="lessons" class="mk-tab flex-1 sm:flex-none flex items-center justify-center gap-1.5 min-h-[44px] px-0.5 sm:px-0 border-b-2 border-transparent text-slate-500 hover:text-slate-800 whitespace-nowrap"><span class="mk-ai">AI</span> My lessons</button>
-                    </nav>
-                    <div class="p-4 sm:p-5 space-y-4">
-                        <div id="mk-lessons" class="hidden space-y-2 text-sm text-slate-700"></div>
-                        <div id="mk-theme" class="hidden space-y-2">
-                            <p class="text-sm text-slate-600">Pick a topic, or type your own:</p>
-                            <div id="mk-themes" class="flex flex-wrap gap-2" role="group" aria-label="Topic"></div>
-                            <input id="mk-own" type="text" maxlength="80" placeholder="✏️ …or type your own subject, e.g. a night train to Nice" class="w-full min-h-[44px] px-3 text-base bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                        </div>
-                        <div id="mk-ai" class="space-y-3">
-                            <div class="grid grid-cols-2 gap-2 sm:max-w-md">
-                                <select id="mk-level" class="mk-sel" aria-label="Level"></select>
-                                <select id="mk-format" class="mk-sel" aria-label="Format"></select>
-                            </div>
-                            <div class="flex flex-wrap items-center gap-3">
-                                <button id="mk-go" type="button" class="w-full sm:w-auto min-h-[52px] px-6 rounded-xl font-black text-base"></button>
-                                <span id="mk-free" class="hidden text-xs font-bold px-2.5 py-1 rounded-full bg-amber-100 text-amber-800"></span>
-                            </div>
-                            <p id="mk-error" class="hidden text-sm text-rose-700"></p>
-                        </div>
-                        <!-- 📖 Library: texts already in the app, no AI needed -->
-                        <div id="ready" class="hidden space-y-2">
-                            <div id="levels" class="flex flex-wrap gap-1.5 pb-1" role="tablist" aria-label="Level"></div>
-                            <div class="flex items-baseline justify-between gap-2">
-                                <p id="texts-heading" class="text-sm text-slate-500"></p>
-                                <span id="lib-note" class="shrink-0 text-xs text-slate-400"></span>
-                            </div>
-                            <p id="list-error" class="hidden text-sm text-rose-700"></p>
-                            <div id="text-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
-                        </div>
-                    </div>
-                </section>
+                    <p id="list-error" class="hidden text-sm text-rose-700"></p>
+                    <div id="text-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+                </div>
 
                 <!-- ===== YOUR TEXTS ===== -->
                 <section class="space-y-2">
@@ -320,7 +283,7 @@
             if (push) history.pushState({}, '', 'reading.html');
             $('text-view').classList.add('hidden');
             $('list-view').classList.remove('hidden');
-            renderList(); renderMaker(); renderMade();
+            renderList(); maker.render(); renderMade();
         }
         function renderQuestions() {
             const qs = text.questions || [];
@@ -370,97 +333,17 @@
             LIB.say(sents[i].textContent, 0.9, () => { if (playing) setTimeout(() => playFrom(i + 1), 250); });
         }
 
-        // ---------- New texts ----------
-        // ---------- ✨ A new text, written for you ----------
-        // Tabs: 📖 Library (texts already in the app) · AI Topics (🎲 Any topic, a theme, or your own subject)
-        // · AI My lessons (your last Vocab topic and Grammar lesson). The tab is remembered; the level is picked for each text.
-        const THEMES = [['🏠', 'Daily life'], ['👨‍👩‍👧', 'Family and friends'], ['🍽️', 'Food'], ['✈️', 'Travel'], ['🏡', 'Home'], ['💼', 'Work'],
-            ['🎓', 'Studies'], ['🩺', 'Health and sport'], ['🎨', 'Free time'], ['🛍️', 'Shopping'], ['🤖', 'Technology'], ['🌍', 'Environment'], ['🎭', 'Culture and media'], ['🏛️', 'Society']];
+        // ---------- ✨ AI writes a new text for you (the card is in js/ai-maker.js) ----------
         const FORMATS = ['Story', 'Message / email', 'Article', 'Advert', 'Blog post'];
-        const ABOUTS = ['library', 'theme', 'lessons'];
-        const savedAbout = store.get('reading_about', '') === 'random' ? 'theme' : store.get('reading_about', '');
-        // 🎲 Any topic is picked each time the page opens
-        const mk = { about: ABOUTS.includes(savedAbout) ? savedAbout : '', theme: '🎲', allThemes: false, level: '', format: '', vocab: null, grammar: null, busy: false };
-        function lessonPicks() {
-            const v = RecentLessons.list('vocab'), g = RecentLessons.list('grammar');
-            if (!mk.vocab || !v.some(x => String(x.id) === String(mk.vocab))) mk.vocab = v[0] ? String(v[0].id) : '';
-            if (!g.some(x => String(x.id) === String(mk.grammar))) mk.grammar = g[0] ? String(g[0].id) : '';
-            return { v, g, vocab: v.find(x => String(x.id) === mk.vocab), grammar: g.find(x => String(x.id) === mk.grammar) };
-        }
-        function renderMaker() {
-            const L = lessonPicks(), hasLessons = !!(L.vocab || L.grammar);
-            if (!mk.about) mk.about = hasLessons ? 'lessons' : 'library';
-            document.querySelectorAll('.mk-tab').forEach(b => { const on = b.dataset.about === mk.about; b.setAttribute('aria-selected', on);
-                ['border-indigo-600', 'text-indigo-700'].forEach(c => b.classList.toggle(c, on)); ['border-transparent', 'text-slate-500', 'hover:text-slate-800'].forEach(c => b.classList.toggle(c, !on)); });
-            $('mk-lessons').classList.toggle('hidden', mk.about !== 'lessons');
-            $('mk-theme').classList.toggle('hidden', mk.about !== 'theme');
-            $('mk-ai').classList.toggle('hidden', mk.about === 'library');
-            $('ready').classList.toggle('hidden', mk.about !== 'library');
-            if (mk.about === 'lessons') {
-                const pill = (x, kind) => `<button type="button" class="mk-pill" data-pick="${kind}" data-id="${escapeHtml(String(x.id))}" aria-pressed="${String(x.id) === (kind === 'vocab' ? mk.vocab : mk.grammar)}">${kind === 'vocab' ? '📖' : '✍️'} ${escapeHtml(x.title)}</button>`;
-                $('mk-lessons').innerHTML = !hasLessons
-                    ? '<p class="rounded-xl bg-indigo-50 border border-indigo-100 p-3">Open a <a class="font-semibold text-indigo-700 underline" href="vocab.html">Vocab topic</a> or a <a class="font-semibold text-indigo-700 underline" href="lesson.html">Grammar lesson</a> first: the AI will write a text with its words and its grammar.</p>'
-                    : mk.changing
-                        ? `<div class="space-y-2">${L.v.length ? `<div class="text-xs font-bold uppercase tracking-wide text-slate-500">Words from</div><div class="flex flex-wrap gap-2">${L.v.slice(0, 6).map(x => pill(x, 'vocab')).join('')}</div>` : ''}
-                           ${L.g.length ? `<div class="text-xs font-bold uppercase tracking-wide text-slate-500">Grammar</div><div class="flex flex-wrap gap-2">${L.g.slice(0, 6).map(x => pill(x, 'grammar')).join('')}</div>` : ''}
-                           <button type="button" data-mk-done class="min-h-[40px] px-3 font-bold text-indigo-700">✓ Done</button></div>`
-                        : `<p class="text-slate-600">A text that uses what you studied last:</p><div class="flex flex-wrap items-center gap-2">${L.vocab ? `<span class="mk-pill">📖 <b>${escapeHtml(L.vocab.title)}</b></span>` : ''}${L.grammar ? `<span class="mk-pill">✍️ <b>${escapeHtml(L.grammar.title)}</b></span>` : ''}
-                           ${L.v.length + L.g.length > 1 ? '<button type="button" data-mk-change class="min-h-[40px] px-1 font-semibold text-indigo-700 underline">Change</button>' : ''}</div>`;
-            }
-            if (mk.about === 'theme') {
-                const list = mk.allThemes ? THEMES : THEMES.slice(0, 6);
-                $('mk-themes').innerHTML = `<button type="button" class="mk-chip" data-theme="🎲" aria-pressed="${mk.theme === '🎲' && !$('mk-own').value.trim()}">🎲 Any topic</button>`
-                    + list.map(([e, n]) => `<button type="button" class="mk-chip" data-theme="${escapeHtml(n)}" aria-pressed="${mk.theme === n && !$('mk-own').value.trim()}">${e} ${escapeHtml(n)}</button>`).join('')
-                    + (mk.allThemes ? '' : `<button type="button" class="mk-chip text-slate-500" data-mk-more>+ ${THEMES.length - 6} more</button>`);
-            }
-            if (!$('mk-level').options.length) {
-                $('mk-level').innerHTML = '<option value="">Level…</option>' + LEVELS.map(l => `<option value="${l}" title="${LEVEL_NAME[l]}">${l}</option>`).join('');
-                $('mk-format').innerHTML = '<option value="">Any format</option>' + FORMATS.map(f => `<option>${escapeHtml(f)}</option>`).join('');
-            }
-            $('mk-level').classList.toggle('on', !!mk.level);
-            const subjectLabel = mk.about === 'lessons' ? (hasLessons ? 'my lessons' : '') : ($('mk-own').value.trim() || (mk.theme === '🎲' ? 'any topic' : mk.theme));
-            const ready = mk.level && subjectLabel;
-            const go = $('mk-go');
-            go.disabled = !ready || mk.busy;
-            go.className = 'w-full sm:w-auto min-h-[52px] px-6 rounded-xl font-black text-base ' + (ready ? 'bg-indigo-600 hover:bg-indigo-700 text-white' : 'bg-slate-200 text-slate-500');
-            go.innerHTML = mk.busy ? '✨ AI is writing your text…' : !mk.level ? 'Pick a level to start' : !subjectLabel ? (mk.about === 'lessons' ? 'Open a lesson first' : 'Pick a theme')
-                : `✨ AI, write my text · ${mk.level}<span class="hidden sm:inline"> · ${escapeHtml(subjectLabel)}</span>`;
-            renderFree();
-        }
-        // Free AI uses: shown to students on the free plan (the count comes from the AI server)
-        function renderFree() {
-            const q = LocalStore.get('ai_quota', null), el = $('mk-free');
-            if (!q || q.unlimited || q.free == null) { el.classList.add('hidden'); return; }
-            el.classList.remove('hidden');
-            el.textContent = q.used === 0 ? `🎁 ${q.free} free texts from your lessons · ${q.left} left` : `🎁 Free AI uses · ${q.left} left`;
-        }
-        async function writeText() {
-            const L = lessonPicks();
-            let subject, focus = null;
-            if (mk.about === 'lessons') {
-                subject = L.vocab ? L.vocab.title : 'everyday life';
-                focus = { words: L.vocab ? L.vocab.words || [] : [], grammar: L.grammar ? `${L.grammar.title}${L.grammar.rule ? ' (' + L.grammar.rule + ')' : ''}` : '',
-                    label: [L.vocab && L.vocab.title, L.grammar && L.grammar.title].filter(Boolean).join(' · ') };
-            } else if ($('mk-own').value.trim()) subject = $('mk-own').value.trim();
-            else {
-                // 🎲 Any topic: a random area. In every case the AI picks the exact angle, so a theme never gives the same text twice
-                const area = mk.theme === '🎲' ? THEMES[Math.floor(Math.random() * THEMES.length)][1] : mk.theme;
-                subject = area;
-                focus = { note: 'Choose the exact topic yourself, inside this area: something specific and interesting, not the obvious one.', label: (mk.theme === '🎲' ? '🎲 ' : '') + area };
-            }
-            const kind = mk.format || 'whichever fits the subject best (story, message, article, advert, blog post…)';
-            mk.busy = true; renderMaker(); $('mk-error').classList.add('hidden');
-            try {
-                const t = await LIB.generate({ subject, kind, level: mk.level, purpose: PAGE, focus });
+        const maker = AIMaker.mount($('maker'), {
+            key: 'reading', noun: 'text', title: '✨ AI writes a new text for you', sub: 'Every text is new, made for you in seconds.',
+            formats: FORMATS, anyFormat: 'whichever fits the subject best (story, message, article, advert, blog post…)', freeNoun: 'texts', library: $('ready'),
+            async write({ subject, focus, level, format }) {
+                const t = await LIB.generate({ subject, kind: format, level, purpose: PAGE, focus });
                 if (t.source === 'library') { libTexts[t.level] = [t, ...(libTexts[t.level] || []).filter(x => x.id !== t.id)]; }
-                mk.busy = false; openText(t.id, true);
-            } catch (err) {
-                mk.busy = false;
-                $('mk-error').textContent = err.code === 'signin' || /sign in/i.test(err.message) ? 'Sign in to get your free AI texts. Meanwhile, the texts in the 📖 Library work without AI.' : err.message;
-                $('mk-error').classList.remove('hidden');
+                openText(t.id, true);
             }
-            renderMaker(); renderFree();
-        }
+        });
         // Your texts: the ones the AI wrote for you, then the ones you pasted
         function renderMade() {
             const list = [...LIB.made(PAGE), ...LIB.mine().filter(t => t.source === 'mine' && t.kind === 'Your text')];
@@ -509,21 +392,6 @@
         });
         $('back').addEventListener('click', () => showList(true));
         $('open-post').addEventListener('click', () => openSheet());
-        $('maker').addEventListener('click', (e) => {
-            const ab = e.target.closest('[data-about]');
-            if (ab) { mk.about = ab.dataset.about; mk.changing = false; store.set('reading_about', mk.about); renderMaker(); return; }
-            const th = e.target.closest('[data-theme]');
-            if (th) { mk.theme = th.dataset.theme; $('mk-own').value = ''; renderMaker(); return; }
-            if (e.target.closest('[data-mk-more]')) { mk.allThemes = true; renderMaker(); return; }
-            if (e.target.closest('[data-mk-change]')) { mk.changing = true; renderMaker(); return; }
-            if (e.target.closest('[data-mk-done]')) { mk.changing = false; renderMaker(); return; }
-            const pk = e.target.closest('[data-pick]');
-            if (pk) { if (pk.dataset.pick === 'vocab') mk.vocab = pk.dataset.id; else mk.grammar = pk.dataset.id; renderMaker(); return; }
-        });
-        $('mk-own').addEventListener('input', renderMaker);
-        $('mk-level').addEventListener('change', () => { mk.level = $('mk-level').value; renderMaker(); });
-        $('mk-format').addEventListener('change', () => { mk.format = $('mk-format').value; });
-        $('mk-go').addEventListener('click', writeText);
         document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('sheet').classList.contains('hidden')) closeSheet(); });
         $('paste-btn').addEventListener('click', pasteText);
         $('btn-retry').addEventListener('click', () => { answers = {}; renderQuestions(); });
@@ -545,9 +413,7 @@
         if (startId && LIB.find(startId)) openText(startId, false);
         else if (startId) { renderList(); LIB.fetchOne(startId).then(t => { if (t) openText(t.id, false); }); }
         else { renderList(); }
-        renderMaker(); renderMade();
-        // the free AI uses left, for the badge (signed-in students on the free plan)
-        Account.session().then(ss => { if (ss) AIServer.quota().then(q => { if (q) { LocalStore.set('ai_quota', { ...q, at: Date.now() }); renderFree(); } }).catch(() => {}); });
+        renderMade();
         loadLevel(currentLevel());
         loadDbTopics();
     </script>
