@@ -45,10 +45,10 @@ const LessonKit = (function () {
         // countries and cities (27) before the articles; stressed pronouns (29) right after subject pronouns
         [1, 27, 2, 3, 4, 29, 'v1', 'v2', 5, 'v3', 'v6', 6, 7, 8, 9, 10, 11, 12, 13, 14],
         [24, 21, 19, 20, 30, 31, 'v10', 15, 18, 25, 22, 26, 16, 17, 28, 23, 'v17'],
-        [32, 33, 34, 35, 'v25', 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46],
-        [47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 'v33'],
-        ['v34', 'v35', 61, 64, 65, 67, 'v39', 68, 'v36', 'v37', 'v38', 69, 70, 'v40'],
-        [71, 'v43', 72, 73, 'v41', 74, 75, 76, 'v42', 'v44', 78]
+        [43, 44, 45, 37, 38, 36, 32, 42, 33, 34, 41, 39, 40, 35, 'v25', 46],
+        [48, 49, 60, 47, 53, 54, 50, 51, 55, 56, 58, 52, 57, 59, 'v33'],
+        ['v34', 'v35', 'v39', 67, 68, 'v36', 'v37', 'v38', 64, 65, 61, 69, 70, 'v40'],
+        ['v41', 'v42', 'v43', 71, 72, 73, 74, 75, 76, 'v44', 78]
     ];
     // C1 lessons that repeated a B2 one now live inside it, as its "Going further" part
     const MERGED_INTO = { 62: 55, 63: 51, 66: 57, 77: 69 };   // 77 (Quebec French) was removed: the app teaches France French
@@ -402,31 +402,46 @@ const LessonKit = (function () {
     // An interactive page (t.page = 'steps'): the rule in one line, See it and Practise, then Type; the long
     // explanation, the tables and the examples wait under « More detail »
     function stepsBody(section, id, t) {
-        const parts = [card('The rule', `<p class="text-lg text-slate-900 leading-relaxed">${t.line}</p>${t.words ? `<p class="text-sm text-slate-600">${t.words}</p>` : ''}`)];
-        parts.push(card('See it and practise', `<div data-explore="${t.explore}" data-page="${escapeHtml(String(id))}"></div>`));
-        if (t.drill && t.drill.length) parts.push(`<div id="lk-type">${card('Now type them', drillBlock(t.drill, `${section}:${id}`))}</div>`);
-        parts.push(`<details class="bg-white border border-slate-200 rounded-2xl p-4 group"><summary class="cursor-pointer text-sm font-bold uppercase tracking-wide text-slate-500 min-h-[28px]">More detail: the full rule, tables and examples</summary><div class="mt-3 space-y-4">${lessonParts(t, 'The rule in full').join('')}${(t.forms || []).map(f => `<h3 class="pt-2 text-lg font-black text-slate-900">${escapeHtml(f.title)}</h3>${lessonParts(f, 'How to form it').join('')}`).join('')}</div></details>`);
-        parts.push(seeAlsoHtml(id, t));
-        return parts.join('');
+        // Two tabs: the full lesson first, then the rule in short, the tools to try and the exercises
+        const lesson = `${lessonParts(t, 'The rule in full').join('')}${(t.forms || []).map(f => `<h3 class="pt-2 text-lg font-black text-slate-900">${escapeHtml(f.title)}</h3>${lessonParts(f, 'How to form it').join('')}`).join('')}`;
+        const practice = [card('The rule', `<p class="text-lg text-slate-900 leading-relaxed">${t.line}</p>${t.words ? `<p class="text-sm text-slate-600">${t.words}</p>` : ''}`),
+            card('See it and practise', `<div data-explore="${t.explore}" data-page="${escapeHtml(String(id))}"></div>`)];
+        if (t.drill && t.drill.length) practice.push(`<div id="lk-type">${card('Now type them', drillBlock(t.drill, `${section}:${id}`))}</div>`);
+        return tabsHtml(lesson, practice.join(''), seeAlsoHtml(id, t));
+    }
+    function tabsHtml(lesson, practice, after) {
+        const tab = (k, label, on) => `<button type="button" role="tab" class="lk-tab flex-1 min-h-[44px] px-4 rounded-xl font-bold ${on ? 'bg-slate-900 text-white' : 'bg-white text-slate-700 border border-slate-200'}" data-tab="${k}" aria-selected="${on}">${label}</button>`;
+        return `<div class="lk-tabs flex gap-2" role="tablist" aria-label="Lesson or practice">${tab('lesson', '📖 Leçon', true)}${tab('practice', '✏️ Exercices', false)}</div>
+            <div class="space-y-4" data-panel="lesson" role="tabpanel">${lesson}${after}</div>
+            <div class="space-y-4" data-panel="practice" role="tabpanel" hidden>${practice}</div>`;
+    }
+    // Switch the Leçon / Exercices tabs; the page goes back to the top of the tabs
+    function wireTabs(body) {
+        const tabs = body.querySelectorAll('.lk-tab');
+        tabs.forEach(b => b.addEventListener('click', () => {
+            tabs.forEach(x => { const on = x === b; x.setAttribute('aria-selected', on); x.className = x.className.replace(/bg-slate-900 text-white|bg-white text-slate-700 border border-slate-200/, on ? 'bg-slate-900 text-white' : 'bg-white text-slate-700 border border-slate-200'); });
+            body.querySelectorAll('[data-panel]').forEach(p => { p.hidden = p.dataset.panel !== b.dataset.tab; });
+            const top = body.querySelector('.lk-tabs').getBoundingClientRect().top;
+            if (top < 0) body.querySelector('.lk-tabs').scrollIntoView({ block: 'start' });
+        }));
     }
     function topicBody(section, id, t) {
         // a page written in js/grammar-pages.js: its rule line, words, drill and See-it steps replace the old ones
         const gp = window.GRAMMAR_PAGES && window.GRAMMAR_PAGES[String(id)];
         if (gp) return stepsBody(section, id, { ...t, page: 'steps', explore: 'tools', line: gp.line, words: gp.words, drill: gp.drill || t.drill });
         if (t.page === 'steps' && t.explore && EXPLORE[t.explore]) return stepsBody(section, id, t);
-        const parts = lessonParts(t, 'The rule');
-        parts.push(embeddedPractice(section, id));
-        // A lesson with something to play with before typing (t.explore: the script that draws it)
-        if (t.explore && EXPLORE[t.explore]) parts.push(card('Explore and practise', `<div data-explore="${t.explore}"></div>`));
-        if (t.drill && t.drill.length) parts.push(card(t.explore ? 'Now type them' : 'Practice', drillBlock(t.drill, `${section}:${id}`)));
-        // The verb forms that go with this lesson
+        // Leçon: the rule, tables and verb forms. Exercices: everything to do.
+        const lesson = lessonParts(t, 'The rule'), practice = [embeddedPractice(section, id)];
+        if (t.explore && EXPLORE[t.explore]) practice.push(card('Explore and practise', `<div data-explore="${t.explore}"></div>`));
+        if (t.drill && t.drill.length) practice.push(`<div id="lk-type">${card(t.explore ? 'Now type them' : 'Practice', drillBlock(t.drill, `${section}:${id}`))}</div>`);
         (t.forms || []).forEach(f => {
-            parts.push(`<h2 class="pt-4 text-xl font-black text-slate-900 flex items-center gap-2"><span class="text-xs font-bold uppercase tracking-wide text-violet-700 bg-violet-50 px-2 py-1 rounded-full">Verb forms</span>${escapeHtml(f.title)}</h2>`);
-            parts.push(...lessonParts(f, 'How to form it'));
-            if (f.drill && f.drill.length) parts.push(card('Practice the forms', drillBlock(f.drill, `${section}:${id}:${f.title}`)));
+            lesson.push(`<h2 class="pt-4 text-xl font-black text-slate-900 flex items-center gap-2"><span class="text-xs font-bold uppercase tracking-wide text-violet-700 bg-violet-50 px-2 py-1 rounded-full">Verb forms</span>${escapeHtml(f.title)}</h2>`);
+            lesson.push(...lessonParts(f, 'How to form it'));
+            if (f.drill && f.drill.length) practice.push(card(`Practice the forms: ${escapeHtml(f.title)}`, drillBlock(f.drill, `${section}:${id}:${f.title}`)));
         });
-        parts.push(seeAlsoHtml(id, t));
-        return parts.join('');
+        const doing = practice.filter(Boolean).join('');
+        if (!doing) return lesson.join('') + seeAlsoHtml(id, t);
+        return tabsHtml(lesson.join(''), doing, seeAlsoHtml(id, t));
     }
 
     // Load a lesson's own script once, when the lesson is first opened
@@ -708,6 +723,7 @@ const LessonKit = (function () {
             document.title = `${t.title} - ${sec.name}`;
             q('body').innerHTML = topicBody(section, id, t);
             markWideTables(q('body'));
+            wireTabs(q('body'));
             renderFooter();
             await loadInteractive(q('body'));
             await mountExplore(q('body'));
