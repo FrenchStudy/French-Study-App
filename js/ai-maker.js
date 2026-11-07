@@ -153,7 +153,15 @@
         try {
             if (typeof Account !== 'undefined' && typeof AIServer !== 'undefined') Account.session().then(ss => { if (ss) AIServer.quota().then(r => { if (r) { LocalStore.set('ai_quota', { ...r, at: Date.now() }); renderFree(); } }).catch(() => {}); }).catch(() => {});
         } catch (e) { /* no account: no badge */ }
-        return { render, renderFree, state: mk };
+        // Open the card from elsewhere on the page: set({ about: 'theme', own: 'a subject', level: 'B1', scroll: false })
+        function set(x) {
+            if (x.about && ABOUTS.includes(x.about)) mk.about = x.about;
+            if (x.own != null) q('own').value = x.own;
+            if (x.level && LEVELS.includes(x.level)) { mk.level = x.level; q('level').value = x.level; }
+            mk.changing = false; render();
+            if (x.scroll !== false) host.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+        return { render, renderFree, set, state: mk };
     }
     window.AIMaker = { mount, THEMES, LEVELS };
 })();
