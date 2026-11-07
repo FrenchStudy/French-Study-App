@@ -714,6 +714,12 @@ const LessonKit = (function () {
             const t = sec.get(id);
             if (!t) { showList(false); return; }
             current = id;
+            // remember it for Reading's « My lessons »: the title and the rule in one line
+            if (section === 'grammar' && typeof RecentLessons !== 'undefined') {
+                const gp = window.GRAMMAR_PAGES && window.GRAMMAR_PAGES[String(id)];
+                const tmp = document.createElement('div'); tmp.innerHTML = gp ? gp.line : (Array.isArray(t.rule) ? t.rule[0] : t.rule) || '';
+                RecentLessons.add({ k: 'grammar', id: String(id), title: t.title, level: levelOf(id), rule: tmp.textContent.trim().slice(0, 240) });
+            }
             level = levelOf(id);
             store.set(LEVEL_KEY, level);
             if (push) history.pushState({}, '', url(id));

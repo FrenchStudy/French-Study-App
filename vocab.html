@@ -619,6 +619,9 @@
             }
             if (token !== loadSeq) return;   // another topic was opened meanwhile
             deck = next;
+            // the topic's words, for Reading's « My lessons »
+            if (type === 'theme' && topic && topic.n && next.words.length && typeof RecentLessons !== 'undefined')
+                RecentLessons.add({ k: 'vocab', id: topic.id, n: topic.n, title: topic.title, level: topic.level || '', words: next.words.map(w => w.fr).filter(Boolean).slice(0, 24) });
             $('loading').classList.add('hidden');
             reviewAll = false;
             renderAll();
@@ -1596,6 +1599,12 @@
             topic = tp;
             if (tp.level) store.set('vocab_level', tp.level);
             if (tp.id !== 'review') store.set('vocab_last_topic', tp.id);
+            // remember it for Reading's « My lessons »: the topic and some of its words
+            if (tp.n && typeof RecentLessons !== 'undefined') {
+                const b = CS && CS.blocks && CS.blocks[tp.n];
+                const words = b ? b.sections.flatMap(sc => sc.items.map(it => it[0])).filter(Boolean).slice(0, 24) : [];
+                RecentLessons.add({ k: 'vocab', id: tp.id, n: tp.n, title: tp.title, level: tp.level || '', words });
+            }
             if (push) history.pushState({}, '', topicUrl(tp.id, s));
             renderTopicNav();
             $('topics-view').classList.add('hidden');

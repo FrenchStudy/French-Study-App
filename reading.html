@@ -25,6 +25,14 @@
         .w.on { background: #c7d2fe; color: #1e1b4b; }
         .sent.playing { background: #fef3c7; border-radius: 4px; }
         #text-body p + p { margin-top: 1rem; }
+        .mk-chip { min-height: 44px; padding: 0 14px; border-radius: 12px; border: 1px solid #e2e8f0; background: #fff; font-weight: 700; color: #334155; }
+        .mk-chip:hover { border-color: #a5b4fc; }
+        .mk-chip.mk-big { min-height: 52px; font-size: var(--fs-base, 1rem); }
+        .mk-chip[aria-pressed="true"] { background: #4f46e5; border-color: #4f46e5; color: #fff; }
+        .mk-sel { min-height: 48px; width: 100%; padding: 0 10px; border-radius: 12px; border: 1px solid #e2e8f0; background: #fff; font-weight: 800; color: #334155; font-size: 1rem; }
+        .mk-sel.on { border-color: #4f46e5; color: #3730a3; background: #eef2ff; }
+        .mk-pill { display: inline-flex; align-items: center; gap: 4px; min-height: 40px; padding: 0 12px; border-radius: 999px; border: 1px solid #c7d2fe; background: #fff; font-weight: 600; color: #334155; }
+        .mk-pill[aria-pressed="true"] { background: #4f46e5; border-color: #4f46e5; color: #fff; }
     </style>
 </head>
 <body class="h-full bg-slate-100 flex flex-col overflow-hidden font-sans text-slate-800">
@@ -35,49 +43,69 @@
         <div class="max-w-6xl mx-auto px-4 py-5 space-y-4">
 
             <!-- ===== ALL TEXTS ===== -->
-            <div id="list-view" class="space-y-4">
+            <div id="list-view" class="space-y-5">
                 <div>
                     <h1 class="text-2xl font-black text-slate-900">Reading</h1>
-                    <p class="text-sm text-slate-500 mt-1">Read a text at your level, tap any word for its meaning, then answer the questions.</p>
+                    <p class="text-sm text-slate-500 mt-1">The AI writes a text for you. Tap any word for its meaning, then answer the questions.</p>
                 </div>
-                <div class="flex flex-wrap gap-1.5 sm:gap-2">
-                    <button id="open-ai" type="button" class="min-h-[44px] px-3 sm:px-4 text-sm sm:text-base bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl">✨ New text</button>
-                    <button id="open-post" type="button" class="min-h-[44px] px-3 sm:px-4 text-sm sm:text-base bg-white border border-slate-200 hover:border-indigo-300 disabled:opacity-50 font-bold rounded-xl">📋 Paste<span class="hidden sm:inline"> your own</span></button>
-                    <button id="random-btn" type="button" class="min-h-[44px] px-3 sm:px-4 text-sm sm:text-base bg-white border border-slate-200 hover:border-indigo-300 disabled:opacity-50 font-bold rounded-xl">🎲 Random</button>
-                </div>
-                <p id="list-error" class="hidden text-sm text-rose-700"></p>
 
-                <section class="space-y-2 pt-1">
-                    <h2 class="text-lg font-black text-slate-900">Choose a text</h2>
-                    <div id="levels" class="flex flex-wrap gap-1.5 pb-1" role="tablist" aria-label="Level"></div>
-                    <div class="flex items-baseline justify-between gap-2">
-                        <p id="texts-heading" class="text-sm text-slate-500"></p>
-                        <span id="lib-note" class="shrink-0 text-xs text-slate-400"></span>
+                <!-- ===== A NEW TEXT, WRITTEN FOR YOU ===== -->
+                <section id="maker" class="bg-white border-2 border-indigo-200 rounded-2xl p-4 sm:p-5 space-y-4 shadow-sm" aria-labelledby="maker-title">
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                        <h2 id="maker-title" class="text-lg font-black text-slate-900">✨ A new text, written for you</h2>
+                        <span id="mk-free" class="hidden text-xs font-bold px-2.5 py-1 rounded-full bg-amber-100 text-amber-800"></span>
                     </div>
-                    <div id="text-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+                    <div class="space-y-2">
+                        <div class="text-sm font-bold text-slate-700">1 · About</div>
+                        <div class="grid grid-cols-2 gap-2 sm:max-w-md" role="group" aria-label="About">
+                            <button type="button" data-about="lessons" class="mk-chip mk-big">📚 My lessons</button>
+                            <button type="button" data-about="theme" class="mk-chip mk-big">🗂️ A theme</button>
+                        </div>
+                        <div id="mk-lessons" class="hidden rounded-xl bg-indigo-50 border border-indigo-100 p-3 text-sm text-slate-700"></div>
+                        <div id="mk-theme" class="hidden space-y-2">
+                            <div id="mk-themes" class="flex flex-wrap gap-2" role="group" aria-label="Theme"></div>
+                            <input id="mk-own" type="text" maxlength="80" placeholder="✏️ …or type your own subject, e.g. a night train to Nice" class="w-full min-h-[44px] px-3 text-base bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                    </div>
+                    <div class="space-y-2">
+                        <div class="text-sm font-bold text-slate-700">2 · Level and format</div>
+                        <div class="grid grid-cols-2 gap-2 sm:max-w-md">
+                            <select id="mk-level" class="mk-sel" aria-label="Level"></select>
+                            <select id="mk-format" class="mk-sel" aria-label="Format"></select>
+                        </div>
+                    </div>
+                    <button id="mk-go" type="button" class="w-full sm:w-auto min-h-[52px] px-6 rounded-xl font-black text-base"></button>
+                    <p id="mk-error" class="hidden text-sm text-rose-700"></p>
                 </section>
 
-                <!-- New text (AI) and Your own text: a panel over the page (from the bottom on phones) -->
-                <div id="sheet" class="hidden fixed inset-0 z-[60] flex items-end sm:items-start justify-center sm:pt-20 bg-slate-900/40" role="dialog" aria-modal="true" aria-labelledby="sheet-title">
-                    <div class="w-full sm:max-w-lg bg-white rounded-t-2xl sm:rounded-2xl p-5 space-y-3 max-h-[90vh] overflow-y-auto shadow-xl">
-                        <div id="sheet-ai" class="space-y-3">
-                            <h2 id="sheet-title" class="text-lg font-black text-slate-900">✨ New text</h2>
-                            <p class="text-sm text-slate-500">The AI writes a new text with questions. It is shared with other students at the same level.</p>
-                            <label class="block"><span class="block text-sm font-semibold text-slate-700 mb-1">Level</span>
-                                <select id="ai-level" class="w-full text-base px-3 py-2.5 bg-white border border-slate-200 rounded-xl"></select></label>
-                            <label class="block"><span class="block text-sm font-semibold text-slate-700 mb-1">Subject</span>
-                                <select id="ai-subject" class="w-full text-base px-3 py-2.5 bg-white border border-slate-200 rounded-xl"></select></label>
-                            <input id="subject-other" type="text" maxlength="80" placeholder="…or type any subject" class="w-full text-base px-3 py-2.5 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                            <label class="block"><span class="block text-sm font-semibold text-slate-700 mb-1">Type of text</span>
-                                <select id="ai-kind" class="w-full text-base px-3 py-2.5 bg-white border border-slate-200 rounded-xl"></select></label>
-                            <div class="flex flex-wrap gap-2 pt-1">
-                                <button id="gen-btn" type="button" class="min-h-[48px] px-5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-bold rounded-xl">Write me a text</button>
-                                <button type="button" data-sheet-close class="min-h-[48px] px-4 bg-white border border-slate-200 font-semibold rounded-xl">Cancel</button>
-                            </div>
-                            <p id="gen-error" class="hidden text-sm text-rose-700"></p>
+                <!-- ===== YOUR TEXTS ===== -->
+                <section class="space-y-2">
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                        <h2 class="text-lg font-black text-slate-900">Your texts</h2>
+                        <button id="open-post" type="button" class="min-h-[40px] px-3 text-sm bg-white border border-slate-200 hover:border-indigo-300 font-bold rounded-xl">📋 Paste your own text</button>
+                    </div>
+                    <div id="made-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+                </section>
+
+                <!-- ===== READY-MADE TEXTS (no AI) ===== -->
+                <details id="ready" class="bg-white border border-slate-200 rounded-2xl p-4 group">
+                    <summary class="cursor-pointer font-bold text-slate-700 min-h-[28px]">📚 Ready-made texts <span id="ready-note" class="font-normal text-slate-400">· A1 to C2 · no AI needed</span></summary>
+                    <div class="pt-3 space-y-2">
+                        <div id="levels" class="flex flex-wrap gap-1.5 pb-1" role="tablist" aria-label="Level"></div>
+                        <div class="flex items-baseline justify-between gap-2">
+                            <p id="texts-heading" class="text-sm text-slate-500"></p>
+                            <span id="lib-note" class="shrink-0 text-xs text-slate-400"></span>
                         </div>
-                        <div id="sheet-post" class="hidden space-y-3">
-                            <h2 class="text-lg font-black text-slate-900">📋 Your own text</h2>
+                        <p id="list-error" class="hidden text-sm text-rose-700"></p>
+                        <div id="text-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+                    </div>
+                </details>
+
+                <!-- New text (AI) and Your own text: a panel over the page (from the bottom on phones) -->
+                <div id="sheet" class="hidden fixed inset-0 z-[60] flex items-end sm:items-start justify-center sm:pt-20 bg-slate-900/40" role="dialog" aria-modal="true" aria-labelledby="post-title">
+                    <div class="w-full sm:max-w-lg bg-white rounded-t-2xl sm:rounded-2xl p-5 space-y-3 max-h-[90vh] overflow-y-auto shadow-xl">
+                        <div id="sheet-post" class="space-y-3">
+                            <h2 id="post-title" class="text-lg font-black text-slate-900">📋 Your own text</h2>
                             <p class="text-sm text-slate-500">Paste a French text from a book, a website or your teacher. It stays on this device.</p>
                             <textarea id="paste-text" rows="6" maxlength="6000" lang="fr" placeholder="Paste a French text here…" class="w-full text-base p-3 bg-white border border-slate-200 rounded-xl resize-y focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
                             <div class="flex flex-wrap gap-2">
@@ -142,14 +170,13 @@
             'Free time', 'Shopping', 'Technology', 'Environment', 'Culture and media', 'Society'];
         const KINDS = ['Article', 'Story', 'Dialogue', 'Email or message', 'Blog', 'Advert or notice'];
         const PAGE = 'reading';
-        let pick = store.get('reading_pick', { subject: 'Daily life', kind: 'Article' });
         let dbTopics = [];          // your reading_topics: shown at their own level, at the bottom
         let libTexts = {};          // level -> texts from the shared library
         let text = null;            // the open text
         let answers = {};           // question index -> chosen option (shuffled index)
 
         // The list filter: a level, or 'mine' (your own texts, all levels)
-        const filterOn = () => store.get('reading_level', null) === 'mine' ? 'mine' : currentLevel();
+        const filterOn = () => currentLevel();   // (your own texts are in « Your texts » now)
         function currentLevel() {
             const saved = store.get('reading_level', null);
             if (LEVELS.includes(saved)) return saved;
@@ -162,7 +189,7 @@
         const topicText = (tp) => [...(libTexts[tp.level] || []), ...LIB.mine()].find(t => t.level === tp.level && sameTopic(t, tp));
         const textsFor = (lv) => {
             const seen = new Set();
-            return [...LIB.mine().filter(t => t.level === lv), ...(libTexts[lv] || []), ...LIB.BUILT_IN.filter(t => t.level === lv && t.skill === 'reading')]
+            return [...(libTexts[lv] || []), ...LIB.BUILT_IN.filter(t => t.level === lv && t.skill === 'reading')]
                 .filter(t => !seen.has(t.id) && seen.add(t.id))
                 .filter(t => !topicsFor(lv).some(tp => sameTopic(t, tp)));   // shown on its topic's card instead
         };
@@ -179,7 +206,7 @@
                 const n = list.filter(t => result(t.id)).length + tps.filter(tp => { const t = topicText(tp); return t && result(t.id); }).length;
                 const on = lv === f;
                 return `<button type="button" role="tab" aria-selected="${on}" data-level="${lv}" class="${chip(on)}">${lv} <span class="text-xs font-medium ${on ? 'text-indigo-100' : 'text-slate-400'}">${n}/${list.length + tps.length}</span></button>`;
-            }).join('') + (mineN || f === 'mine' ? `<button type="button" role="tab" aria-selected="${f === 'mine'}" data-level="mine" class="${chip(f === 'mine')}">Mine <span class="text-xs font-medium ${f === 'mine' ? 'text-indigo-100' : 'text-slate-400'}">${mineN}</span></button>` : '');
+            }).join('') + '';
             if (f === 'mine') { renderMine(); return; }
             const st = LEVEL_STYLE[level];
             const list = textsFor(level);
@@ -198,7 +225,7 @@
             };
             { const all = list.length + topicsFor(level).length, done = list.filter(t => result(t.id)).length + topicsFor(level).filter(tp => { const t = topicText(tp); return t && result(t.id); }).length;
               $('texts-heading').textContent = all ? `${all} texts for ${level} · ${done} done` : ''; }
-            $('text-grid').innerHTML = (list.length || topicsFor(level).length) ? topicsFor(level).map(topicCard).join('') + list.map(t => textCard(t, st)).join('') : '<p class="text-sm text-slate-500">No texts yet at this level. Tap ✨ New text above.</p>';
+            $('text-grid').innerHTML = (list.length || topicsFor(level).length) ? topicsFor(level).map(topicCard).join('') + list.map(t => textCard(t, st)).join('') : '<p class="text-sm text-slate-500">No ready-made texts at this level yet. Use ✨ A new text, written for you, above.</p>';
             $('lib-note').textContent = '';   // (the shared library state is for the admin page, not for learners)
         }
         function textCard(t, st) {
@@ -222,40 +249,12 @@
                 : '<p class="text-sm text-slate-500">Nothing here yet. Tap 📋 Paste to add a French text of your own.</p>';
             $('lib-note').textContent = '';
         }
-        // 🎲 Random: one you have not done yet at this level (or in Mine)
-        function randomText() {
-            $('list-error').classList.add('hidden');
-            const f = filterOn();
-            if (f === 'mine') {
-                const list = LIB.mine(), todo = list.filter(t => !result(t.id));
-                const pool = todo.length ? todo : list;
-                if (!pool.length) { openSheet('post'); return; }
-                openText(pool[Math.floor(Math.random() * pool.length)].id, true); return;
-            }
-            const list = textsFor(f), todo = list.filter(t => !result(t.id));
-            const newTopics = topicsFor(f).filter(tp => !topicText(tp));
-            const doneTopics = topicsFor(f).map(topicText).filter(t => t && !result(t.id));
-            const pool = [...todo, ...doneTopics];
-            if (pool.length) { openText(pool[Math.floor(Math.random() * pool.length)].id, true); return; }
-            if (newTopics.length) { const tp = newTopics[Math.floor(Math.random() * newTopics.length)]; openTopic(tp.id, document.querySelector(`[data-topic="${tp.id}"]`)); return; }
-            if (list.length) { openText(list[Math.floor(Math.random() * list.length)].id, true); return; }
-            openSheet('ai');
-        }
-
         // ---------- The panel: New text (AI) and Your own text ----------
         const LEVEL_NAME = { A1: 'Beginner', A2: 'Elementary', B1: 'Intermediate', B2: 'Upper intermediate', C1: 'Advanced', C2: 'Mastery' };
-        function openSheet(which) {
+        function openSheet() {
             $('sheet').classList.remove('hidden');
-            $('sheet-ai').classList.toggle('hidden', which !== 'ai');
-            $('sheet-post').classList.toggle('hidden', which !== 'post');
-            $('gen-error').classList.add('hidden'); $('paste-error').classList.add('hidden');
-            if (which === 'ai') {
-                const lv = currentLevel();
-                $('ai-level').innerHTML = LEVELS.map(l => `<option value="${l}" ${l === lv ? 'selected' : ''}>${l} · ${LEVEL_NAME[l]}</option>`).join('');
-                $('ai-subject').innerHTML = SUBJECTS.map(x => `<option ${x === pick.subject ? 'selected' : ''}>${escapeHtml(x)}</option>`).join('');
-                $('ai-kind').innerHTML = KINDS.map(x => `<option ${x === pick.kind ? 'selected' : ''}>${escapeHtml(x)}</option>`).join('');
-                setTimeout(() => $('gen-btn').focus(), 0);
-            } else setTimeout(() => $('paste-text').focus(), 0);
+            $('paste-error').classList.add('hidden');
+            setTimeout(() => $('paste-text').focus(), 0);
         }
         const closeSheet = () => $('sheet').classList.add('hidden');
         async function loadLevel(lv) {
@@ -321,7 +320,7 @@
             if (push) history.pushState({}, '', 'reading.html');
             $('text-view').classList.add('hidden');
             $('list-view').classList.remove('hidden');
-            renderList();
+            renderList(); renderMaker(); renderMade();
         }
         function renderQuestions() {
             const qs = text.questions || [];
@@ -372,19 +371,98 @@
         }
 
         // ---------- New texts ----------
-        async function generateText() {
-            const subject = $('subject-other').value.trim() || $('ai-subject').value || pick.subject;
-            $('gen-error').classList.add('hidden');
-            $('gen-btn').disabled = true; $('gen-btn').textContent = 'Writing…';
-            try {
-                const t = await LIB.generate({ subject, kind: $('ai-kind').value || pick.kind, level: $('ai-level').value, purpose: PAGE });
-                $('subject-other').value = ''; closeSheet(); store.set('reading_level', t.level);
-                if (t.source === 'library') { libTexts[t.level] = [t, ...(libTexts[t.level] || []).filter(x => x.id !== t.id)]; }
-                openText(t.id, true);
-            } catch (err) {
-                $('gen-error').textContent = err.message; $('gen-error').classList.remove('hidden');
+        // ---------- ✨ A new text, written for you ----------
+        // About: « My lessons » (your last Vocab topic and Grammar lesson) or « A theme » (or your own subject).
+        // The level is picked for each text and never stored; the About choice is.
+        const THEMES = [['🏠', 'Daily life'], ['👨‍👩‍👧', 'Family and friends'], ['🍽️', 'Food'], ['✈️', 'Travel'], ['🏡', 'Home'], ['💼', 'Work'],
+            ['🎓', 'Studies'], ['🩺', 'Health and sport'], ['🎨', 'Free time'], ['🛍️', 'Shopping'], ['🤖', 'Technology'], ['🌍', 'Environment'], ['🎭', 'Culture and media'], ['🏛️', 'Society']];
+        const FORMATS = ['Story', 'Message / email', 'Article', 'Advert', 'Blog post'];
+        const mk = { about: store.get('reading_about', ''), theme: store.get('reading_theme', 'Travel'), allThemes: false, level: '', format: '', vocab: null, grammar: null, busy: false };
+        function lessonPicks() {
+            const v = RecentLessons.list('vocab'), g = RecentLessons.list('grammar');
+            if (!mk.vocab || !v.some(x => String(x.id) === String(mk.vocab))) mk.vocab = v[0] ? String(v[0].id) : '';
+            if (!g.some(x => String(x.id) === String(mk.grammar))) mk.grammar = g[0] ? String(g[0].id) : '';
+            return { v, g, vocab: v.find(x => String(x.id) === mk.vocab), grammar: g.find(x => String(x.id) === mk.grammar) };
+        }
+        function renderMaker() {
+            const L = lessonPicks(), hasLessons = !!(L.vocab || L.grammar);
+            if (!mk.about) mk.about = hasLessons ? 'lessons' : 'theme';
+            document.querySelectorAll('[data-about]').forEach(b => b.setAttribute('aria-pressed', b.dataset.about === mk.about));
+            $('mk-lessons').classList.toggle('hidden', mk.about !== 'lessons');
+            $('mk-theme').classList.toggle('hidden', mk.about !== 'theme');
+            if (mk.about === 'lessons') {
+                const pill = (x, kind) => `<button type="button" class="mk-pill" data-pick="${kind}" data-id="${escapeHtml(String(x.id))}" aria-pressed="${String(x.id) === (kind === 'vocab' ? mk.vocab : mk.grammar)}">${kind === 'vocab' ? '📖' : '✍️'} ${escapeHtml(x.title)}</button>`;
+                $('mk-lessons').innerHTML = !hasLessons
+                    ? 'Open a <a class="font-semibold text-indigo-700 underline" href="vocab.html">Vocab topic</a> or a <a class="font-semibold text-indigo-700 underline" href="lesson.html">Grammar lesson</a> first: the text will use its words and its grammar. Or pick a theme.'
+                    : mk.changing
+                        ? `<div class="space-y-2">${L.v.length ? `<div class="text-xs font-bold uppercase tracking-wide text-slate-500">Words from</div><div class="flex flex-wrap gap-2">${L.v.slice(0, 6).map(x => pill(x, 'vocab')).join('')}</div>` : ''}
+                           ${L.g.length ? `<div class="text-xs font-bold uppercase tracking-wide text-slate-500">Grammar</div><div class="flex flex-wrap gap-2">${L.g.slice(0, 6).map(x => pill(x, 'grammar')).join('')}</div>` : ''}
+                           <button type="button" data-mk-done class="min-h-[40px] px-3 font-bold text-indigo-700">✓ Done</button></div>`
+                        : `<div class="flex flex-wrap items-center gap-2">${L.vocab ? `<span class="mk-pill">📖 <b>${escapeHtml(L.vocab.title)}</b></span>` : ''}${L.grammar ? `<span class="mk-pill">✍️ <b>${escapeHtml(L.grammar.title)}</b></span>` : ''}
+                           ${L.v.length + L.g.length > 1 ? '<button type="button" data-mk-change class="min-h-[40px] px-1 font-semibold text-indigo-700 underline">Change</button>' : ''}</div>`;
             }
-            $('gen-btn').disabled = false; $('gen-btn').textContent = 'Write me a text';
+            if (mk.about === 'theme') {
+                const list = mk.allThemes ? THEMES : THEMES.slice(0, 6);
+                $('mk-themes').innerHTML = `<button type="button" class="mk-chip" data-theme="🎲" aria-pressed="${mk.theme === '🎲'}">🎲 Surprise me</button>`
+                    + list.map(([e, n]) => `<button type="button" class="mk-chip" data-theme="${escapeHtml(n)}" aria-pressed="${mk.theme === n && !$('mk-own').value.trim()}">${e} ${escapeHtml(n)}</button>`).join('')
+                    + (mk.allThemes ? '' : `<button type="button" class="mk-chip text-slate-500" data-mk-more>+ ${THEMES.length - 6} more</button>`);
+            }
+            if (!$('mk-level').options.length) {
+                $('mk-level').innerHTML = '<option value="">Level…</option>' + LEVELS.map(l => `<option value="${l}" title="${LEVEL_NAME[l]}">${l}</option>`).join('');
+                $('mk-format').innerHTML = '<option value="">Any format</option>' + FORMATS.map(f => `<option>${escapeHtml(f)}</option>`).join('');
+            }
+            $('mk-level').classList.toggle('on', !!mk.level);
+            const subjectLabel = mk.about === 'lessons' ? (hasLessons ? 'my lessons' : '') : ($('mk-own').value.trim() || (mk.theme === '🎲' ? 'Surprise' : mk.theme));
+            const ready = mk.level && subjectLabel;
+            const go = $('mk-go');
+            go.disabled = !ready || mk.busy;
+            go.className = 'w-full sm:w-auto min-h-[52px] px-6 rounded-xl font-black text-base ' + (ready ? 'bg-indigo-600 hover:bg-indigo-700 text-white' : 'bg-slate-200 text-slate-500');
+            go.textContent = mk.busy ? 'Writing your text…' : !mk.level ? 'Pick a level to start' : !subjectLabel ? 'Pick a theme' : `✨ Write my text · ${mk.level} · ${subjectLabel}`;
+            renderFree();
+        }
+        // Free AI uses: shown to students on the free plan (the count comes from the AI server)
+        function renderFree() {
+            const q = LocalStore.get('ai_quota', null), el = $('mk-free');
+            if (!q || q.unlimited || q.free == null) { el.classList.add('hidden'); return; }
+            el.classList.remove('hidden');
+            el.textContent = q.used === 0 ? `🎁 ${q.free} free texts from your lessons · ${q.left} left` : `🎁 Free AI uses · ${q.left} left`;
+        }
+        async function writeText() {
+            const L = lessonPicks();
+            let subject, focus = null;
+            if (mk.about === 'lessons') {
+                subject = L.vocab ? L.vocab.title : 'everyday life';
+                focus = { words: L.vocab ? L.vocab.words || [] : [], grammar: L.grammar ? `${L.grammar.title}${L.grammar.rule ? ' (' + L.grammar.rule + ')' : ''}` : '',
+                    label: [L.vocab && L.vocab.title, L.grammar && L.grammar.title].filter(Boolean).join(' · ') };
+            } else subject = $('mk-own').value.trim() || (mk.theme === '🎲' ? THEMES[Math.floor(Math.random() * THEMES.length)][1] : mk.theme);
+            const kind = mk.format || 'whichever fits the subject best (story, message, article, advert, blog post…)';
+            mk.busy = true; renderMaker(); $('mk-error').classList.add('hidden');
+            try {
+                const t = await LIB.generate({ subject, kind, level: mk.level, purpose: PAGE, focus });
+                if (t.source === 'library') { libTexts[t.level] = [t, ...(libTexts[t.level] || []).filter(x => x.id !== t.id)]; }
+                mk.busy = false; openText(t.id, true);
+            } catch (err) {
+                mk.busy = false;
+                $('mk-error').textContent = err.code === 'signin' || /sign in/i.test(err.message) ? 'Sign in to get your free AI texts. Meanwhile, the ready-made texts below work without AI.' : err.message;
+                $('mk-error').classList.remove('hidden');
+            }
+            renderMaker(); renderFree();
+        }
+        // Your texts: the ones the AI wrote for you, then the ones you pasted
+        function renderMade() {
+            const list = [...LIB.made(PAGE), ...LIB.mine().filter(t => t.source === 'mine' && t.kind === 'Your text')];
+            $('made-grid').innerHTML = list.length ? list.slice(0, 12).map(t => madeCard(t)).join('')
+                : '<p class="text-sm text-slate-500">The texts the AI writes for you appear here, so you can read them again.</p>';
+        }
+        function madeCard(t) {
+            const r = result(t.id), st = LEVEL_STYLE[t.level] || ['text-slate-600', 'bg-slate-100'], words = wordCount(t.fr);
+            const tag = t.kind === 'Your text' ? '📋 Yours' : `✨ AI · ${t.level}`;
+            return `<a href="reading.html?text=${encodeURIComponent(t.id)}" data-text="${escapeHtml(t.id)}" class="group flex flex-col gap-1.5 bg-white border border-slate-200 hover:border-indigo-400 hover:shadow-md transition rounded-2xl p-4">
+                <span class="flex items-center justify-between gap-2"><span class="text-xs font-bold px-2 py-0.5 rounded-full ${st[0]} ${st[1]}">${escapeHtml(tag)}</span>${r ? `<span class="shrink-0 text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">✓ ${r.score}/${r.total}</span>` : ''}</span>
+                <span class="font-bold text-slate-900 group-hover:text-indigo-700 leading-snug">${escapeHtml(t.title)}</span>
+                <span class="text-xs text-slate-500">${escapeHtml((t.kind === 'Your text' ? [t.level, words + ' words'] : [t.about || t.subject, t.kind, words + ' words']).filter(Boolean).join(' · '))}</span>
+                <span class="text-sm text-slate-500 line-clamp-1">${escapeHtml(t.fr.slice(0, 140))}…</span>
+            </a>`;
         }
         async function pasteText() {
             const fr = $('paste-text').value.trim();
@@ -392,7 +470,7 @@
             if (fr.length < 40) { $('paste-error').textContent = 'Paste a longer text (at least a few sentences).'; $('paste-error').classList.remove('hidden'); return; }
             $('paste-btn').disabled = true; $('paste-btn').textContent = 'Preparing questions…';
             const t = await LIB.fromPasted(fr, currentLevel());
-            $('paste-text').value = ''; closeSheet(); store.set('reading_level', 'mine');
+            $('paste-text').value = ''; closeSheet();
             $('paste-btn').disabled = false; $('paste-btn').textContent = 'Read my text';
             openText(t.id, true);
         }
@@ -417,12 +495,22 @@
             if (w && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); LIB.openWord(w, text.id); }
         });
         $('back').addEventListener('click', () => showList(true));
-        $('gen-btn').addEventListener('click', generateText);
-        $('open-ai').addEventListener('click', () => openSheet('ai'));
-        $('open-post').addEventListener('click', () => openSheet('post'));
-        $('random-btn').addEventListener('click', randomText);
-        $('ai-subject').addEventListener('change', () => { pick.subject = $('ai-subject').value; $('subject-other').value = ''; store.set('reading_pick', pick); });
-        $('ai-kind').addEventListener('change', () => { pick.kind = $('ai-kind').value; store.set('reading_pick', pick); });
+        $('open-post').addEventListener('click', () => openSheet());
+        $('maker').addEventListener('click', (e) => {
+            const ab = e.target.closest('[data-about]');
+            if (ab) { mk.about = ab.dataset.about; mk.changing = false; store.set('reading_about', mk.about); renderMaker(); return; }
+            const th = e.target.closest('[data-theme]');
+            if (th) { mk.theme = th.dataset.theme; $('mk-own').value = ''; store.set('reading_theme', mk.theme); renderMaker(); return; }
+            if (e.target.closest('[data-mk-more]')) { mk.allThemes = true; renderMaker(); return; }
+            if (e.target.closest('[data-mk-change]')) { mk.changing = true; renderMaker(); return; }
+            if (e.target.closest('[data-mk-done]')) { mk.changing = false; renderMaker(); return; }
+            const pk = e.target.closest('[data-pick]');
+            if (pk) { if (pk.dataset.pick === 'vocab') mk.vocab = pk.dataset.id; else mk.grammar = pk.dataset.id; renderMaker(); return; }
+        });
+        $('mk-own').addEventListener('input', renderMaker);
+        $('mk-level').addEventListener('change', () => { mk.level = $('mk-level').value; renderMaker(); });
+        $('mk-format').addEventListener('change', () => { mk.format = $('mk-format').value; });
+        $('mk-go').addEventListener('click', writeText);
         document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('sheet').classList.contains('hidden')) closeSheet(); });
         $('paste-btn').addEventListener('click', pasteText);
         $('btn-retry').addEventListener('click', () => { answers = {}; renderQuestions(); });
@@ -443,7 +531,10 @@
         const startId = new URLSearchParams(location.search).get('text');
         if (startId && LIB.find(startId)) openText(startId, false);
         else if (startId) { renderList(); LIB.fetchOne(startId).then(t => { if (t) openText(t.id, false); }); }
-        else renderList();
+        else { renderList(); }
+        renderMaker(); renderMade();
+        // the free AI uses left, for the badge (signed-in students on the free plan)
+        Account.session().then(ss => { if (ss) AIServer.quota().then(q => { if (q) { LocalStore.set('ai_quota', { ...q, at: Date.now() }); renderFree(); } }).catch(() => {}); });
         loadLevel(currentLevel());
         loadDbTopics();
     </script>
