@@ -410,8 +410,9 @@ const LessonKit = (function () {
         return tabsHtml(lesson, practice.join(''), seeAlsoHtml(id, t));
     }
     function tabsHtml(lesson, practice, after) {
-        const tab = (k, label, on) => `<button type="button" role="tab" class="lk-tab flex-1 min-h-[44px] px-4 rounded-xl font-bold ${on ? 'bg-slate-900 text-white' : 'bg-white text-slate-700 border border-slate-200'}" data-tab="${k}" aria-selected="${on}">${label}</button>`;
-        return `<div class="lk-tabs flex gap-2" role="tablist" aria-label="Lesson or practice">${tab('lesson', '📖 Leçon', true)}${tab('practice', '✏️ Exercices', false)}</div>
+        // the same tabs as a Vocab topic: numbered, blue text and a blue line under the one you're on
+        const tab = (k, n, label, on) => `<button type="button" role="tab" class="lk-tab flex-1 sm:flex-none text-center shrink-0 min-h-[44px] px-1.5 sm:px-0 border-b-2 ${on ? 'border-indigo-600 text-indigo-700' : 'border-transparent text-slate-500 hover:text-slate-800'}" data-tab="${k}" aria-selected="${on}"><span class="hidden sm:inline">${n}</span> ${label}</button>`;
+        return `<nav class="lk-tabs flex gap-0 sm:gap-6 text-sm font-semibold overflow-x-auto overflow-y-hidden shadow-[inset_0_-1px_0_#e2e8f0]" role="tablist" aria-label="Lesson or practice">${tab('lesson', 1, 'Leçon', true)}${tab('practice', 2, 'Exercices', false)}</nav>
             <div class="space-y-4" data-panel="lesson" role="tabpanel">${lesson}${after}</div>
             <div class="space-y-4" data-panel="practice" role="tabpanel" hidden>${practice}</div>`;
     }
@@ -419,7 +420,7 @@ const LessonKit = (function () {
     function wireTabs(body) {
         const tabs = body.querySelectorAll('.lk-tab');
         tabs.forEach(b => b.addEventListener('click', () => {
-            tabs.forEach(x => { const on = x === b; x.setAttribute('aria-selected', on); x.className = x.className.replace(/bg-slate-900 text-white|bg-white text-slate-700 border border-slate-200/, on ? 'bg-slate-900 text-white' : 'bg-white text-slate-700 border border-slate-200'); });
+            tabs.forEach(x => { const on = x === b; x.setAttribute('aria-selected', on); ['border-indigo-600', 'text-indigo-700'].forEach(c => x.classList.toggle(c, on)); ['border-transparent', 'text-slate-500', 'hover:text-slate-800'].forEach(c => x.classList.toggle(c, !on)); });
             body.querySelectorAll('[data-panel]').forEach(p => { p.hidden = p.dataset.panel !== b.dataset.tab; });
             const top = body.querySelector('.lk-tabs').getBoundingClientRect().top;
             if (top < 0) body.querySelector('.lk-tabs').scrollIntoView({ block: 'start' });
