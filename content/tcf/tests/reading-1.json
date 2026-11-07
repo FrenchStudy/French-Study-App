@@ -1,0 +1,477 @@
+{
+ "id": "reading-1",
+ "part": "reading",
+ "title": "Compréhension écrite · Test 1",
+ "minutes": 60,
+ "note": "In every question the first option is the right one; the page shuffles them.",
+ "questions": [
+  {
+   "kind": "Affiche",
+   "doc": "BOULANGERIE DUPAIN\nFermée le lundi\nDu mardi au samedi : 7 h – 19 h 30\nDimanche : 7 h – 13 h",
+   "q": "Quel jour la boulangerie est-elle fermée toute la journée ?",
+   "o": [
+    "Le lundi",
+    "Le mardi",
+    "Le samedi",
+    "Le dimanche"
+   ],
+   "why": "« Fermée le lundi ». On Sunday it is open in the morning."
+  },
+  {
+   "kind": "Texto",
+   "doc": "Salut Paul ! Je suis au cinéma avec Léa. Le film finit à 22 h. On mange une pizza après ? Appelle-moi !\nMarie",
+   "q": "Que propose Marie ?",
+   "o": [
+    "De manger une pizza après le film",
+    "D'aller au cinéma avec Léa demain soir",
+    "De regarder un film à la maison chez Paul",
+    "De téléphoner à Léa après la fin du film"
+   ],
+   "why": "« On mange une pizza après ? » = shall we have a pizza after (the film)?"
+  },
+  {
+   "kind": "Petite annonce",
+   "doc": "À LOUER : studio 25 m², centre-ville, 2e étage avec ascenseur. 650 $ par mois. Libre le 1er juillet.\nTél. : 514 555 0198",
+   "q": "Quand peut-on habiter dans le studio ?",
+   "o": [
+    "À partir du 1er juillet",
+    "Tout de suite, dès aujourd'hui",
+    "À partir du 2 juillet seulement",
+    "À partir du 25 juin, avant le déménagement"
+   ],
+   "why": "« Libre le 1er juillet » = available on July 1st."
+  },
+  {
+   "kind": "Menu",
+   "doc": "Cantine de l'école – Menu du jeudi\nSalade de tomates\nPoulet et riz\nYaourt\nEnfants végétariens : omelette à la place du poulet.",
+   "q": "Jeudi, qu'est-ce que les enfants végétariens mangent à la place du poulet ?",
+   "o": [
+    "Une omelette",
+    "Du poisson",
+    "Du riz seulement",
+    "Une salade de fruits"
+   ],
+   "why": "« omelette à la place du poulet » = an omelette instead of the chicken."
+  },
+  {
+   "kind": "Courriel",
+   "doc": "Bonjour à tous,\nLa réunion de vendredi est déplacée à lundi 10 h, salle 204, parce que la directrice est en déplacement à Toronto. Apportez vos rapports mensuels.\nMerci,\nSophie",
+   "q": "Pourquoi la réunion change-t-elle de jour ?",
+   "o": [
+    "La directrice n'est pas là vendredi.",
+    "La salle 204 n'est pas libre vendredi matin.",
+    "Les rapports mensuels ne sont pas encore prêts.",
+    "Sophie est malade et ne peut pas venir."
+   ],
+   "why": "« parce que la directrice est en déplacement à Toronto »: she is away on a business trip."
+  },
+  {
+   "kind": "Règlement",
+   "doc": "Médiathèque municipale\nVous pouvez emprunter 10 documents pour 3 semaines (DVD : 1 semaine seulement).\nRetard : 0,25 $ par jour et par document.\nRenouvellement possible une fois, en ligne ou au comptoir, sauf si le document est réservé par un autre abonné.",
+   "q": "Que peut-on faire pour garder un livre plus longtemps ?",
+   "o": [
+    "Le renouveler une fois, en ligne ou au comptoir",
+    "Payer 0,25 $ par jour à l'avance au comptoir",
+    "L'échanger contre un DVD pour une semaine",
+    "Le réserver en ligne pour trois semaines de plus"
+   ],
+   "why": "« Renouvellement possible une fois, en ligne ou au comptoir ». The 0.25 $ is a late fee, not a way to extend."
+  },
+  {
+   "kind": "Carte postale",
+   "doc": "Chère Anne,\nNous sommes à Québec depuis lundi. Il fait froid, mais la ville est magnifique sous la neige ! Hier, nous avons visité le Château Frontenac et ce soir, nous allons au Carnaval. Les enfants adorent le patin à glace. Retour à Montréal dimanche.\nBises,\nClaire",
+   "q": "Qu'est-ce que la famille a fait hier ?",
+   "o": [
+    "Elle a visité le Château Frontenac.",
+    "Elle est allée au Carnaval avec les enfants.",
+    "Elle est rentrée en train à Montréal.",
+    "Elle a fait du ski et du patin à glace."
+   ],
+   "why": "« Hier, nous avons visité le Château Frontenac ». The Carnaval is tonight (« ce soir »)."
+  },
+  {
+   "kind": "Notice",
+   "doc": "Sirop contre la toux\nAdultes : 1 cuillère à soupe 3 fois par jour, après les repas.\nEnfants de 6 à 12 ans : 1 cuillère à café 3 fois par jour.\nNe pas donner aux enfants de moins de 6 ans.\nNe pas conduire après la prise.",
+   "q": "D'après la notice, quelle phrase est vraie ?",
+   "o": [
+    "Il ne faut pas conduire après avoir pris le sirop.",
+    "Les adultes le prennent avant les repas.",
+    "Un enfant de 4 ans peut prendre une cuillère à café.",
+    "On le prend une fois par jour."
+   ],
+   "why": "« Ne pas conduire après la prise » = do not drive after taking it."
+  },
+  {
+   "kind": "Offre d'emploi",
+   "doc": "Le restaurant Le Saint-Laurent cherche un serveur ou une serveuse pour la saison d'été (de juin à septembre). Temps partiel, soirs et fins de semaine. Expérience non nécessaire : formation offerte. Français et anglais exigés.\nEnvoyez votre CV à emplois@lesaintlaurent.ca",
+   "q": "Pour ce poste, il faut…",
+   "o": [
+    "parler français et anglais.",
+    "avoir de l'expérience.",
+    "travailler le matin.",
+    "être disponible toute l'année."
+   ],
+   "why": "« Français et anglais exigés » = French and English required. Experience is not needed."
+  },
+  {
+   "kind": "Message",
+   "doc": "Bonjour,\nJe suis votre voisine du 3e étage. Samedi soir, je fête mon anniversaire à la maison et il y aura peut-être un peu de bruit jusqu'à minuit. Je m'en excuse à l'avance ! Si vous voulez passer prendre un verre, vous êtes les bienvenus.\nMartine, app. 32",
+   "q": "Pourquoi Martine écrit-elle ce message ?",
+   "o": [
+    "Pour prévenir ses voisins d'une fête et les inviter",
+    "Pour se plaindre du bruit de ses voisins du 3e",
+    "Pour annoncer à ses voisins qu'elle déménage samedi",
+    "Pour demander de l'aide pour préparer sa fête"
+   ],
+   "why": "She warns about noise from her party (« je m'en excuse à l'avance ») and invites them (« vous êtes les bienvenus »)."
+  },
+  {
+   "kind": "Article",
+   "doc": "Depuis septembre, la ville de Sherbrooke propose des vélos en libre-service. Pour 5 $ par jour ou 40 $ par saison, on peut prendre un vélo dans l'une des 30 stations et le rendre dans une autre. Le service fonctionne d'avril à novembre. Selon la mairie, plus de 12 000 trajets ont déjà été effectués, surtout par des étudiants. La ville prévoit d'ajouter dix stations l'an prochain, près des quartiers résidentiels.",
+   "q": "D'après l'article, qui utilise le plus ce service ?",
+   "o": [
+    "Les étudiants",
+    "Les touristes",
+    "Les retraités",
+    "Les employés de la mairie"
+   ],
+   "why": "« plus de 12 000 trajets… surtout par des étudiants » = mostly by students."
+  },
+  {
+   "kind": "Lettre de réclamation",
+   "doc": "Madame, Monsieur,\nLe 12 mars, j'ai commandé sur votre site une machine à café qui devait être livrée en cinq jours. Elle est arrivée le 2 avril, dans une boîte abîmée, et il manque le réservoir d'eau. J'ai appelé trois fois votre service client sans obtenir de réponse. Je vous demande donc soit de m'envoyer la pièce manquante dans les plus brefs délais, soit de me rembourser intégralement.\nNathalie Côté",
+   "q": "Que demande la cliente ?",
+   "o": [
+    "Recevoir la pièce manquante ou être remboursée",
+    "Une machine à café plus chère, livrée en cinq jours",
+    "Des excuses écrites du service client pour les appels",
+    "L'annulation de toutes ses commandes sur le site"
+   ],
+   "why": "« soit de m'envoyer la pièce manquante…, soit de me rembourser » = either the missing part or a full refund."
+  },
+  {
+   "kind": "Blogue",
+   "doc": "J'ai longtemps cru que le télétravail était la solution idéale : plus de transports, plus de bruit au bureau… Au début, j'étais ravi. Mais après six mois, je me suis senti isolé. Les pauses café avec mes collègues me manquaient, et je travaillais souvent jusqu'à 20 h. Aujourd'hui, je vais au bureau deux jours par semaine, et je trouve que c'est le bon équilibre.",
+   "q": "Quelle est la position actuelle de l'auteur ?",
+   "o": [
+    "Il préfère partager son temps entre le bureau et la maison.",
+    "Il veut travailler uniquement à la maison.",
+    "Il a quitté son emploi.",
+    "Il pense que le télétravail est mauvais pour tout le monde."
+   ],
+   "why": "« je vais au bureau deux jours par semaine… c'est le bon équilibre » = a mix of office and home."
+  },
+  {
+   "kind": "Avis",
+   "doc": "Avis aux résidents\nDes travaux de réparation de l'ascenseur auront lieu du 14 au 18 octobre. Pendant cette période, l'ascenseur sera hors service de 8 h à 17 h. Les personnes à mobilité réduite qui ont besoin d'aide pour leurs courses peuvent s'inscrire auprès du concierge avant le 10 octobre.\nMerci de votre patience.\nLa gestion",
+   "q": "Que doivent faire les résidents qui ont du mal à marcher et qui veulent de l'aide ?",
+   "o": [
+    "S'inscrire auprès du concierge avant le 10 octobre",
+    "Utiliser l'escalier de secours pendant toute la semaine",
+    "Appeler la mairie pour obtenir une aide à domicile",
+    "Faire leurs courses seulement après 17 h, quand l'ascenseur marche"
+   ],
+   "why": "« Les personnes à mobilité réduite… peuvent s'inscrire auprès du concierge avant le 10 octobre »."
+  },
+  {
+   "kind": "Information municipale",
+   "doc": "À partir du 1er janvier, les restes de nourriture ne devront plus être jetés avec les ordures ménagères. Chaque foyer recevra gratuitement un bac brun pour les déchets alimentaires, qui sera ramassé chaque semaine. Les ordures, elles, ne seront plus collectées que toutes les deux semaines. La municipalité espère ainsi réduire de 30 % les déchets envoyés au site d'enfouissement.",
+   "q": "Quel changement concerne les ordures ménagères ?",
+   "o": [
+    "Elles seront ramassées moins souvent.",
+    "Elles seront ramassées chaque semaine.",
+    "Il faudra payer un bac pour elles.",
+    "Elles iront dans le bac brun."
+   ],
+   "why": "« ne seront plus collectées que toutes les deux semaines » = only every two weeks. The brown bin is collected weekly."
+  },
+  {
+   "kind": "Témoignage",
+   "doc": "Quand je suis arrivée à Montréal, je parlais déjà bien anglais, alors je pensais que le français n'était pas indispensable. J'ai vite compris mon erreur : au travail, toutes les réunions se faisaient en français, et je n'osais pas intervenir. J'ai suivi des cours du soir pendant un an. Ce qui m'a le plus aidée, pourtant, ce sont les conversations avec mes voisins, qui me corrigeaient avec beaucoup de patience.",
+   "q": "Selon elle, qu'est-ce qui l'a le plus aidée à progresser ?",
+   "o": [
+    "Parler avec ses voisins",
+    "Les cours du soir",
+    "Les réunions de travail",
+    "Son niveau d'anglais"
+   ],
+   "why": "« Ce qui m'a le plus aidée, pourtant, ce sont les conversations avec mes voisins ». « pourtant » contrasts with the evening classes."
+  },
+  {
+   "kind": "Programme",
+   "doc": "Festival du film documentaire\nProjections à 18 h et à 21 h. Le billet donne aussi accès à la rencontre avec le réalisateur, qui suit la séance de 18 h.\nTarif réduit pour les étudiants et les plus de 65 ans, sur présentation d'une carte.\nAttention : les places ne sont pas numérotées. Arrivez 15 minutes avant la séance.",
+   "q": "Pour rencontrer le réalisateur, il faut…",
+   "o": [
+    "aller à la séance de 18 h.",
+    "acheter un billet spécial.",
+    "arriver 15 minutes avant la séance de 21 h.",
+    "présenter une carte d'étudiant."
+   ],
+   "why": "The meeting « suit la séance de 18 h » (follows the 6 p.m. showing), and the normal ticket includes it."
+  },
+  {
+   "kind": "Conseils",
+   "doc": "Vous cherchez un logement ? Méfiez-vous des annonces trop belles pour être vraies. Un propriétaire qui vous demande de payer un dépôt avant même la visite, ou qui dit vivre à l'étranger et ne pas pouvoir vous montrer l'appartement, est probablement un escroc. Ne versez jamais d'argent sans avoir vu les lieux et signé un bail.",
+   "q": "Quel est l'objectif de ce texte ?",
+   "o": [
+    "Mettre en garde contre les arnaques au logement",
+    "Présenter des appartements à louer à des prix intéressants",
+    "Expliquer comment louer un logement quand on vit à l'étranger",
+    "Encourager les locataires à payer un dépôt pour réserver vite"
+   ],
+   "why": "« Méfiez-vous », « escroc », « Ne versez jamais d'argent »: it warns about rental scams."
+  },
+  {
+   "kind": "Lettre de l'école",
+   "doc": "Madame, Monsieur,\nNous avons remarqué que votre fils Lucas arrive souvent en retard le matin depuis la rentrée. Ces retards le pénalisent, car il manque le début du cours de mathématiques. Nous aimerions vous rencontrer pour en parler et trouver ensemble une solution. Merci de contacter le secrétariat pour fixer un rendez-vous.\nLa direction",
+   "q": "Que souhaite l'école ?",
+   "o": [
+    "Rencontrer les parents pour régler le problème",
+    "Changer Lucas de classe pour le cours de mathématiques",
+    "Prévenir les parents que Lucas sera puni à chaque retard",
+    "Déplacer le cours de mathématiques plus tard dans la journée"
+   ],
+   "why": "« Nous aimerions vous rencontrer pour en parler et trouver ensemble une solution »."
+  },
+  {
+   "kind": "Article",
+   "doc": "Plusieurs entreprises québécoises testent la semaine de quatre jours. Dans une PME de Laval, les employés travaillent désormais 32 heures, sans baisse de salaire. Après un an, la direction affirme que la productivité est restée stable et que l'absentéisme a diminué de moitié. Les syndicats saluent l'initiative tout en restant prudents : selon eux, ce modèle fonctionne dans les bureaux, mais il serait difficile à appliquer dans les hôpitaux ou les commerces, où il faut assurer une présence continue. Des chercheurs rappellent par ailleurs que les résultats d'une seule entreprise ne suffisent pas à tirer des conclusions générales.",
+   "q": "Quelle réserve les syndicats expriment-ils ?",
+   "o": [
+    "Le modèle conviendrait mal aux secteurs qui exigent une présence permanente.",
+    "La productivité risque de baisser dans les bureaux après un an.",
+    "Les salaires des employés vont diminuer avec la semaine de 32 heures.",
+    "L'absentéisme pourrait augmenter dans les entreprises qui testent ce modèle."
+   ],
+   "why": "« difficile à appliquer dans les hôpitaux ou les commerces, où il faut assurer une présence continue »."
+  },
+  {
+   "kind": "Chronique",
+   "doc": "On accuse volontiers les écrans de tous les maux : troubles du sommeil, baisse de l'attention, isolement. Pourtant, les études sérieuses invitent à la nuance. Ce n'est pas tant le temps passé devant un écran qui pose problème que ce que l'enfant y fait, et avec qui. Regarder un documentaire avec un parent qui commente n'a rien à voir avec le fait d'enchaîner seul des vidéos courtes pendant des heures. Plutôt que d'interdire, mieux vaudrait donc accompagner.",
+   "q": "Quelle idée l'auteur défend-il ?",
+   "o": [
+    "La façon d'utiliser les écrans compte davantage que la durée.",
+    "Il faut interdire les écrans aux enfants pour protéger leur sommeil.",
+    "Les écrans n'ont aucun effet réel sur l'attention des enfants.",
+    "Les documentaires sont plus mauvais pour l'attention que les vidéos courtes."
+   ],
+   "why": "« Ce n'est pas tant le temps passé… que ce que l'enfant y fait, et avec qui »: what and with whom matters more than how long."
+  },
+  {
+   "kind": "Courrier des lecteurs",
+   "doc": "Je lis depuis des semaines les critiques contre les nouvelles pistes cyclables de la rue Saint-Denis. Les commerçants affirment qu'elles font fuir les clients. J'aimerais nuancer ce point de vue. Libraire dans cette rue depuis quinze ans, j'ai constaté que mes ventes avaient légèrement augmenté depuis l'été : les cyclistes s'arrêtent plus facilement que les automobilistes, qui cherchaient de toute façon désespérément une place de stationnement. Cela dit, je reconnais que les livraisons sont devenues plus compliquées et que la ville devrait prévoir des zones réservées.",
+   "q": "Quelle concession la libraire fait-elle ?",
+   "o": [
+    "Les livraisons posent désormais un problème.",
+    "Ses ventes ont baissé depuis l'arrivée des pistes cyclables.",
+    "Les cyclistes s'arrêtent rarement dans les commerces de la rue.",
+    "Les automobilistes trouvent maintenant plus facilement une place."
+   ],
+   "why": "« Cela dit, je reconnais que les livraisons sont devenues plus compliquées »: « je reconnais » signals the concession."
+  },
+  {
+   "kind": "Vulgarisation",
+   "doc": "On pense souvent que l'abeille domestique est la grande pollinisatrice de nos cultures. En réalité, plus de 800 espèces d'abeilles sauvages vivent au Canada, et beaucoup sont plus efficaces qu'elle pour polliniser certaines plantes, comme les bleuets ou les tomates. Or ces espèces, qui vivent souvent seules et nichent dans le sol, souffrent de la disparition des haies et des terrains non cultivés. Installer davantage de ruches, comme le proposent certains, ne réglerait rien : les abeilles domestiques pourraient même entrer en concurrence avec les abeilles sauvages pour les fleurs disponibles.",
+   "q": "Pourquoi l'auteur critique-t-il l'idée d'installer davantage de ruches ?",
+   "o": [
+    "Les abeilles domestiques pourraient priver les abeilles sauvages de nourriture.",
+    "Les ruches coûtent trop cher aux agriculteurs qui cultivent des bleuets.",
+    "Les abeilles domestiques sont incapables de polliniser les tomates et les bleuets.",
+    "Les ruches prennent la place des haies et des terrains non cultivés."
+   ],
+   "why": "« pourraient même entrer en concurrence avec les abeilles sauvages pour les fleurs disponibles »: they would compete for the same flowers."
+  },
+  {
+   "kind": "Politique d'entreprise",
+   "doc": "Remboursement des frais de formation\nL'entreprise rembourse jusqu'à 2 000 $ par an les formations liées au poste occupé ou à un poste visé dans l'entreprise. La demande doit être approuvée par le gestionnaire avant l'inscription. Le remboursement est versé à la fin de la formation, sur présentation d'une attestation de réussite. L'employé qui quitte l'entreprise dans les douze mois suivant le remboursement devra en rendre la moitié.",
+   "q": "Un employé démissionne huit mois après avoir été remboursé. Que se passe-t-il ?",
+   "o": [
+    "Il doit rendre la moitié de la somme.",
+    "Il doit rendre toute la somme, puisqu'il quitte l'entreprise.",
+    "Il ne doit rien rendre, car sa formation était déjà terminée.",
+    "Il perd son attestation de réussite et doit refaire la formation."
+   ],
+   "why": "Eight months is within « douze mois », so « il devra en rendre la moitié » (half)."
+  },
+  {
+   "kind": "Critique",
+   "doc": "Avec son troisième roman, Nadia Lemaire confirme son talent pour décrire les liens familiaux. L'histoire de ces trois sœurs qui se retrouvent après la mort de leur père est touchante, et les dialogues sonnent juste. On regrettera toutefois une seconde partie trop longue, où l'intrigue s'essouffle, et une fin un peu prévisible. Malgré ces défauts, le livre se lit avec plaisir.",
+   "q": "Quel est le jugement global du critique ?",
+   "o": [
+    "Plutôt positif, malgré quelques faiblesses",
+    "Très négatif, à cause d'une fin trop prévisible",
+    "Enthousiaste, sans aucune réserve sur l'intrigue",
+    "Indifférent : le critique ne donne pas vraiment d'avis"
+   ],
+   "why": "Praise (« talent », « touchante »), criticism (« toutefois… trop longue »), then « Malgré ces défauts, le livre se lit avec plaisir »."
+  },
+  {
+   "kind": "Article",
+   "doc": "Le bénévolat connaît une crise silencieuse. Si le nombre de Canadiens qui donnent de leur temps reste élevé, la durée de leur engagement diminue : on préfère désormais participer ponctuellement à un événement plutôt que de s'engager chaque semaine dans un organisme. Pour les associations, cette évolution est un vrai défi, car certaines missions, comme l'accompagnement de personnes âgées, exigent une relation suivie. Certaines s'adaptent en proposant des missions courtes et flexibles ; d'autres misent sur la formation pour fidéliser leurs bénévoles.",
+   "q": "Selon le texte, qu'est-ce qui a changé ?",
+   "o": [
+    "Les bénévoles s'engagent de façon plus occasionnelle.",
+    "Il y a beaucoup moins de Canadiens qui font du bénévolat.",
+    "Les associations refusent désormais les missions courtes.",
+    "Les personnes âgées ont moins besoin d'accompagnement qu'avant."
+   ],
+   "why": "The number stays high (« reste élevé »), but people now help « ponctuellement » (now and then) rather than every week."
+  },
+  {
+   "kind": "Courriel officiel",
+   "doc": "Votre déclaration de revenus a été traitée. Selon nos calculs, vous avez droit à un remboursement de 412,50 $. Ce montant sera déposé dans votre compte bancaire d'ici dix jours ouvrables. Si les coordonnées bancaires enregistrées dans votre dossier ne sont plus valides, le montant vous sera envoyé par chèque, ce qui peut prendre jusqu'à six semaines. Si vous n'êtes pas d'accord avec ce calcul, vous disposez de 90 jours pour le contester.",
+   "q": "Que se passe-t-il si le compte bancaire enregistré n'est plus valide ?",
+   "o": [
+    "Le remboursement arrivera par chèque, plus lentement.",
+    "Le remboursement est annulé jusqu'à la mise à jour du dossier.",
+    "Il faut contester le calcul dans les 90 jours pour être payé.",
+    "Le montant est quand même déposé dans le compte en dix jours."
+   ],
+   "why": "« le montant vous sera envoyé par chèque, ce qui peut prendre jusqu'à six semaines »."
+  },
+  {
+   "kind": "Entrevue",
+   "doc": "— Vous avez quitté un poste d'ingénieure pour devenir ébéniste. Pourquoi ?\n— Je passais mes journées devant des tableaux de chiffres, sans jamais voir le résultat concret de mon travail. Le bois, c'est l'inverse : à la fin de la journée, la table est là. Je ne vais pas mentir : je gagne deux fois moins qu'avant, et les premières années ont été difficiles. Mais je ne regrette rien.\n— Conseilleriez-vous ce changement ?\n— Seulement à ceux qui ont mis de l'argent de côté. La passion ne paie pas le loyer.",
+   "q": "Quel conseil donne-t-elle à ceux qui veulent changer de métier ?",
+   "o": [
+    "Avoir des économies avant de se lancer",
+    "Ne jamais quitter un poste stable pour un métier manuel",
+    "Choisir un nouveau métier aussi bien payé que l'ancien",
+    "Suivre sa passion sans attendre, même sans argent de côté"
+   ],
+   "why": "« Seulement à ceux qui ont mis de l'argent de côté » = only to those who have saved money."
+  },
+  {
+   "kind": "Article",
+   "doc": "Une étude menée auprès de 2 000 travailleurs montre que les réunions occupent en moyenne 11 heures par semaine chez les cadres. Plus de la moitié des participants jugent qu'au moins un tiers de ces réunions sont inutiles. Les auteurs ne recommandent pas pour autant de les supprimer : les réunions restent, selon eux, essentielles pour créer de la cohésion. Ils suggèrent plutôt d'en limiter la durée, de fixer un ordre du jour précis et de n'inviter que les personnes directement concernées.",
+   "q": "Que recommandent les auteurs de l'étude ?",
+   "o": [
+    "Mieux organiser les réunions plutôt que de les supprimer",
+    "Supprimer au moins un tiers des réunions jugées inutiles",
+    "Réserver les réunions aux cadres, qui y passent 11 heures par semaine",
+    "Organiser davantage de réunions pour renforcer la cohésion"
+   ],
+   "why": "« ne recommandent pas pour autant de les supprimer… Ils suggèrent plutôt d'en limiter la durée… »."
+  },
+  {
+   "kind": "Éditorial",
+   "doc": "Chaque été, les mêmes images reviennent : des files interminables devant les sites célèbres, des rues saturées, des habitants excédés. Face au surtourisme, plusieurs villes ont choisi la manière forte : taxes de séjour relevées, quotas de croisiéristes, interdiction des locations de courte durée. Ces mesures ont le mérite d'exister, mais elles risquent de faire du voyage un privilège réservé aux plus aisés. Le véritable enjeu n'est sans doute pas de voyager moins, mais de voyager autrement : étaler les séjours sur l'année, privilégier les destinations moins connues, rester plus longtemps au même endroit. Encore faut-il que les politiques publiques, et le calendrier scolaire, le permettent.",
+   "q": "Quelle crainte l'auteur exprime-t-il au sujet des mesures prises par certaines villes ?",
+   "o": [
+    "Elles pourraient rendre le voyage inaccessible aux moins riches.",
+    "Elles ne réduisent pas vraiment les files devant les sites célèbres.",
+    "Elles favorisent les croisières au détriment des autres voyageurs.",
+    "Elles obligent les familles à voyager pendant les vacances scolaires."
+   ],
+   "why": "« elles risquent de faire du voyage un privilège réservé aux plus aisés » (the well-off)."
+  },
+  {
+   "kind": "Essai",
+   "doc": "Nous photographions tout : nos repas, nos paysages, nos enfants. Cette frénésie part d'une intention louable, celle de ne rien oublier. Mais plusieurs travaux en psychologie suggèrent un effet paradoxal : le simple fait de photographier une scène réduirait la qualité du souvenir qu'on en garde, comme si l'appareil se chargeait de mémoriser à notre place. Il ne s'agit pas de renoncer à la photographie, mais peut-être de réapprendre à regarder avant de cadrer.",
+   "q": "Quel paradoxe le texte met-il en évidence ?",
+   "o": [
+    "Photographier pour se souvenir peut affaiblir le souvenir.",
+    "On se souvient mieux des repas photographiés que des paysages.",
+    "Les psychologues conseillent d'arrêter complètement de photographier.",
+    "On oublie moins une scène quand on ne prend pas le temps de la regarder."
+   ],
+   "why": "The aim is « ne rien oublier », yet photographing « réduirait la qualité du souvenir »."
+  },
+  {
+   "kind": "Analyse",
+   "doc": "La hausse des taux d'intérêt, destinée à freiner l'inflation, produit des effets contrastés. Les épargnants s'en réjouissent : leurs placements rapportent enfin davantage. Les ménages endettés, en revanche, voient leurs mensualités hypothécaires grimper au moment de renouveler leur prêt, parfois de plusieurs centaines de dollars. Paradoxalement, cette mesure peut aussi aggraver la crise du logement à moyen terme : en rendant les emprunts plus coûteux pour les promoteurs, elle ralentit la construction de nouveaux logements, alors que l'offre est déjà insuffisante.",
+   "q": "Pourquoi l'auteur parle-t-il d'un effet paradoxal ?",
+   "o": [
+    "La mesure peut réduire encore une offre de logements déjà trop faible.",
+    "Les épargnants perdent de l'argent alors que les taux augmentent.",
+    "L'inflation augmente en même temps que les taux d'intérêt.",
+    "Les mensualités des ménages baissent au moment du renouvellement."
+   ],
+   "why": "Higher rates slow building « alors que l'offre est déjà insuffisante », so the housing crisis can get worse."
+  },
+  {
+   "kind": "Texte juridique",
+   "doc": "Le locataire peut sous-louer son logement ou céder son bail, à condition d'en aviser le propriétaire par écrit. Le propriétaire ne peut refuser que pour un motif sérieux, par exemple si le futur occupant n'est pas en mesure de payer le loyer. S'il ne répond pas dans les quinze jours suivant la réception de l'avis, il est réputé avoir accepté. La cession libère l'ancien locataire de ses obligations, alors qu'en cas de sous-location, celui-ci reste responsable envers le propriétaire.",
+   "q": "Selon ce texte, quelle est la différence entre la sous-location et la cession de bail ?",
+   "o": [
+    "En cas de sous-location, le locataire d'origine reste responsable.",
+    "Seule la cession de bail demande d'aviser le propriétaire par écrit.",
+    "Le propriétaire ne peut jamais refuser une sous-location, même pour un motif sérieux.",
+    "Sans réponse du propriétaire en quinze jours, la cession est refusée."
+   ],
+   "why": "« La cession libère l'ancien locataire…, alors qu'en cas de sous-location, celui-ci reste responsable ». Silence counts as acceptance, and both need written notice."
+  },
+  {
+   "kind": "Chronique",
+   "doc": "Il fut un temps où l'on s'excusait d'appeler après 21 heures. Aujourd'hui, on reçoit à minuit un courriel de son supérieur, assorti de la mention « pas urgent, à traiter quand tu peux ». Formule délicieuse : elle dit l'inverse de ce qu'elle prétend. Car qui oserait vraiment attendre le lendemain ? La France a beau avoir instauré un « droit à la déconnexion », la loi peine à changer des habitudes que chacun, au fond, entretient : celui qui envoie le message comme celui qui y répond aussitôt.",
+   "q": "Quel est le ton de l'auteur à propos de la mention « pas urgent » ?",
+   "o": [
+    "Ironique : selon lui, elle crée en réalité une pression.",
+    "Admiratif : il salue la politesse des supérieurs qui écrivent tard.",
+    "Neutre : il décrit simplement une habitude de travail moderne.",
+    "Indigné : il attaque la loi française sur le droit à la déconnexion."
+   ],
+   "why": "« Formule délicieuse : elle dit l'inverse de ce qu'elle prétend » is ironic: nobody dares to wait until the next day."
+  },
+  {
+   "kind": "Tribune",
+   "doc": "Les outils de traduction automatique ont fait des progrès spectaculaires, au point que certains annoncent la disparition prochaine du métier de traducteur. C'est confondre deux activités. Pour un mode d'emploi ou un courriel de routine, la machine suffit souvent, et elle est imbattable en rapidité. Mais dès qu'un texte engage une responsabilité – un contrat, une notice médicale – ou qu'il joue sur les sous-entendus, comme la publicité ou la littérature, quelqu'un doit répondre de chaque mot. Le traducteur de demain sera moins celui qui produit le premier jet que celui qui vérifie, adapte et assume.",
+   "q": "Selon l'auteur, comment le rôle du traducteur va-t-il évoluer ?",
+   "o": [
+    "Il vérifiera et assumera les textes plutôt que d'écrire le premier jet.",
+    "Il va disparaître, car la machine traduit mieux et plus vite que lui.",
+    "Il ne traduira plus que des modes d'emploi et des courriels de routine.",
+    "Il devra apprendre à travailler plus vite que les outils automatiques."
+   ],
+   "why": "« moins celui qui produit le premier jet que celui qui vérifie, adapte et assume »."
+  },
+  {
+   "kind": "Essai",
+   "doc": "On aime à se représenter le progrès technique comme une ligne droite, chaque innovation rendant la précédente obsolète. L'histoire suggère pourtant un tableau plus enchevêtré. La radio n'a pas tué le livre, ni la télévision la radio ; chaque média a plutôt contraint les autres à redéfinir leur fonction. Le vinyle, qu'on croyait relégué aux greniers, se vend de nouveau, non parce qu'il serait plus pratique, mais précisément parce qu'il ne l'est pas : son usage exige du temps, un rituel, une attention que le flux numérique a rendus rares. Ce qui disparaît, au fond, ce sont moins les objets que les évidences qui les accompagnaient.",
+   "q": "Comment l'auteur explique-t-il le retour du vinyle ?",
+   "o": [
+    "Sa contrainte même est devenue une qualité recherchée.",
+    "Il offre un son de meilleure qualité que la musique numérique.",
+    "Il est devenu plus pratique que la musique en ligne pour les jeunes.",
+    "La radio et la télévision en ont fait la promotion pendant des années."
+   ],
+   "why": "« non parce qu'il serait plus pratique, mais précisément parce qu'il ne l'est pas »: the time and ritual it demands are now rare and wanted."
+  },
+  {
+   "kind": "Essai",
+   "doc": "Le discours méritocratique a ceci de séduisant qu'il flatte à la fois les gagnants et l'idée de justice : chacun serait récompensé à la mesure de ses efforts. Mais, à force d'être répété, il produit un effet pervers. Ceux qui réussissent finissent par croire qu'ils ne doivent leur position qu'à eux-mêmes, oubliant le capital culturel hérité, les réseaux, la chance. Quant à ceux qui échouent, ils sont sommés d'y voir la preuve de leur insuffisance. Loin de pacifier la société, la croyance en un mérite pur nourrit ainsi l'arrogance des uns et l'humiliation des autres.",
+   "q": "Quelle thèse l'auteur soutient-il ?",
+   "o": [
+    "La croyance en un mérite pur aggrave les tensions sociales.",
+    "La méritocratie récompense justement les efforts de chacun.",
+    "L'héritage culturel n'influence pas la réussite.",
+    "Ceux qui échouent n'ont pas fait assez d'efforts."
+   ],
+   "why": "« Loin de pacifier la société, la croyance en un mérite pur nourrit… l'arrogance des uns et l'humiliation des autres »."
+  },
+  {
+   "kind": "Article de fond",
+   "doc": "Il serait tentant d'affirmer que la langue que nous parlons détermine notre façon de penser : les locuteurs d'une langue sans futur grammatical, par exemple, épargneraient davantage, le lendemain leur paraissant plus proche. L'hypothèse a fait les gros titres. Elle a aussi été sérieusement contestée : une fois prises en compte la richesse des pays, la culture et les institutions, l'effet observé s'amenuise considérablement. Sans doute la langue oriente-t-elle l'attention et rend-elle certaines distinctions plus saillantes ; de là à la tenir pour une prison de la pensée, il y a un pas que les données ne permettent pas de franchir.",
+   "q": "Quelle est la position de l'auteur sur cette hypothèse ?",
+   "o": [
+    "La langue oriente l'attention, mais rien ne prouve qu'elle enferme la pensée.",
+    "La langue détermine entièrement notre façon de penser et d'épargner.",
+    "Il est désormais prouvé que les langues sans futur font épargner davantage.",
+    "La langue n'a aucun effet, même sur l'attention ou la perception."
+   ],
+   "why": "He grants « Sans doute la langue oriente-t-elle l'attention », but « de là à la tenir pour une prison de la pensée, il y a un pas que les données ne permettent pas de franchir »."
+  },
+  {
+   "kind": "Extrait de roman",
+   "doc": "Elle n'avait jamais aimé les gares, ces lieux où l'on fait semblant de partir alors qu'on ne fait qu'attendre. Ce soir-là pourtant, assise sur un banc du quai désert, elle se surprit à espérer que le train eût du retard. Non qu'elle redoutât l'arrivée ; elle redoutait plutôt ce qu'elle ne pourrait plus différer. Tant que le train n'était pas là, la décision restait suspendue, réversible, presque légère. Quand enfin les phares percèrent la brume, elle se leva, ajusta son manteau, et comprit qu'elle avait choisi depuis longtemps.",
+   "q": "Pourquoi le personnage espère-t-il que le train ait du retard ?",
+   "o": [
+    "Pour repousser le moment où sa décision deviendra définitive",
+    "Parce qu'elle a peur de la personne qui doit arriver par ce train",
+    "Parce qu'elle a toujours aimé attendre seule dans les gares le soir",
+    "Parce qu'elle n'a pas encore acheté son billet et craint le contrôleur"
+   ],
+   "why": "« Non qu'elle redoutât l'arrivée ; elle redoutait plutôt ce qu'elle ne pourrait plus différer »: while the train is not there, the decision stays « réversible »."
+  }
+ ]
+}

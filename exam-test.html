@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Timed exam - Apprendre le Français</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#4f46e5">
+    <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Français">
+    <link rel="stylesheet" href="css/app.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.104.0"></script>
+    <script>window.supabase || document.write('<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"><\/script>')</script>
+    <script src="config.js"></script>
+    <script src="js/ai.js"></script>
+    <script src="js/tcf.js"></script>
+    <script src="js/nclc.js"></script>
+</head>
+<body class="h-full bg-slate-100 flex flex-col overflow-hidden font-sans text-slate-800">
+
+    <header id="app-header" class="bg-white border-b border-slate-200 sticky top-0 z-50 shrink-0 h-14"></header>
+
+    <main id="scroller" class="flex-1 overflow-y-auto">
+        <div class="max-w-5xl mx-auto px-4 py-5 space-y-4">
+            <a href="exam.html" id="back" class="inline-flex items-center min-h-[44px] px-1 text-sm font-semibold text-slate-600 hover:text-indigo-600">← Exam guide</a>
+            <div id="app" class="space-y-4"></div>
+        </div>
+    </main>
+
+    <script>
+    // exam-test.html - timed exam parts in the TCF Canada format:
+    //   ?part=reading    39 questions, 60 minutes, A1 → C2, estimated score /699 and NCLC
+    //   ?part=listening  39 questions, 35 minutes, each recording heard once, estimated score /699 and NCLC
+    //   ?part=writing    the 3 writing tasks with one 60-minute timer, then the AI marks each /20 (≈ NCLC)
+    // Questions: content/tcf/tests/<part>-<n>.json (the first option is the right one; shown shuffled).
+    // Scores: NCLC.saveTest (reading, listening); writing results go into writing_results like the Writing page.
+    const $ = (id) => document.getElementById(id);
+    const app = $('app');
+    const P = new URLSearchParams(location.search);
+    const part = ['reading', 'listening', 'writing'].includes(P.get('part')) ? P.get('part') : 'reading';
+    const SETS = { reading: ['reading-1'], listening: ['listening-1'] };
+    const LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
+    const levelOf = (n) => n <= 4 ? 'A1' : n <= 10 ? 'A2' : n <= 19 ? 'B1' : n <= 29 ? 'B2' : n <= 35 ? 'C1' : 'C2';
+    const fmt = (s) => `${Math.floor(s / 60)}:${String(Math.max(0, s) % 60).padStart(2, '0')}`;
+    const store = {
+        get(k, d) { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch (e) { return d; } },
+        set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+    };
+    const btn = (cls) => `inline-flex items-center justify-center min-h-[48px] px-5 font-bold rounded-xl ${cls}`;
+    const card = 'bg-white border border-slate-200 rounded-2xl p-4';
+    // The same shuffle every time for one question (so going back shows the options in the same order)
+    function order(seed) {
+        let h = 0; for (const c of seed) h = (h * 31 + c.charCodeAt(0)) >>> 0;
+        const a = [0, 1, 2, 3];
+        for (let i = 3; i > 0; i--) { h = (h * 1103515245 + 12345) >>> 0; const j = h % (i + 1); [a[i], a[j]] = [a[j], a[i]]; }
+        return a;
+    }
+    let timer = null, left = 0, onTimeUp = null;
+    function startClock(seconds, done) {
+        left = seconds; onTimeUp = done; clearInterval(timer);
+        const tick = () => {
+            const el = $('clock');
+            if (el) { el.textContent = fmt(left); el.className = `font-black ${left <= 300 ? 'text-rose-600' : 'text-slate-900'}`; }
+            if (left <= 0) { clearInterval(timer); timer = null; onTimeUp && onTimeUp(true); return; }
+            left--;
+        };
+        tick(); timer = setInterval(tick, 1000);
+    }
+    const stopClock = () => { clearInterval(timer); timer = null; };
+    // Leaving the page by mistake in the middle of a test
+    let running = false;
+    addEventListener('beforeunload', (e) => { if (running) { e.preventDefault(); e.returnValue = ''; } });
+
+    const INTRO = {
+        reading: { emoji: '📖', title: 'Reading · timed test', time: 60, lines: ['39 questions, from A1 (short notices) to C2 (essays and literary texts). They get harder as you go.', 'Four answers each, only one is right. No mark is taken off for a wrong answer, so answer every question.', 'You can move between questions and change your answers until the time is up.'] },
+        listening: { emoji: '🎧', title: 'Listening · timed test', time: 35, lines: ['39 questions, from A1 (announcements, short dialogues) to C2 (talks and readings).', 'Read the question and the answers, then play the recording. <b>You hear each recording once</b>, as in the exam.', 'You cannot go back to an earlier question. Four answers each, only one is right; answer every question.'] },
+        writing: { emoji: '✍️', title: 'Writing · timed exam', time: 60, lines: ['The three TCF writing tasks with <b>one 60-minute timer</b>: you decide how to share the time.', 'Task 1: a short message (60–120 words). Task 2: an experience or advice (120–150 words). Task 3: sum up two documents and give your opinion (120–180 words).', 'When you finish, the AI marks each task out of 20, as a TCF examiner would, and shows the NCLC level.'] }
+    };
+    function intro() {
+        const I = INTRO[part];
+        const past = part === 'writing' ? [] : NCLC.tests().filter(t => t.part === part).sort((a, b) => b.at - a.at).slice(0, 3);
+        app.innerHTML = `
+            <div><h1 class="text-2xl font-black text-slate-900">${I.emoji} ${I.title}</h1>
+            <p class="text-sm text-slate-500 mt-1">TCF Canada format · ${I.time} minutes</p></div>
+            <section class="${card} space-y-3">
+                <ul class="space-y-2 text-base text-slate-700">${I.lines.map(l => `<li class="flex gap-2"><span class="text-indigo-500">•</span><span>${l}</span></li>`).join('')}</ul>
+                ${part === 'listening' ? '<p id="voice-note" class="hidden text-sm bg-amber-50 border border-amber-200 text-amber-900 rounded-xl px-3 py-2"></p>' : ''}
+                ${part !== 'writing' ? `<p class="text-sm text-slate-500">Your score is an <b>estimate</b>: the app counts each question with the points usually given to its level (3 for A1 up to 33 for C2, 699 in all), then reads the NCLC level from IRCC's table. The real test is marked by France Éducation International.</p>` : '<p class="text-sm text-slate-500">Have a quiet hour. Your texts are saved on this device while you write.</p>'}
+                ${part === 'writing' && store.get('writing_exam', null) ? `<p class="text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2">You have an exam in progress. Start goes back to it, with the time that was left.</p>` : ''}
+                <div class="flex flex-wrap gap-2 pt-1">
+                    <button id="start" type="button" class="${btn('bg-indigo-600 hover:bg-indigo-700 text-white')}">▶ Start the ${I.time}-minute ${part === 'writing' ? 'exam' : 'test'}</button>
+                    ${part === 'writing' && store.get('writing_exam', null) ? `<button id="restart" type="button" class="${btn('bg-white border border-slate-200 hover:border-indigo-300 text-slate-700')}">New questions</button>` : ''}
+                </div>
+            </section>
+            ${past.length ? `<section class="${card} space-y-2"><h2 class="text-sm font-bold uppercase tracking-wide text-slate-500">Your last results</h2>
+                ${past.map(t => `<div class="flex flex-wrap items-center gap-2 text-sm"><span class="text-slate-500">${new Date(t.at).toLocaleDateString()}</span><b>${t.score}/699</b><span class="text-slate-500">${t.correct}/${t.total} right</span><span class="text-xs font-bold ${NCLC.tone(t.nclc)} px-2 py-0.5 rounded-full">≈ ${NCLC.label(t.nclc)}</span></div>`).join('')}
+                <p class="text-xs text-slate-500">Taking the same test again shows the questions you remember, not your level. More tests will be added.</p></section>` : ''}`;
+        $('start').onclick = () => part === 'writing' ? startWriting(false) : startQuiz();
+        if ($('restart')) $('restart').onclick = () => { store.set('writing_exam', null); startWriting(true); };
+        if (part === 'listening') voiceCheck();
+    }
+
+    // ===================== Reading and listening =====================
+    let test = null, answers = [], at = 0, played = [];
+    async function startQuiz() {
+        app.innerHTML = '<p class="text-sm text-slate-400 animate-pulse">Loading the test…</p>';
+        try {
+            const r = await fetch(`content/tcf/tests/${SETS[part][0]}.json`);
+            if (!r.ok) throw new Error('Could not load the test.');
+            test = await r.json();
+        } catch (e) { app.innerHTML = `<p class="text-sm text-rose-700">${escapeHtml(e.message)}</p>`; return; }
+        answers = test.questions.map(() => null); played = test.questions.map(() => false); at = 0;
+        running = true;
+        startClock(test.minutes * 60, () => finishQuiz(true));
+        drawQuestion();
+    }
+    const qOrder = (i) => order(`${test.id}-${i}`);
+    function drawQuestion() {
+        const q = test.questions[at], n = at + 1, ord = qOrder(at), listen = part === 'listening';
+        const done = answers.filter(a => a !== null).length;
+        app.innerHTML = `
+            <div class="sticky top-0 z-10 py-2 bg-slate-100 flex flex-wrap items-center gap-x-4 gap-y-1">
+                <span class="text-sm font-bold text-slate-900">Question ${n} / ${test.questions.length}</span>
+                <span class="text-xs font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-full">${levelOf(n)}</span>
+                <span class="text-sm text-slate-500">${done} answered</span>
+                <span class="ml-auto text-sm text-slate-500">⏱️ <b id="clock" class="font-black text-slate-900">${fmt(left)}</b></span>
+            </div>
+            ${listen ? `<section class="${card} flex flex-wrap items-center gap-3">
+                    <button id="play" type="button" ${played[at] ? 'disabled' : ''} class="${btn('bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white')}">${played[at] ? '✓ Heard' : '▶ Play the recording'}</button>
+                    <span id="play-note" class="text-sm text-slate-500">${played[at] ? 'You have heard this recording.' : `${escapeHtml(q.kind)} · you can play it once.`}</span>
+                </section>`
+                : `<section class="${card} space-y-2"><span class="text-xs font-bold uppercase tracking-wide text-slate-500">${escapeHtml(q.kind)}</span>
+                    <div lang="fr" class="text-base text-slate-900 leading-relaxed whitespace-pre-line">${escapeHtml(q.doc)}</div></section>`}
+            <section class="${card} space-y-3">
+                <h2 lang="fr" class="font-bold text-slate-900">${escapeHtml(q.q)}</h2>
+                <div class="grid gap-2" role="radiogroup">${ord.map((k, j) => `<button type="button" data-opt="${k}" role="radio" aria-checked="${answers[at] === k}"
+                    class="text-left flex items-start gap-3 min-h-[48px] px-3 py-2.5 rounded-xl border ${answers[at] === k ? 'bg-indigo-50 border-indigo-500' : 'bg-white border-slate-200 hover:border-indigo-300'}">
+                    <span class="shrink-0 w-6 h-6 rounded-full ${answers[at] === k ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-600'} text-sm font-bold flex items-center justify-center">${'ABCD'[j]}</span>
+                    <span lang="fr" class="text-base text-slate-800 mt-0.5">${escapeHtml(q.o[k])}</span></button>`).join('')}</div>
+            </section>
+            <div class="flex flex-wrap items-center gap-2">
+                ${!listen && at > 0 ? `<button id="prev" type="button" class="${btn('bg-white border border-slate-200 hover:border-indigo-300 text-slate-700')}">← Previous</button>` : ''}
+                ${at < test.questions.length - 1 ? `<button id="next" type="button" class="${btn('bg-slate-900 hover:bg-slate-700 text-white')}">Next →</button>` : ''}
+                <button id="finish" type="button" class="${btn('ml-auto bg-white border border-slate-200 hover:border-indigo-300 text-slate-700')}">Finish the test</button>
+            </div>
+            <div id="confirm" class="hidden ${card} border-rose-200 space-y-2"></div>
+            ${!listen ? `<section class="${card} space-y-2"><h2 class="text-xs font-bold uppercase tracking-wide text-slate-500">Go to a question</h2>
+                <div class="flex flex-wrap gap-1.5">${test.questions.map((_, i) => `<button type="button" data-go="${i}" class="w-10 min-h-[40px] rounded-lg text-sm font-bold border ${i === at ? 'bg-indigo-600 border-indigo-600 text-white' : answers[i] !== null ? 'bg-indigo-50 border-indigo-200 text-indigo-800' : 'bg-white border-slate-200 text-slate-500'}">${i + 1}</button>`).join('')}</div></section>` : ''}`;
+        app.querySelectorAll('[data-opt]').forEach(b => b.onclick = () => { answers[at] = Number(b.dataset.opt); drawQuestion(); });
+        app.querySelectorAll('[data-go]').forEach(b => b.onclick = () => { at = Number(b.dataset.go); drawQuestion(); });
+        if ($('prev')) $('prev').onclick = () => { at--; drawQuestion(); };
+        if ($('next')) $('next').onclick = () => { stopAudio(); at++; drawQuestion(); $('scroller').scrollTop = 0; };
+        $('finish').onclick = () => {
+            const empty = answers.filter(a => a === null).length;
+            $('confirm').classList.remove('hidden');
+            $('confirm').innerHTML = `<p class="text-sm text-slate-700">${empty ? `<b>${empty} question${empty > 1 ? 's' : ''}</b> without an answer. ` : ''}Finish now and see your score?</p>
+                <div class="flex gap-2"><button id="yes" type="button" class="${btn('bg-rose-600 hover:bg-rose-600 text-white')}">Finish</button>
+                <button id="no" type="button" class="${btn('bg-white border border-slate-200 text-slate-700')}">Keep going</button></div>`;
+            $('yes').onclick = () => finishQuiz(false);
+            $('no').onclick = () => $('confirm').classList.add('hidden');
+        };
+        if ($('play')) $('play').onclick = () => {
+            played[at] = true;
+            $('play').disabled = true; $('play').textContent = '🔊 Playing…';
+            $('play-note').textContent = 'Listen carefully: once only.';
+            const i = at;
+            playLines(q.lines, () => { if (at === i && $('play')) { $('play').textContent = '✓ Heard'; $('play-note').textContent = 'You have heard this recording.'; } });
+        };
+    }
+
+    // ---------- Voices: a woman, a man and an announcer, from the French voices on this device ----------
+    let VOICES = null;
+    function pickVoices() {
+        const all = (window.speechSynthesis && speechSynthesis.getVoices()) || [];
+        const fr = all.filter(v => /^fr/i.test(v.lang || ''));
+        const pref = fr.filter(v => /fr[-_]FR/i.test(v.lang)).concat(fr.filter(v => !/fr[-_]FR/i.test(v.lang)));
+        const F = /amélie|amelie|audrey|aurélie|denise|julie|marie|hortense|léa|lea|virginie|céline|celine|chantal|sylvie|eloise|éloise|female|femme|google français/i;
+        const M = /thomas|henri|paul|claude|nicolas|jean|antoine|daniel|guillaume|remy|rémy|male|homme/i;
+        const f = pref.find(v => F.test(v.name)) || pref[0] || null;
+        const m = pref.find(v => M.test(v.name) && v !== f) || pref.find(v => v !== f) || f;
+        VOICES = { f, m, n: f, same: !f || f === m };
+        return VOICES;
+    }
+    if (window.speechSynthesis) try { speechSynthesis.addEventListener('voiceschanged', () => { VOICES = null; }); } catch (e) {}
+    function voiceCheck() {
+        const note = $('voice-note'); if (!note) return;
+        setTimeout(() => {
+            const v = pickVoices();
+            if (!('speechSynthesis' in window)) { note.textContent = 'This browser cannot read text aloud. Try Chrome, Edge or Safari.'; note.classList.remove('hidden'); }
+            else if (!v.f) { note.textContent = 'Your device has no French voice, so the recordings may sound English. Add a French voice in your device settings (Speech or Text-to-speech), then reload this page.'; note.classList.remove('hidden'); }
+        }, 1200);
+    }
+    let speaking = 0;
+    function playLines(lines, done) {
+        if (!('speechSynthesis' in window)) { done && done(); return; }
+        const v = VOICES || pickVoices();
+        const run = ++speaking;
+        speechSynthesis.cancel();
+        let i = 0;
+        const next = () => {
+            if (run !== speaking) return;
+            if (i >= lines.length) { done && done(); return; }
+            const [who, text] = lines[i++];
+            const u = new SpeechSynthesisUtterance(String(text).replace(/[«»—–]/g, ' '));
+            u.lang = 'fr-FR';
+            const voice = v[who] || v.f; if (voice) u.voice = voice;
+            // one voice only on this device: tell the speakers apart by pitch
+            u.pitch = v.same ? (who === 'm' ? 0.75 : who === 'f' ? 1.2 : 1) : 1;
+            u.rate = who === 'n' ? 0.95 : 1;
+            u.onend = () => setTimeout(next, 450); u.onerror = () => setTimeout(next, 100);
+            speechSynthesis.speak(u);
+        };
+        next();
+    }
+    function stopAudio() { speaking++; if ('speechSynthesis' in window) speechSynthesis.cancel(); }
+
+    function finishQuiz(timeUp) {
+        stopClock(); stopAudio(); running = false;
+        const qs = test.questions;
+        let score = 0, correct = 0;
+        const band = {}; LEVELS.forEach(l => band[l] = [0, 0]);
+        qs.forEach((q, i) => { const ok = answers[i] === 0, l = levelOf(i + 1); band[l][1]++; if (ok) { correct++; score += NCLC.points(i + 1); band[l][0]++; } });
+        const row = NCLC.saveTest(part, test.id, { correct, total: qs.length, score });
+        if (typeof Activity !== 'undefined') try { Activity.record(); } catch (e) {}
+        const n = row.nclc, need = part === 'listening' ? 458 : 453;
+        app.innerHTML = `
+            <div><h1 class="text-2xl font-black text-slate-900">${INTRO[part].emoji} Your result</h1>
+            ${timeUp ? '<p class="text-sm text-rose-700 font-semibold mt-1">Time is up.</p>' : ''}</div>
+            <section class="${card} flex flex-wrap items-center gap-4">
+                <div class="w-16 h-16 rounded-2xl ${NCLC.tone(n)} flex flex-col items-center justify-center"><span class="text-xs font-bold">≈ NCLC</span><span class="text-2xl font-black leading-none">${n >= 10 ? '10+' : n >= 4 ? n : '<4'}</span></div>
+                <div class="min-w-0 flex-1 space-y-1">
+                    <p class="text-lg font-black text-slate-900">${score} / 699 <span class="text-base font-semibold text-slate-500">· ${correct} of ${qs.length} right</span></p>
+                    <p class="text-sm text-slate-700">${n >= 7 ? `Above the NCLC 7 line (${need}).` : `NCLC 7 starts at <b>${need}</b> in ${part}: ${need - score} points to go.`}</p>
+                    <p class="text-xs text-slate-500">An estimate: the questions are counted with the usual TCF points per level, and the level is read from IRCC's table for TCF Canada.</p>
+                </div>
+            </section>
+            <section class="${card} space-y-2"><h2 class="text-sm font-bold uppercase tracking-wide text-slate-500">By level</h2>
+                <div class="grid grid-cols-3 sm:grid-cols-6 gap-2">${LEVELS.map(l => { const [ok, all] = band[l]; return `<div class="rounded-xl bg-slate-50 border border-slate-100 p-2 text-center">
+                    <div class="text-xs font-bold text-slate-500">${l}</div><div class="text-lg font-black ${ok === all ? 'text-emerald-700' : ok / all >= 0.5 ? 'text-slate-900' : 'text-rose-700'}">${ok}/${all}</div></div>`; }).join('')}</div>
+                <p class="text-sm text-slate-600">${(() => { const weak = LEVELS.find(l => band[l][0] / band[l][1] < 0.6); return weak ? `Your points start slipping at <b>${weak}</b>. For NCLC 7 you need nearly every question up to B2, plus two or three at C1.` : 'Strong at every level. Bravo !'; })()}</p>
+            </section>
+            <div class="flex flex-wrap gap-2">
+                <a href="exam.html" class="${btn('bg-indigo-600 hover:bg-indigo-700 text-white')}">See your four skills</a>
+                <a href="${part}.html" class="${btn('bg-white border border-slate-200 hover:border-indigo-300 text-slate-700')}">Practise in ${part === 'reading' ? 'Reading' : 'Listening'}</a>
+            </div>
+            <section class="space-y-2"><h2 class="text-sm font-bold uppercase tracking-wide text-slate-500">Check your answers</h2>
+                ${qs.map((q, i) => { const a = answers[i], ok = a === 0; return `<details class="${card} group">
+                    <summary class="list-none cursor-pointer flex items-start gap-3 [&::-webkit-details-marker]:hidden">
+                        <span class="shrink-0 w-6 h-6 rounded-full ${ok ? 'bg-emerald-500' : 'bg-rose-400'} text-white text-sm font-black flex items-center justify-center">${ok ? '✓' : '✗'}</span>
+                        <span class="min-w-0 flex-1"><span class="text-xs font-bold text-slate-400">${i + 1} · ${levelOf(i + 1)} · ${escapeHtml(q.kind)}</span><span lang="fr" class="block font-semibold text-slate-900">${escapeHtml(q.q)}</span></span>
+                        <span class="shrink-0 text-sm font-semibold text-indigo-600 group-open:hidden">Show</span></summary>
+                    <div class="pt-3 space-y-2 text-sm">
+                        <p lang="fr" class="text-base text-slate-800 leading-relaxed whitespace-pre-line bg-slate-50 rounded-xl p-3">${q.doc ? escapeHtml(q.doc) : q.lines.map(([w, t]) => `<b>${w === 'f' ? 'Femme' : w === 'm' ? 'Homme' : 'Annonce'} :</b> ${escapeHtml(t)}`).join('\n')}</p>
+                        ${q.lines ? `<button type="button" data-replay="${i}" class="min-h-[36px] px-2.5 text-sm font-semibold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 rounded-lg">🔊 Listen again</button>` : ''}
+                        ${!ok ? `<p class="text-rose-700">Your answer: <span lang="fr">${a === null ? '(none)' : escapeHtml(q.o[a])}</span></p>` : ''}
+                        <p class="text-emerald-700 font-semibold">Right answer: <span lang="fr">${escapeHtml(q.o[0])}</span></p>
+                        <p class="text-slate-600">${escapeHtml(q.why)}</p>
+                    </div></details>`; }).join('')}
+            </section>`;
+        app.querySelectorAll('[data-replay]').forEach(b => b.onclick = () => playLines(test.questions[Number(b.dataset.replay)].lines));
+        $('scroller').scrollTop = 0;
+    }
+
+    // ===================== Writing: the three tasks in 60 minutes =====================
+    const W_KEY = 'writing_exam';   // { ids: [W1, W2, W3 task ids], texts: [], left, at }
+    let wx = null, wTasks = [];
+    const countWords = (s) => (String(s).trim().match(/[\p{L}\p{N}'’-]+/gu) || []).length;
+    async function startWriting(fresh) {
+        app.innerHTML = '<p class="text-sm text-slate-400 animate-pulse">Choosing your questions…</p>';
+        try {
+            wx = fresh ? null : store.get(W_KEY, null);
+            if (!wx) {
+                const ix = await TCF.index();
+                const themes = ix.themes.slice().sort(() => Math.random() - 0.5);   // a different theme for each task
+                const ids = [];
+                for (const [k, task] of ['W1', 'W2', 'W3'].entries()) {
+                    const id = await TCF.randomId(task, themes[k % themes.length].slug);
+                    if (!id) throw new Error('Could not find the questions.');
+                    ids.push(id);
+                }
+                wx = { ids, texts: ['', '', ''], left: 3600 };
+            }
+            wTasks = await Promise.all(wx.ids.map(id => TCF.taskFromId(id)));
+            if (wTasks.some(t => !t)) throw new Error('Could not load the questions.');
+        } catch (e) { app.innerHTML = `<p class="text-sm text-rose-700">${escapeHtml(e.message)}</p>`; return; }
+        store.set(W_KEY, wx);
+        running = true;
+        drawWriting();
+        startClock(wx.left, () => finishWriting(true));
+    }
+    let wAt = 0;
+    function drawWriting() {
+        const t = wTasks[wAt], range = t.words;
+        app.innerHTML = `
+            <div class="sticky top-0 z-10 py-2 bg-slate-100 flex flex-wrap items-center gap-2">
+                ${wTasks.map((x, i) => { const n = countWords(wx.texts[i]); return `<button type="button" data-wtask="${i}" class="min-h-[40px] px-3 rounded-xl text-sm font-semibold border ${i === wAt ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-white border-slate-200 text-slate-700 hover:border-indigo-300'}">Task ${i + 1} <span data-wn="${i}" class="text-xs font-medium ${i === wAt ? 'text-indigo-100' : 'text-slate-400'}">${n} words</span></button>`; }).join('')}
+                <span class="ml-auto text-sm text-slate-500">⏱️ <b id="clock" class="font-black text-slate-900">${fmt(left)}</b></span>
+            </div>
+            <section class="${card} space-y-2">
+                <div class="flex flex-wrap items-baseline gap-2"><span class="text-xs font-bold uppercase tracking-wide text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-full">${escapeHtml(t.type)}</span><span class="text-sm text-slate-500">${range[0]}–${range[1]} words</span></div>
+                <h2 lang="fr" class="font-black text-slate-900">${escapeHtml(t.title)}</h2>
+                <p lang="fr" class="text-base text-slate-900 leading-relaxed whitespace-pre-line">${escapeHtml(t.fr)}</p>
+            </section>
+            <section class="${card} space-y-2">
+                <textarea id="wtext" rows="12" lang="fr" spellcheck="false" placeholder="Écrivez votre texte ici…" class="block w-full p-3 text-base leading-relaxed text-slate-900 bg-slate-50 border border-slate-200 rounded-xl resize-y focus:outline-none focus:ring-2 focus:ring-indigo-500">${escapeHtml(wx.texts[wAt])}</textarea>
+                <p id="wcount" class="text-sm text-slate-500"></p>
+            </section>
+            <div class="flex flex-wrap items-center gap-2">
+                ${wAt < 2 ? `<button id="wnext" type="button" class="${btn('bg-slate-900 hover:bg-slate-700 text-white')}">Task ${wAt + 2} →</button>` : ''}
+                <button id="wfinish" type="button" class="${btn('ml-auto bg-indigo-600 hover:bg-indigo-700 text-white')}">✨ Finish and get my marks</button>
+            </div>
+            <div id="confirm" class="hidden ${card} space-y-2"></div>`;
+        const ta = $('wtext');
+        const count = () => { const n = countWords(ta.value); $('wcount').textContent = `${n} words · aim for ${range[0]}–${range[1]}`; $('wcount').className = `text-sm ${n > range[1] ? 'text-amber-700' : n >= range[0] ? 'text-emerald-700' : 'text-slate-500'}`; const tab = app.querySelector(`[data-wn="${wAt}"]`); if (tab) tab.textContent = `${n} words`; };
+        ta.oninput = () => { wx.texts[wAt] = ta.value; wx.left = left; store.set(W_KEY, wx); count(); };
+        count();
+        app.querySelectorAll('[data-wtask]').forEach(b => b.onclick = () => { wAt = Number(b.dataset.wtask); drawWriting(); });
+        if ($('wnext')) $('wnext').onclick = () => { wAt++; drawWriting(); $('scroller').scrollTop = 0; };
+        $('wfinish').onclick = () => {
+            const short = wx.texts.map((x, i) => countWords(x) < wTasks[i].words[0] ? i + 1 : 0).filter(Boolean);
+            $('confirm').classList.remove('hidden');
+            $('confirm').innerHTML = `<p class="text-sm text-slate-700">${short.length ? `Task ${short.join(' and ')} ${short.length > 1 ? 'are' : 'is'} shorter than asked. ` : ''}Hand in your three texts now?</p>
+                <div class="flex gap-2"><button id="yes" type="button" class="${btn('bg-indigo-600 hover:bg-indigo-700 text-white')}">Hand in</button>
+                <button id="no" type="button" class="${btn('bg-white border border-slate-200 text-slate-700')}">Keep writing</button></div>`;
+            $('yes').onclick = () => finishWriting(false);
+            $('no').onclick = () => $('confirm').classList.add('hidden');
+        };
+    }
+    // Every minute, remember the time left (so a closed tab comes back with the right time)
+    setInterval(() => { if (running && part === 'writing' && wx) { wx.left = left; store.set(W_KEY, wx); } }, 15000);
+
+    // The same marking as the Writing page, for an exam-style task
+    async function markText(task, text) {
+        const fb = await askAI([
+            { role: 'system', content: `${window.FRANCE_FR_CHECK || ''} You are a kind, precise French teacher. This is an exam-style task (TCF/TEF, ${task.type}), written in a timed exam. Mark it as a TCF Canada examiner would, whatever the student's level. On the TCF scale, 4-5/20 is A2, 6-9 B1, 10-13 B2, 14-15 C1, 16-20 C2: a text that shows solid B1 French gets at most 9, even if it does the task well. Correct their French text.
+Reply with JSON only:
+{"score": number 0-20 for this task (task done, accuracy, range), as in the TCF,
+ "level": "the CEFR level this text shows: A1, A2, B1, B2, C1 or C2",
+ "summary": "two short sentences in simple English: overall impression and the main thing to work on",
+ "strengths": ["up to 3 short points in English"],
+ "corrections": [{"wrong": "the exact words copied from the student's text", "right": "the corrected French", "why": "one short explanation in simple English", "type": "grammar|spelling|agreement|conjugation|vocabulary|punctuation|style"}],
+ "checklist": [true/false for each checklist item, in order],
+ "corrected": "the whole text corrected, keeping the student's ideas and level"}
+Only list real mistakes, at most 12, in the order they appear. "wrong" must be copied exactly from the text, as short as possible (a few words).` },
+            { role: 'user', content: `Task: ${task.fr}\nChecklist: ${JSON.stringify(task.include)}\nTarget length: ${task.words[0]}-${task.words[1]} words.\n\nStudent's text:\n${text}` }
+        ], { json: true, temperature: 0.2, feature: 'writing-check' });
+        const score = Math.max(0, Math.min(20, Math.round(Number(fb.score))));
+        if (!Number.isFinite(score)) throw new Error('The AI reply could not be read.');
+        fb.score = score;
+        fb.level = LEVELS.includes(String(fb.level || '').toUpperCase()) ? String(fb.level).toUpperCase() : null;
+        return fb;
+    }
+    function showMark(i, t, head, fb) {
+        const box = $(`wr-${i}`), n = NCLC.from20(fb.score);
+        box.className = `${card} space-y-2 text-sm`;
+        box.innerHTML = `${head}
+            <p class="text-base"><b class="text-slate-900">${fb.score}/20</b> <span class="text-xs font-bold ${NCLC.tone(n)} px-2 py-0.5 rounded-full">≈ ${NCLC.label(n)}</span>${fb.level ? ` <span class="text-slate-500">· about ${escapeHtml(fb.level)}</span>` : ''}</p>
+            <p class="text-slate-700">${escapeHtml(fb.summary || '')}</p>
+            <a href="writing.html?task=${encodeURIComponent(t.id)}" class="inline-flex items-center min-h-[40px] font-semibold text-indigo-700 hover:underline">See your text corrected →</a>`;
+        return fb.score;
+    }
+    async function finishWriting(timeUp) {
+        stopClock(); running = false;
+        wx.left = 0; store.set(W_KEY, wx);
+        app.innerHTML = `<div><h1 class="text-2xl font-black text-slate-900">✍️ Your marks</h1>${timeUp ? '<p class="text-sm text-rose-700 font-semibold mt-1">Time is up: your texts were handed in.</p>' : ''}</div>
+            <div id="wres" class="space-y-3">${wTasks.map((t, i) => `<section id="wr-${i}" class="${card} text-sm text-indigo-600 animate-pulse">Marking task ${i + 1}…</section>`).join('')}</div>
+            <div id="wsum"></div>`;
+        const results = store.get('writing_results', {});
+        const scores = await Promise.all(wTasks.map(async (t, i) => {
+            const text = String(wx.texts[i] || '').trim(), box = $(`wr-${i}`);
+            const head = `<div class="flex flex-wrap items-baseline gap-2"><span class="text-xs font-bold uppercase tracking-wide text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-full">Task ${i + 1}</span><b lang="fr" class="text-slate-900">${escapeHtml(t.title)}</b><span class="text-slate-500">${countWords(text)} words</span></div>`;
+            const prev = results[t.id];
+            if (prev && prev.timed && prev.text === text && prev.feedback) return showMark(i, t, head, prev.feedback);   // already marked (a retry)
+            if (countWords(text) < 5) { box.className = `${card} space-y-1 text-sm`; box.innerHTML = `${head}<p class="text-rose-700">Nothing written: 0/20.</p>`; return 0; }
+            try {
+                const fb = await markText(t, text);
+                results[t.id] = { score: fb.score, at: Date.now(), text, feedback: fb, timed: true };
+                store.set('writing_results', results);
+                return showMark(i, t, head, fb);
+            } catch (e) {
+                box.className = `${card} space-y-2 text-sm`;
+                box.innerHTML = `${head}<p class="text-rose-700">${escapeHtml(e.message)}</p><p class="text-slate-600">Your text is kept: open it in Writing to check it later.</p>
+                    <a href="writing.html?task=${encodeURIComponent(t.id)}" class="inline-flex items-center min-h-[40px] font-semibold text-indigo-700 hover:underline">Open in Writing →</a>`;
+                const drafts = store.get('writing_drafts', {}); drafts[t.id] = text; store.set('writing_drafts', drafts);
+                return null;
+            }
+        }));
+        if (typeof Activity !== 'undefined') try { Activity.record(); } catch (e) {}
+        const ok = scores.filter(s => s !== null);
+        if (ok.length === 3) {
+            // TCF writing gives one mark /20 for the whole paper: here, the average of the three tasks
+            const avg = Math.round(ok.reduce((a, b) => a + b, 0) / 3), n = NCLC.from20(avg);
+            $('wsum').innerHTML = `<section class="${card} flex flex-wrap items-center gap-4">
+                <div class="w-16 h-16 rounded-2xl ${NCLC.tone(n)} flex flex-col items-center justify-center"><span class="text-xs font-bold">≈ NCLC</span><span class="text-2xl font-black leading-none">${n >= 10 ? '10+' : n >= 4 ? n : '<4'}</span></div>
+                <div class="min-w-0 flex-1 space-y-1"><p class="text-lg font-black text-slate-900">About ${avg}/20 for the paper</p>
+                <p class="text-sm text-slate-700">${avg >= 10 ? 'At or above the NCLC 7 line (10/20).' : `NCLC 7 starts at <b>10/20</b>.`}</p>
+                <p class="text-xs text-slate-500">The real exam gives one mark for the three tasks together; here it is the average of the AI's three marks.</p></div></section>
+                <div class="flex flex-wrap gap-2 pt-1"><a href="exam.html" class="${btn('bg-indigo-600 hover:bg-indigo-700 text-white')}">See your four skills</a></div>`;
+            store.set(W_KEY, null);
+        } else {
+            $('wsum').innerHTML = `<button id="wretry" type="button" class="${btn('bg-indigo-600 hover:bg-indigo-700 text-white')}">Try the marking again</button>`;
+            $('wretry').onclick = () => finishWriting(false);
+        }
+        $('scroller').scrollTop = 0;
+    }
+
+    intro();
+    </script>
+</body>
+</html>

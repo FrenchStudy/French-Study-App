@@ -21,6 +21,7 @@
     <script src="js/scenes.js"></script>
     <script src="js/task-angles.js"></script>
     <script src="js/tcf.js"></script>
+    <script src="js/nclc.js"></script>
     <script src="js/ai-maker.js"></script>
     <style>
         .fix-del { text-decoration: line-through; text-decoration-thickness: 2px; }
@@ -192,6 +193,10 @@
                                     <div class="text-sm text-slate-500"><b id="exam-timer" class="text-slate-900">0:00</b> <span id="exam-target"></span></div>
                                     <div class="mt-1 h-1.5 bg-slate-100 rounded-full overflow-hidden"><div id="exam-bar" class="h-full bg-indigo-400 rounded-full transition-all" style="width:0%"></div></div>
                                 </div>
+                            </div>
+                            <div id="exam-prep" class="hidden flex flex-wrap items-center gap-2 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2">
+                                <span id="exam-prep-text" class="flex-1 min-w-0 text-sm text-amber-900">In the exam you get <b>2 minutes</b> to prepare this role-play before you speak.</span>
+                                <button id="exam-prep-btn" type="button" class="min-h-[40px] px-3 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-sm font-bold">⏱️ Start preparing</button>
                             </div>
                             <textarea id="exam-text" rows="7" lang="fr" spellcheck="false" placeholder="What you say appears here. You can also type or fix words." class="block w-full p-3 text-base leading-relaxed text-slate-900 bg-slate-50 border border-slate-200 rounded-xl resize-y focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
                             <p id="exam-interim" class="text-sm text-slate-400 italic min-h-[1.25rem]"></p>
@@ -668,7 +673,7 @@ Give at most 4 corrections, only for real mistakes (an empty list if there are n
         function renderExamHome() { if (picker) picker.redraw(); }
         function statusHtml(id) {
             const r = examResults[id];
-            return r ? `<span class="shrink-0 text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">✓ ${r.score}/20</span>` : '';
+            return r ? `<span class="shrink-0 flex flex-wrap justify-end gap-1"><span class="text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">✓ ${r.score}/20</span>${r.exam ? NCLC.badge20(r.score) : ''}</span>` : '';
         }
         function mineCard(t) {
             return `<a href="speaking.html?task=${encodeURIComponent(t.id)}" data-task="${escapeHtml(t.id)}" class="group flex flex-col gap-1.5 bg-white border border-slate-200 hover:border-indigo-400 hover:shadow-md transition rounded-2xl p-4">
@@ -806,11 +811,38 @@ Reply with JSON only:
             $('exam-interim').textContent = '';
             $('exam-sample-box').classList.add('hidden');
             seconds = 0; updateTimer();
+            resetPrep(!!(t.tcf && /^S2\./.test(t.tcf.prompt)));
             const [min, max] = timeFor(t);
             $('exam-target').textContent = `· aim for ${fmtTime(min)}–${fmtTime(max)}`;
             if (r && r.feedback) renderExamFeedback(r.feedback, r.text);
             else if (t.note) { $('exam-feedback').innerHTML = errorBox(`Your question is saved. ${t.note} Without AI there are no talking points for it.`); $('exam-feedback').classList.remove('hidden'); }
             else $('exam-feedback').classList.add('hidden');
+        }
+        // Speaking 2: the exam gives 2 minutes to prepare before the role-play starts
+        const PREP = 120;
+        let prepTimer = null, prepLeft = PREP;
+        function resetPrep(show) {
+            clearInterval(prepTimer); prepTimer = null; prepLeft = PREP;
+            $('exam-prep').classList.toggle('hidden', !show);
+            $('exam-prep-text').innerHTML = 'In the exam you get <b>2 minutes</b> to prepare this role-play before you speak. Plan your questions, but don\'t write full sentences.';
+            $('exam-prep-btn').textContent = '⏱️ Start preparing';
+            $('exam-prep-btn').classList.remove('hidden');
+        }
+        function startPrep() {
+            if (prepTimer) { prepLeft = 0; }   // tap again: skip the rest
+            const tick = () => {
+                if (prepLeft <= 0) {
+                    clearInterval(prepTimer); prepTimer = null;
+                    $('exam-prep-text').innerHTML = '<b>Preparation over.</b> Tap the microphone and start the role-play.';
+                    $('exam-prep-btn').classList.add('hidden');
+                    $('exam-mic').focus();
+                    return;
+                }
+                $('exam-prep-text').innerHTML = `Preparing… <b>${fmtTime(prepLeft)}</b> left. Plan your greeting, 8–10 questions and how you will close.`;
+                prepLeft--;
+            };
+            $('exam-prep-btn').textContent = 'Skip, I\'m ready';
+            if (!prepTimer) { tick(); prepTimer = setInterval(tick, 1000); } else tick();
         }
         function updateTimer() {
             const [min, max] = timeFor(exam);
@@ -850,13 +882,13 @@ Reply with JSON only:
             $('exam-feedback').innerHTML = '<div class="bg-white border border-slate-200 rounded-2xl p-4 text-sm text-indigo-600 animate-pulse">Reading what you said…</div>';
             try {
                 const fb = await askAI([
-                    { role: 'system', content: `${window.FRANCE_FR_CHECK || ''} You are a kind, precise French oral examiner. The learner is at CEFR level ${exam.level}. Their answer was spoken and turned into text by speech recognition: ignore punctuation, capitals and obvious recognition slips; judge what they said.
+                    { role: 'system', content: `${window.FRANCE_FR_CHECK || ''} You are a kind, precise French oral examiner. ${exam.tcf ? `This is an exam-style task (TCF Canada, ${exam.kindLabel}). Mark it as a TCF Canada examiner would, whatever the learner's level. On the TCF scale, 4-5/20 is A2, 6-9 B1, 10-13 B2, 14-15 C1, 16-20 C2: an answer that shows solid B1 French gets at most 9, even if it does the task well. You only have a transcript, so you cannot judge pronunciation or fluency: mark task, range, accuracy and coherence.` : `The learner is at CEFR level ${exam.level}.`} Their answer was spoken and turned into text by speech recognition: ignore punctuation, capitals and obvious recognition slips; judge what they said.
 Reply with JSON only:
-{"score": number 0-20 for a ${exam.level} learner (task done, range, accuracy, coherence),
+{"score": number 0-20 ${exam.tcf ? 'on the TCF scale' : `for a ${exam.level} learner`} (task done, range, accuracy, coherence),
  "summary": "two short sentences in simple English: overall impression and the main thing to work on",
  "strengths": ["up to 3 short points in English"],
  "corrections": [{"wrong": "the exact words copied from the text", "right": "the corrected French", "why": "one short explanation in simple English", "type": "grammar|agreement|conjugation|vocabulary|style"}],
- "better": "the whole answer said the way a strong ${exam.level} speaker would say it, keeping the learner's ideas",
+ "better": "the whole answer said the way a strong ${exam.tcf ? 'B2' : exam.level} speaker would say it, keeping the learner's ideas",
  "next_time": "one tip in English to sound more natural next time"}
 Only list real mistakes, at most 10, in order. "wrong" must be copied exactly from the text, as short as possible.` },
                     { role: 'user', content: `Task: ${exam.fr}\nSpeaking time: ${fmtTime(seconds)}\n\nWhat the learner said:\n${text}` }
@@ -864,7 +896,7 @@ Only list real mistakes, at most 10, in order. "wrong" must be copied exactly fr
                 const score = Math.max(0, Math.min(20, Math.round(Number(fb.score))));
                 if (!Number.isFinite(score)) throw new Error('The AI reply could not be read. Please try again.');
                 fb.score = score;
-                examResults[exam.id] = { score, text, feedback: fb, at: Date.now() };
+                examResults[exam.id] = { score, text, feedback: fb, at: Date.now(), exam: !!exam.tcf };
                 store.set('speak_results', examResults);
                 record();
                 saveProgress('speaking', exam.id, score);
@@ -893,6 +925,7 @@ Only list real mistakes, at most 10, in order. "wrong" must be copied exactly fr
                     <div class="shrink-0 w-16 h-16 rounded-2xl ${tone[1]} ${tone[0]} flex flex-col items-center justify-center"><span class="text-2xl font-black leading-none">${score}</span><span class="text-xs font-bold">/ 20</span></div>
                     <div class="min-w-0 space-y-1">
                         <h2 class="font-black text-slate-900">Your feedback</h2>
+                        ${exam.tcf ? `<p class="text-sm font-semibold text-slate-900">${score}/20 ≈ <b>${NCLC.label(NCLC.from20(score))}</b> <span class="font-normal text-slate-500">(TCF Canada: NCLC 7 starts at 10/20)</span></p>` : ''}
                         <p class="text-sm text-slate-700">${escapeHtml(fb.summary || '')}</p>
                         ${(fb.strengths || []).length ? `<ul class="text-sm text-emerald-800 space-y-0.5">${fb.strengths.map(s => `<li>✓ ${escapeHtml(s)}</li>`).join('')}</ul>` : ''}
                         ${fb.next_time ? `<p class="text-sm text-indigo-800">💡 ${escapeHtml(fb.next_time)}</p>` : ''}
@@ -902,6 +935,7 @@ Only list real mistakes, at most 10, in order. "wrong" must be copied exactly fr
                     <h2 class="text-sm font-bold uppercase tracking-wide text-slate-500">What you said, corrected</h2>
                     <div class="text-base leading-8 text-slate-900 whitespace-pre-wrap">${markedText(text, corr)}</div>
                 </section>
+                ${exam.tcf ? '<p class="text-sm text-slate-500">This mark comes from the words the microphone heard. Pronunciation, fluency and hesitations are a big part of the real speaking mark, and the AI cannot hear them: get a tutor or a language partner to listen to you every week or two.</p>' : ''}
                 ${corr.length ? `<section class="bg-white border border-slate-200 rounded-2xl p-4 space-y-2">
                     <h2 class="text-sm font-bold uppercase tracking-wide text-slate-500">${corr.length} correction${corr.length === 1 ? '' : 's'}</h2>
                     <ol class="divide-y divide-slate-100">${corr.map((c, i) => `<li class="py-2.5 flex gap-3">
@@ -1051,6 +1085,8 @@ Only list real mistakes, at most 10, in order. "wrong" must be copied exactly fr
         $('exam-say').addEventListener('click', () => speakFrench(exam.fr));
         $('exam-en-btn').addEventListener('click', () => { const h = $('exam-en').classList.toggle('hidden'); $('exam-en-btn').textContent = h ? 'English' : 'Hide English'; });
         $('exam-mic').addEventListener('click', toggleExamMic);
+        $('exam-mic').addEventListener('click', () => { if (prepTimer) { clearInterval(prepTimer); prepTimer = null; $('exam-prep').classList.add('hidden'); } });
+        $('exam-prep-btn').addEventListener('click', startPrep);
         $('exam-check').addEventListener('click', checkExam);
         $('exam-sample').addEventListener('click', () => showExamSample(false));
         TCF.wire($('exam-sample-box'), () => bankTheme, (t) => speakFrench(t, 0.9));
