@@ -163,11 +163,12 @@ window.LIB = (function () {
     const LENGTH = { A1: '70-100', A2: '100-140', B1: '150-200', B2: '200-260', C1: '250-320', C2: '300-380' };
     const cleanQuestions = (qs) => (Array.isArray(qs) ? qs : []).filter(q => q && q.q && Array.isArray(q.options) && q.options.length >= 2)
         .map(q => ({ q: String(q.q), options: q.options.map(String).slice(0, 4), answer: Math.max(0, Math.min(q.options.length - 1, Number(q.answer) || 0)), why: String(q.why || '') })).slice(0, 6);
-    // focus (optional): { words: [French words to use], grammar: 'a grammar point to practise' }, from « My lessons »
+    // focus (optional): { words: [French words to use], grammar: 'a grammar point to practise' }, from « My lessons »;
+    // { note: 'an extra instruction' }, e.g. from the Topic generator (the AI picks the exact topic inside an area)
     async function generate({ subject, kind, level, purpose, focus }) {
         const f = focus || {};
         const focusLines = [(f.words || []).length ? `Use at least 6 of these words or phrases, naturally: ${f.words.slice(0, 24).join(', ')}` : '',
-            f.grammar ? `Use this grammar point several times, at ${level} level: ${f.grammar}` : ''].filter(Boolean).join('\n');
+            f.grammar ? `Use this grammar point several times, at ${level} level: ${f.grammar}` : '', f.note || ''].filter(Boolean).join('\n');
         const recent = mine().filter(x => x.subject === subject).slice(0, 5).map(x => x.title);
         const t = await askAI([
             { role: 'system', content: `${window.FRANCE_FR || ''} You write original French ${purpose === 'listening' ? 'listening scripts (written to be read aloud: natural spoken French, short sentences)' : 'reading texts'} for CEFR level ${level} learners, in the style of TV5Monde and DELF exams.
