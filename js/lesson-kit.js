@@ -552,24 +552,29 @@ const LessonKit = (function () {
                 </div>
             </div>
             <article class="lk-view hidden">
-                <div class="lg:grid lg:grid-cols-[minmax(0,1fr)_20rem] lg:gap-8">
-                    <div class="space-y-4 min-w-0">
-                        <div class="flex items-center justify-between gap-2">
-                            <button type="button" class="lk-back min-h-[44px] px-1 text-sm font-semibold text-slate-600 hover:text-indigo-600">← All lessons</button>
+                <!-- Same layout as a Vocab topic: full width, the other lessons in a drop-down from « Topic 28 ▾ » -->
+                <div class="space-y-4 min-w-0">
+                    <div class="flex items-center justify-between gap-2">
+                        <div class="flex items-center gap-3 min-w-0">
+                            <button type="button" class="lk-back min-h-[44px] px-1 text-sm font-semibold text-slate-600 hover:text-indigo-600 whitespace-nowrap">← <span class="hidden sm:inline">All lessons</span><span class="sm:hidden">Lessons</span></button>
                             <span class="lk-crumb text-xs font-bold px-2 py-1 rounded-full"></span>
                         </div>
-                        <header class="space-y-1">
-                            <h1 class="lk-title text-2xl lg:text-3xl font-black text-slate-900 leading-tight"></h1>
-                            <p class="lk-blurb text-base text-slate-600"></p>
-                        </header>
-                        <div class="lk-body space-y-4"></div>
-                        <button type="button" class="lk-done min-h-[48px] px-5 rounded-xl font-bold"></button>
-                        <div class="grid grid-cols-2 gap-2">
-                            <button type="button" class="lk-prev min-h-[56px] text-left px-3 py-2 bg-white border border-slate-200 hover:border-indigo-300 rounded-xl text-sm disabled:opacity-40"></button>
-                            <button type="button" class="lk-next min-h-[56px] text-right px-3 py-2 bg-white border border-slate-200 hover:border-indigo-300 rounded-xl text-sm disabled:opacity-40"></button>
+                        <div class="relative">
+                            <div class="lk-navtop flex items-center gap-1"></div>
+                            <div class="lk-side absolute right-0 top-full mt-2 z-40 w-80 max-w-[calc(100vw-2rem)] shadow-xl rounded-2xl" hidden data-scroll-ok></div>
                         </div>
                     </div>
-                    <aside class="lk-side hidden lg:block lg:sticky lg:top-4 lg:self-start"></aside>
+                    <header class="space-y-1">
+                        <span class="lk-crumb2 text-xs font-bold px-2 py-1 rounded-full"></span>
+                        <h1 class="lk-title text-2xl lg:text-3xl font-black text-slate-900 leading-tight"></h1>
+                        <p class="lk-blurb text-base text-slate-600"></p>
+                    </header>
+                    <div class="lk-body space-y-4"></div>
+                    <button type="button" class="lk-done min-h-[48px] px-5 rounded-xl font-bold"></button>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button type="button" class="lk-prev min-h-[56px] text-left px-3 py-2 bg-white border border-slate-200 hover:border-indigo-300 rounded-xl text-sm disabled:opacity-40"></button>
+                        <button type="button" class="lk-next min-h-[56px] text-right px-3 py-2 bg-white border border-slate-200 hover:border-indigo-300 rounded-xl text-sm disabled:opacity-40"></button>
+                    </div>
                 </div>
             </article>`;
         const q = (cls) => root.querySelector('.lk-' + cls);
@@ -695,8 +700,8 @@ const LessonKit = (function () {
             q('side').innerHTML = `
                 <div class="bg-white border border-slate-200 rounded-2xl p-3">
                     <div class="text-xs font-bold uppercase tracking-wide ${st.text} px-1 pb-2">${escapeHtml(name)}</div>
-                    <div class="divide-y divide-slate-100">
-                        ${list.map(x => `<a href="${url(x)}" data-open="${escapeHtml(String(x))}" class="flex items-center gap-2 px-1 py-2 text-sm rounded-lg ${x === id ? `${st.soft} font-bold text-slate-900` : 'text-slate-700 hover:bg-slate-50'}">
+                    <div class="max-h-[70vh] overflow-y-auto divide-y divide-slate-100">
+                        ${list.map(x => `<a href="${url(x)}" data-open="${escapeHtml(String(x))}" ${x === id ? 'aria-current="page"' : ''} class="flex items-center gap-2 px-1 py-2 text-sm rounded-lg ${x === id ? `${st.soft} font-bold text-slate-900` : 'text-slate-700 hover:bg-slate-50'}">
                             <span class="shrink-0 w-6 h-6 rounded-full text-xs font-bold flex items-center justify-center ${isDone(section, x) ? 'bg-emerald-500 text-white' : x === id ? `${st.solid} text-white` : 'bg-slate-100 text-slate-600'}">${isDone(section, x) ? '✓' : escapeHtml(String(nodeLabel(x, sec.get(x))))}</span>
                             <span class="truncate">${escapeHtml(sec.get(x).title)}</span></a>`).join('')}
                     </div>
@@ -716,8 +721,11 @@ const LessonKit = (function () {
             if (opts.onViewChange) opts.onViewChange(true);
             scrollTop();
             const st = styleOf(level);
-            q('crumb').className = `lk-crumb text-xs font-bold px-2 py-1 rounded-full ${st.soft} ${st.text}`;
+            // the level badge: next to the back link on a computer, above the title on a phone (like a Vocab topic)
+            q('crumb').className = `lk-crumb hidden md:inline text-xs font-bold px-2 py-1 rounded-full whitespace-nowrap ${st.soft} ${st.text}`;
             q('crumb').textContent = `${sec.name} · ${level}`;
+            q('crumb2').className = `lk-crumb2 md:hidden inline-block text-xs font-bold px-2 py-1 rounded-full ${st.soft} ${st.text}`;
+            q('crumb2').textContent = `${sec.name} · ${level}`;
             q('title').textContent = `${t.n}. ${t.title}`;
             q('blurb').textContent = t.blurb || '';
             document.title = `${t.title} - ${sec.name}`;
@@ -744,6 +752,12 @@ const LessonKit = (function () {
             q('next').innerHTML = next === undefined ? '' : `<span class="block text-xs text-slate-400">Next →</span><span class="block font-semibold text-slate-800">${label(next)}</span>`;
             q('prev').classList.toggle('invisible', prev === undefined);   // first lesson: no empty box
             q('next').classList.toggle('invisible', next === undefined);
+            const small = (x, label) => x !== undefined
+                ? `<button type="button" data-open="${escapeHtml(String(x))}" title="${label(x)}" class="min-h-[40px] px-3 inline-flex items-center text-sm font-semibold text-slate-700 bg-white border border-slate-200 hover:border-indigo-300 rounded-xl">${x === prev ? '‹<span class="hidden sm:inline">&nbsp;Prev</span>' : '<span class="hidden sm:inline">Next&nbsp;</span>›'}</button>`
+                : `<span class="min-h-[40px] px-3 inline-flex items-center text-sm font-semibold text-slate-300 bg-white border border-slate-100 rounded-xl" aria-hidden="true">${list.indexOf(current) === 0 ? '‹<span class="hidden sm:inline">&nbsp;Prev</span>' : '<span class="hidden sm:inline">Next&nbsp;</span>›'}</span>`;
+            const here = sec.get(current);
+            q('navtop').innerHTML = `${small(prev, label)}<button type="button" class="lk-menu min-h-[40px] px-3 inline-flex items-center gap-1.5 text-sm font-semibold text-slate-700 bg-white border border-slate-200 hover:border-indigo-300 rounded-xl" aria-expanded="false" title="All lessons of this level"><span class="whitespace-nowrap">Topic ${escapeHtml(String(nodeLabel(current, here)))}</span><span class="text-slate-400" aria-hidden="true">▾</span></button>${small(next, label)}`;
+            q('side').hidden = true;
             q('prev').onclick = () => prev !== undefined && open(prev, true);
             q('next').onclick = () => next !== undefined && open(next, true);
             renderSide(current);
@@ -839,6 +853,18 @@ const LessonKit = (function () {
                 if (missed[0]) { missed[0].scrollIntoView({ block: 'center' }); missed[0].querySelector('input').focus({ preventScroll: true }); }
             }
         });
+        // « Topic 28 ▾ »: the other lessons of this level as a drop-down, like a Vocab topic
+        const setMenu = (on) => {
+            const side = q('side'), btn = root.querySelector('.lk-menu');
+            side.hidden = !on; if (btn) btn.setAttribute('aria-expanded', on);
+            const cur = on && side.querySelector('[aria-current="page"]');
+            if (cur) { const box = cur.parentElement; box.scrollTop = Math.max(0, cur.offsetTop - box.offsetTop - box.clientHeight / 2); }
+        };
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('.lk-menu')) { setMenu(q('side').hidden); return; }
+            if (!q('side').hidden && !e.target.closest('.lk-side')) setMenu(false);
+        });
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !q('side').hidden) { setMenu(false); root.querySelector('.lk-menu')?.focus(); } });
         root.addEventListener('click', (e) => {
             const lv = e.target.closest('[data-level]');
             if (lv) { level = lv.dataset.level; store.set(LEVEL_KEY, level); renderPath(); return; }
