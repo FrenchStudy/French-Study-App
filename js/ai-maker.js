@@ -23,7 +23,7 @@
     function mount(host, opts) {
         if (!document.getElementById('mk-css')) { const st = document.createElement('style'); st.id = 'mk-css'; st.textContent = CSS; document.head.appendChild(st); }
         const o = Object.assign({ key: 'page', noun: 'text', title: '✨ AI writes a new text for you', sub: 'Every text is new, made for you in seconds.',
-            formats: [], anyFormat: '', freeNoun: 'texts', topicsHint: 'Pick a topic, or type your own:', ownPlaceholder: '✏️ …or type your own subject, e.g. a night train to Nice',
+            verb: 'write', busyText: '', formats: [], anyFormat: '', freeNoun: 'texts', topicsHint: 'Pick a topic, or type your own:', ownPlaceholder: '✏️ …or type your own subject, e.g. a night train to Nice',
             library: null, write: async () => {} }, opts);
         const tabCls = 'mk-tab flex-1 sm:flex-none flex items-center justify-center gap-1.5 min-h-[44px] px-0.5 sm:px-0 border-b-2 border-transparent text-slate-500 hover:text-slate-800 whitespace-nowrap';
         host.classList.add('bg-white', 'border-2', 'border-indigo-200', 'rounded-2xl', 'shadow-sm');
@@ -100,8 +100,8 @@
             const ready = mk.level && subjectLabel, go = q('go');
             go.disabled = !ready || mk.busy;
             go.className = 'w-full sm:w-auto min-h-[52px] px-6 rounded-xl font-black text-base ' + (ready ? 'bg-indigo-600 hover:bg-indigo-700 text-white' : 'bg-slate-200 text-slate-500');
-            go.innerHTML = mk.busy ? `✨ AI is writing your ${esc(o.noun)}…` : !mk.level ? 'Pick a level to start' : !subjectLabel ? 'Open a lesson first'
-                : `✨ AI, write my ${esc(o.noun)} · ${mk.level}<span class="hidden sm:inline"> · ${esc(subjectLabel)}</span>`;
+            go.innerHTML = mk.busy ? esc(o.busyText || `✨ AI is writing your ${o.noun}…`) : !mk.level ? 'Pick a level to start' : !subjectLabel ? 'Open a lesson first'
+                : `✨ AI, ${esc(o.verb)} my ${esc(o.noun)} · ${mk.level}<span class="hidden sm:inline"> · ${esc(subjectLabel)}</span>`;
             renderFree();
         }
         // Free AI uses: shown to students on the free plan (the count comes from the AI server)

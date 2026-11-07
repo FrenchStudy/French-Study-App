@@ -21,6 +21,7 @@
     <script src="js/scenes.js"></script>
     <script src="js/task-angles.js"></script>
     <script src="js/tcf.js"></script>
+    <script src="js/ai-maker.js"></script>
     <style>
         .fix-del { text-decoration: line-through; text-decoration-thickness: 2px; }
         @keyframes pulse-ring { 0% { box-shadow: 0 0 0 0 rgba(244,63,94,.45); } 100% { box-shadow: 0 0 0 14px rgba(244,63,94,0); } }
@@ -38,7 +39,7 @@
             <div id="home-view" class="space-y-4">
                 <div>
                     <h1 class="text-2xl font-black text-slate-900">Speaking</h1>
-                    <p class="text-sm text-slate-500 mt-1">Talk with a character, repeat after native audio, or answer speaking questions.</p>
+                    <p class="text-sm text-slate-500 mt-1">Talk with an AI character, repeat after native audio, or answer speaking questions and get them corrected.</p>
                 </div>
                 <nav class="flex flex-wrap gap-x-1 sm:gap-x-6 text-sm font-semibold shadow-[inset_0_-1px_0_#e2e8f0]" role="tablist" aria-label="Speaking">
                     <button data-mode="conversation" role="tab" class="mode-tab shrink-0 min-h-[44px] px-2 sm:px-0 border-b-2">💬 Conversation</button>
@@ -49,28 +50,8 @@
 
                 <!-- Conversation -->
                 <section id="mode-conversation" class="space-y-3">
-                    <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] gap-3">
-                        <section class="bg-white border border-slate-200 rounded-2xl p-4 space-y-2">
-                            <h2 class="font-black text-slate-900">💬 Talk with a character</h2>
-                            <p class="text-sm text-slate-600">Pick a scene below and chat with a French character in an everyday situation.</p>
-                            <ul class="text-sm text-slate-600 space-y-1">
-                                <li>🎙️ Speak or type your answers.</li>
-                                <li>💡 Stuck? Tap "What can I say?" for ideas.</li>
-                                <li>✏️ Your mistakes are corrected as you go, and you get a short report at the end.</li>
-                            </ul>
-                        </section>
-                        <section class="bg-white border border-slate-200 rounded-2xl p-4 space-y-3 flex flex-col">
-                            <h2 class="font-black text-slate-900">🎭 Your own scene</h2>
-                            <p class="text-sm text-slate-500">Describe any situation and the AI plays the other person.</p>
-                            <input id="own-scene" type="text" maxlength="160" placeholder="e.g. returning a broken phone to a shop" class="w-full text-base md:text-sm px-3 py-2.5 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                            <button id="own-scene-btn" type="button" class="self-start min-h-[44px] px-4 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl">Start the scene</button>
-                            <div class="pt-2 border-t border-slate-100">
-                                <div class="text-sm font-semibold text-slate-700 mb-1.5">Or pick a subject: the AI invents a situation for your level</div>
-                                <div id="scene-subjects" class="flex flex-wrap gap-1.5"></div>
-                            </div>
-                        </section>
-                    </div>
-                    <h2 class="text-sm font-bold uppercase tracking-wide text-slate-500">Scenes</h2>
+                    <!-- ✨ AI creates a new conversation for you · and the Library of scenes (js/ai-maker.js) -->
+                    <section id="conv-maker" aria-label="AI creates a new conversation for you"></section>
                     <div id="scene-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
                 </section>
 
@@ -81,39 +62,23 @@
                 </section>
 
                 <!-- Questions: a new one from the AI, your own, then the exam-style questions (the mode is still called "exam" in the code) -->
-                <section id="mode-exam" class="hidden space-y-3">
-                    <div class="flex flex-wrap gap-1.5 sm:gap-2">
-                        <button id="open-ai" type="button" class="min-h-[44px] px-3 sm:px-4 text-sm sm:text-base bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl">✨ New task</button>
-                        <button id="open-post" type="button" class="min-h-[44px] px-3 sm:px-4 text-sm sm:text-base bg-white border border-slate-200 hover:border-indigo-300 disabled:opacity-50 font-bold rounded-xl">📝 Paste<span class="hidden sm:inline"> your own</span></button>
-                        <button id="random-btn" type="button" class="min-h-[44px] px-3 sm:px-4 text-sm sm:text-base bg-white border border-slate-200 hover:border-indigo-300 disabled:opacity-50 font-bold rounded-xl">🎲 Random</button>
-                    </div>
-                    <p id="random-error" class="hidden text-sm text-rose-700"></p>
-                    <section class="space-y-2 pt-1">
-                        <h2 class="text-lg font-black text-slate-900">Choose a question</h2>
-                        <div id="q-bank"><p class="text-sm text-slate-400 animate-pulse">Loading the questions…</p></div>
+                <section id="mode-exam" class="hidden space-y-4">
+                    <!-- ✨ AI writes a new question for you · and the Library of exam-style questions (js/ai-maker.js) -->
+                    <section id="q-maker" aria-label="AI writes a new question for you"></section>
+                    <div id="q-bank"><p class="text-sm text-slate-400 animate-pulse">Loading the questions…</p></div>
+                    <section class="space-y-2 pt-2">
+                        <div class="flex flex-wrap items-center justify-between gap-2">
+                            <h2 class="text-lg font-black text-slate-900">Your questions</h2>
+                            <button id="open-post" type="button" class="min-h-[40px] px-3 text-sm bg-white border border-slate-200 hover:border-indigo-300 font-bold rounded-xl">📝 Paste your own question</button>
+                        </div>
+                        <div id="made-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
                     </section>
 
-                    <!-- New task (AI) and Your own question: a panel over the page (from the bottom on phones) -->
+                    <!-- Your own question: a panel over the page (from the bottom on phones) -->
                     <div id="sheet" class="hidden fixed inset-0 z-[60] flex items-end sm:items-start justify-center sm:pt-20 bg-slate-900/40" role="dialog" aria-modal="true" aria-labelledby="sheet-title">
                         <div class="w-full sm:max-w-lg bg-white rounded-t-2xl sm:rounded-2xl p-5 space-y-3 max-h-[90vh] overflow-y-auto shadow-xl">
-                            <div id="sheet-ai" class="space-y-3">
-                                <h2 id="sheet-title" class="text-lg font-black text-slate-900">✨ New speaking task</h2>
-                                <p class="text-sm text-slate-500">The AI writes a new task for you, with points to cover and useful phrases. A different one every time.</p>
-                                <label class="block"><span class="block text-sm font-semibold text-slate-700 mb-1">Level</span>
-                                    <select id="ai-level" class="w-full text-base px-3 py-2.5 bg-white border border-slate-200 rounded-xl"></select></label>
-                                <label class="block"><span class="block text-sm font-semibold text-slate-700 mb-1">Subject</span>
-                                    <select id="ai-subject" class="w-full text-base px-3 py-2.5 bg-white border border-slate-200 rounded-xl"></select></label>
-                                <input id="subject-other" type="text" maxlength="80" placeholder="…or type any subject" class="w-full text-base px-3 py-2.5 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                                <label class="block"><span class="block text-sm font-semibold text-slate-700 mb-1">Type of task</span>
-                                    <select id="ai-kind" class="w-full text-base px-3 py-2.5 bg-white border border-slate-200 rounded-xl"></select></label>
-                                <div class="flex flex-wrap gap-2 pt-1">
-                                    <button id="gen-btn" type="button" class="min-h-[48px] px-5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-bold rounded-xl">Give me a task</button>
-                                    <button type="button" data-sheet-close class="min-h-[48px] px-4 bg-white border border-slate-200 font-semibold rounded-xl">Cancel</button>
-                                </div>
-                                <p id="gen-error" class="hidden text-sm text-rose-700"></p>
-                            </div>
-                            <div id="sheet-post" class="hidden space-y-3">
-                                <h2 class="text-lg font-black text-slate-900">📝 Your own question</h2>
+                            <div id="sheet-post" class="space-y-3">
+                                <h2 id="sheet-title" class="text-lg font-black text-slate-900">📝 Your own question</h2>
                                 <p class="text-sm text-slate-500">Paste a speaking question from a book, an exam or your teacher, in French or English.</p>
                                 <textarea id="post-text" rows="5" maxlength="1200" placeholder="e.g. Parlez de votre ville et de ce que vous aimez y faire." class="w-full text-base p-3 bg-white border border-slate-200 rounded-xl resize-y focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
                                 <div class="flex flex-wrap gap-2">
@@ -307,9 +272,9 @@
                 b.setAttribute('aria-selected', on);
             });
             ['conversation', 'shadowing', 'exam'].forEach(x => $('mode-' + x).classList.toggle('hidden', x !== mode));
-            if (mode === 'conversation') renderScenes();
+            if (mode === 'conversation') { renderScenes(); convMaker.render(); }
             if (mode === 'shadowing') renderTracks();
-            if (mode === 'exam') { renderExamHome(); initBank(); }
+            if (mode === 'exam') { renderExamHome(); qMaker.render(); renderMade(); initBank(); }
             if (push) history.pushState({}, '', 'speaking.html?mode=' + (mode === 'exam' ? 'questions' : mode));
         }
         let bankReady = false, picker = null;
@@ -319,7 +284,7 @@
             const q = new URLSearchParams(location.search);
             TCF.picker($('q-bank'), { kind: 'speaking', extra: EXTRA, status: statusHtml,
                 href: (id) => `speaking.html?task=${encodeURIComponent(id)}`, say: (t) => speakFrench(t, 0.9),
-                askAI: (th) => openSheet('ai', th.en) })
+                askAI: (th) => qMaker.set({ about: 'theme', own: th.en }) })
                 .then(p => { picker = p; if (p && (q.get('t') || q.get('theme'))) p.set(q.get('t'), q.get('theme')); });
         }
         function showHome(push) {
@@ -376,6 +341,26 @@ Return a JSON object:
  "fix": null if the learner's last message was correct and natural French, otherwise {"better": "their message corrected (same meaning, natural French)", "why": "one short explanation in simple English"},
  "hints": ["2 or 3 short French sentences the learner could say next"]}`;
         }
+        // ---------- ✨ AI creates a new conversation for you (the card is in js/ai-maker.js) ----------
+        // The AI plays the other person in a situation it invents from your topic, your lessons or your own words.
+        const CONV_FORMATS = ['Everyday chat', 'At a shop or a service', 'Solve a problem', 'Make plans', 'Interview'];
+        const convMaker = AIMaker.mount($('conv-maker'), {
+            key: 'speaking_conv', noun: 'conversation', verb: 'start', busyText: '✨ Starting your conversation…',
+            title: '✨ AI creates a new conversation for you', sub: 'Every conversation is new: the AI plays the other person. Speak or type; your mistakes are corrected as you go.',
+            formats: CONV_FORMATS, freeNoun: 'conversations', topicsHint: 'Pick a topic, or describe your own situation:', ownPlaceholder: '✏️ …or your own situation, e.g. returning a broken phone to a shop',
+            library: $('scene-grid'),
+            async write({ subject, focus, level, formatName }) {
+                const f = focus || {}, own = !f.label && !f.words;   // your own words: the situation as you wrote it
+                const kindLine = formatName ? ` The kind of conversation: ${formatName.toLowerCase()}.` : '';
+                const lessonLine = [(f.words || []).length ? ` Use some of these words naturally, so the learner hears and reuses them: ${f.words.slice(0, 16).join(', ')}.` : '',
+                    f.grammar ? ` Ask questions that make the learner use this grammar point: ${f.grammar}.` : ''].join('');
+                const persona = own
+                    ? `a French person in this situation: "${subject}". Choose a fitting first name and role, and play your part naturally.${kindLine} Uses "vous" unless the situation is between friends.`
+                    : `a French person in an everyday situation about "${subject}" that you invent: concrete, realistic and suited to a ${level} learner (for example a shop, a call, a neighbour, a colleague, an appointment). Choose a fitting first name and role.${kindLine}${lessonLine} In your first message, set the scene in one short sentence and start the conversation. Uses "vous" unless the situation is between friends.`;
+                startScene({ own: true, id: null, name: 'Your partner', role: '', emoji: '🎭', level, scene: own ? subject : `${f.label || subject}: a new situation`,
+                    goal: 'Handle the situation in French.', persona, opener: null, phrases: [] }, true);
+            }
+        });
         let convSession = '';
         function startScene(s, push) {
             convSession = 'conv-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);   // the whole conversation = one AI use
@@ -671,20 +656,16 @@ Give at most 4 corrections, only for real mistakes (an empty list if there are n
         // EXAM TASK: speak on a topic, get a score and corrections
         // =====================================================================
         const SECONDS = { A1: [30, 60], A2: [60, 90], B1: [90, 150], B2: [120, 180], C1: [180, 240], C2: [240, 300] };
-        const SUBJECTS = ['Yourself', 'Family and friends', 'Daily life', 'Food', 'Travel', 'Home', 'Work', 'Studies', 'Health and sport',
-            'Free time', 'Technology', 'Environment', 'Culture and media', 'Society'];
         const KINDS = [['monologue', 'Talk about a topic'], ['interaction', 'Role-play: get information'], ['opinion', 'Give and defend your opinion']];
         const DEFAULT_KIND = { A1: 'monologue', A2: 'interaction', B1: 'opinion', B2: 'opinion', C1: 'opinion', C2: 'opinion' };
         let examTasks = store.get('speak_tasks', []);
         let examResults = store.get('speak_results', {});
         let examSamples = store.get('speak_samples', {});
-        let pick = store.get('speak_pick', { subject: 'Yourself', kind: null });
         let exam = null;
         let bankTasks = [], bankTheme = null;   // questions from the exam question bank (exam.html), opened by their id
         const timeFor = (t) => t.seconds || SECONDS[t.level] || SECONDS.A1;
         const fmtTime = (s) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
         function renderExamHome() { if (picker) picker.redraw(); }
-        const LEVEL_NAME = { A1: 'Beginner', A2: 'Elementary', B1: 'Intermediate', B2: 'Upper intermediate', C1: 'Advanced', C2: 'Mastery' };
         function statusHtml(id) {
             const r = examResults[id];
             return r ? `<span class="shrink-0 text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">✓ ${r.score}/20</span>` : '';
@@ -695,31 +676,29 @@ Give at most 4 corrections, only for real mistakes (an empty list if there are n
                 <span class="font-bold text-slate-900 leading-snug group-hover:text-indigo-700">${escapeHtml(t.title)}</span>
                 <span class="text-sm text-slate-500 line-clamp-2">${escapeHtml(t.en || t.fr)}</span></a>`;
         }
-        const EXTRA = [
-            { key: 'mine', label: 'Mine', count: () => examTasks.length,
-              note: () => examTasks.length ? 'Tasks the AI wrote for you and questions you pasted, newest first.' : '',
-              html: () => examTasks.length ? examTasks.map(mineCard).join('') : '<p class="text-sm text-slate-500 sm:col-span-2 lg:col-span-3">No tasks yet. Tap <b>✨ New task</b> or <b>📝 Paste your own</b> above.</p>' }
-        ];
-        // ---------- The panel: New task (AI) and Your own question ----------
-        function openSheet(which, subject) {
-            $('sheet').classList.remove('hidden');
-            $('sheet-ai').classList.toggle('hidden', which !== 'ai');
-            $('sheet-post').classList.toggle('hidden', which !== 'post');
-            $('gen-error').classList.add('hidden'); $('post-error').classList.add('hidden');
-            if (which === 'ai') {
-                const lv = LEVELS.includes(pick.level) ? pick.level : myLevel();
-                $('ai-level').innerHTML = LEVELS.map(l => `<option value="${l}" ${l === lv ? 'selected' : ''}>${l} · ${LEVEL_NAME[l]}</option>`).join('');
-                $('ai-subject').innerHTML = SUBJECTS.map(x => `<option ${x === pick.subject ? 'selected' : ''}>${escapeHtml(x)}</option>`).join('');
-                $('subject-other').value = typeof subject === 'string' ? subject : '';
-                drawKinds();
-                setTimeout(() => $('gen-btn').focus(), 0);
-            } else setTimeout(() => $('post-text').focus(), 0);
+        const EXTRA = [];
+        // Your questions: the tasks the AI wrote for you and the questions you pasted, newest first
+        function renderMade() {
+            $('made-grid').innerHTML = examTasks.length ? examTasks.slice(0, 12).map(mineCard).join('')
+                : '<p class="text-sm text-slate-500">The questions the AI writes for you appear here, so you can practise them again.</p>';
         }
-        function drawKinds() {
-            const kind = pick.kind || DEFAULT_KIND[$('ai-level').value];
-            $('ai-kind').innerHTML = KINDS.map(([k, label]) => `<option value="${k}" ${k === kind ? 'selected' : ''}>${escapeHtml(label)}</option>`).join('');
+        // ---------- The panel: Your own question ----------
+        function openSheet() {
+            $('sheet').classList.remove('hidden');
+            $('post-error').classList.add('hidden');
+            setTimeout(() => $('post-text').focus(), 0);
         }
         const closeSheet = () => $('sheet').classList.add('hidden');
+        // ---------- ✨ AI writes a new question for you (the card is in js/ai-maker.js) ----------
+        const qMaker = AIMaker.mount($('q-maker'), {
+            key: 'speaking_q', noun: 'question', title: '✨ AI writes a new question for you', sub: 'Every question is new, made for you in seconds, with points to cover and useful phrases. Then the AI corrects what you say.',
+            formats: KINDS.map(([, label]) => label), freeNoun: 'questions', library: $('q-bank'),
+            async write({ subject, focus, level, formatName }) {
+                const kind = formatName ? KINDS.find(([, label]) => label === formatName)[0] : DEFAULT_KIND[level];
+                const t = await generateTask(subject, kind, level, focus);
+                openExam(t.id, true);
+            }
+        });
         // Open a question by its id: your own, or one from the exam-style bank
         async function openAnyTask(id, push) {
             if (!examTasks.find(t => t.id === id) && !bankTasks.find(t => t.id === id) && TCF.parseId(id)) {
@@ -733,11 +712,15 @@ Give at most 4 corrections, only for real mistakes (an empty list if there are n
             bank: (t.bank || []).filter(x => Array.isArray(x) && x.length >= 2).map(([a, b]) => [String(a), String(b)]).slice(0, 10)
         });
         function saveTask(t) { examTasks = [t, ...examTasks.filter(x => x.id !== t.id)].slice(0, 30); store.set('speak_tasks', examTasks); }
-        async function generateTask(subject, kind, level) {
+        // focus (from the card): { words, grammar } from « My lessons », { note } for a theme or Any topic
+        async function generateTask(subject, kind, level, focus) {
+            const f = focus || {};
             const kindLabel = (KINDS.find(([k]) => k === kind) || [, kind])[1];
             const earlier = examTasks.filter(x => x.subject === subject).slice(0, 8);
-            const angle = pickTaskAngle(subject, level, earlier.map(x => x.angle).filter(Boolean));
+            const angle = (f.words || f.grammar) ? null : pickTaskAngle(subject, level, earlier.map(x => x.angle).filter(Boolean));
             const topic = angle ? `${subject}, and more precisely: ${angle}` : subject;
+            const focusLines = [(f.words || []).length ? `Build the task so the learner naturally uses some of these words (put 4-6 of them in the bank): ${f.words.slice(0, 24).join(', ')}` : '',
+                f.grammar ? `The task should make the learner use this grammar point: ${f.grammar}` : '', !angle && f.note ? f.note : ''].filter(Boolean).join('\n');
             const messages = [
                 { role: 'system', content: `${window.FRANCE_FR || ''} You write French speaking tasks in the style of the DELF and TCF oral exams, for CEFR level ${level}.
 The task must be clearly and specifically about the topic given, never a general question about the subject.
@@ -748,7 +731,7 @@ Never write vague instructions like "Give your opinion about X" or "Explain why 
 Reply with JSON only:
 {"title": "short English title naming the precise topic", "fr": "the task in French, at ${level} level, 2-4 sentences", "en": "the same task in English",
  "include": ["3 or 4 short English points to talk about, specific to this task"], "bank": [["useful French phrase", "English meaning"], ... 8 items suited to ${level} and this topic]}` },
-                { role: 'user', content: `Topic: ${topic}\nTask type: ${kindLabel}${earlier.length ? '\nMake it different from: ' + earlier.slice(0, 6).map(x => x.title).join('; ') : ''}` }
+                { role: 'user', content: `Topic: ${topic}\nTask type: ${kindLabel}${focusLines ? '\n' + focusLines : ''}${earlier.length ? '\nMake it different from: ' + earlier.slice(0, 6).map(x => x.title).join('; ') : ''}` }
             ];
             // Both attempts share one session, so a retry does not cost the student a second free use
             const session = 'speaking-task-' + Date.now().toString(36);
@@ -777,7 +760,7 @@ Reply with JSON only:
         async function postQuestion() {
             const text = $('post-text').value.trim();
             if (text.length < 10) { $('post-error').textContent = 'Type or paste the question first.'; $('post-error').classList.remove('hidden'); return; }
-            const level = LEVELS.includes(pick.level) ? pick.level : myLevel();
+            const level = myLevel();   // only for the length and the phrases
             $('post-error').classList.add('hidden');
             $('post-btn').disabled = true; $('post-btn').textContent = 'Reading your question…';
             let task = { id: 'spq-' + Date.now().toString(36), source: 'posted', level, kindLabel: 'Your question', title: text.split(/[.?!\n]/)[0].slice(0, 60) || 'My question', fr: text, en: '', include: [], bank: [] };
@@ -1051,22 +1034,6 @@ Only list real mistakes, at most 10, in order. "wrong" must be copied exactly fr
         $('auto-speak').addEventListener('change', () => store.set('speak_auto', $('auto-speak').checked));
         $('btn-hints').addEventListener('click', showHints);
         $('btn-finish').addEventListener('click', finishScene);
-        $('own-scene-btn').addEventListener('click', () => {
-            const text = $('own-scene').value.trim();
-            if (!text) { $('own-scene').focus(); return; }
-            const lv = myLevel();
-            startScene({ own: true, id: null, name: 'Your partner', role: '', emoji: '🎭', level: lv, scene: text, goal: 'Handle the situation in French.',
-                persona: `a French person in this situation: "${text}". Choose a fitting first name and role, and play your part naturally. Uses "vous" unless the situation is between friends.`, opener: null, phrases: [] }, true);
-        });
-        $('own-scene').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('own-scene-btn').click(); });
-        // A subject: the AI invents a concrete everyday situation on it, at your level
-        $('scene-subjects').innerHTML = SUBJECTS.map(sj => `<button type="button" data-scene-subject="${escapeHtml(sj)}" class="min-h-[36px] px-3 rounded-full text-sm font-semibold border bg-white border-slate-200 text-slate-700 hover:border-indigo-300">${escapeHtml(sj)}</button>`).join('');
-        $('scene-subjects').addEventListener('click', (e) => {
-            const b = e.target.closest('[data-scene-subject]'); if (!b) return;
-            const sj = b.dataset.sceneSubject, lv = myLevel();
-            startScene({ own: true, id: null, name: 'Your partner', role: '', emoji: '🎭', level: lv, scene: `${sj}: a new situation`, goal: 'Handle the situation in French.',
-                persona: `a French person in an everyday situation about "${sj}" that you invent: concrete, realistic and suited to a ${lv} learner (for example a shop, a call, a neighbour, a colleague, an appointment). Choose a fitting first name and role. In your first message, set the scene in one short sentence and start the conversation. Uses "vous" unless the situation is between friends.`, opener: null, phrases: [] }, true);
-        });
         // Shadowing
         $('sh-listen').addEventListener('click', () => speakFrench(track.items[idx].fr));
         $('sh-slow').addEventListener('click', () => speakFrench(track.items[idx].fr, 0.6));
@@ -1074,37 +1041,8 @@ Only list real mistakes, at most 10, in order. "wrong" must be copied exactly fr
         $('sh-prev').addEventListener('click', () => { if (idx > 0) { idx--; renderPhrase(); } });
         $('sh-next').addEventListener('click', () => { if (idx < track.items.length - 1) { idx++; renderPhrase(); } });
         // Exam task
-        $('gen-btn').addEventListener('click', () => {
-            const lv = $('ai-level').value;
-            const showError = (m) => { $('gen-error').textContent = m; $('gen-error').classList.toggle('hidden', !m); };
-            onGenerate($('gen-btn'), showError, $('subject-other').value.trim() || $('ai-subject').value, $('ai-kind').value || DEFAULT_KIND[lv], lv);
-        });
-        $('open-ai').addEventListener('click', () => openSheet('ai'));
-        $('open-post').addEventListener('click', () => openSheet('post'));
-        $('ai-level').addEventListener('change', () => { pick.level = $('ai-level').value; store.set('speak_pick', pick); drawKinds(); });
-        $('ai-subject').addEventListener('change', () => { pick.subject = $('ai-subject').value; $('subject-other').value = ''; store.set('speak_pick', pick); });
-        $('ai-kind').addEventListener('change', () => { pick.kind = $('ai-kind').value; store.set('speak_pick', pick); });
+        $('open-post').addEventListener('click', () => openSheet());
         document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('sheet').classList.contains('hidden')) closeSheet(); });
-        // 🎲 Random: a question you have not practised yet, of the type and topic you are looking at
-        $('random-btn').addEventListener('click', async () => {
-            const btn = $('random-btn'), err = $('random-error');
-            err.classList.add('hidden');
-            const st = picker ? picker.state() : { type: 'S1', slug: 'all', isBank: true };
-            try {
-                btn.disabled = true;
-                let id = null;
-                if (st.isBank) id = await TCF.randomId(st.type, st.slug);
-                else {
-                    const fresh = examTasks.filter(t => !examResults[t.id]);
-                    const from = fresh.length ? fresh : examTasks;
-                    id = from.length ? from[Math.floor(Math.random() * from.length)].id : null;
-                }
-                if (!id) throw new Error(st.type === 'mine' ? 'You have no tasks of your own yet.' : 'No question found.');
-                await openAnyTask(id, true);
-            } catch (e) { err.textContent = e.message; err.classList.remove('hidden'); }
-            finally { btn.disabled = false; }
-        });
-        $('subject-other').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('gen-btn').click(); });
         $('post-btn').addEventListener('click', postQuestion);
         $('exam-another').addEventListener('click', () => {
             const showError = (m) => { if (m) { $('exam-feedback').innerHTML = errorBox(m); $('exam-feedback').classList.remove('hidden'); } };
