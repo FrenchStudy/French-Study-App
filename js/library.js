@@ -153,6 +153,8 @@ window.LIB = (function () {
     }
     const mine = () => store.get('lib_mine', []);
     function keepMine(t) { store.set('lib_mine', [t, ...mine().filter(x => x.id !== t.id)].slice(0, 40)); }
+    // The texts the AI wrote on this device, newest first (one skill: 'reading' or 'listening')
+    const made = (skill) => store.get('lib_made', []).map(find).filter(t => t && (t.skill || 'reading') === skill);
     function find(id) {
         return BUILT_IN.find(t => t.id === id) || mine().find(t => t.id === id) || store.get('lib_cache', {})[id] || null;
     }
@@ -161,7 +163,11 @@ window.LIB = (function () {
     const LENGTH = { A1: '70-100', A2: '100-140', B1: '150-200', B2: '200-260', C1: '250-320', C2: '300-380' };
     const cleanQuestions = (qs) => (Array.isArray(qs) ? qs : []).filter(q => q && q.q && Array.isArray(q.options) && q.options.length >= 2)
         .map(q => ({ q: String(q.q), options: q.options.map(String).slice(0, 4), answer: Math.max(0, Math.min(q.options.length - 1, Number(q.answer) || 0)), why: String(q.why || '') })).slice(0, 6);
-    async function generate({ subject, kind, level, purpose }) {
+    // focus (optional): { words: [French words to use], grammar: 'a grammar point to practise' }, from « My lessons »
+    async function generate({ subject, kind, level, purpose, focus }) {
+        const f = focus || {};
+        const focusLines = [(f.words || []).length ? `Use at least 6 of these words or phrases, naturally: ${f.words.slice(0, 24).join(', ')}` : '',
+            f.grammar ? `Use this grammar point several times, at ${level} level: ${f.grammar}` : ''].filter(Boolean).join('\n');
         const recent = mine().filter(x => x.subject === subject).slice(0, 5).map(x => x.title);
         const t = await askAI([
             { role: 'system', content: `${window.FRANCE_FR || ''} You write original French ${purpose === 'listening' ? 'listening scripts (written to be read aloud: natural spoken French, short sentences)' : 'reading texts'} for CEFR level ${level} learners, in the style of TV5Monde and DELF exams.
@@ -169,10 +175,10 @@ Write about ${LENGTH[level] || '120-160'} words, at ${level} level (vocabulary a
 Then write 4 multiple-choice comprehension questions, each with 3 options, in ${['A1', 'A2'].includes(level) ? 'simple English' : 'French'}. Put the correct option FIRST (answer: 0); the app shuffles them.
 Reply with JSON only: {"title": "a short French title", "kind": "the type of text in one or two English words, e.g. Dialogue, Announcement", "fr": "the text (use \\n between paragraphs or speakers)", "en": "an English translation",
  "questions": [{"q": "question", "options": ["correct", "wrong", "wrong"], "answer": 0, "why": "one short English explanation quoting the text"}]}` },
-            { role: 'user', content: `Subject: ${subject}\nType of text: ${kind}${recent.length ? '\nMake it different from: ' + recent.join('; ') : ''}` }
+            { role: 'user', content: `Subject: ${subject}\nType of text: ${kind}${focusLines ? '\n' + focusLines : ''}${recent.length ? '\nMake it different from: ' + recent.join('; ') : ''}` }
         ], { json: true, temperature: 0.9, feature: purpose === 'listening' ? 'listening-text' : 'reading-text' });
         if (!t.fr || String(t.fr).length < 40) throw new Error('The AI reply could not be read. Please try again.');
-        const text = { id: '', level, subject, kind: String(kind).length > 30 ? String(t.kind || 'Recording').slice(0, 30) : kind, title: String(t.title || subject).slice(0, 120), fr: String(t.fr).trim(), en: String(t.en || '').trim(), questions: cleanQuestions(t.questions), source: 'library' };
+        const text = { id: '', level, subject, kind: String(kind).length > 30 ? String(t.kind || 'Recording').slice(0, 30) : kind, title: String(t.title || subject).slice(0, 120), fr: String(t.fr).trim(), en: String(t.en || '').trim(), questions: cleanQuestions(t.questions), source: 'library', about: String(f.label || ''), skill: purpose === 'listening' ? 'listening' : 'reading' };
         // Share it with everyone at this level; if that fails, keep it on this device
         const dbId = await saveToLibrary(text);
         if (dbId) {
@@ -434,6 +440,6 @@ Reply with JSON only: {"title": "a short French title", "kind": "the type of tex
         return idx.map(i => ({ text: q.options[i], right: i === q.answer }));
     }
 
-    return { renderText, allSentences, openWord, closeWord, LEVELS, BUILT_IN, loadLibrary, fetchOne, libraryReady: () => libraryReady, mine, find, generate, fromPasted, sentences, candidates, lookupWord, explainWord,
+    return { renderText, allSentences, openWord, closeWord, LEVELS, BUILT_IN, loadLibrary, fetchOne, libraryReady: () => libraryReady, mine, made, find, generate, fromPasted, sentences, candidates, lookupWord, explainWord,
         addToReview, inReview, say, stop, voiceCheck, results, saveResult, shuffled, plain, store };
 })();

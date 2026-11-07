@@ -101,6 +101,18 @@ const LocalStore = {
     set(key, value) { try { localStorage.setItem(key, JSON.stringify(value)); } catch (e) {} }
 };
 
+// The lessons you opened last (Vocab topics and Grammar lessons), newest first: Reading's « My lessons » uses them
+// { k: 'vocab' | 'grammar', id, title, level, words?: [French words], rule?: 'the rule in one line' }
+const RecentLessons = {
+    KEY: 'recent_lessons',
+    list(kind) { const all = LocalStore.get(this.KEY, []); return Array.isArray(all) ? all.filter(x => x && (!kind || x.k === kind)) : []; },
+    add(item) {
+        if (!item || !item.k || item.id === undefined || !item.title) return;
+        const same = (x) => x.k === item.k && String(x.id) === String(item.id);
+        LocalStore.set(this.KEY, [{ ...item, at: Date.now() }, ...this.list().filter(x => !same(x))].slice(0, 12));
+    }
+};
+
 // The signed-in student and their profile (level, goal, name).
 // Saved in the profiles table, with a copy on this device so pages work before the SQL is run.
 const Account = {
