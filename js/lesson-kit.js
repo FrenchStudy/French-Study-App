@@ -394,14 +394,21 @@ const LessonKit = (function () {
     function lessonParts(t, ruleTitle) {
         const parts = [];
         if (t.rule && t.rule.length) parts.push(card(ruleTitle, t.rule.map(p => `<p class="text-base text-slate-800 leading-relaxed">${p}</p>`).join('')));
-        if (t.tables && t.tables.length) parts.push(card('Tables', t.tables.map(tb => tb.tense ? verbTable(tb) : dataTable(tb)).join('') +
+        // a table can carry its own cards (tb.cards: [{ title, html }]) and a short note (tb.note) shown right under it
+        const cardGrid = (cs) => `<div class="grid grid-cols-1 sm:grid-cols-${cs.length > 4 ? 4 : cs.length} gap-2">${cs.map(c => `
+            <div class="border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-700 leading-relaxed"><div class="font-bold text-slate-900">${escapeHtml(c.title)}</div>${c.html}</div>`).join('')}</div>`;
+        const after = (tb) => `${tb.cards && tb.cards.length ? `<div class="space-y-1"><div class="text-sm font-bold text-slate-800">${escapeHtml(tb.cardsTitle || '')}</div>${cardGrid(tb.cards)}</div>` : ''}${tb.note ? `<p class="text-sm text-slate-600">${tb.note}</p>` : ''}`;
+        if (t.tables && t.tables.length) parts.push(card('Tables', t.tables.map(tb => (tb.tense ? verbTable(tb) : dataTable(tb)) + after(tb)).join('') +
             '<p class="text-xs text-slate-400">Tap any French word to hear it.</p>'));
         if (t.likes && t.likes.length) parts.push(card('Verbs that follow the same pattern', t.likes.map(g => `
             <div><div class="text-sm font-semibold text-slate-700 mb-1">${escapeHtml(g.label)}</div>
             <div class="flex flex-wrap gap-1.5">${g.verbs.map(v => `<a href="${URLS.verb(v)}" class="text-sm px-2 py-1 bg-slate-100 hover:bg-indigo-100 rounded-lg text-slate-700">${escapeHtml(v)}</a>`).join('')}</div></div>`).join('')));
-        if (t.cards && t.cards.length) parts.push(card(t.cardsTitle || 'Which one?', `<div class="grid grid-cols-1 sm:grid-cols-${t.cards.length > 4 ? 4 : t.cards.length} gap-2">${t.cards.map(c => `
-            <div class="border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-700 leading-relaxed"><div class="font-bold text-slate-900">${escapeHtml(c.title)}</div>${c.html}</div>`).join('')}</div>`));
+        if (t.cards && t.cards.length) parts.push(card(t.cardsTitle || 'Which one?', cardGrid(t.cards)));
         if (t.ex && t.ex.length) parts.push(card('Examples', examplesBlock(t.ex)));
+        // t.mistakes: [[wrong, right, why]]
+        if (t.mistakes && t.mistakes.length) parts.push(card('Common mistakes', `<div class="border border-slate-200 rounded-xl overflow-hidden"><table class="w-full text-sm">
+            <thead><tr class="bg-slate-50 text-left text-slate-600"><th class="px-3 py-2 font-semibold">✗</th><th class="px-3 py-2 font-semibold">✓</th><th class="px-3 py-2 font-semibold">Why</th></tr></thead>
+            <tbody>${t.mistakes.map(([w, r, y]) => `<tr class="border-t border-slate-100"><td class="px-3 py-2 text-rose-700 line-through">${w}</td><td class="px-3 py-2"><button type="button" data-say="${escapeHtml(toText(r))}" class="text-left font-semibold text-emerald-700 hover:text-indigo-700">${r}</button></td><td class="px-3 py-2 text-slate-600">${y}</td></tr>`).join('')}</tbody></table></div>`));
         if (t.watch) parts.push(card('⚠️ Watch out', `<div class="text-base text-amber-900 leading-relaxed">${t.watch}</div>`, 'bg-amber-50 border-amber-200'));
         return parts;
     }
