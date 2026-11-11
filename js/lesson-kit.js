@@ -161,6 +161,7 @@ const LessonKit = (function () {
         </figure>`;
     }
 
+    // t.means (optional): one short English meaning per verb, shown under each verb
     function verbTable(t) {
         const verbs = t.verbs.map(v => C.find(v)).filter(Boolean);
         const tense = C.tenses.find(x => x.key === t.tense);
@@ -175,14 +176,14 @@ const LessonKit = (function () {
         // Phones: one small card per verb, side by side when they fit, so nothing scrolls sideways
         const cards = verbs.length < 2 ? '' : `<div class="sm:hidden grid grid-cols-[repeat(auto-fill,minmax(9.5rem,1fr))] gap-2">${verbs.map((v, j) => `
             <div class="border border-slate-200 rounded-xl overflow-hidden">
-                <a class="block px-2.5 py-1.5 bg-slate-50 text-sm font-semibold text-slate-600 hover:text-indigo-700" href="${URLS.verb(v.disp)}">${escapeHtml(v.disp)}</a>
+                <a class="block px-2.5 py-1.5 bg-slate-50 text-sm font-semibold text-slate-600 hover:text-indigo-700" href="${URLS.verb(v.disp)}">${escapeHtml(v.disp)}${t.means && t.means[j] ? ` <span class="font-normal text-xs text-slate-500">${escapeHtml(t.means[j])}</span>` : ''}</a>
                 <ul class="text-sm divide-y divide-slate-100">${cols[j].map((r, i) => r ? `<li class="px-2.5 py-1.5"><button type="button" data-say="${escapeHtml(r.say)}" class="text-left hover:text-indigo-700"><span class="text-slate-500">${escapeHtml(rows[i] ? rows[i].cp : '')}</span> <span class="font-semibold text-slate-900">${C.highlight(v, t.tense, i, r.cf)}</span></button></li>` : '').join('')}</ul>
             </div>`).join('')}</div>`;
         return `<figure class="space-y-1">
             <figcaption class="text-sm font-bold text-slate-800">${escapeHtml(t.cap || '')}${tense ? ` <span class="font-normal text-slate-500">· ${escapeHtml(tense.name)}</span>` : ''}</figcaption>
             ${cards}<div class="${cards ? 'hidden sm:block ' : ''}overflow-x-auto border border-slate-200 rounded-xl"><table class="w-full text-sm">
                 <thead><tr><th class="bg-slate-50"></th>${verbs.map(v => `<th class="text-left px-3 py-2 font-semibold text-slate-600 bg-slate-50"><a class="hover:text-indigo-700" href="${URLS.verb(v.disp)}">${escapeHtml(v.disp)}</a></th>`).join('')}</tr></thead>
-                <tbody>${body}</tbody></table></div>
+                <tbody>${t.means ? `<tr><td class="px-3 py-1 text-xs text-slate-500">means</td>${verbs.map((v, j) => `<td class="px-3 py-1 text-xs text-slate-500">${escapeHtml(t.means[j] || '')}</td>`).join('')}</tr>` : ''}${body}</tbody></table></div>
         </figure>`;
     }
 
