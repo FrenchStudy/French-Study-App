@@ -43,22 +43,18 @@ const LessonKit = (function () {
     // Teaching order per level: numbers are grammar lessons, "vN" are verb lessons of their own.
     // Inside each level, related topics sit together: articles and places, then pronouns, then verbs, then sentences.
     const ORDER = [
-        [1, 2, 10, 4, 29, 9, 'v1', 5, 12, 13, 14, 8, 11, 6, 7],
+        [1, 2, 11, 10, 4, 29, 9, 'v1', 5, 13, 14, 8, 6, 7],
         [19, 20, 31, 30, 21, 22, 24, 'v10', 15, 18, 16, 17, 23, 'v17', 28, 25, 26],
-        [43, 44, 37, 45, 38, 36, 32, 42, 33, 35, 'v25', 40, 39, 34, 41, 46],
-        [48, 47, 58, 52, 59, 49, 60, 53, 54, 50, 51, 55, 56, 57, 'v33'],
+        [43, 44, 37, 45, 38, 36, 32, 42, 33, 34, 35, 'v25', 40, 39, 41, 46],
+        [48, 49, 60, 47, 53, 54, 50, 58, 52, 59, 51, 55, 56, 57, 'v33'],
         ['v34', 'v35', 'v39', 67, 68, 'v36', 'v37', 'v38', 'v40', 64, 65, 61, 69, 70],
         ['v41', 'v42', 'v43', 71, 72, 73, 74, 75, 76, 'v44', 78]
     ];
-    // Lessons shown as one: the parts follow the main lesson on its page (Nov 2026).
-    //   2 takes in 27 (countries and cities) and 3 (partitive); v1 takes in v2 (aller, faire), v3 (modals) and v6 (key irregular verbs).
-    const COMBINE = {
-        2: { parts: [3, 27], title: 'Articles, partitive and à / de', blurb: 'le, un, du; au, à la, en, chez: the little words before a noun, a place, a country or a person.' },
-        v1: { parts: ['v2', 'v3', 'v6'], title: 'Key verbs: être, avoir, aller, faire, modals', blurb: 'The verbs used everywhere, in the present: être, avoir, aller, faire, vouloir, pouvoir, devoir, savoir and the key irregulars.' }
-    };
+    // Lessons folded into one (Nov 2026): 2 holds 27 (countries and cities) and 3 (partitive); v1 holds v2 (aller, faire),
+    // v3 (modals) and v6 (key irregular verbs). Their content is rewritten as one lesson in lessons-data.js.
     const VERB_INTO = { v2: 'v1', v3: 'v1', v6: 'v1' };
     // C1 lessons that repeated a B2 one now live inside it, as its "Going further" part
-    const MERGED_INTO = { 62: 55, 63: 51, 66: 57, 77: 69, 27: 2, 3: 2 };   // 77 (Quebec French) was removed: the app teaches France French
+    const MERGED_INTO = { 62: 55, 63: 51, 66: 57, 77: 69, 27: 2, 3: 2, 12: 'v1' };   // 77 (Quebec French) was removed: the app teaches France French
     const COURSE_LEVELS = ORDER.map((ids, i) => [(L.grammarLevels[i] || [`Level ${i + 1}`])[0], ids]);
     const COURSE_IDS = ORDER.flat();
     const isVerbId = (id) => typeof id === 'string' && /^v\d+$/.test(id);
@@ -77,13 +73,6 @@ const LessonKit = (function () {
         } else if (L.grammar[id]) {
             const forms = (MERGE[id] || []).map(c => L.conjugation[c]).filter(Boolean);
             t = { ...L.grammar[id], verbs: forms.length > 0, forms };
-        }
-        const cb = COMBINE[id];
-        if (t && cb) {
-            // the main lesson becomes the first part; each part keeps its own title, rule, tables and examples
-            const part = (x) => isVerbId(x) ? L.conjugation[Number(x.slice(1))] : L.grammar[x];
-            const parts = [t, ...cb.parts.map(part).filter(Boolean)].map(p => ({ ...p, ruleTitle: isVerbId(id) ? 'How to form it' : 'The rule' }));
-            t = { title: cb.title, blurb: cb.blurb, see: t.see, drill: t.drill, verbs: t.verbs, forms: [...parts, ...(t.forms || [])] };
         }
         if (t) { t.n = COURSE_IDS.indexOf(id) + 1; courseCache[id] = t; }
         return t;
@@ -409,6 +398,8 @@ const LessonKit = (function () {
         if (t.likes && t.likes.length) parts.push(card('Verbs that follow the same pattern', t.likes.map(g => `
             <div><div class="text-sm font-semibold text-slate-700 mb-1">${escapeHtml(g.label)}</div>
             <div class="flex flex-wrap gap-1.5">${g.verbs.map(v => `<a href="${URLS.verb(v)}" class="text-sm px-2 py-1 bg-slate-100 hover:bg-indigo-100 rounded-lg text-slate-700">${escapeHtml(v)}</a>`).join('')}</div></div>`).join('')));
+        if (t.cards && t.cards.length) parts.push(card(t.cardsTitle || 'Which one?', `<div class="grid grid-cols-1 sm:grid-cols-${t.cards.length > 4 ? 4 : t.cards.length} gap-2">${t.cards.map(c => `
+            <div class="border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-700 leading-relaxed"><div class="font-bold text-slate-900">${escapeHtml(c.title)}</div>${c.html}</div>`).join('')}</div>`));
         if (t.ex && t.ex.length) parts.push(card('Examples', examplesBlock(t.ex)));
         if (t.watch) parts.push(card('⚠️ Watch out', `<div class="text-base text-amber-900 leading-relaxed">${t.watch}</div>`, 'bg-amber-50 border-amber-200'));
         return parts;
