@@ -11,6 +11,7 @@
 //   line   a time line: tap a point   { marks: [ { at (-1 … 1, 0 = now), label, fr, en } ] }
 //   flip   cards that turn into their other form when tapped   { cards: [ { a, b, en, tag } ], en?: 'a' | 'b' (that side is English: not spoken) }
 //   pairs  two ways to say it side by side; tap one to hear it   { cap: [left, right], rows: [ { l, r, en } ] }
+// page.game: 'articles' adds a « Play » part after the practice (js/articles-game.js).
 // window.GrammarTools.mount(el, { page, say, done })
 (function () {
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -231,9 +232,22 @@ function mount(root, { page, say, done }) {
     if (!document.getElementById('gt-css')) { const s = document.createElement('style'); s.id = 'gt-css'; s.textContent = CSS; document.head.appendChild(s); }
     const steps = page.steps || [];
     root.innerHTML = `<div class="gt">${steps.map((st, i) => `<section class="gt-sec"><h3>${i + 1} · ${esc(st.title)}${st.sub ? ` <small>${st.sub}</small>` : ''}</h3><div data-tool="${i}"></div></section>`).join('')}
-        ${page.practice ? `<section class="gt-sec"><h3>${steps.length + 1} · Practise <small>From easy to harder. A wrong answer gets a hint and another try.</small></h3><div data-practice></div></section>` : ''}</div>`;
+        ${page.practice ? `<section class="gt-sec"><h3>${steps.length + 1} · Practise <small>From easy to harder. A wrong answer gets a hint and another try.</small></h3><div data-practice></div></section>` : ''}
+        ${page.game ? `<section class="gt-sec"><h3>${steps.length + (page.practice ? 2 : 1)} · Play <small>Rounds of 10 mixed sentences. After each answer, the rule lights up in the table.</small></h3><div data-game></div></section>` : ''}</div>`;
     steps.forEach((st, i) => { const box = root.querySelector(`[data-tool="${i}"]`); try { TOOLS[st.tool](box, st, say); } catch (e) { box.innerHTML = `<p class="gt-en">This part could not be drawn.</p>`; console.error(e); } });
     if (page.practice) window.GrammarPractice.mount(root.querySelector('[data-practice]'), { items: page.practice, say, done });
+    // page.game: a game with its own script (game: 'articles' → js/articles-game.js, window.ArticlesGame)
+    if (page.game) {
+        const box = root.querySelector('[data-game]'), name = page.game.charAt(0).toUpperCase() + page.game.slice(1) + 'Game';
+        const go = () => window[name].mount(box, { say });
+        if (window[name]) go();
+        else {
+            const s = document.createElement('script');
+            s.src = `js/${page.game}-game.js` + (typeof APP_VERSION !== 'undefined' && APP_VERSION ? '?v=' + APP_VERSION : '');
+            s.onload = go; s.onerror = () => { box.innerHTML = '<p class="gt-en">This part could not be loaded. Check your connection and try again.</p>'; };
+            document.head.appendChild(s);
+        }
+    }
 }
 window.GrammarTools = { mount, TOOLS };
 })();

@@ -24,13 +24,13 @@ const LessonKit = (function () {
     // Interactive lessons (hand-built pages in content/)
     const INTERACTIVE = [
         { id: 'lalphabet', emoji: '🔤', title: "L'alphabet", blurb: 'The alphabet and spelling out loud.', level: 'A1', path: 'content/vocab/lalphabet.html' },
-        { id: 'nationalites', emoji: '🌍', title: 'Les nationalités', blurb: 'Countries and nationalities.', level: 'A1', path: 'content/vocab/nationalites.html', theme: 10, grammar: [27], widget: 'nationalites' },
+        { id: 'nationalites', emoji: '🌍', title: 'Les nationalités', blurb: 'Countries and nationalities.', level: 'A1', path: 'content/vocab/nationalites.html', theme: 10, grammar: [2], widget: 'nationalites' },
         { id: 'professions', emoji: '👩‍⚕️', title: 'Les professions', blurb: 'Jobs, with and without an article.', level: 'A1', path: 'content/vocab/professions.html', theme: 11, grammar: [11] },
         { id: 'lheure-prix', emoji: '⏰', title: "L'heure et les prix", blurb: 'Telling the time and prices, with a practice clock.', level: 'A1', path: 'content/vocab/lheure-prix.html', theme: 6, widget: 'clock' },
         { id: 'meteo-date-jours', emoji: '⛅', title: 'Météo, date et jours', blurb: 'Dates, weather, temperature and seasons, with a forecast builder and a quiz.', level: 'A1', path: 'content/vocab/meteo-date-jours.html', theme: 8, widget: 'meteo' },
         { id: 'loisirs-hobbies', emoji: '⚽', title: 'Les loisirs', blurb: 'Hobbies and free time.', level: 'A1', path: 'content/vocab/loisirs-hobbies.html', theme: 26 },
         // Grammar practice pages, shown inside their grammar topics
-        { id: 'articles-definis-indefinis-partitifs', emoji: '📰', title: 'Les articles', blurb: 'le, un, du: definite, indefinite and partitive.', level: 'A1', path: 'content/grammar/articles-definis-indefinis-partitifs.html', embedIn: [2, 3] },
+        { id: 'articles-definis-indefinis-partitifs', emoji: '📰', title: 'Les articles', blurb: 'le, un, du: definite, indefinite and partitive.', level: 'A1', path: 'content/grammar/articles-definis-indefinis-partitifs.html', embedIn: [2] },
         { id: 'prepositions-temps-lieu', emoji: '📍', title: 'Prépositions de temps et de lieu', blurb: 'à, en, dans, depuis, pendant...', level: 'A2', path: 'content/grammar/prepositions-temps-lieu.html', embedIn: [10, 28] }
     ];
     const VOCAB_LESSONS = INTERACTIVE.filter(x => !x.embedIn);
@@ -40,18 +40,25 @@ const LessonKit = (function () {
     const MERGE = { 5: [4, 5], 13: [9], 14: [8], 15: [11, 12], 16: [13], 17: [15], 18: [7], 23: [14], 24: [16],
         32: [19], 33: [18], 35: [21], 36: [24], 39: [23], 40: [22], 42: [20], 45: [31], 47: [27], 48: [26],
         49: [28], 50: [30], 52: [32], 59: [29] };
-    // Teaching order per level: numbers are grammar lessons, "vN" are verb lessons of their own
+    // Teaching order per level: numbers are grammar lessons, "vN" are verb lessons of their own.
+    // Inside each level, related topics sit together: articles and places, then pronouns, then verbs, then sentences.
     const ORDER = [
-        // countries and cities (27) before the articles; stressed pronouns (29) right after subject pronouns
-        [1, 27, 2, 3, 4, 29, 'v1', 'v2', 5, 'v3', 'v6', 6, 7, 8, 9, 10, 11, 12, 13, 14],
-        [24, 21, 19, 20, 30, 31, 'v10', 15, 18, 25, 22, 26, 16, 17, 28, 23, 'v17'],
-        [43, 44, 45, 37, 38, 36, 32, 42, 33, 34, 41, 39, 40, 35, 'v25', 46],
-        [48, 49, 60, 47, 53, 54, 50, 51, 55, 56, 58, 52, 57, 59, 'v33'],
-        ['v34', 'v35', 'v39', 67, 68, 'v36', 'v37', 'v38', 64, 65, 61, 69, 70, 'v40'],
+        [1, 2, 10, 4, 29, 9, 'v1', 5, 12, 13, 14, 8, 11, 6, 7],
+        [19, 20, 31, 30, 21, 22, 24, 'v10', 15, 18, 16, 17, 23, 'v17', 28, 25, 26],
+        [43, 44, 37, 45, 38, 36, 32, 42, 33, 35, 'v25', 40, 39, 34, 41, 46],
+        [48, 47, 58, 52, 59, 49, 60, 53, 54, 50, 51, 55, 56, 57, 'v33'],
+        ['v34', 'v35', 'v39', 67, 68, 'v36', 'v37', 'v38', 'v40', 64, 65, 61, 69, 70],
         ['v41', 'v42', 'v43', 71, 72, 73, 74, 75, 76, 'v44', 78]
     ];
+    // Lessons shown as one: the parts follow the main lesson on its page (Nov 2026).
+    //   2 takes in 27 (countries and cities) and 3 (partitive); v1 takes in v2 (aller, faire), v3 (modals) and v6 (key irregular verbs).
+    const COMBINE = {
+        2: { parts: [3, 27], title: 'Articles, partitive and à / de', blurb: 'le, un, du; au, à la, en, chez: the little words before a noun, a place, a country or a person.' },
+        v1: { parts: ['v2', 'v3', 'v6'], title: 'Key verbs: être, avoir, aller, faire, modals', blurb: 'The verbs used everywhere, in the present: être, avoir, aller, faire, vouloir, pouvoir, devoir, savoir and the key irregulars.' }
+    };
+    const VERB_INTO = { v2: 'v1', v3: 'v1', v6: 'v1' };
     // C1 lessons that repeated a B2 one now live inside it, as its "Going further" part
-    const MERGED_INTO = { 62: 55, 63: 51, 66: 57, 77: 69 };   // 77 (Quebec French) was removed: the app teaches France French
+    const MERGED_INTO = { 62: 55, 63: 51, 66: 57, 77: 69, 27: 2, 3: 2 };   // 77 (Quebec French) was removed: the app teaches France French
     const COURSE_LEVELS = ORDER.map((ids, i) => [(L.grammarLevels[i] || [`Level ${i + 1}`])[0], ids]);
     const COURSE_IDS = ORDER.flat();
     const isVerbId = (id) => typeof id === 'string' && /^v\d+$/.test(id);
@@ -59,6 +66,7 @@ const LessonKit = (function () {
     const CONJ_HOME = {};
     Object.entries(MERGE).forEach(([g, cs]) => cs.forEach(c => { CONJ_HOME[c] = Number(g); }));
     COURSE_IDS.filter(isVerbId).forEach(id => { CONJ_HOME[Number(id.slice(1))] = id; });
+    Object.entries(VERB_INTO).forEach(([v, to]) => { CONJ_HOME[Number(v.slice(1))] = to; });
     const courseCache = {};
     function courseGet(id) {
         if (courseCache[id]) return courseCache[id];
@@ -70,10 +78,17 @@ const LessonKit = (function () {
             const forms = (MERGE[id] || []).map(c => L.conjugation[c]).filter(Boolean);
             t = { ...L.grammar[id], verbs: forms.length > 0, forms };
         }
+        const cb = COMBINE[id];
+        if (t && cb) {
+            // the main lesson becomes the first part; each part keeps its own title, rule, tables and examples
+            const part = (x) => isVerbId(x) ? L.conjugation[Number(x.slice(1))] : L.grammar[x];
+            const parts = [t, ...cb.parts.map(part).filter(Boolean)].map(p => ({ ...p, ruleTitle: isVerbId(id) ? 'How to form it' : 'The rule' }));
+            t = { title: cb.title, blurb: cb.blurb, see: t.see, drill: t.drill, verbs: t.verbs, forms: [...parts, ...(t.forms || [])] };
+        }
         if (t) { t.n = COURSE_IDS.indexOf(id) + 1; courseCache[id] = t; }
         return t;
     }
-    const courseIdOf = (raw) => /^v\d+$/.test(String(raw)) ? String(raw) : (MERGED_INTO[Number(raw)] || Number(raw));
+    const courseIdOf = (raw) => /^v\d+$/.test(String(raw)) ? (VERB_INTO[String(raw)] || String(raw)) : (MERGED_INTO[Number(raw)] || Number(raw));
 
     // Where each kind of lesson lives
     const URLS = {
@@ -403,7 +418,7 @@ const LessonKit = (function () {
     // explanation, the tables and the examples wait under « More detail »
     function stepsBody(section, id, t) {
         // Two tabs: the full lesson first, then the rule in short, the tools to try and the exercises
-        const lesson = `${lessonParts(t, 'The rule in full').join('')}${(t.forms || []).map(f => `<h3 class="pt-2 text-lg font-black text-slate-900">${escapeHtml(f.title)}</h3>${lessonParts(f, 'How to form it').join('')}`).join('')}`;
+        const lesson = `${lessonParts(t, 'The rule in full').join('')}${(t.forms || []).map(f => `<h3 class="pt-2 text-lg font-black text-slate-900">${escapeHtml(f.title)}</h3>${lessonParts(f, f.ruleTitle || 'How to form it').join('')}`).join('')}`;
         const practice = [card('The rule', `<p class="text-lg text-slate-900 leading-relaxed">${t.line}</p>${t.words ? `<p class="text-sm text-slate-600">${t.words}</p>` : ''}`),
             card('See it and practise', `<div data-explore="${t.explore}" data-page="${escapeHtml(String(id))}"></div>`)];
         if (t.drill && t.drill.length) practice.push(`<div id="lk-type">${card('Now type them', drillBlock(t.drill, `${section}:${id}`))}</div>`);
