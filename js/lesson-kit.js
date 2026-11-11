@@ -43,7 +43,7 @@ const LessonKit = (function () {
     // Teaching order per level: numbers are grammar lessons, "vN" are verb lessons of their own.
     // Inside each level, related topics sit together: articles and places, then pronouns, then verbs, then sentences.
     const ORDER = [
-        [1, 2, 11, 10, 4, 29, 9, 'v1', 5, 13, 14, 8, 6, 7],
+        [1, 2, 10, 4, 29, 9, 'v1', 11, 5, 13, 14, 8, 6, 7],
         [19, 20, 31, 30, 21, 22, 24, 'v10', 15, 18, 16, 17, 23, 'v17', 28, 25, 26],
         [43, 44, 37, 45, 38, 36, 32, 42, 33, 34, 35, 'v25', 40, 39, 41, 46],
         [48, 49, 60, 47, 53, 54, 50, 58, 52, 59, 51, 55, 56, 57, 'v33'],
