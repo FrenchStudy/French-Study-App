@@ -688,6 +688,37 @@ P['14'] = dict(
            ["Let's go!", 'Allons-y ! / On y va !', "Let's = the nous form: <b>Allons-y !</b>"], ["Don't be late (tu)", 'Ne sois pas en retard !', 'être → <b>sois</b>; the no goes round it.'],
            ['Tell a friend: eat!', 'Mange !', '-er verbs drop the -s: <b>Mange !</b>'], ['Tell two friends: listen!', 'Écoutez !', 'More than one person: the vous form, <b>Écoutez !</b>']])
 
+# ---------------- A1 merges (Nov 2026) ----------------
+# Lesson 2 « Articles, partitive and à / de » takes in 27 (countries and cities) and 3 (partitive), plus the game.
+_c, _p = P.pop('27'), P.pop('3')
+P['2'] = dict(
+    line="<b>le, la, l', les</b> = the · <b>un, une, des</b> = a, some · <b>du, de la, de l', des</b> = some of something. "
+         "Only <b>le</b> and <b>les</b> stick to à and de: <b>au, aux, du, des</b>. A city takes <b>à</b> (à Paris); a country takes "
+         "<b>au</b> (masculine), <b>en</b> (feminine) or <b>aux</b> (plural); a person takes <b>chez</b>. After a no or a quantity: <b>de</b>.",
+    words=_c['words'] + ' ' + _p['words'],
+    steps=[
+        dict(tool='join', title='à and de + the article', sub='Tap a pair: only le and les stick; la and l\' stay apart.',
+             pairs=[dict(a='à', b='le marché', res='au marché', ex='Je vais au marché.', en='I am going to the market.'),
+                    dict(a='à', b='la plage', res='à la plage', stay=True, ex='Nous allons à la plage.', en='We are going to the beach.'),
+                    dict(a='à', b="l'école", res="à l'école", stay=True, ex="Il est à l'école.", en='He is at school.'),
+                    dict(a='à', b='les enfants', res='aux enfants', ex='Elle parle aux enfants.', en='She is talking to the children.'),
+                    dict(a='de', b='le cinéma', res='du cinéma', ex='Je reviens du cinéma.', en='I am coming back from the cinema.'),
+                    dict(a='de', b='la gare', res='de la gare', stay=True, ex='Je viens de la gare.', en='I am coming from the station.'),
+                    dict(a='de', b='les voisins', res='des voisins', ex="C'est la porte des voisins.", en="It is the neighbours' door.")]),
+    ] + _p['steps'][1:3] + _c['steps'][1:3],
+    practice={k: _p['practice'][k] + _c['practice'][k] for k in ('choose', 'build', 'spot')},
+    drill=_p['drill'][:4] + _c['drill'][:4],
+    game='articles')
+
+# Lesson v1 « Key verbs » takes in v2 (aller, faire), v3 (modals) and v6 (key irregulars); the present of regular verbs (5) stays its own lesson.
+_kv = [P['v1'], P.pop('v2'), P.pop('v3'), P.pop('v6')]
+P['v1'] = dict(
+    line='<br>'.join(x['line'] for x in _kv),
+    words=' '.join(x['words'] for x in _kv if x.get('words')),
+    steps=[x['steps'][0] for x in _kv],
+    practice={k: [it for x in _kv for it in x['practice'][k][:(3 if k == 'choose' else 2)]] for k in ('choose', 'build', 'spot')},
+    drill=[d for x in _kv for d in x['drill'][:2]])
+
 # the other levels, one file each, written with the same helpers (C, B, S, T, CARD, FLIP, VOC) into P
 for lvl in ['a2', 'b1', 'b2', 'c1', 'c2']:
     fp = os.path.join(os.path.dirname(os.path.abspath(__file__)), lvl + '.py')
