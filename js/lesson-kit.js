@@ -43,10 +43,10 @@ const LessonKit = (function () {
     // Teaching order per level: numbers are grammar lessons, "vN" are verb lessons of their own.
     // Inside each level, related topics sit together: articles and places, then pronouns, then verbs, then sentences.
     const ORDER = [
-        [1, 2, 10, 4, 29, 9, 'v1', 5, 12, 13, 14, 8, 11, 6, 7],
+        [1, 2, 11, 10, 4, 29, 9, 'v1', 5, 13, 14, 8, 6, 7],
         [19, 20, 31, 30, 21, 22, 24, 'v10', 15, 18, 16, 17, 23, 'v17', 28, 25, 26],
-        [43, 44, 37, 45, 38, 36, 32, 42, 33, 35, 'v25', 40, 39, 34, 41, 46],
-        [48, 47, 58, 52, 59, 49, 60, 53, 54, 50, 51, 55, 56, 57, 'v33'],
+        [43, 44, 37, 45, 38, 36, 32, 42, 33, 34, 35, 'v25', 40, 39, 41, 46],
+        [48, 49, 60, 47, 53, 54, 50, 58, 52, 59, 51, 55, 56, 57, 'v33'],
         ['v34', 'v35', 'v39', 67, 68, 'v36', 'v37', 'v38', 'v40', 64, 65, 61, 69, 70],
         ['v41', 'v42', 'v43', 71, 72, 73, 74, 75, 76, 'v44', 78]
     ];
@@ -54,7 +54,7 @@ const LessonKit = (function () {
     // v3 (modals) and v6 (key irregular verbs). Their content is rewritten as one lesson in lessons-data.js.
     const VERB_INTO = { v2: 'v1', v3: 'v1', v6: 'v1' };
     // C1 lessons that repeated a B2 one now live inside it, as its "Going further" part
-    const MERGED_INTO = { 62: 55, 63: 51, 66: 57, 77: 69, 27: 2, 3: 2 };   // 77 (Quebec French) was removed: the app teaches France French
+    const MERGED_INTO = { 62: 55, 63: 51, 66: 57, 77: 69, 27: 2, 3: 2, 12: 'v1' };   // 77 (Quebec French) was removed: the app teaches France French
     const COURSE_LEVELS = ORDER.map((ids, i) => [(L.grammarLevels[i] || [`Level ${i + 1}`])[0], ids]);
     const COURSE_IDS = ORDER.flat();
     const isVerbId = (id) => typeof id === 'string' && /^v\d+$/.test(id);

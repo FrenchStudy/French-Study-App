@@ -715,9 +715,17 @@ _kv = [P['v1'], P.pop('v2'), P.pop('v3'), P.pop('v6')]
 P['v1'] = dict(
     line='<br>'.join(x['line'] for x in _kv),
     words=' '.join(x['words'] for x in _kv if x.get('words')),
-    steps=[x['steps'][0] for x in _kv],
+    steps=[x['steps'][0] for x in _kv] + [_kv[0]['steps'][1]],   # + « être or avoir? » (avoir faim, j'ai 20 ans: the old lesson 12)
     practice={k: [it for x in _kv for it in x['practice'][k][:(3 if k == 'choose' else 2)]] for k in ('choose', 'build', 'spot')},
-    drill=[d for x in _kv for d in x['drill'][:2]])
+    drill=[d for x in _kv for d in x['drill'][:2]] + [
+        ["I'm 20 years old.", "J'ai vingt ans. / J'ai 20 ans.", 'Age takes <b>avoir</b>: j\'ai vingt ans (never je suis 20).'],
+        ["I'm not hungry.", "Je n'ai pas faim.", "The no goes round avoir: je <b>n'ai pas</b> faim."],
+        ['I agree.', "Je suis d'accord.", "This one uses <b>être</b>: je suis d'accord."]])
+# the avoir / être expressions (old lesson 12) are now part of « Key verbs »
+P['v1']['practice']['choose'] += [
+    C("J'___ faim.", "I'm hungry.", ['ai', 'suis', 'as', 'est'], 'ai', "Hunger takes avoir: <b>j'ai faim</b>.", 'Hunger is something you have.'),
+    C('Elle ___ dix ans.', 'She is ten.', ['a', 'est', 'as', 'es'], 'a', 'Age takes avoir: elle <b>a</b> dix ans.', 'Age is something you have.'),
+    C('Je ___ en retard.', "I'm late.", ['suis', 'ai', 'es', 'a'], 'suis', 'être: je <b>suis</b> en retard.', 'Being late is a state: être.')]
 
 # the other levels, one file each, written with the same helpers (C, B, S, T, CARD, FLIP, VOC) into P
 for lvl in ['a2', 'b1', 'b2', 'c1', 'c2']:
