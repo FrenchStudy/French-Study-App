@@ -192,7 +192,7 @@ function render() {
                     <input id="tt-new" type="search" placeholder="+ Add a verb: French or English" aria-label="Add a verb: type it in French or English" autocomplete="off" style="width:16rem" class="min-h-[40px] px-3 text-sm bg-white border border-slate-200 rounded-full focus:outline-none focus:ring-2">
                 </form>
             </div>
-            <div id="tt-found" class="flex flex-wrap gap-2" aria-live="polite"></div>
+            <div id="tt-found" class="hidden bg-white border border-slate-200 rounded-2xl p-3 space-y-2" aria-live="polite"></div>
         </div>
 
         <section class="bg-white border border-slate-200 rounded-2xl p-3 sm:p-4 space-y-3">
@@ -222,17 +222,22 @@ function search(q) {
     q = fold(q).replace(/^to /, '');
     if (!q) return [];
     const score = (v) => { const f = fold(v.disp), g = fold(v.gloss);
-        return f === q || g.replace(/^to /, '').split(/[,;(]/)[0].trim() === q ? 0 : f.startsWith(q) ? 1 : new RegExp('(^|[ ,;/(])(to )?' + q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).test(g) ? 2 : f.includes(q) ? 3 : g.includes(q) ? 4 : 9; };
+        return g.replace(/^to /, '') === q ? -1 : f === q || g.replace(/^to /, '').split(/[,;(]/)[0].trim() === q ? 0 : f.startsWith(q) ? 1 : new RegExp('(^|[ ,;/(])(to )?' + q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).test(g) ? 2 : f.includes(q) ? 3 : g.includes(q) ? 4 : 9; };
     return C.verbs.map(v => [score(v), v]).filter(([n]) => n < 9).sort((a, b) => a[0] - b[0] || a[1].disp.localeCompare(b[1].disp)).slice(0, 8).map(([, v]) => v);
 }
+const COMMON = ['être', 'avoir', 'aller', 'faire', 'dire', 'pouvoir', 'vouloir', 'savoir', 'venir', 'devoir', 'prendre', 'voir', 'mettre', 'parler', 'finir', 'attendre'];
+// The verb list under the search box: common verbs while it is empty, then the matches (French or English)
 function showFound(q) {
     const box = S.el.querySelector('#tt-found');
     if (!box) return;
-    const list = search(q);
-    box.innerHTML = !String(q).trim() ? '' : list.length
-        ? list.map(v => `<button type="button" data-add="${esc(v.disp)}" class="min-h-[40px] px-3 text-sm text-left bg-white border border-slate-200 hover:border-indigo-300 rounded-xl"><b lang="fr">${esc(v.disp)}</b> <span class="text-slate-500">${esc(meaning(v))}</span></button>`).join('')
-        : '<span class="text-sm text-slate-500">No verb found. Try the infinitive (prendre) or the English (to take).</span>';
+    const typed = String(q || '').trim();
+    const list = typed ? search(typed) : COMMON.map(x => C.find(x)).filter(Boolean);
+    box.classList.remove('hidden');
+    box.innerHTML = `<div class="flex items-center justify-between gap-2"><span class="text-sm text-slate-500">${typed ? (list.length ? 'Tap a verb to add it' : 'No verb found. Try the infinitive (prendre) or the English (to take).') : 'Common verbs · or type to search all 296, in French or English'}</span>
+        <button type="button" data-close class="min-h-[36px] px-2 text-slate-400 hover:text-slate-700" aria-label="Close the list">×</button></div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-1">${list.map(v => `<button type="button" data-add="${esc(v.disp)}" class="min-h-[40px] px-2.5 text-sm text-left rounded-lg hover:bg-indigo-50 ${S.verbs.includes(v.disp) ? 'text-indigo-700' : 'text-slate-800'}"><b lang="fr">${esc(v.disp)}</b> <span class="text-slate-500">${esc(meaning(v))}</span></button>`).join('')}</div>`;
 }
+const hideFound = () => { const box = S.el && S.el.querySelector('#tt-found'); if (box) box.classList.add('hidden'); };
 
 // Accept (e) and (s) as optional letters: « suis allée » is right for « suis allé(e) »
 const norm = (s) => String(s).toLowerCase().replace(/[’]/g, "'").replace(/\s*!\s*$/, '').replace(/\s+/g, ' ').trim();
@@ -269,7 +274,8 @@ function mount(el) {
             S.verbs = S.verbs.filter(x => x !== rm.dataset.remove); LocalStore.set('tense_table_verbs', S.verbs);
             if (S.verb === rm.dataset.remove) S.verb = S.verbs[0];
             render();
-        } else if (e.target.closest('[data-add]')) add(e.target.closest('[data-add]').dataset.add);
+        } else if (e.target.closest('[data-close]')) hideFound();
+        else if (e.target.closest('[data-add]')) add(e.target.closest('[data-add]').dataset.add);
         else if (e.target.closest('[data-jump]')) el.querySelector('#tt-basic').scrollIntoView({ behavior: 'smooth', block: 'start' });
         else if (e.target.id === 'tt-check') check();
         else if (e.target.id === 'tt-again') { pickHidden(C.find(S.verb)); render(); }
@@ -278,6 +284,9 @@ function mount(el) {
         if (e.target.id === 'tt-practise') { S.practise = e.target.checked; if (S.practise) pickHidden(C.find(S.verb)); render(); }
     });
     el.addEventListener('input', (e) => { if (e.target.id === 'tt-new') showFound(e.target.value); });
+    el.addEventListener('focusin', (e) => { if (e.target.id === 'tt-new') showFound(e.target.value); });
+    el.addEventListener('keydown', (e) => { if (e.key === 'Escape' && e.target.id === 'tt-new') hideFound(); });
+    document.addEventListener('click', (e) => { if (!e.target.closest('#tt-found') && !e.target.closest('#tt-add')) hideFound(); });
     el.addEventListener('submit', (e) => { if (e.target.id === 'tt-add') { e.preventDefault(); const q = el.querySelector('#tt-new').value, hit = search(q)[0]; if (hit) add(hit.disp); else showFound(q); } });
     el.addEventListener('keydown', (e) => { if (e.key === 'Enter' && e.target.matches('input[data-ans]')) { e.preventDefault(); check(); } });
     matchMedia('(min-width: 1024px)').addEventListener('change', render);
@@ -285,6 +294,7 @@ function mount(el) {
 function add(text) {
     const v = C.verbs.find(x => x.disp === text);
     if (!v) return;
+    hideFound();
     if (!S.verbs.includes(v.disp)) { S.verbs.push(v.disp); LocalStore.set('tense_table_verbs', S.verbs); }
     S.verb = v.disp; LocalStore.set('tense_table_verb', S.verb);
     if (S.practise) pickHidden(v);
