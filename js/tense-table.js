@@ -1,7 +1,8 @@
 // tense-table.js - Conjugations › « All tenses »: the basic forms every tense is built from (être, avoir,
 // aller, faire, venir, the -ER / -IR / -RE endings, être / avoir in the imparfait and conditionnel), then one verb in
 // every tense, in the order of the student's own tense sheet. Colours: green = the ending, violet = taken from the
-// basic forms, amber = a stem that changes. Picking a verb highlights the basic column it uses.
+// basic forms (tap to jump to them), amber = a stem that changes. The basic forms sit at the bottom; the column
+// the verb uses is highlighted. Verbs are added by searching in French or English.
 // « Hide some to practise » blanks random cells to type in.
 // Needs config.js (LocalStore) and js/conjugate.js (Conjugator). window.TenseTable.mount(el)
 (function () {
@@ -33,6 +34,13 @@ function group(v) {
     if (BASIC.includes(v.disp)) return v.disp;
     return null;
 }
+const meaning = (v) => String(v && v.gloss || '').replace(/\s*;.*$/, '');
+function groupShort(v) {
+    const g = group(v);
+    if (v.kind === 'ouv') return '-ER endings in the present';
+    if (g === 'er' || g === 'ir' || g === 're') return `-${g.toUpperCase()} verb`;
+    return g ? 'basic form' : 'irregular';
+}
 function groupNote(v) {
     const g = group(v), name = `<b>${esc(v.disp)}</b>`;
     if (v.kind === 'ouv') return `${name} ends in -ir but takes the <b>-ER</b> endings in the present (j'ouvre, tu ouvres…).`;
@@ -43,6 +51,8 @@ function groupNote(v) {
 
 // ---------- One cell: { html, text } (null = no form, e.g. the imperative for je) ----------
 const plain = (html) => html.replace(/<[^>]+>/g, '').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"');
+// A helper verb: tap it to see it in the basic forms
+const jump = (t) => `<button type="button" data-jump class="${HELP} hover:underline" title="See it in the basic forms">${esc(t)}</button>`;
 const wrap = (cls, t) => `<span class="${cls}">${esc(t)}</span>`;
 const infFor = (v, i) => v.refl ? (VOWEL.test(v.inf) ? RP[i].slice(0, -1) + "'" : RP[i] + ' ') + v.inf : v.inf;
 const ENDS = {
@@ -82,7 +92,7 @@ function cell(v, key, i) {
         const inf = infFor(v, i);
         const de = VOWEL.test(inf) ? "d'" : 'de ';
         const mid = key === 'prog' ? ' en train ' + de : key === 'recent' ? ' ' + de : ' ';
-        return { html: wrap(HELP, helper) + esc(mid) + esc(inf), text: helper + mid + inf };
+        return { html: jump(helper) + esc(mid) + esc(inf), text: helper + mid + inf };
     }
     if (key === 'pc' || key === 'pqp' || key === 'cp') {
         const f = C.forms(v, key)[i].cf;
@@ -91,7 +101,7 @@ function cell(v, key, i) {
         const at = f.indexOf(af);
         if (at < 0) return { html: esc(f), text: f };
         const pp = f.slice(at + af.length).trim();
-        return { html: esc(f.slice(0, at)) + wrap(HELP, af) + ' ' + ppHtml(v, pp), text: f };
+        return { html: esc(f.slice(0, at)) + jump(af) + ' ' + ppHtml(v, pp), text: f };
     }
     const f = C.forms(v, key)[i].cf;
     if (key === 'subj') {
@@ -170,29 +180,24 @@ function pickHidden(v) {
 function render() {
     const el = S.el, v = C.find(S.verb);
     S.wide = matchMedia('(min-width: 1024px)').matches;
-    const chip = (x) => `<span class="inline-flex items-center rounded-full border ${x === S.verb ? 'bg-indigo-50 border-indigo-300 text-indigo-700' : 'bg-white border-slate-200 text-slate-700 hover:border-indigo-300'}">
-        <button type="button" data-verb="${esc(x)}" class="min-h-[40px] px-3 text-sm font-semibold" lang="fr">${esc(x)}</button>${DEFAULT_VERBS.includes(x) ? '' : `<button type="button" data-remove="${esc(x)}" class="min-h-[40px] pr-3 text-slate-400 hover:text-rose-600" aria-label="Remove ${esc(x)}">×</button>`}</span>`;
+    const chip = (x) => { const cv = C.find(x); return `<span class="inline-flex items-center rounded-full border ${x === S.verb ? 'bg-indigo-50 border-indigo-300 text-indigo-700' : 'bg-white border-slate-200 text-slate-700 hover:border-indigo-300'}">
+        <button type="button" data-verb="${esc(x)}" class="min-h-[40px] px-3 text-sm"><b lang="fr">${esc(x)}</b> <span class="text-slate-500">${esc(meaning(cv))}</span></button>${DEFAULT_VERBS.includes(x) ? '' : `<button type="button" data-remove="${esc(x)}" class="min-h-[40px] pr-3 text-slate-400 hover:text-rose-600" aria-label="Remove ${esc(x)}">×</button>`}</span>`; };
     el.innerHTML = `
     <div class="space-y-4">
-        <div class="flex flex-wrap items-center gap-2">
-            <span class="text-sm font-semibold text-slate-500 mr-1">Your verb</span>
-            ${S.verbs.map(chip).join('')}
-            <form id="tt-add" class="inline-flex items-center gap-1">
-                <input id="tt-new" list="tt-list" placeholder="+ Add a verb" aria-label="Add a verb" autocomplete="off" lang="fr" class="w-40 min-h-[40px] px-3 text-sm bg-white border border-slate-200 rounded-full focus:outline-none focus:ring-2">
-                <datalist id="tt-list">${C.verbs.map(x => `<option value="${esc(x.disp)}">`).join('')}</datalist>
-            </form>
-            <span id="tt-msg" class="text-sm text-rose-600"></span>
+        <div class="space-y-2">
+            <div class="flex flex-wrap items-center gap-2">
+                <span class="text-sm font-semibold text-slate-500 mr-1">Your verb</span>
+                ${S.verbs.map(chip).join('')}
+                <form id="tt-add" class="inline-flex items-center">
+                    <input id="tt-new" type="search" placeholder="+ Add a verb: French or English" aria-label="Add a verb: type it in French or English" autocomplete="off" style="width:16rem" class="min-h-[40px] px-3 text-sm bg-white border border-slate-200 rounded-full focus:outline-none focus:ring-2">
+                </form>
+            </div>
+            <div id="tt-found" class="flex flex-wrap gap-2" aria-live="polite"></div>
         </div>
 
         <section class="bg-white border border-slate-200 rounded-2xl p-3 sm:p-4 space-y-3">
-            <h2 class="text-base font-black text-slate-900">Basic forms <span class="font-normal text-sm text-slate-500">· every tense below uses these</span></h2>
-            ${renderBasic(v)}
-            <p class="text-sm text-slate-600">${groupNote(v)}</p>
-        </section>
-
-        <section class="bg-white border border-slate-200 rounded-2xl p-3 sm:p-4 space-y-3">
             <div class="flex flex-wrap items-center gap-x-4 gap-y-2">
-                <h2 class="text-base font-black text-slate-900" lang="fr">${esc(v.disp)} <span class="font-normal text-sm text-slate-500" lang="en">${esc(v.gloss || '')}</span></h2>
+                <h2 class="text-base font-black text-slate-900"><span lang="fr">${esc(v.disp)}</span> <span class="font-normal text-sm text-slate-500">${esc(meaning(v))} · ${esc(groupShort(v))}</span></h2>
                 <span class="text-sm text-slate-500"><span class="${END}">ending</span> · <span class="${HELP}">from the basic forms</span> · <span class="${STEM}">stem change</span></span>
                 <label class="sm:ml-auto inline-flex items-center gap-2 min-h-[40px] text-sm font-semibold text-slate-700"><input type="checkbox" id="tt-practise" class="w-4 h-4 accent-indigo-600" ${S.practise ? 'checked' : ''}> Hide some to practise</label>
             </div>
@@ -202,7 +207,31 @@ function render() {
                 <span id="tt-score" class="text-sm font-bold text-slate-700"></span></div>` : ''}
             ${HALVES.map(h => S.wide ? `<div>${renderHalf(v, h)}</div>` : `<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">${renderHalf(v, h)}</div>`).join('')}
         </section>
+
+        <section id="tt-basic" class="bg-white border border-slate-200 rounded-2xl p-3 sm:p-4 space-y-3">
+            <h2 class="text-base font-black text-slate-900">Basic forms <span class="font-normal text-sm text-slate-500">· every tense above uses these</span></h2>
+            ${renderBasic(v)}
+            <p class="text-sm text-slate-600">${groupNote(v)}</p>
+        </section>
     </div>`;
+}
+
+// ---------- Add a verb: search the French verbs and their English meanings ----------
+const fold = (x) => String(x || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+function search(q) {
+    q = fold(q).replace(/^to /, '');
+    if (!q) return [];
+    const score = (v) => { const f = fold(v.disp), g = fold(v.gloss);
+        return f === q || g.replace(/^to /, '').split(/[,;(]/)[0].trim() === q ? 0 : f.startsWith(q) ? 1 : new RegExp('(^|[ ,;/(])(to )?' + q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).test(g) ? 2 : f.includes(q) ? 3 : g.includes(q) ? 4 : 9; };
+    return C.verbs.map(v => [score(v), v]).filter(([n]) => n < 9).sort((a, b) => a[0] - b[0] || a[1].disp.localeCompare(b[1].disp)).slice(0, 8).map(([, v]) => v);
+}
+function showFound(q) {
+    const box = S.el.querySelector('#tt-found');
+    if (!box) return;
+    const list = search(q);
+    box.innerHTML = !String(q).trim() ? '' : list.length
+        ? list.map(v => `<button type="button" data-add="${esc(v.disp)}" class="min-h-[40px] px-3 text-sm text-left bg-white border border-slate-200 hover:border-indigo-300 rounded-xl"><b lang="fr">${esc(v.disp)}</b> <span class="text-slate-500">${esc(meaning(v))}</span></button>`).join('')
+        : '<span class="text-sm text-slate-500">No verb found. Try the infinitive (prendre) or the English (to take).</span>';
 }
 
 // Accept (e) and (s) as optional letters: « suis allée » is right for « suis allé(e) »
@@ -240,27 +269,26 @@ function mount(el) {
             S.verbs = S.verbs.filter(x => x !== rm.dataset.remove); LocalStore.set('tense_table_verbs', S.verbs);
             if (S.verb === rm.dataset.remove) S.verb = S.verbs[0];
             render();
-        } else if (e.target.id === 'tt-check') check();
+        } else if (e.target.closest('[data-add]')) add(e.target.closest('[data-add]').dataset.add);
+        else if (e.target.closest('[data-jump]')) el.querySelector('#tt-basic').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        else if (e.target.id === 'tt-check') check();
         else if (e.target.id === 'tt-again') { pickHidden(C.find(S.verb)); render(); }
     });
     el.addEventListener('change', (e) => {
         if (e.target.id === 'tt-practise') { S.practise = e.target.checked; if (S.practise) pickHidden(C.find(S.verb)); render(); }
-        if (e.target.id === 'tt-new') add(e.target.value);
     });
-    el.addEventListener('submit', (e) => { if (e.target.id === 'tt-add') { e.preventDefault(); add(el.querySelector('#tt-new').value); } });
+    el.addEventListener('input', (e) => { if (e.target.id === 'tt-new') showFound(e.target.value); });
+    el.addEventListener('submit', (e) => { if (e.target.id === 'tt-add') { e.preventDefault(); const q = el.querySelector('#tt-new').value, hit = search(q)[0]; if (hit) add(hit.disp); else showFound(q); } });
     el.addEventListener('keydown', (e) => { if (e.key === 'Enter' && e.target.matches('input[data-ans]')) { e.preventDefault(); check(); } });
     matchMedia('(min-width: 1024px)').addEventListener('change', render);
 }
 function add(text) {
-    text = String(text || '').trim().toLowerCase();
-    if (!text) return;
-    const v = C.verbs.find(x => x.disp.toLowerCase() === text) || C.find(text);
-    const msg = S.el.querySelector('#tt-msg');
-    if (!v) { if (msg) msg.textContent = 'Not a French verb we know. Try an infinitive like « prendre ».'; return; }
+    const v = C.verbs.find(x => x.disp === text);
+    if (!v) return;
     if (!S.verbs.includes(v.disp)) { S.verbs.push(v.disp); LocalStore.set('tense_table_verbs', S.verbs); }
     S.verb = v.disp; LocalStore.set('tense_table_verb', S.verb);
     if (S.practise) pickHidden(v);
     render();
 }
-window.TenseTable = { mount, cell, isRight };
+window.TenseTable = { mount, cell, isRight, search };
 })();
