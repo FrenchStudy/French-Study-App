@@ -12,6 +12,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="Français">
     <link rel="stylesheet" href="css/app.css">
+    <style>@media (min-width: 768px) { #verbs-layout { grid-template-columns: 13.5rem minmax(0, 1fr); } }   /* a narrow verb list: more room for the tenses */</style>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.104.0"></script>
     <script>window.supabase || document.write('<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"><\/script>')</script>
     <script src="config.js"></script>
@@ -37,19 +38,18 @@
 
             <!-- ===== VERBS: the list, then the chosen verb in every tense (js/tense-table.js) ===== -->
             <section id="tab-tables">
-              <div class="md:grid md:grid-cols-[18rem_1fr] md:gap-5 space-y-4 md:space-y-0">
+              <div id="verbs-layout" class="md:grid md:grid-cols-[18rem_1fr] md:gap-5 space-y-4 md:space-y-0">
                 <aside class="space-y-3 md:sticky md:top-4 md:self-start">
-                    <input type="search" id="verb-search" placeholder="Verb (FR) or meaning (EN), Enter to conjugate"
+                    <input type="search" id="verb-search" placeholder="Verb or meaning"
                            oninput="filterVerbList(this.value)" onkeydown="if(event.key==='Enter') conjugateTyped(this.value)"
                            class="w-full text-base px-3 py-3 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
                     <div class="flex flex-wrap gap-1.5 pb-1 text-sm">
-                        <button onclick="filterVerbs('all', this)" class="filter-pill shrink-0 min-h-[40px] px-3 rounded-lg font-medium bg-indigo-600 border border-indigo-600 text-white">All</button>
-                        <button onclick="filterVerbs('er', this)" class="filter-pill shrink-0 min-h-[40px] px-3 rounded-lg font-medium bg-white border border-slate-200 text-slate-700 hover:bg-slate-50">-er (1st group)</button>
-                        <button onclick="filterVerbs('ersp', this)" class="filter-pill shrink-0 min-h-[40px] px-3 rounded-lg font-medium bg-white border border-slate-200 text-slate-700 hover:bg-slate-50">-er spelling change</button>
-                        <button onclick="filterVerbs('ir', this)" class="filter-pill shrink-0 min-h-[40px] px-3 rounded-lg font-medium bg-white border border-slate-200 text-slate-700 hover:bg-slate-50">-ir (2nd group)</button>
-                        <button onclick="filterVerbs('re', this)" class="filter-pill shrink-0 min-h-[40px] px-3 rounded-lg font-medium bg-white border border-slate-200 text-slate-700 hover:bg-slate-50">-re regular</button>
-                        <button onclick="filterVerbs('irr', this)" class="filter-pill shrink-0 min-h-[40px] px-3 rounded-lg font-medium bg-white border border-slate-200 text-slate-700 hover:bg-slate-50">Irregular</button>
-                        <button onclick="filterVerbs('refl', this)" class="filter-pill shrink-0 min-h-[40px] px-3 rounded-lg font-medium bg-white border border-slate-200 text-slate-700 hover:bg-slate-50">Reflexive</button>
+                        <button onclick="filterVerbs('all', this)" class="filter-pill shrink-0 min-h-[40px] px-2.5 rounded-lg font-medium bg-indigo-600 border border-indigo-600 text-white">All</button>
+                        <button onclick="filterVerbs('er', this)" class="filter-pill shrink-0 min-h-[40px] px-2.5 rounded-lg font-medium bg-white border border-slate-200 text-slate-700 hover:bg-slate-50">-er</button>
+                        <button onclick="filterVerbs('ir', this)" class="filter-pill shrink-0 min-h-[40px] px-2.5 rounded-lg font-medium bg-white border border-slate-200 text-slate-700 hover:bg-slate-50">-ir</button>
+                        <button onclick="filterVerbs('re', this)" class="filter-pill shrink-0 min-h-[40px] px-2.5 rounded-lg font-medium bg-white border border-slate-200 text-slate-700 hover:bg-slate-50">-re</button>
+                        <button onclick="filterVerbs('irr', this)" class="filter-pill shrink-0 min-h-[40px] px-2.5 rounded-lg font-medium bg-white border border-slate-200 text-slate-700 hover:bg-slate-50">Irreg.</button>
+                        <button onclick="filterVerbs('refl', this)" class="filter-pill shrink-0 min-h-[40px] px-2.5 rounded-lg font-medium bg-white border border-slate-200 text-slate-700 hover:bg-slate-50">Refl.</button>
                     </div>
                     <div id="verb-list-container" class="space-y-1 bg-white border border-slate-200 rounded-xl p-2">
                         <p class="text-sm text-slate-400 p-2">Loading verbs…</p>
@@ -62,7 +62,7 @@
                             <h2 id="atelier-title" class="text-2xl font-black text-slate-900 break-words">Choose a verb</h2>
                             <p id="atelier-category" class="text-sm text-slate-500 mt-0.5"></p>
                         </div>
-                        <div class="flex items-center gap-2 flex-wrap">
+                        <div id="verb-tools" class="flex items-center gap-2 flex-wrap">
                             <button onclick="playNativeAudio()" class="min-h-[44px] px-3 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold rounded-xl">🔊 Listen</button>
                             <button onclick="adjustSpeed()" id="speed-btn" class="min-h-[44px] px-3 bg-white border border-slate-200 text-slate-700 text-sm font-semibold rounded-xl">⚡ 1x</button>
                             <label class="inline-flex items-center gap-2 min-h-[44px] px-3 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700"><input type="checkbox" id="tt-practise" class="w-4 h-4 accent-indigo-600"> Hide some to practise</label>
@@ -70,7 +70,7 @@
                     </div>
 
                     <div class="bg-amber-50 border border-amber-200 rounded-2xl p-4">
-                        <div class="text-sm font-bold text-amber-900 mb-1">💡 About this verb</div>
+                        <div id="rule-title" class="text-sm font-bold text-amber-900 mb-1">💡 About this verb</div>
                         <div id="rule-text" class="text-base text-amber-900 leading-relaxed">Pick a verb to see its forms. Tap any form to hear it.</div>
                     </div>
 
@@ -131,8 +131,8 @@
         let currentFilter = 'all';
         let showAllVerbs = false;   // the list shows the first verbs, then a button for the rest (no scroll box)
         const FIRST_VERBS = matchMedia('(max-width: 767px)').matches ? 6 : 12;
-        const PILL_OFF = 'filter-pill shrink-0 min-h-[40px] px-3 rounded-lg font-medium bg-white border border-slate-200 text-slate-700 hover:bg-slate-50';
-        const PILL_ON = 'filter-pill shrink-0 min-h-[40px] px-3 rounded-lg font-medium bg-indigo-600 border border-indigo-600 text-white';
+        const PILL_OFF = 'filter-pill shrink-0 min-h-[40px] px-2.5 rounded-lg font-medium bg-white border border-slate-200 text-slate-700 hover:bg-slate-50';
+        const PILL_ON = 'filter-pill shrink-0 min-h-[40px] px-2.5 rounded-lg font-medium bg-indigo-600 border border-indigo-600 text-white';
 
         // Accent-insensitive match: "etre" finds "être"
         function plain(s) {
@@ -159,6 +159,7 @@
                 btn.className = PILL_OFF;
             });
             buttonElement.className = PILL_ON;
+            if (category === 'all') { $('verb-search').value = ''; showAllVerbs = false; showStructure(); }
             populateVerbList(document.getElementById('verb-search').value);
         }
 
@@ -176,7 +177,7 @@
             if (!container) return;
             const q = plain(searchQuery);
             const matches = C.verbs.filter(v =>
-                (currentFilter === 'all' || verbGroup(v) === currentFilter) &&
+                (currentFilter === 'all' || verbGroup(v) === currentFilter || (currentFilter === 'er' && verbGroup(v) === 'ersp')) &&
                 (!q || plain(v.disp).includes(q) || plain(v.gloss).includes(q))
             );
 
@@ -199,7 +200,6 @@
                         <span class="font-bold text-slate-900 truncate">${escapeHtml(v.disp)}</span>
                         <span class="text-xs text-slate-500 truncate">${escapeHtml(v.gloss)}</span>
                     </div>
-                    <span class="text-xs font-semibold text-slate-500 uppercase tracking-wide shrink-0">${GROUP_LABELS[verbGroup(v)]}</span>
                 `;
                 item.addEventListener('click', () => { renderVerb(v); showTablesOnPhone(); });
                 container.appendChild(item);
@@ -213,7 +213,6 @@
                 container.appendChild(more);
             }
 
-            if (!activeVerb) renderVerb(matches[0]);
         }
 
         // Conjugate a verb typed in the search box, even if it is not in the list
@@ -232,9 +231,23 @@
             return /'$/.test(row.cp) ? row.cp + row.cf : row.cp + ' ' + row.cf;
         }
 
+        // « All »: no verb, the pattern of every tense for -er, -ir and -re
+        function showStructure() {
+            activeVerb = null;
+            $('atelier-title').innerText = 'All verbs: the pattern';
+            $('atelier-category').innerText = 'Regular -er, -ir and -re verbs, endings only';
+            $('verb-tools').classList.add('hidden');
+            $('rule-text').innerText = 'Regular verbs follow these patterns: take the stem (or the infinitive) and add the green ending. Irregular verbs do not: pick one in the list to see it in full.';
+            $('rule-title').innerText = '💡 How to read this';
+            TenseTable.showStructure();
+            populateVerbList($('verb-search').value);
+        }
+
         function renderVerb(v) {
             if (!v) return;
             activeVerb = v;
+            $('verb-tools').classList.remove('hidden');
+            $('rule-title').innerText = '💡 About this verb';
 
             const title = document.getElementById('atelier-title');
             title.dataset.activeVerb = v.disp;
@@ -400,6 +413,7 @@
             const saved = !p.get('verb') && !p.get('tab') ? LocalStore.get('conj_tab', 'tables') : '';
             const want = p.get('tab') || saved;
             setTab(want === 'practice' ? 'practice' : 'tables', false);   // the old « All tenses » tab is now the Verbs view
+            if (!activeVerb) showStructure();
         }
         pr.tense = LocalStore.get('conj_practice_tense', 'pres');
         $('pr-tense').value = pr.tense;

@@ -4,7 +4,8 @@
 // column the verb uses highlighted. Colours: green = the ending, violet = from the basic forms (tap to jump to them),
 // amber = a stem that changes. Tap a form to hear it. « Hide some to practise » blanks a third of the forms.
 // Needs config.js (LocalStore), js/conjugate.js (Conjugator); window.speakText(text) for listening (optional).
-// window.TenseTable.mount(el) · .show(verb) · .setPractise(on)
+// With no verb (« All » in the list): the pattern of every tense for -ER, -IR and -RE, endings only.
+// window.TenseTable.mount(el) · .show(verb) · .showStructure() · .setPractise(on)
 (function () {
 'use strict';
 const C = window.Conjugator;
@@ -121,7 +122,7 @@ function cell(v, key, i) {
 }
 
 // ---------- State ----------
-const S = { verb: null, practise: false, hidden: new Set(), wide: true, el: null };
+const S = { verb: null, structure: false, practise: false, hidden: new Set(), wide: true, el: null };
 
 // ---------- Basic forms ----------
 function basicColumns() {
@@ -137,7 +138,7 @@ function basicColumns() {
     ];
 }
 function renderBasic(v) {
-    const cols = basicColumns(), on = group(v);
+    const cols = basicColumns(), on = v ? group(v) : null;
     const head = (c) => `${esc(c.title)}${c.sub ? `<span class="block font-normal text-xs text-slate-500">${esc(c.sub)}</span>` : ''}`;
     if (S.wide) {
         const td = (c, x, th) => `<${th ? 'th' : 'td'} class="text-left align-top py-1.5 px-2 border-b border-slate-100 ${c.id === on ? 'bg-emerald-50 text-emerald-800 font-bold' : th ? 'text-slate-900' : 'text-slate-700'}"${c.sep ? ' style="border-left:1px solid #cbd5e1"' : ''}>${x}</${th ? 'th' : 'td'}>`;
@@ -180,9 +181,53 @@ function pickHidden(v) {
     S.hidden = new Set(all.slice(0, Math.round(all.length / 3)));
 }
 
+// ---------- « All »: the pattern of every tense for regular -ER, -IR and -RE verbs (endings only, no example verb) ----------
+const GROUPS = ['er', 'ir', 're'];
+const STRUCT_NOTE = { subj: 'que + ils form − ent + ending', sp: 'que + aie / sois + past participle', pres: 'stem + ending', fut: 'infinitive + ending (-RE drops the e)', cond: 'infinitive + imparfait ending (-RE drops the e)',
+    pc: 'avoir + past participle (some verbs take être)', imp: 'present, no subject' };
+function structCell(key, g, i) {
+    const E = (t) => wrap(END + ' whitespace-nowrap', t), nw = (h) => `<span class="whitespace-nowrap">${h}</span>`;
+    const inf = '-' + g, futStem = g === 're' ? '-r' : '-' + g, pp = '-' + { er: 'é', ir: 'i', re: 'u' }[g], iss = g === 'ir' ? 'iss' : '';
+    const AUX = { pc: 'pres', pqp: 'impf', cp: 'cond', fa: 'fut', sp: 'subj' };
+    switch (key) {
+        case 'pres': { const e = PRES_ENDS[g][i]; return e ? E('-' + e) : '—'; }
+        case 'imp': { const k = { 1: 0, 3: 1, 4: 2 }[i]; if (k == null) return null; return E('-' + { er: ['e', 'ons', 'ez'], ir: ['is', 'issons', 'issez'], re: ['s', 'ons', 'ez'] }[g][k]) + ' !'; }
+        case 'prog': return jump(form('être', 'pres', i)) + ' en train de ' + nw(esc(inf));
+        case 'fp': return nw(jump(form('aller', 'pres', i)) + ' ' + esc(inf));
+        case 'recent': return jump(form('venir', 'pres', i)) + ' ' + nw('de ' + esc(inf));
+        case 'impf': return E('-' + iss + ENDS.impf[i]);
+        case 'fut': case 'cond': return nw(esc(futStem) + E(ENDS[key][i]));
+        case 'subj': return E('-' + iss + ENDS.subj[i]);   // « que » is in the card's note
+        default: if (AUX[key]) return nw(jump(form('avoir', AUX[key], i)) + ' ' + E(pp));
+    }
+    return null;
+}
+function renderStructure() {
+    return `<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">${HALVES.flat().map(([k, name, from]) => `<div class="bg-white border border-slate-200 rounded-xl p-3">
+        <div class="text-base font-bold text-slate-900">${esc(name)}</div>
+        <div class="text-xs text-slate-500 mb-2">${esc(STRUCT_NOTE[k] || from)}</div>
+        <table class="w-full text-sm" style="table-layout:fixed">
+            <thead><tr><th class="w-14"></th>${GROUPS.map(g => `<th class="text-left py-1 px-1 border-b border-slate-200 text-slate-900">-${g.toUpperCase()}</th>`).join('')}</tr></thead>
+            <tbody>${PERSONS.map((p, i) => `<tr><td class="py-1 px-1 border-b border-slate-100 text-slate-500 align-top">${p}</td>${GROUPS.map(g => { const c = structCell(k, g, i); return `<td class="py-1 px-1 border-b border-slate-100 text-slate-800 align-top">${c == null ? '<span class="text-slate-400">—</span>' : c}</td>`; }).join('')}</tr>`).join('')}</tbody>
+        </table></div>`).join('')}</div>`;
+}
+
 function render() {
     const el = S.el, v = S.verb;
-    if (!el || !v) return;
+    if (!el || (!v && !S.structure)) return;
+    S.wide = matchMedia('(min-width: 1024px)').matches;
+    if (S.structure) {
+        el.innerHTML = `<div class="space-y-4">
+            <section class="space-y-3">
+                <span class="text-sm text-slate-500"><span class="${END}">ending</span> · <span class="${HELP}">from the basic forms</span> · -er / -ir / -re = the infinitive</span>
+                ${renderStructure()}
+            </section>
+            <section id="tt-basic" class="bg-white border border-slate-200 rounded-2xl p-3 sm:p-4 space-y-3">
+                <h2 class="text-base font-black text-slate-900">Basic forms <span class="font-normal text-sm text-slate-500">· every tense above uses these</span></h2>
+                ${renderBasic(null)}
+            </section></div>`;
+        return;
+    }
     S.wide = matchMedia('(min-width: 1024px)').matches;
     const half = (h) => S.wide ? `<div${h.length < 6 ? ' style="max-width:40rem"' : ''}>${renderHalf(v, h)}</div>` : `<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">${renderHalf(v, h)}</div>`;
     el.innerHTML = `
@@ -243,7 +288,8 @@ function mount(el) {
     el.addEventListener('keydown', (e) => { if (e.key === 'Enter' && e.target.matches('input[data-ans]')) { e.preventDefault(); check(); } });
     matchMedia('(min-width: 1024px)').addEventListener('change', render);
 }
-function show(v) { S.verb = v; if (S.practise) pickHidden(v); render(); }
+function showStructure() { S.structure = true; S.verb = null; render(); }
+function show(v) { S.structure = false; S.verb = v; if (S.practise) pickHidden(v); render(); }
 function setPractise(on) { S.practise = !!on; if (S.practise && S.verb) pickHidden(S.verb); render(); }
-window.TenseTable = { mount, show, setPractise, cell, isRight, groupShort };
+window.TenseTable = { mount, show, showStructure, setPractise, cell, isRight, groupShort };
 })();
