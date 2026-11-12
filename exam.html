@@ -18,6 +18,8 @@
     <script src="js/ai.js"></script>
     <script src="js/tcf.js"></script>
     <script src="js/nclc.js"></script>
+    <script src="js/lessons-index.js"></script>
+    <script src="js/progress.js"></script>
 </head>
 <body class="h-full bg-slate-100 flex flex-col overflow-hidden font-sans text-slate-800">
 
@@ -33,7 +35,10 @@
             <!-- Your four skills as NCLC levels (js/nclc.js) -->
             <section id="nclc" class="bg-white border border-slate-200 rounded-2xl p-4 space-y-3" aria-labelledby="nclc-title"></section>
 
-            <!-- Your progress -->
+            <!-- Your progress across the app (js/progress.js; moved here from the Home page) -->
+            <section id="progress" class="bg-white border border-slate-200 rounded-2xl p-4 space-y-4"></section>
+
+            <!-- Your exam practice -->
             <section class="order-last sm:order-none bg-white border border-slate-200 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center gap-3">
                 <div class="flex-1 min-w-0">
                     <div class="text-xs font-bold uppercase tracking-wide text-indigo-700">Your exam practice</div>
@@ -112,6 +117,13 @@
             skill('🎧', 'Listening', '39 questions · 35 minutes', timed('listening', 'Announcements, conversations, interviews and talks, from A1 to C2. Each recording is heard once.'));
 
         // ---------- Your four skills (NCLC) ----------
+        // Your progress: drawn now, then again with your level once the profile has loaded
+        (async () => {
+            const el = document.getElementById('progress');
+            Progress.render(el, 'A1');
+            if (location.hash === '#progress') el.scrollIntoView();
+            try { const { profile } = await Account.profile(); if (profile && profile.level) Progress.render(el, profile.level); } catch (e) {}
+        })();
         (function drawNclc() {
             const S = NCLC.summary();
             const SK = [['listening', '🎧', 'Listening', 'exam-test.html?part=listening'], ['reading', '📖', 'Reading', 'exam-test.html?part=reading'],
