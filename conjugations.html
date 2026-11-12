@@ -17,6 +17,7 @@
     <script src="config.js"></script>
     <script src="js/ai.js"></script>
     <script src="js/conjugate.js"></script>
+    <script src="js/tense-table.js"></script>
 </head>
 <body class="h-full bg-slate-100 flex flex-col overflow-hidden font-sans text-slate-800">
 
@@ -32,6 +33,7 @@
             <nav class="flex gap-1 sm:gap-6 text-sm font-semibold overflow-x-auto overflow-y-hidden shadow-[inset_0_-1px_0_#e2e8f0]" role="tablist" aria-label="Conjugations">
                 <button data-tab="tables" role="tab" class="tab-btn shrink-0 min-h-[44px] px-2 sm:px-0 border-b-2">Verb tables</button>
                 <button data-tab="practice" role="tab" class="tab-btn shrink-0 min-h-[44px] px-2 sm:px-0 border-b-2">Practice</button>
+                <button data-tab="all" role="tab" class="tab-btn shrink-0 min-h-[44px] px-2 sm:px-0 border-b-2">All tenses</button>
             </nav>
 
             <!-- ===== VERB TABLES ===== -->
@@ -80,6 +82,9 @@
             </section>
 
             <!-- ===== PRACTICE ===== -->
+            <!-- ===== ALL TENSES: the basic forms, then one verb in every tense (js/tense-table.js) ===== -->
+            <section id="tab-all" class="hidden"></section>
+
             <section id="tab-practice" class="hidden space-y-4">
                 <div class="flex flex-col sm:flex-row sm:items-end gap-3">
                     <label class="block flex-1 sm:max-w-xs">
@@ -429,9 +434,11 @@
             });
             $('tab-tables').classList.toggle('hidden', name !== 'tables');
             $('tab-practice').classList.toggle('hidden', name !== 'practice');
+            $('tab-all').classList.toggle('hidden', name !== 'all');
+            if (name === 'all' && !$('tab-all').childElementCount) TenseTable.mount($('tab-all'));
             LocalStore.set('conj_tab', name);
             if (name === 'practice' && !pr.verb) startPractice(activeVerb && COMMON.includes(activeVerb.disp) ? activeVerb : null);
-            if (push) history.pushState({}, '', name === 'practice' ? 'conjugations.html?tab=practice' : 'conjugations.html' + (activeVerb ? '?verb=' + encodeURIComponent(activeVerb.disp) : ''));
+            if (push) history.pushState({}, '', name !== 'tables' ? 'conjugations.html?tab=' + name : 'conjugations.html' + (activeVerb ? '?verb=' + encodeURIComponent(activeVerb.disp) : ''));
         }
         document.querySelectorAll('.tab-btn').forEach(b => b.addEventListener('click', () => setTab(b.dataset.tab, true)));
         $('practise-this').addEventListener('click', () => { setTab('practice', true); startPractice(activeVerb); });
@@ -442,7 +449,9 @@
             if (p.get('lesson')) return location.replace('lesson.html?c=' + encodeURIComponent(p.get('lesson')));
             if (p.get('tab') === 'lessons') return location.replace('lesson.html');
             if (p.get('verb')) { const v = C.find(p.get('verb')); if (v) { setTab('tables', false); renderVerb(v); populateVerbList($('verb-search').value); return; } }
-            setTab(p.get('tab') === 'practice' || (!p.get('verb') && !p.get('tab') && LocalStore.get('conj_tab', 'tables') === 'practice') ? 'practice' : 'tables', false);
+            const saved = !p.get('verb') && !p.get('tab') ? LocalStore.get('conj_tab', 'tables') : '';
+            const want = p.get('tab') || saved;
+            setTab(want === 'practice' || want === 'all' ? want : 'tables', false);
         }
         pr.tense = LocalStore.get('conj_practice_tense', 'pres');
         $('pr-tense').value = pr.tense;

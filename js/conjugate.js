@@ -197,6 +197,8 @@ function cjEnglish(s, key) {
     case "fut": return `${I} will ${B}`;
     case "fa": return `${I} will have ${pp}${rest}`;
     case "fp": return `${I} ${am} going to ${B}`;
+    case "prog": return `${I} ${am} ${ing}${rest} (right now)`;
+    case "recent": return `${I} have just ${pp}${rest}`;
     case "cond": return `${I} would ${B}`;
     case "cp": return `${I} would have ${pp}${rest}`;
     case "subj": return `that ${I} ${base}${rest}`;
