@@ -1,10 +1,10 @@
-// tense-table.js - Conjugations › « All tenses »: the basic forms every tense is built from (être, avoir,
-// aller, faire, venir, the -ER / -IR / -RE endings, être / avoir in the imparfait and conditionnel), then one verb in
-// every tense, in the order of the student's own tense sheet. Colours: green = the ending, violet = taken from the
-// basic forms (tap to jump to them), amber = a stem that changes. The basic forms sit at the bottom; the column
-// the verb uses is highlighted. Verbs are added by searching in French or English.
-// « Hide some to practise » blanks random cells to type in.
-// Needs config.js (LocalStore) and js/conjugate.js (Conjugator). window.TenseTable.mount(el)
+// tense-table.js - the Conjugations « Verbs » view for one verb: every tense in the order of the student's tense sheet
+// (then futur antérieur and subjonctif passé), and the basic forms every tense is built from at the bottom (être,
+// avoir, aller, faire, venir, the -ER / -IR / -RE endings, être / avoir in the imparfait and conditionnel), with the
+// column the verb uses highlighted. Colours: green = the ending, violet = from the basic forms (tap to jump to them),
+// amber = a stem that changes. Tap a form to hear it. « Hide some to practise » blanks a third of the forms.
+// Needs config.js (LocalStore), js/conjugate.js (Conjugator); window.speakText(text) for listening (optional).
+// window.TenseTable.mount(el) · .show(verb) · .setPractise(on)
 (function () {
 'use strict';
 const C = window.Conjugator;
@@ -13,7 +13,6 @@ const PERSONS = ['je', 'tu', 'il/elle', 'nous', 'vous', 'ils/elles'];
 const RP = ['me', 'te', 'se', 'nous', 'vous', 'se'];
 const VOWEL = /^[aeiouyâàäéèêëîïôöùûüœh]/i;
 const END = 'text-emerald-700 font-bold', HELP = 'text-violet-700 font-bold', STEM = 'text-amber-700 font-bold';
-const DEFAULT_VERBS = ['parler', 'finir', 'attendre', 'aller'];
 const ER_KINDS = ['er', 'e_è', 'é_è', 'll', 'tt', 'yer', 'envoyer'];
 const BASIC = ['être', 'avoir', 'aller', 'faire', 'venir'];
 
@@ -22,7 +21,8 @@ const HALVES = [
     [['pres', 'Présent', ''], ['imp', 'Impératif', 'present, no subject'], ['prog', 'Présent progressif', 'être + en train de + infinitive'],
      ['fp', 'Futur proche', 'aller + infinitive'], ['recent', 'Passé récent', 'venir + de + infinitive'], ['impf', 'Imparfait', 'nous form − ons + ais']],
     [['cond', 'Conditionnel', 'futur stem + ais'], ['fut', 'Futur simple', 'infinitive + ai'], ['cp', 'Conditionnel passé', 'aurais / serais + PP'],
-     ['pqp', 'Plus-que-parfait', 'avais / étais + PP'], ['pc', 'Passé composé', 'avoir / être + PP'], ['subj', 'Subjonctif', 'que + ils form − ent + e']]
+     ['pqp', 'Plus-que-parfait', 'avais / étais + PP'], ['pc', 'Passé composé', 'avoir / être + PP'], ['subj', 'Subjonctif', 'que + ils form − ent + e']],
+    [['fa', 'Futur antérieur', 'aurai / serai + PP'], ['sp', 'Subjonctif passé', 'que + aie / sois + PP']]
 ];
 
 const form = (inf, key, i) => C.forms(C.find(inf), key)[i].cf;
@@ -81,6 +81,13 @@ function ppHtml(v, pp) {
     if (e && core.endsWith(e) && core === v.pp) return esc(core.slice(0, -e.length)) + wrap(END, e) + esc(tail);
     return esc(pp);
 }
+const queFor = (i, f) => i === 0 ? (VOWEL.test(f) ? "que j'" : 'que je ') : ['', 'que tu ', "qu'il ", 'que nous ', 'que vous ', "qu'ils "][i];
+// What to say aloud for a form: the pronoun and the form (« je parle », « nous sommes en train de parler »)
+function sayFor(key, i, text) {
+    if (key === 'imp' || key === 'subj' || key === 'sp') return text.replace(/\s*!$/, '');
+    const p = ['je', 'tu', 'il', 'nous', 'vous', 'ils'][i];
+    return i === 0 && VOWEL.test(text) ? "j'" + text : p + ' ' + text;
+}
 function cell(v, key, i) {
     if (key === 'imp') {
         const k = { 1: 0, 3: 1, 4: 2 }[i];
@@ -94,31 +101,27 @@ function cell(v, key, i) {
         const mid = key === 'prog' ? ' en train ' + de : key === 'recent' ? ' ' + de : ' ';
         return { html: jump(helper) + esc(mid) + esc(inf), text: helper + mid + inf };
     }
-    if (key === 'pc' || key === 'pqp' || key === 'cp') {
+    const AUX_TENSE = { pc: 'pres', pqp: 'impf', cp: 'cond', fa: 'fut', sp: 'subj' };
+    if (AUX_TENSE[key]) {
         const f = C.forms(v, key)[i].cf;
         const aux = C.find(v.aux === 'être' || v.refl ? 'être' : 'avoir');
-        const af = C.forms(aux, { pc: 'pres', pqp: 'impf', cp: 'cond' }[key])[i].cf;
+        const af = C.forms(aux, AUX_TENSE[key])[i].cf;
+        const que = key === 'sp' ? queFor(i, f) : '';
         const at = f.indexOf(af);
-        if (at < 0) return { html: esc(f), text: f };
+        if (at < 0) return { html: esc(que + f), text: que + f };
         const pp = f.slice(at + af.length).trim();
-        return { html: esc(f.slice(0, at)) + jump(af) + ' ' + ppHtml(v, pp), text: f };
+        return { html: esc(que + f.slice(0, at)) + jump(af) + ' ' + ppHtml(v, pp), text: que + f };
     }
     const f = C.forms(v, key)[i].cf;
     if (key === 'subj') {
-        const que = (i === 0 ? (VOWEL.test(f) ? "que j'" : 'que je ') : ['', 'que tu ', "qu'il ", 'que nous ', 'que vous ', "qu'ils "][i]);
+        const que = queFor(i, f);
         return { html: esc(que) + ending(v, key, i, f), text: que + f };
     }
     return { html: ending(v, key, i, f), text: f };
 }
 
 // ---------- State ----------
-const S = {
-    verbs: LocalStore.get('tense_table_verbs', DEFAULT_VERBS).filter(x => C.find(x)),
-    verb: LocalStore.get('tense_table_verb', 'parler'),
-    practise: false, hidden: new Set(), wide: true, el: null
-};
-if (!S.verbs.length) S.verbs = DEFAULT_VERBS.slice();
-if (!S.verbs.includes(S.verb)) S.verb = S.verbs[0];
+const S = { verb: null, practise: false, hidden: new Set(), wide: true, el: null };
 
 // ---------- Basic forms ----------
 function basicColumns() {
@@ -153,7 +156,7 @@ function cellHtml(v, key, i) {
     const c = cell(v, key, i);
     if (!c) return '<span class="text-slate-400">—</span>';
     if (S.practise && S.hidden.has(key + i)) return `<input type="text" data-ans="${esc(c.text)}" aria-label="${esc(PERSONS[i])}, ${esc(key)}" autocomplete="off" autocapitalize="off" spellcheck="false" class="w-full px-1.5 py-1 text-sm bg-white border-2 border-slate-200 rounded-lg focus:outline-none" lang="fr">`;
-    return c.html;
+    return `<span data-say="${esc(sayFor(key, i, c.text))}" class="cursor-pointer hover:text-indigo-700">${c.html}</span>`;
 }
 function renderHalf(v, tenses) {
     if (S.wide) {
@@ -178,34 +181,21 @@ function pickHidden(v) {
 }
 
 function render() {
-    const el = S.el, v = C.find(S.verb);
+    const el = S.el, v = S.verb;
+    if (!el || !v) return;
     S.wide = matchMedia('(min-width: 1024px)').matches;
-    const chip = (x) => { const cv = C.find(x); return `<span class="inline-flex items-center rounded-full border ${x === S.verb ? 'bg-indigo-50 border-indigo-300 text-indigo-700' : 'bg-white border-slate-200 text-slate-700 hover:border-indigo-300'}">
-        <button type="button" data-verb="${esc(x)}" class="min-h-[40px] px-3 text-sm"><b lang="fr">${esc(x)}</b> <span class="text-slate-500">${esc(meaning(cv))}</span></button>${DEFAULT_VERBS.includes(x) ? '' : `<button type="button" data-remove="${esc(x)}" class="min-h-[40px] pr-3 text-slate-400 hover:text-rose-600" aria-label="Remove ${esc(x)}">×</button>`}</span>`; };
+    const half = (h) => S.wide ? `<div${h.length < 6 ? ' style="max-width:40rem"' : ''}>${renderHalf(v, h)}</div>` : `<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">${renderHalf(v, h)}</div>`;
     el.innerHTML = `
     <div class="space-y-4">
-        <div class="space-y-2">
-            <div class="flex flex-wrap items-center gap-2">
-                <span class="text-sm font-semibold text-slate-500 mr-1">Your verb</span>
-                ${S.verbs.map(chip).join('')}
-                <form id="tt-add" class="inline-flex items-center">
-                    <input id="tt-new" type="search" placeholder="+ Add a verb: French or English" aria-label="Add a verb: type it in French or English" autocomplete="off" style="width:16rem" class="min-h-[40px] px-3 text-sm bg-white border border-slate-200 rounded-full focus:outline-none focus:ring-2">
-                </form>
-            </div>
-            <div id="tt-found" class="hidden bg-white border border-slate-200 rounded-2xl p-3 space-y-2" aria-live="polite"></div>
-        </div>
-
         <section class="bg-white border border-slate-200 rounded-2xl p-3 sm:p-4 space-y-3">
             <div class="flex flex-wrap items-center gap-x-4 gap-y-2">
-                <h2 class="text-base font-black text-slate-900"><span lang="fr">${esc(v.disp)}</span> <span class="font-normal text-sm text-slate-500">${esc(meaning(v))} · ${esc(groupShort(v))}</span></h2>
-                <span class="text-sm text-slate-500"><span class="${END}">ending</span> · <span class="${HELP}">from the basic forms</span> · <span class="${STEM}">stem change</span></span>
-                <label class="sm:ml-auto inline-flex items-center gap-2 min-h-[40px] text-sm font-semibold text-slate-700"><input type="checkbox" id="tt-practise" class="w-4 h-4 accent-indigo-600" ${S.practise ? 'checked' : ''}> Hide some to practise</label>
+                <span class="text-sm text-slate-500"><span class="${END}">ending</span> · <span class="${HELP}">from the basic forms</span> · <span class="${STEM}">stem change</span> · tap a form to hear it</span>
+                ${S.practise ? `<span class="sm:ml-auto flex flex-wrap items-center gap-2">
+                    <button type="button" id="tt-check" class="min-h-[40px] px-4 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold rounded-xl">Check</button>
+                    <button type="button" id="tt-again" class="min-h-[40px] px-4 bg-white border border-slate-200 hover:border-indigo-300 text-sm font-semibold rounded-xl">New blanks</button>
+                    <span id="tt-score" class="text-sm font-bold text-slate-700"></span></span>` : ''}
             </div>
-            ${S.practise ? `<div class="flex flex-wrap items-center gap-2">
-                <button type="button" id="tt-check" class="min-h-[40px] px-4 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold rounded-xl">Check</button>
-                <button type="button" id="tt-again" class="min-h-[40px] px-4 bg-white border border-slate-200 hover:border-indigo-300 text-sm font-semibold rounded-xl">New blanks</button>
-                <span id="tt-score" class="text-sm font-bold text-slate-700"></span></div>` : ''}
-            ${HALVES.map(h => S.wide ? `<div>${renderHalf(v, h)}</div>` : `<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">${renderHalf(v, h)}</div>`).join('')}
+            ${HALVES.map(half).join('')}
         </section>
 
         <section id="tt-basic" class="bg-white border border-slate-200 rounded-2xl p-3 sm:p-4 space-y-3">
@@ -215,29 +205,6 @@ function render() {
         </section>
     </div>`;
 }
-
-// ---------- Add a verb: search the French verbs and their English meanings ----------
-const fold = (x) => String(x || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
-function search(q) {
-    q = fold(q).replace(/^to /, '');
-    if (!q) return [];
-    const score = (v) => { const f = fold(v.disp), g = fold(v.gloss);
-        return g.replace(/^to /, '') === q ? -1 : f === q || g.replace(/^to /, '').split(/[,;(]/)[0].trim() === q ? 0 : f.startsWith(q) ? 1 : new RegExp('(^|[ ,;/(])(to )?' + q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).test(g) ? 2 : f.includes(q) ? 3 : g.includes(q) ? 4 : 9; };
-    return C.verbs.map(v => [score(v), v]).filter(([n]) => n < 9).sort((a, b) => a[0] - b[0] || a[1].disp.localeCompare(b[1].disp)).slice(0, 8).map(([, v]) => v);
-}
-const COMMON = ['être', 'avoir', 'aller', 'faire', 'dire', 'pouvoir', 'vouloir', 'savoir', 'venir', 'devoir', 'prendre', 'voir', 'mettre', 'parler', 'finir', 'attendre'];
-// The verb list under the search box: common verbs while it is empty, then the matches (French or English)
-function showFound(q) {
-    const box = S.el.querySelector('#tt-found');
-    if (!box) return;
-    const typed = String(q || '').trim();
-    const list = typed ? search(typed) : COMMON.map(x => C.find(x)).filter(Boolean);
-    box.classList.remove('hidden');
-    box.innerHTML = `<div class="flex items-center justify-between gap-2"><span class="text-sm text-slate-500">${typed ? (list.length ? 'Tap a verb to add it' : 'No verb found. Try the infinitive (prendre) or the English (to take).') : 'Common verbs · or type to search all 296, in French or English'}</span>
-        <button type="button" data-close class="min-h-[36px] px-2 text-slate-400 hover:text-slate-700" aria-label="Close the list">×</button></div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-1">${list.map(v => `<button type="button" data-add="${esc(v.disp)}" class="min-h-[40px] px-2.5 text-sm text-left rounded-lg hover:bg-indigo-50 ${S.verbs.includes(v.disp) ? 'text-indigo-700' : 'text-slate-800'}"><b lang="fr">${esc(v.disp)}</b> <span class="text-slate-500">${esc(meaning(v))}</span></button>`).join('')}</div>`;
-}
-const hideFound = () => { const box = S.el && S.el.querySelector('#tt-found'); if (box) box.classList.add('hidden'); };
 
 // Accept (e) and (s) as optional letters: « suis allée » is right for « suis allé(e) »
 const norm = (s) => String(s).toLowerCase().replace(/[’]/g, "'").replace(/\s*!\s*$/, '').replace(/\s+/g, ' ').trim();
@@ -266,39 +233,17 @@ function check() {
 
 function mount(el) {
     S.el = el;
-    render();
     el.addEventListener('click', (e) => {
-        const pick = e.target.closest('[data-verb]'), rm = e.target.closest('[data-remove]');
-        if (pick) { S.verb = pick.dataset.verb; LocalStore.set('tense_table_verb', S.verb); if (S.practise) pickHidden(C.find(S.verb)); render(); }
-        else if (rm) {
-            S.verbs = S.verbs.filter(x => x !== rm.dataset.remove); LocalStore.set('tense_table_verbs', S.verbs);
-            if (S.verb === rm.dataset.remove) S.verb = S.verbs[0];
-            render();
-        } else if (e.target.closest('[data-close]')) hideFound();
-        else if (e.target.closest('[data-add]')) add(e.target.closest('[data-add]').dataset.add);
-        else if (e.target.closest('[data-jump]')) el.querySelector('#tt-basic').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        const say = e.target.closest('[data-say]');
+        if (e.target.closest('[data-jump]')) el.querySelector('#tt-basic').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        else if (say) { if (window.speakText) window.speakText(say.dataset.say); }
         else if (e.target.id === 'tt-check') check();
-        else if (e.target.id === 'tt-again') { pickHidden(C.find(S.verb)); render(); }
+        else if (e.target.id === 'tt-again') { pickHidden(S.verb); render(); }
     });
-    el.addEventListener('change', (e) => {
-        if (e.target.id === 'tt-practise') { S.practise = e.target.checked; if (S.practise) pickHidden(C.find(S.verb)); render(); }
-    });
-    el.addEventListener('input', (e) => { if (e.target.id === 'tt-new') showFound(e.target.value); });
-    el.addEventListener('focusin', (e) => { if (e.target.id === 'tt-new') showFound(e.target.value); });
-    el.addEventListener('keydown', (e) => { if (e.key === 'Escape' && e.target.id === 'tt-new') hideFound(); });
-    document.addEventListener('click', (e) => { if (!e.target.closest('#tt-found') && !e.target.closest('#tt-add')) hideFound(); });
-    el.addEventListener('submit', (e) => { if (e.target.id === 'tt-add') { e.preventDefault(); const q = el.querySelector('#tt-new').value, hit = search(q)[0]; if (hit) add(hit.disp); else showFound(q); } });
     el.addEventListener('keydown', (e) => { if (e.key === 'Enter' && e.target.matches('input[data-ans]')) { e.preventDefault(); check(); } });
     matchMedia('(min-width: 1024px)').addEventListener('change', render);
 }
-function add(text) {
-    const v = C.verbs.find(x => x.disp === text);
-    if (!v) return;
-    hideFound();
-    if (!S.verbs.includes(v.disp)) { S.verbs.push(v.disp); LocalStore.set('tense_table_verbs', S.verbs); }
-    S.verb = v.disp; LocalStore.set('tense_table_verb', S.verb);
-    if (S.practise) pickHidden(v);
-    render();
-}
-window.TenseTable = { mount, cell, isRight, search };
+function show(v) { S.verb = v; if (S.practise) pickHidden(v); render(); }
+function setPractise(on) { S.practise = !!on; if (S.practise && S.verb) pickHidden(S.verb); render(); }
+window.TenseTable = { mount, show, setPractise, cell, isRight, groupShort };
 })();

@@ -27,16 +27,15 @@
         <div class="max-w-6xl mx-auto px-4 py-5 space-y-4">
             <div>
                 <h1 class="text-2xl font-black text-slate-900">Conjugations</h1>
-                <p class="text-sm text-slate-500 mt-1">Tables for 296 verbs in 12 tenses, and practice. The verb tense lessons are in <a href="lesson.html" class="text-indigo-700 font-semibold hover:underline">Grammar</a>.</p>
+                <p class="text-sm text-slate-500 mt-1">296 verbs in every tense, with the basic forms they are built from, and practice. The verb tense lessons are in <a href="lesson.html" class="text-indigo-700 font-semibold hover:underline">Grammar</a>.</p>
             </div>
 
             <nav class="flex gap-1 sm:gap-6 text-sm font-semibold overflow-x-auto overflow-y-hidden shadow-[inset_0_-1px_0_#e2e8f0]" role="tablist" aria-label="Conjugations">
-                <button data-tab="tables" role="tab" class="tab-btn shrink-0 min-h-[44px] px-2 sm:px-0 border-b-2">Verb tables</button>
+                <button data-tab="tables" role="tab" class="tab-btn shrink-0 min-h-[44px] px-2 sm:px-0 border-b-2">Verbs</button>
                 <button data-tab="practice" role="tab" class="tab-btn shrink-0 min-h-[44px] px-2 sm:px-0 border-b-2">Practice</button>
-                <button data-tab="all" role="tab" class="tab-btn shrink-0 min-h-[44px] px-2 sm:px-0 border-b-2">All tenses</button>
             </nav>
 
-            <!-- ===== VERB TABLES ===== -->
+            <!-- ===== VERBS: the list, then the chosen verb in every tense (js/tense-table.js) ===== -->
             <section id="tab-tables">
               <div class="md:grid md:grid-cols-[18rem_1fr] md:gap-5 space-y-4 md:space-y-0">
                 <aside class="space-y-3 md:sticky md:top-4 md:self-start">
@@ -64,27 +63,23 @@
                             <p id="atelier-category" class="text-sm text-slate-500 mt-0.5"></p>
                         </div>
                         <div class="flex items-center gap-2 flex-wrap">
-                            <button id="practise-this" type="button" class="min-h-[44px] px-3 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold rounded-xl">✍️ Practise</button>
                             <button onclick="playNativeAudio()" class="min-h-[44px] px-3 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold rounded-xl">🔊 Listen</button>
                             <button onclick="adjustSpeed()" id="speed-btn" class="min-h-[44px] px-3 bg-white border border-slate-200 text-slate-700 text-sm font-semibold rounded-xl">⚡ 1x</button>
-                            <button onclick="exportLesson()" class="min-h-[44px] px-3 bg-white border border-slate-200 text-slate-700 text-sm font-semibold rounded-xl">📤 Export</button>
+                            <label class="inline-flex items-center gap-2 min-h-[44px] px-3 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700"><input type="checkbox" id="tt-practise" class="w-4 h-4 accent-indigo-600"> Hide some to practise</label>
                         </div>
                     </div>
 
                     <div class="bg-amber-50 border border-amber-200 rounded-2xl p-4">
                         <div class="text-sm font-bold text-amber-900 mb-1">💡 About this verb</div>
-                        <div id="rule-text" class="text-base text-amber-900 leading-relaxed">Pick a verb to see its forms. Tap any row to hear it.</div>
+                        <div id="rule-text" class="text-base text-amber-900 leading-relaxed">Pick a verb to see its forms. Tap any form to hear it.</div>
                     </div>
 
-                    <div id="tense-grid" class="grid grid-cols-1 lg:grid-cols-2 gap-4"></div>
+                    <div id="tense-grid"></div>
                 </div>
               </div>
             </section>
 
             <!-- ===== PRACTICE ===== -->
-            <!-- ===== ALL TENSES: the basic forms, then one verb in every tense (js/tense-table.js) ===== -->
-            <section id="tab-all" class="hidden"></section>
-
             <section id="tab-practice" class="hidden space-y-4">
                 <div class="flex flex-col sm:flex-row sm:items-end gap-3">
                     <label class="block flex-1 sm:max-w-xs">
@@ -243,38 +238,13 @@
 
             const title = document.getElementById('atelier-title');
             title.dataset.activeVerb = v.disp;
-            title.innerText = v.gloss ? `${v.disp} (${v.gloss})` : v.disp;
-            document.getElementById('atelier-category').innerText =
-                `${GROUP_LABELS[verbGroup(v)]} · auxiliary: ${v.refl ? 'être' : v.aux}`;
+            title.innerText = v.disp;
+            document.getElementById('atelier-category').innerText = [v.gloss, TenseTable.groupShort(v)].filter(Boolean).join(' · ');
             document.querySelectorAll('#verb-list-container button').forEach(b => b.classList.remove('ring-2', 'ring-indigo-400'));
-
-            const grid = document.getElementById('tense-grid');
-            grid.innerHTML = C.tenses.map(t => {
-                const rows = C.forms(v, t.key);
-                if (!rows.length) return '';
-                const body = rows.map(r => `
-                    <tr class="hover:bg-indigo-50/50 cursor-pointer" data-say="${escapeHtml(r.say)}">
-                        <td class="px-3 py-2 text-slate-500 w-2/5">${escapeHtml(r.cp)}</td>
-                        <td class="px-3 py-2 font-bold text-slate-800 text-base">${C.highlight(v, t.key, r.i, r.cf)}</td>
-                    </tr>`).join('');
-                return `
-                    <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm flex flex-col">
-                        <div class="bg-slate-50 border-b border-slate-200 px-3 py-2 text-center">
-                            <div class="font-bold text-xs text-slate-700 uppercase tracking-wider">${escapeHtml(t.name)}</div>
-                            <div class="text-xs text-slate-500">${escapeHtml(C.english ? C.english(v, t.key) : t.en)}</div>
-                        </div>
-                        <table class="w-full text-sm text-left"><tbody class="divide-y divide-slate-100">${body}</tbody></table>
-                    </div>`;
-            }).join('');
-
+            TenseTable.show(v);
             document.getElementById('rule-text').innerText = C.notes(v).join(' ');
         }
 
-        // Tap any row to hear it
-        document.addEventListener('click', (event) => {
-            const row = event.target.closest('#tense-grid tr[data-say]');
-            if (row) speakText(row.dataset.say);
-        });
 
         window.speakText = function(text) {
             if (!('speechSynthesis' in window)) return;
@@ -296,26 +266,6 @@
             const btn = document.getElementById('speed-btn');
             if (btn) btn.innerText = `⚡ ${currentPlaybackSpeed}x`;
         }
-
-        function exportLesson() {
-            if (!activeVerb) return;
-            const lines = [`# ${activeVerb.disp}${activeVerb.gloss ? ' (' + activeVerb.gloss + ')' : ''}`, ''];
-            C.tenses.forEach(t => {
-                const rows = C.forms(activeVerb, t.key);
-                if (!rows.length) return;
-                lines.push(`## ${t.name}`, '');
-                rows.forEach(r => lines.push(`- ${formatForm(r)}`));
-                lines.push('');
-            });
-            const blob = new Blob([lines.join('\n')], { type: 'text/markdown' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `${activeVerb.inf}-conjugation.md`;
-            a.click();
-            URL.revokeObjectURL(url);
-        }
-
 
         // On phones the list sits above the tables: jump down to the tables after picking a verb
         function showTablesOnPhone() {
@@ -434,14 +384,12 @@
             });
             $('tab-tables').classList.toggle('hidden', name !== 'tables');
             $('tab-practice').classList.toggle('hidden', name !== 'practice');
-            $('tab-all').classList.toggle('hidden', name !== 'all');
-            if (name === 'all' && !$('tab-all').childElementCount) TenseTable.mount($('tab-all'));
             LocalStore.set('conj_tab', name);
             if (name === 'practice' && !pr.verb) startPractice(activeVerb && COMMON.includes(activeVerb.disp) ? activeVerb : null);
             if (push) history.pushState({}, '', name !== 'tables' ? 'conjugations.html?tab=' + name : 'conjugations.html' + (activeVerb ? '?verb=' + encodeURIComponent(activeVerb.disp) : ''));
         }
         document.querySelectorAll('.tab-btn').forEach(b => b.addEventListener('click', () => setTab(b.dataset.tab, true)));
-        $('practise-this').addEventListener('click', () => { setTab('practice', true); startPractice(activeVerb); });
+        $('tt-practise').addEventListener('change', (e) => TenseTable.setPractise(e.target.checked));
 
         // ---------- Routing: ?verb=finir, ?tab=practice; old lesson links go to Grammar ----------
         function route() {
@@ -451,11 +399,12 @@
             if (p.get('verb')) { const v = C.find(p.get('verb')); if (v) { setTab('tables', false); renderVerb(v); populateVerbList($('verb-search').value); return; } }
             const saved = !p.get('verb') && !p.get('tab') ? LocalStore.get('conj_tab', 'tables') : '';
             const want = p.get('tab') || saved;
-            setTab(want === 'practice' || want === 'all' ? want : 'tables', false);
+            setTab(want === 'practice' ? 'practice' : 'tables', false);   // the old « All tenses » tab is now the Verbs view
         }
         pr.tense = LocalStore.get('conj_practice_tense', 'pres');
         $('pr-tense').value = pr.tense;
         window.addEventListener('popstate', route);
+        TenseTable.mount($('tense-grid'));
         populateVerbList();
         route();
     </script>
