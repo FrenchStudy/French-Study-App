@@ -317,6 +317,15 @@ Give 2 to 6 notes about the most useful French words or grammar points. The text
 
         renderDirection();
         renderRecent();
+        // From the Home page: ?from=en|fr&q=text. A translation already made there is shown from the recent list.
+        (() => {
+            const qs = new URLSearchParams(location.search), q = (qs.get('q') || '').trim().slice(0, 1000);
+            if (qs.get('from') === 'fr' || qs.get('from') === 'en') { from = qs.get('from'); store.set('translator_from', from); renderDirection(); }
+            if (!q) return;
+            $('source').value = q; updateCount();
+            const hit = store.get('translator_recent', []).find(r => r.source === q && r.from === from);
+            if (hit) { last = hit; showResult(hit); } else translate();
+        })();
     </script>
 </body>
 </html>
