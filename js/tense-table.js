@@ -1,6 +1,6 @@
 // tense-table.js - the Conjugations « Verbs » view for one verb: every tense in the order of the student's tense sheet
 // in three tables: present; past and conditional; future and subjonctif, and the basic forms every tense is built from at the bottom (être,
-// avoir, aller, faire, venir, the -ER / -IR / -RE endings, être / avoir in the imparfait and conditionnel), with the
+// avoir, aller, venir, the -ER / -IR / -RE endings; être / avoir in the imparfait, conditionnel, futur and subjonctif), with the
 // column the verb uses highlighted. Colours: green = the ending, violet = from the basic forms (tap to jump to them),
 // amber = a stem that changes. Tap a form to hear it. « Hide some to practise » blanks a third of the forms.
 // Needs config.js (LocalStore), js/conjugate.js (Conjugator); window.speakText(text) for listening (optional).
@@ -15,7 +15,7 @@ const RP = ['me', 'te', 'se', 'nous', 'vous', 'se'];
 const VOWEL = /^[aeiouyâàäéèêëîïôöùûüœh]/i;
 const END = 'text-emerald-700 font-bold', HELP = 'text-violet-700 font-bold', STEM = 'text-amber-700 font-bold';
 const ER_KINDS = ['er', 'e_è', 'é_è', 'll', 'tt', 'yer', 'envoyer'];
-const BASIC = ['être', 'avoir', 'aller', 'faire', 'venir'];
+const BASIC = ['être', 'avoir', 'aller', 'venir'];   // the verbs the tenses are built from
 
 // The tenses, in the order of the tense sheet; « from » says what each one is built from
 // Three tables: the present; the past and the conditional; the future and the subjonctif (each simple tense next to its
@@ -132,16 +132,19 @@ function basicColumns() {
     const pres = (inf) => [0, 1, 2, 3, 4, 5].map(i => form(inf, 'pres', i));
     const both = (key) => [0, 1, 2, 3, 4, 5].map(i => form('être', key, i) + ' / ' + form('avoir', key, i));
     return [
-        ...BASIC.map(b => ({ id: b, title: b, cells: pres(b) })),
-        { id: 'er', title: '-ER', sub: 'parler', cells: ['-e', '-es', '-e', '-ons', '-ez', '-ent'], sep: true },
-        { id: 'ir', title: '-IR', sub: 'finir', cells: ['-is', '-is', '-it', '-issons', '-issez', '-issent'] },
-        { id: 're', title: '-RE', sub: 'attendre', cells: ['-s', '-s', '— (none)', '-ons', '-ez', '-ent'] },
-        { id: 'impf', title: 'être / avoir', sub: 'imparfait', cells: both('impf'), sep: true },
-        { id: 'cond', title: 'être / avoir', sub: 'conditionnel', cells: both('cond') }
+        // 1. the present
+        [...BASIC.map(b => ({ id: b, title: b, cells: pres(b) })),
+         { id: 'er', title: '-ER', sub: 'parler', cells: ['-e', '-es', '-e', '-ons', '-ez', '-ent'], sep: true },
+         { id: 'ir', title: '-IR', sub: 'finir', cells: ['-is', '-is', '-it', '-issons', '-issez', '-issent'] },
+         { id: 're', title: '-RE', sub: 'attendre', cells: ['-s', '-s', '— (none)', '-ons', '-ez', '-ent'] }],
+        // 2. être / avoir in the tenses that build the compound tenses
+        [{ id: 'impf', title: 'Imparfait', sub: '→ plus-que-parfait', cells: both('impf') },
+         { id: 'cond', title: 'Conditionnel', sub: '→ conditionnel passé', cells: both('cond') },
+         { id: 'fut', title: 'Futur simple', sub: '→ futur antérieur', cells: both('fut') },
+         { id: 'subj', title: 'Subjonctif', sub: '→ subjonctif passé', cells: both('subj') }]
     ];
 }
-function renderBasic(v) {
-    const cols = basicColumns(), on = v ? group(v) : null;
+function basicTable(cols, on) {
     const head = (c) => `${esc(c.title)}${c.sub ? `<span class="block font-normal text-xs text-slate-500">${esc(c.sub)}</span>` : ''}`;
     if (S.wide) {
         const td = (c, x, th) => `<${th ? 'th' : 'td'} class="text-left align-top py-1.5 px-2 border-b border-slate-100 ${c.id === on ? 'bg-emerald-50 text-emerald-800 font-bold' : th ? 'text-slate-900' : 'text-slate-700'}"${c.sep ? ' style="border-left:1px solid #cbd5e1"' : ''}>${x}</${th ? 'th' : 'td'}>`;
@@ -153,6 +156,13 @@ function renderBasic(v) {
     return `<div class="grid grid-cols-2 sm:grid-cols-3 gap-2">${cols.map(c => `<div class="rounded-xl border p-2.5 ${c.id === on ? 'bg-emerald-50 border-emerald-500' : 'bg-slate-50 border-slate-100'}">
         <div class="text-sm font-bold ${c.id === on ? 'text-emerald-800' : 'text-slate-900'} mb-1">${head(c)}</div>
         ${PERSONS.map((p, i) => `<div class="text-sm leading-snug"><span class="text-slate-400">${p}</span> <span class="${c.id === on ? 'text-emerald-800 font-bold' : 'text-slate-700'}">${esc(c.cells[i])}</span></div>`).join('')}</div>`).join('')}</div>`;
+}
+function renderBasic(v) {
+    const [present, helpers] = basicColumns(), on = v ? group(v) : null;
+    return `<h3 class="text-sm font-bold text-slate-700">1. The present</h3>
+        ${basicTable(present, on)}
+        <h3 class="text-sm font-bold text-slate-700 pt-2">2. être / avoir in other tenses <span class="font-normal text-slate-500">· the helpers for the compound tenses</span></h3>
+        ${basicTable(helpers, null)}`;
 }
 
 // ---------- The verb in every tense ----------
