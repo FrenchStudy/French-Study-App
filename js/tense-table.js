@@ -29,6 +29,41 @@ const HALVES = [
      ['sp', 'Subjonctif passé', 'que + aie / sois + PP']]
 ];
 
+// A fourth table: the forms that do not change with the person
+const OTHER = [['ppr', 'Participe présent', 'nous form − ons + ant'], ['ger', 'Gérondif', 'en + participe présent'],
+    ['ppa', 'Participe passé', '-é / -i / -u'], ['infp', 'Infinitif passé', 'avoir / être + PP']];
+
+// Verb + à / de (grammar topic 45), shown in « About this verb »: [what follows, example]
+const PREP = {
+    'penser': ['à + noun', 'Je pense à mes vacances.'], 'répondre': ['à + noun', 'Réponds à ma question.'],
+    'téléphoner': ['à + person', 'Je téléphone à ma mère.'], 'jouer': ['à + sport, de + instrument', 'Il joue au tennis. Il joue de la guitare.'],
+    'réussir': ['à + infinitive', 'Elle a réussi à partir.'], 'commencer': ['à + infinitive', 'Il commence à pleuvoir.'],
+    'apprendre': ['à + infinitive', "J'apprends à conduire."], 'aider': ['à + infinitive', "Je l'aide à porter la valise."],
+    'continuer': ['à + infinitive', 'Il continue à travailler.'], 'inviter': ['à + infinitive', 'Je t\'invite à dîner.'],
+    'renoncer': ['à + noun or infinitive', 'Il renonce à partir.'], 'arriver': ['à + infinitive (to manage to)', "Je n'arrive pas à dormir."],
+    'obéir': ['à + person', 'Il obéit à ses parents.'], 'réfléchir': ['à + noun', 'Je réfléchis à ta question.'],
+    "s'intéresser": ['à + noun', "Je m'intéresse à l'histoire."],
+    'parler': ['de + topic, à + person', 'Nous parlons de politique. Je parle à Marie.'], 'se souvenir': ['de + noun', 'Je me souviens de toi.'],
+    'décider': ['de + infinitive', 'Elle a décidé de partir.'], 'finir': ['de + infinitive', "J'ai fini de travailler."],
+    'essayer': ['de + infinitive', "J'essaie de comprendre."], 'oublier': ['de + infinitive', "N'oublie pas de téléphoner."],
+    'arrêter': ['de + infinitive', "J'arrête de fumer."], 'accepter': ['de + infinitive', "Il accepte d'aider."],
+    'refuser': ['de + infinitive', 'Elle refuse de répondre.'], 'choisir': ['de + infinitive', 'Il a choisi de rester.'],
+    'rêver': ['de + noun or infinitive', 'Je rêve de voyager.'], "s'occuper": ['de + noun', "Je m'occupe des enfants."],
+    'éviter': ['de + infinitive', "J'évite de sortir le soir."], 'promettre': ['à + person + de + infinitive', 'Je te promets de venir.'],
+    'venir': ['de + infinitive = have just', 'Je viens de manger.'],
+    'demander': ['à + person + de + infinitive; no preposition for « ask for »', "Je lui demande de venir. Il demande l'addition."],
+    'dire': ['à + person + de + infinitive', 'Elle lui dit de partir.'], 'permettre': ['à + person + de + infinitive', 'Il me permet de sortir.'],
+    'proposer': ['à + person + de + infinitive', 'Je lui propose de venir.'],
+    'attendre': ['no preposition (to wait for)', "J'attends le bus."], 'chercher': ['no preposition (to look for)', 'Je cherche mes clés.'],
+    'regarder': ['no preposition (to look at)', 'Je regarde la télé.'], 'écouter': ['no preposition (to listen to)', "J'écoute de la musique."],
+    'payer': ['no preposition (to pay for)', 'Je paie le repas.']
+};
+function prepNote(v) {
+    const p = v && PREP[v.disp];
+    if (!p) return '';
+    return /^no preposition/.test(p[0]) ? `No preposition, unlike English ${p[0].replace(/^no preposition\s*/, '')}: ${p[1]}` : `Followed by ${p[0]}: ${p[1]}`;
+}
+
 const form = (inf, key, i) => C.forms(C.find(inf), key)[i].cf;
 // Which basic column a verb's present uses
 function group(v) {
@@ -86,6 +121,34 @@ function ppHtml(v, pp) {
     return esc(pp);
 }
 const queFor = (i, f) => i === 0 ? (VOWEL.test(f) ? "que j'" : 'que je ') : ['', 'que tu ', "qu'il ", 'que nous ', 'que vous ', "qu'ils "][i];
+// The forms without a person: participe présent, gérondif, participe passé, infinitif passé
+function otherCell(v, key) {
+    const refl = (w) => !v.refl ? '' : VOWEL.test(w) ? "s'" : 'se ';
+    const etre = v.aux === 'être' || v.refl;
+    const pp = v.pp + (etre ? '(e)(s)' : '');
+    if (key === 'ppa') return { html: ppHtml(v, pp), text: pp };
+    if (key === 'infp') { const a = etre ? 'être' : 'avoir'; return { html: esc(refl(a)) + jump(a) + ' ' + ppHtml(v, pp), text: refl(a) + a + ' ' + pp }; }
+    const special = { 'être': 'étant', 'avoir': 'ayant', 'savoir': 'sachant' }[v.disp];
+    let stem, end = 'ant';
+    if (special) { stem = special.slice(0, -3); }
+    else { const nous = C.forms(v, 'pres')[3].cf.replace(/^nous /, ''); stem = nous.replace(/ons$/, ''); }
+    const word = stem + end, pre = refl(word);
+    const html = esc(pre) + esc(stem) + wrap(END, end), text = pre + word;
+    return key === 'ger' ? { html: 'en ' + html, text: 'en ' + text } : { html, text };
+}
+function renderOther(v) {
+    const cellOf = (k) => { const c = otherCell(v, k); return `<span data-say="${esc(c.text)}" class="cursor-pointer hover:text-indigo-700">${c.html}</span>`; };
+    if (S.wide) {
+        return `<div style="width:84%"><table class="w-full text-sm" style="table-layout:fixed">
+            <thead><tr><th class="w-16"></th>${OTHER.map(([k, name, from]) => `<th class="text-left align-top py-1.5 px-2 border-b border-slate-200 text-slate-900">${esc(name)}<span class="block font-normal text-xs text-slate-500 leading-snug">${esc(from)}</span></th>`).join('')}</tr></thead>
+            <tbody><tr><td class="py-1.5 px-2 border-b border-slate-100 text-slate-500"></td>${OTHER.map(([k]) => `<td class="align-top py-1.5 px-2 border-b border-slate-100 text-slate-800">${cellOf(k)}</td>`).join('')}</tr>
+            <tr><td class="py-1.5 px-2 text-xs text-slate-400 align-top">means</td>${OTHER.map(([k]) => `<td class="align-top py-1.5 px-2 text-xs text-slate-500 italic">${esc(C.english(v, k))}</td>`).join('')}</tr></tbody></table></div>`;
+    }
+    return `<div class="grid grid-cols-2 gap-2">${OTHER.map(([k, name, from]) => `<div class="bg-white border border-slate-200 rounded-xl p-3">
+        <div class="text-sm font-bold text-slate-900">${esc(name)}</div><div class="text-xs text-slate-500">${esc(from)}</div>
+        <div class="text-base text-slate-800 mt-1">${cellOf(k)}</div><div class="text-xs text-slate-500 italic">${esc(C.english(v, k))}</div></div>`).join('')}</div>`;
+}
+
 // What to say aloud for a form: the pronoun and the form (« je parle », « nous sommes en train de parler »)
 function sayFor(key, i, text) {
     if (key === 'imp' || key === 'subj' || key === 'sp') return text.replace(/\s*!$/, '');
@@ -222,7 +285,21 @@ function renderStructure() {
         <table class="w-full text-sm" style="table-layout:fixed">
             <thead><tr><th class="w-14"></th>${GROUPS.map(g => `<th class="text-left py-1 px-1 border-b border-slate-200 text-slate-900">-${g.toUpperCase()}</th>`).join('')}</tr></thead>
             <tbody>${PERSONS.map((p, i) => `<tr><td class="py-1 px-1 border-b border-slate-100 text-slate-500 align-top">${p}</td>${GROUPS.map(g => { const c = structCell(k, g, i); return `<td class="py-1 px-1 border-b border-slate-100 text-slate-800 align-top">${c == null ? '<span class="text-slate-400">—</span>' : c}</td>`; }).join('')}</tr>`).join('')}</tbody>
-        </table></div>`).join('')}</div>`;
+        </table></div>`).join('')}${otherPatternCard()}</div>`;
+}
+function otherPatternCard() {
+    const E = (t) => wrap(END + ' whitespace-nowrap', t);
+    const rows = [['part. présent', { er: E('-ant'), ir: E('-issant'), re: E('-ant') }],
+        ['gérondif', { er: 'en ' + E('-ant'), ir: 'en ' + E('-issant'), re: 'en ' + E('-ant') }],
+        ['part. passé', { er: E('-é'), ir: E('-i'), re: E('-u') }],
+        ['inf. passé', { er: jump('avoir') + ' ' + E('-é'), ir: jump('avoir') + ' ' + E('-i'), re: jump('avoir') + ' ' + E('-u') }]];
+    return `<div class="bg-white border border-slate-200 rounded-xl p-3">
+        <div class="text-base font-bold text-slate-900">Other forms</div>
+        <div class="text-xs text-slate-500 mb-2">the same for every person</div>
+        <table class="w-full text-sm" style="table-layout:fixed">
+            <thead><tr><th style="width:6.5rem"></th>${GROUPS.map(g => `<th class="text-left py-1 px-1 border-b border-slate-200 text-slate-900">-${g.toUpperCase()}</th>`).join('')}</tr></thead>
+            <tbody>${rows.map(([label, c]) => `<tr><td class="py-1 px-1 border-b border-slate-100 text-slate-500 align-top">${label}</td>${GROUPS.map(g => `<td class="py-1 px-1 border-b border-slate-100 text-slate-800 align-top">${c[g]}</td>`).join('')}</tr>`).join('')}</tbody>
+        </table></div>`;
 }
 
 function render() {
@@ -254,6 +331,8 @@ function render() {
                     <span id="tt-score" class="text-sm font-bold text-slate-700"></span></span>` : ''}
             </div>
             ${HALVES.map(half).join('')}
+            <h3 class="text-base font-bold text-slate-900 pt-2">Other forms <span class="font-normal text-sm text-slate-500">· the same for every person</span></h3>
+            ${renderOther(v)}
         </section>
 
         <section id="tt-basic" class="bg-white border border-slate-200 rounded-2xl p-3 sm:p-4 space-y-3">
@@ -304,5 +383,5 @@ function mount(el) {
 function showStructure() { S.structure = true; S.verb = null; render(); }
 function show(v) { S.structure = false; S.verb = v; if (S.practise) pickHidden(v); render(); }
 function setPractise(on) { S.practise = !!on; if (S.practise && S.verb) pickHidden(S.verb); render(); }
-window.TenseTable = { mount, show, showStructure, setPractise, cell, isRight, groupShort };
+window.TenseTable = { mount, show, showStructure, prepNote, otherCell, setPractise, cell, isRight, groupShort };
 })();

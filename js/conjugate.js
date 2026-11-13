@@ -184,6 +184,7 @@ function cjEnglish(s, key) {
   const [w, ...restArr] = gloss.split(/\s+/);
   const rest = restArr.length ? " " + restArr.join(" ").replace(/\boneself\b/g, "myself").replace(/\bone's\b/g, "my") : "";
   const restYou = restArr.length ? " " + restArr.join(" ").replace(/\boneself\b/g, "yourself").replace(/\bone's\b/g, "your") : "";
+  const restO = restArr.length ? " " + restArr.join(" ") : "";   // « oneself » kept: washing oneself
   const base = w.toLowerCase(), past = enEd(base), pp = enPp(base), ing = enIng(base);
   const we = /each other/.test(rest);   // se rencontrer: "we met each other"
   const I = we ? "we" : "I", am = we ? "are" : "am", was = we ? "were" : "was";
@@ -198,6 +199,10 @@ function cjEnglish(s, key) {
     case "fa": return `${I} will have ${pp}${rest}`;
     case "fp": return `${I} ${am} going to ${B}`;
     case "prog": return `${I} ${am} ${ing}${rest} (right now)`;
+    case "ppr": return `${ing}${restO}`;
+    case "ger": return `while / by ${ing}${restO}`;
+    case "ppa": return `${pp}${restO}`;
+    case "infp": return `having ${pp}${restO}`;
     case "recent": return `${I} have just ${pp}${rest}`;
     case "cond": return `${I} would ${B}`;
     case "cp": return `${I} would have ${pp}${rest}`;
