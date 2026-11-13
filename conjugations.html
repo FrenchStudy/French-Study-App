@@ -12,7 +12,6 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="Français">
     <link rel="stylesheet" href="css/app.css">
-    <style>@media (min-width: 768px) { #verbs-layout { grid-template-columns: 13.5rem minmax(0, 1fr); } }   /* a narrow verb list: more room for the tenses */</style>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.104.0"></script>
     <script>window.supabase || document.write('<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"><\/script>')</script>
     <script src="config.js"></script>
@@ -37,46 +36,46 @@
             </nav>
 
             <!-- ===== VERBS: the list, then the chosen verb in every tense (js/tense-table.js) ===== -->
-            <section id="tab-tables">
-              <div id="verbs-layout" class="md:grid md:grid-cols-[18rem_1fr] md:gap-5 space-y-4 md:space-y-0">
-                <aside class="space-y-3 md:sticky md:top-4 md:self-start">
-                    <input type="search" id="verb-search" placeholder="Verb or meaning"
-                           oninput="filterVerbList(this.value)" onkeydown="if(event.key==='Enter') conjugateTyped(this.value)"
-                           class="w-full text-base px-3 py-3 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                    <div class="flex flex-wrap gap-1.5 pb-1 text-sm">
-                        <button onclick="filterVerbs('all', this)" class="filter-pill shrink-0 min-h-[40px] px-2.5 rounded-lg font-medium bg-indigo-600 border border-indigo-600 text-white">All</button>
-                        <button onclick="filterVerbs('er', this)" class="filter-pill shrink-0 min-h-[40px] px-2.5 rounded-lg font-medium bg-white border border-slate-200 text-slate-700 hover:bg-slate-50">-er</button>
-                        <button onclick="filterVerbs('ir', this)" class="filter-pill shrink-0 min-h-[40px] px-2.5 rounded-lg font-medium bg-white border border-slate-200 text-slate-700 hover:bg-slate-50">-ir</button>
-                        <button onclick="filterVerbs('re', this)" class="filter-pill shrink-0 min-h-[40px] px-2.5 rounded-lg font-medium bg-white border border-slate-200 text-slate-700 hover:bg-slate-50">-re</button>
-                        <button onclick="filterVerbs('irr', this)" class="filter-pill shrink-0 min-h-[40px] px-2.5 rounded-lg font-medium bg-white border border-slate-200 text-slate-700 hover:bg-slate-50">Irreg.</button>
-                        <button onclick="filterVerbs('refl', this)" class="filter-pill shrink-0 min-h-[40px] px-2.5 rounded-lg font-medium bg-white border border-slate-200 text-slate-700 hover:bg-slate-50">Refl.</button>
-                    </div>
-                    <div id="verb-list-container" class="space-y-1 bg-white border border-slate-200 rounded-xl p-2">
-                        <p class="text-sm text-slate-400 p-2">Loading verbs…</p>
-                    </div>
-                </aside>
-
-                <div id="verb-detail" class="space-y-4 min-w-0">
-                    <div class="flex items-start justify-between gap-3 flex-wrap">
-                        <div class="min-w-0">
-                            <h2 id="atelier-title" class="text-2xl font-black text-slate-900 break-words">Choose a verb</h2>
-                            <p id="atelier-category" class="text-sm text-slate-500 mt-0.5"></p>
-                        </div>
-                        <div id="verb-tools" class="flex items-center gap-2 flex-wrap">
-                            <button onclick="playNativeAudio()" class="min-h-[44px] px-3 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold rounded-xl">🔊 Listen</button>
-                            <button onclick="adjustSpeed()" id="speed-btn" class="min-h-[44px] px-3 bg-white border border-slate-200 text-slate-700 text-sm font-semibold rounded-xl">⚡ 1x</button>
-                            <label class="inline-flex items-center gap-2 min-h-[44px] px-3 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700"><input type="checkbox" id="tt-practise" class="w-4 h-4 accent-indigo-600"> Hide some to practise</label>
+            <section id="tab-tables" class="space-y-4">
+                <!-- One bar: the verb picker (a dropdown with the search, filters and list), the pattern, and the tools -->
+                <div class="flex flex-wrap items-center gap-2">
+                    <div id="picker" class="relative">
+                        <button id="picker-btn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="picker-panel" style="width:20rem"
+                                class="max-w-full min-h-[44px] flex items-center justify-between gap-2 px-3 bg-white border-2 border-indigo-300 rounded-xl text-left">
+                            <span class="min-w-0 truncate"><b id="atelier-title" class="text-base font-black text-slate-900" lang="fr">Choose a verb</b> <span id="atelier-category" class="text-sm text-slate-500"></span></span>
+                            <span aria-hidden="true" class="text-slate-500">▾</span>
+                        </button>
+                        <div id="picker-panel" class="hidden absolute left-0 top-full mt-1 z-20 bg-white border border-slate-200 rounded-2xl shadow-lg p-3 space-y-3" style="width:min(22rem, calc(100vw - 2rem))">
+                            <input type="search" id="verb-search" placeholder="Verb or meaning" aria-label="Find a verb, in French or English"
+                                   oninput="filterVerbList(this.value)" onkeydown="if(event.key==='Enter') conjugateTyped(this.value)"
+                                   class="w-full text-base px-3 py-2.5 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            <div class="flex flex-wrap gap-1.5 text-sm">
+                                <button onclick="filterVerbs('all', this)" class="filter-pill shrink-0 min-h-[40px] px-2.5 rounded-lg font-medium bg-indigo-600 border border-indigo-600 text-white">All</button>
+                                <button onclick="filterVerbs('er', this)" class="filter-pill shrink-0 min-h-[40px] px-2.5 rounded-lg font-medium bg-white border border-slate-200 text-slate-700 hover:bg-slate-50">-er</button>
+                                <button onclick="filterVerbs('ir', this)" class="filter-pill shrink-0 min-h-[40px] px-2.5 rounded-lg font-medium bg-white border border-slate-200 text-slate-700 hover:bg-slate-50">-ir</button>
+                                <button onclick="filterVerbs('re', this)" class="filter-pill shrink-0 min-h-[40px] px-2.5 rounded-lg font-medium bg-white border border-slate-200 text-slate-700 hover:bg-slate-50">-re</button>
+                                <button onclick="filterVerbs('irr', this)" class="filter-pill shrink-0 min-h-[40px] px-2.5 rounded-lg font-medium bg-white border border-slate-200 text-slate-700 hover:bg-slate-50">Irreg.</button>
+                                <button onclick="filterVerbs('refl', this)" class="filter-pill shrink-0 min-h-[40px] px-2.5 rounded-lg font-medium bg-white border border-slate-200 text-slate-700 hover:bg-slate-50">Refl.</button>
+                            </div>
+                            <div id="verb-list-container" class="space-y-1">
+                                <p class="text-sm text-slate-400 p-2">Loading verbs…</p>
+                            </div>
                         </div>
                     </div>
-
-                    <div class="bg-amber-50 border border-amber-200 rounded-2xl p-4">
-                        <div id="rule-title" class="text-sm font-bold text-amber-900 mb-1">💡 About this verb</div>
-                        <div id="rule-text" class="text-base text-amber-900 leading-relaxed">Pick a verb to see its forms. Tap any form to hear it.</div>
+                    <button id="pattern-btn" type="button" class="min-h-[44px] px-3 bg-white border border-slate-200 hover:border-indigo-300 text-slate-700 text-sm font-semibold rounded-xl">The pattern (all verbs)</button>
+                    <div id="verb-tools" class="sm:ml-auto flex items-center gap-2 flex-wrap">
+                        <button onclick="playNativeAudio()" class="min-h-[44px] px-3 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold rounded-xl">🔊 Listen</button>
+                        <button onclick="adjustSpeed()" id="speed-btn" class="min-h-[44px] px-3 bg-white border border-slate-200 text-slate-700 text-sm font-semibold rounded-xl">⚡ 1x</button>
+                        <label class="inline-flex items-center gap-2 min-h-[44px] px-3 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700"><input type="checkbox" id="tt-practise" class="w-4 h-4 accent-indigo-600"> Hide some to practise</label>
                     </div>
-
-                    <div id="tense-grid"></div>
                 </div>
-              </div>
+
+                <div id="rule-box" class="bg-amber-50 border border-amber-200 rounded-2xl p-4">
+                    <div id="rule-title" class="text-sm font-bold text-amber-900 mb-1">💡 About this verb</div>
+                    <div id="rule-text" class="text-base text-amber-900 leading-relaxed">Pick a verb to see its forms. Tap any form to hear it.</div>
+                </div>
+
+                <div id="tense-grid"></div>
             </section>
 
             <!-- ===== PRACTICE ===== -->
@@ -159,7 +158,7 @@
                 btn.className = PILL_OFF;
             });
             buttonElement.className = PILL_ON;
-            if (category === 'all') { $('verb-search').value = ''; showAllVerbs = false; showStructure(); }
+            if (category === 'all') { $('verb-search').value = ''; showAllVerbs = false; }
             populateVerbList(document.getElementById('verb-search').value);
         }
 
@@ -234,11 +233,12 @@
         // « All »: no verb, the pattern of every tense for -er, -ir and -re
         function showStructure() {
             activeVerb = null;
-            $('atelier-title').innerText = 'All verbs: the pattern';
-            $('atelier-category').innerText = 'Regular -er, -ir and -re verbs, endings only';
+            $('atelier-title').innerText = 'Choose a verb';
+            $('atelier-category').innerText = '';
+            $('pattern-btn').classList.add('bg-indigo-50', 'border-indigo-300', 'text-indigo-700'); $('pattern-btn').classList.remove('bg-white', 'border-slate-200', 'text-slate-700');
+            closePicker();
             $('verb-tools').classList.add('hidden');
-            $('rule-text').innerText = 'Regular verbs follow these patterns: take the stem (or the infinitive) and add the green ending. Irregular verbs do not: pick one in the list to see it in full.';
-            $('rule-title').innerText = '💡 How to read this';
+            $('rule-box').classList.add('hidden');   // the pattern needs no note: more room for the cards
             TenseTable.showStructure();
             populateVerbList($('verb-search').value);
         }
@@ -247,15 +247,16 @@
             if (!v) return;
             activeVerb = v;
             $('verb-tools').classList.remove('hidden');
-            $('rule-title').innerText = '💡 About this verb';
+            $('pattern-btn').classList.remove('bg-indigo-50', 'border-indigo-300', 'text-indigo-700'); $('pattern-btn').classList.add('bg-white', 'border-slate-200', 'text-slate-700');
+            $('rule-box').classList.remove('hidden');
 
             const title = document.getElementById('atelier-title');
             title.dataset.activeVerb = v.disp;
             title.innerText = v.disp;
-            document.getElementById('atelier-category').innerText = [v.gloss, TenseTable.groupShort(v)].filter(Boolean).join(' · ');
+            document.getElementById('atelier-category').innerText = String(v.gloss || '').replace(/\s*[;,].*$/, '');
             document.querySelectorAll('#verb-list-container button').forEach(b => b.classList.remove('ring-2', 'ring-indigo-400'));
             TenseTable.show(v);
-            document.getElementById('rule-text').innerText = C.notes(v).join(' ');
+            document.getElementById('rule-text').innerText = [...C.notes(v), TenseTable.prepNote(v)].filter(Boolean).join(' ');
         }
 
 
@@ -281,9 +282,17 @@
         }
 
         // On phones the list sits above the tables: jump down to the tables after picking a verb
-        function showTablesOnPhone() {
-            if (window.innerWidth < 768) document.getElementById('verb-detail').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        // The verb picker: a dropdown with the search, the filters and the list; it closes when a verb is picked
+        function openPicker() {
+            $('picker-panel').classList.remove('hidden'); $('picker-btn').setAttribute('aria-expanded', 'true');
+            if (window.innerWidth >= 768) $('verb-search').focus();
         }
+        function closePicker() { $('picker-panel').classList.add('hidden'); $('picker-btn').setAttribute('aria-expanded', 'false'); }
+        $('picker-btn').addEventListener('click', () => $('picker-panel').classList.contains('hidden') ? openPicker() : closePicker());
+        document.addEventListener('click', (e) => { if (!e.composedPath().includes($('picker'))) closePicker(); });   // the path survives the list being redrawn
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('picker-panel').classList.contains('hidden')) { closePicker(); $('picker-btn').focus(); } });
+        $('pattern-btn').addEventListener('click', () => showStructure());
+        function showTablesOnPhone() { closePicker(); }
 
         // ---------- Practice: fill in the six forms ----------
         const COMMON = ['être', 'avoir', 'aller', 'faire', 'dire', 'pouvoir', 'vouloir', 'savoir', 'venir', 'devoir', 'prendre', 'voir', 'mettre', 'parler',
