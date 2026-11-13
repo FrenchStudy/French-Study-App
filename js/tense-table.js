@@ -1,5 +1,5 @@
 // tense-table.js - the Conjugations « Verbs » view for one verb: every tense in the order of the student's tense sheet
-// (then futur antérieur and subjonctif passé), and the basic forms every tense is built from at the bottom (être,
+// in three tables: present; past and conditional; future and subjonctif, and the basic forms every tense is built from at the bottom (être,
 // avoir, aller, faire, venir, the -ER / -IR / -RE endings, être / avoir in the imparfait and conditionnel), with the
 // column the verb uses highlighted. Colours: green = the ending, violet = from the basic forms (tap to jump to them),
 // amber = a stem that changes. Tap a form to hear it. « Hide some to practise » blanks a third of the forms.
@@ -18,12 +18,15 @@ const ER_KINDS = ['er', 'e_è', 'é_è', 'll', 'tt', 'yer', 'envoyer'];
 const BASIC = ['être', 'avoir', 'aller', 'faire', 'venir'];
 
 // The tenses, in the order of the tense sheet; « from » says what each one is built from
+// Three tables: the present; the past and the conditional; the future and the subjonctif (each simple tense next to its
+// compound partner)
 const HALVES = [
     [['pres', 'Présent', ''], ['imp', 'Impératif', 'present, no subject'], ['prog', 'Présent progressif', 'être + en train de + infinitive'],
-     ['fp', 'Futur proche', 'aller + infinitive'], ['recent', 'Passé récent', 'venir + de + infinitive'], ['impf', 'Imparfait', 'nous form − ons + ais']],
-    [['cond', 'Conditionnel', 'futur stem + ais'], ['fut', 'Futur simple', 'infinitive + ai'], ['cp', 'Conditionnel passé', 'aurais / serais + PP'],
-     ['pqp', 'Plus-que-parfait', 'avais / étais + PP'], ['pc', 'Passé composé', 'avoir / être + PP'], ['subj', 'Subjonctif', 'que + ils form − ent + e']],
-    [['fa', 'Futur antérieur', 'aurai / serai + PP'], ['sp', 'Subjonctif passé', 'que + aie / sois + PP']]
+     ['fp', 'Futur proche', 'aller + infinitive'], ['recent', 'Passé récent', 'venir + de + infinitive']],
+    [['pc', 'Passé composé', 'ai / suis + PP'], ['impf', 'Imparfait', 'nous form − ons + ais'], ['pqp', 'Plus-que-parfait', 'avais / étais + PP'],
+     ['cond', 'Conditionnel', 'futur stem + ais'], ['cp', 'Conditionnel passé', 'aurais / serais + PP']],
+    [['fut', 'Futur simple', 'infinitive + ai'], ['fa', 'Futur antérieur', 'aurai / serai + PP'], ['subj', 'Subjonctif', 'que + ils form − ent + e'],
+     ['sp', 'Subjonctif passé', 'que + aie / sois + PP']]
 ];
 
 const form = (inf, key, i) => C.forms(C.find(inf), key)[i].cf;
@@ -229,7 +232,7 @@ function render() {
         return;
     }
     S.wide = matchMedia('(min-width: 1024px)').matches;
-    const half = (h) => S.wide ? `<div${h.length < 6 ? ' style="max-width:40rem"' : ''}>${renderHalf(v, h)}</div>` : `<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">${renderHalf(v, h)}</div>`;
+    const half = (h) => S.wide ? `<div${h.length < 5 ? ` style="width:${Math.round(h.length / 5 * 100 + 4)}%"` : ''}>${renderHalf(v, h)}</div>` : `<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">${renderHalf(v, h)}</div>`;
     el.innerHTML = `
     <div class="space-y-4">
         <section class="bg-white border border-slate-200 rounded-2xl p-3 sm:p-4 space-y-3">
