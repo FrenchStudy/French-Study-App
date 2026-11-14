@@ -14,7 +14,7 @@
 # Needs Python Playwright with Chromium. --mock FILE: a JavaScript file added after config.js that fakes the database:
 # topics 31-56 come from the database, so they are checked with it (everything else is checked without it). Writes DIR/report.md, DIR/report.json and a
 # screenshot of each problem (DIR defaults to a folder in the system temp directory).
-import json, os, subprocess, sys, tempfile, time, argparse
+import glob, json, os, subprocess, sys, tempfile, time, argparse
 from multiprocessing import Pool
 from playwright.sync_api import sync_playwright
 
@@ -135,6 +135,19 @@ def run_jobs(jobs):
         b.close()
     return rows
 
+def option_bias():
+    """Exam tests: if the right option (always the first in the file) is too often the shortest or the longest,
+    picking by length beats chance. Flag a test where either happens in more than 30% of its questions."""
+    out = []
+    for f in sorted(glob.glob(os.path.join(R, 'content', 'tcf', 'tests', '*.json'))):
+        qs = json.load(open(f)).get('questions', [])
+        if not qs: continue
+        short = sum(1 for q in qs if len(q['o'][0]) == min(map(len, q['o'])) and [len(o) for o in q['o']].count(len(q['o'][0])) == 1)
+        long_ = sum(1 for q in qs if len(q['o'][0]) == max(map(len, q['o'])) and [len(o) for o in q['o']].count(len(q['o'][0])) == 1)
+        if max(short, long_) > 0.3 * len(qs):
+            out.append(f'{os.path.basename(f)}: the right answer is the shortest in {short} and the longest in {long_} of {len(qs)} questions')
+    return out
+
 def main():
     srv = subprocess.Popen([sys.executable, '-m', 'http.server', str(A.port), '-d', R], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     time.sleep(1)
@@ -162,10 +175,12 @@ def main():
     json.dump(rows, open(os.path.join(OUT, 'report.json'), 'w'), ensure_ascii=False, indent=1)
     probs = [r for r in rows if r['errors'] or r['wide'] or r['tiny'] or r.get('fail') or r['textLen'] < 20]
     offs = [r for r in rows if r['off']]
+    bias = option_bias()
     lines = [f'# App check: {len(rows)} screens ({sum(r["view"] == "phone" for r in rows)} on a phone, {sum(r["view"] == "desktop" for r in rows)} on a desktop)', '',
              f'- JavaScript errors: {sum(bool(r["errors"]) for r in rows)} screens', f'- Wider than the screen: {sum(r["wide"] for r in rows)}',
              f'- Text under 12px: {sum(bool(r["tiny"]) for r in rows)}', f'- Text outside the size scale: {len(offs)}', f'- Empty screens: {sum(r["textLen"] < 20 for r in rows)}',
-             f'- Words shown twice on one step: {sum(bool(r.get("twice")) for r in rows)}', f'- Boxes with their own scroll bar: {sum(bool(r.get("scroll")) for r in rows)}', f'- Main picture or video not in the first screen (computer): {sum(bool(r.get("below")) for r in rows)}', '']
+             f'- Words shown twice on one step: {sum(bool(r.get("twice")) for r in rows)}', f'- Boxes with their own scroll bar: {sum(bool(r.get("scroll")) for r in rows)}', f'- Main picture or video not in the first screen (computer): {sum(bool(r.get("below")) for r in rows)}',
+             f'- Exam tests where the right answer can be guessed by its length: {len(bias)}', '']
     for r in probs:
         lines.append(f'## {r["view"]} · {r["where"]}')
         if r['errors']: lines.append('- errors: ' + '; '.join(r['errors'])[:400])
@@ -187,8 +202,11 @@ def main():
     if offs:
         lines.append('## Text outside the scale')
         for r in offs[:40]: lines.append(f'- {r["view"]} · {r["where"]}: ' + ' | '.join(r['off'][:4]))
+    if bias:
+        lines.append('## Exam answers guessable by length')
+        lines += [f'- {b}' for b in bias] + ['']
     open(os.path.join(OUT, 'report.md'), 'w').write('\n'.join(lines) + '\n')
-    print('\n'.join(lines[:11])); print('report:', os.path.join(OUT, 'report.md'))
+    print('\n'.join(lines[:12])); print('report:', os.path.join(OUT, 'report.md'))
 
 if __name__ == '__main__':
     main()

@@ -142,7 +142,7 @@
    "q": "Qu'est-ce que la femme a fait samedi ?",
    "o": [
     "Elle a aidé sa sœur à déménager.",
-    "Elle s'est reposée à la maison toute la journée.",
+    "Elle s'est reposée.",
     "Elle a acheté des cartons pour son déménagement.",
     "Elle a visité un nouvel appartement avec sa sœur."
    ],
@@ -185,7 +185,7 @@
    "o": [
     "Il n'y a plus de place le samedi.",
     "Le cours du mardi est moins cher que celui du samedi.",
-    "Son fils préfère nager le soir, après l'école.",
+    "Son fils préfère le soir.",
     "Elle travaille le samedi matin et ne peut pas l'emmener."
    ],
    "why": "« Le samedi est complet » = Saturday is full."
@@ -234,7 +234,7 @@
    "q": "Qu'est-ce qui pose problème à la femme dans son nouvel emploi ?",
    "o": [
     "Le temps de trajet",
-    "Ses nouveaux collègues de bureau",
+    "Ses collègues",
     "Son salaire, plus bas qu'avant",
     "Ses tâches, qu'elle trouve ennuyeuses"
    ],
@@ -289,7 +289,7 @@
    "q": "Pourquoi Thomas Gagnon appelle-t-il ?",
    "o": [
     "Il manque un document dans la demande.",
-    "Sa demande de carte de crédit a été refusée.",
+    "Sa demande a été refusée.",
     "Sa nouvelle carte de crédit est prête en succursale.",
     "Il veut lui proposer un prêt pour un achat important."
    ],
@@ -390,7 +390,7 @@
    "q": "Qu'est-ce que la femme va faire ?",
    "o": [
     "Écrire au propriétaire",
-    "Parler encore une fois avec ses voisins",
+    "Parler à ses voisins",
     "Appeler la police à sept heures du matin",
     "Chercher un autre appartement plus calme"
    ],
@@ -493,7 +493,7 @@
     "Avoir des heures de sommeil régulières",
     "Dormir exactement huit heures chaque nuit, comme on le dit",
     "Dormir plus longtemps le week-end pour récupérer",
-    "Dormir au moins neuf heures pour se sentir bien"
+    "Dormir au moins neuf heures"
    ],
    "why": "« Ce qui compte surtout, c'est la régularité »."
   },
@@ -512,8 +512,8 @@
    "q": "Qu'est-ce qui explique le problème du client ?",
    "o": [
     "Une erreur dans son adresse",
-    "Le technicien était malade.",
-    "Le client était absent.",
+    "Le technicien était malade",
+    "Le client était absent",
     "Une panne générale d'Internet"
    ],
    "why": "« il y a eu une erreur dans votre adresse »."
@@ -567,7 +567,7 @@
    "q": "Qu'est-ce que l'homme a demandé à l'entreprise ?",
    "o": [
     "De travailler à distance pendant un an",
-    "Un salaire encore plus élevé que celui qu'on lui offre",
+    "Un meilleur salaire",
     "Un poste dans l'entreprise pour sa femme à Calgary",
     "De commencer seulement après la fin de l'année scolaire"
    ],
@@ -624,7 +624,7 @@
     "Il accepte la densification, à condition qu'elle s'accompagne de services.",
     "Il refuse toute densification des quartiers existants.",
     "Il préfère l'étalement urbain, qui laisse plus d'espace.",
-    "Il veut d'abord construire des écoles, puis des tours."
+    "Il veut construire des tours partout, même sans services."
    ],
    "why": "« Sur le principe, je vous suis. Mais… La densité n'est acceptable… que si elle s'accompagne de services »."
   },
@@ -679,7 +679,7 @@
     "Leur avis est plus nuancé que celui des deux camps.",
     "Ils soutiennent tous la hausse décidée par le gouvernement.",
     "Ils prédisent, comme les patrons, des fermetures de commerces.",
-    "Ils pensent qu'une forte hausse ne présente aucun risque."
+    "Ils ne voient aucun risque."
    ],
    "why": "« plus partagés que ne le laissent croire ces deux discours »: moderate rises have little effect, large ones are « mal connu »."
   },

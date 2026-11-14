@@ -34,7 +34,7 @@
    "doc": "À LOUER : studio 25 m², centre-ville, 2e étage avec ascenseur. 650 $ par mois. Libre le 1er juillet.\nTél. : 514 555 0198",
    "q": "Quand peut-on habiter dans le studio ?",
    "o": [
-    "À partir du 1er juillet",
+    "Le 1er juillet, quand il sera libre",
     "Tout de suite, dès aujourd'hui",
     "À partir du 2 juillet seulement",
     "À partir du 25 juin, avant le déménagement"
@@ -58,7 +58,7 @@
    "doc": "Bonjour à tous,\nLa réunion de vendredi est déplacée à lundi 10 h, salle 204, parce que la directrice est en déplacement à Toronto. Apportez vos rapports mensuels.\nMerci,\nSophie",
    "q": "Pourquoi la réunion change-t-elle de jour ?",
    "o": [
-    "La directrice n'est pas là vendredi.",
+    "La directrice sera en déplacement vendredi.",
     "La salle 204 n'est pas libre vendredi matin.",
     "Les rapports mensuels ne sont pas encore prêts.",
     "Sophie est malade et ne peut pas venir."
@@ -143,7 +143,7 @@
    "q": "Que demande la cliente ?",
    "o": [
     "Recevoir la pièce manquante ou être remboursée",
-    "Une machine à café plus chère, livrée en cinq jours",
+    "Une machine à café plus chère",
     "Des excuses écrites du service client pour les appels",
     "L'annulation de toutes ses commandes sur le site"
    ],
@@ -215,7 +215,7 @@
    "q": "Quel est l'objectif de ce texte ?",
    "o": [
     "Mettre en garde contre les arnaques au logement",
-    "Présenter des appartements à louer à des prix intéressants",
+    "Présenter des appartements à bon prix",
     "Expliquer comment louer un logement quand on vit à l'étranger",
     "Encourager les locataires à payer un dépôt pour réserver vite"
    ],
@@ -252,7 +252,7 @@
    "o": [
     "La façon d'utiliser les écrans compte davantage que la durée.",
     "Il faut interdire les écrans aux enfants pour protéger leur sommeil.",
-    "Les écrans n'ont aucun effet réel sur l'attention des enfants.",
+    "Les écrans n'ont aucun effet réel.",
     "Les documentaires sont plus mauvais pour l'attention que les vidéos courtes."
    ],
    "why": "« Ce n'est pas tant le temps passé… que ce que l'enfant y fait, et avec qui »: what and with whom matters more than how long."
@@ -287,7 +287,7 @@
    "q": "Un employé démissionne huit mois après avoir été remboursé. Que se passe-t-il ?",
    "o": [
     "Il doit rendre la moitié de la somme.",
-    "Il doit rendre toute la somme, puisqu'il quitte l'entreprise.",
+    "Il doit tout rendre.",
     "Il ne doit rien rendre, car sa formation était déjà terminée.",
     "Il perd son attestation de réussite et doit refaire la formation."
    ],
@@ -311,7 +311,7 @@
    "q": "Selon le texte, qu'est-ce qui a changé ?",
    "o": [
     "Les bénévoles s'engagent de façon plus occasionnelle.",
-    "Il y a beaucoup moins de Canadiens qui font du bénévolat.",
+    "Moins de Canadiens font du bénévolat.",
     "Les associations refusent désormais les missions courtes.",
     "Les personnes âgées ont moins besoin d'accompagnement qu'avant."
    ],
@@ -337,7 +337,7 @@
     "Avoir des économies avant de se lancer",
     "Ne jamais quitter un poste stable pour un métier manuel",
     "Choisir un nouveau métier aussi bien payé que l'ancien",
-    "Suivre sa passion sans attendre, même sans argent de côté"
+    "Suivre sa passion sans attendre"
    ],
    "why": "« Seulement à ceux qui ont mis de l'argent de côté » = only to those who have saved money."
   },
@@ -359,7 +359,7 @@
    "q": "Quelle crainte l'auteur exprime-t-il au sujet des mesures prises par certaines villes ?",
    "o": [
     "Elles pourraient rendre le voyage inaccessible aux moins riches.",
-    "Elles ne réduisent pas vraiment les files devant les sites célèbres.",
+    "Elles ne réduisent pas les files d'attente.",
     "Elles favorisent les croisières au détriment des autres voyageurs.",
     "Elles obligent les familles à voyager pendant les vacances scolaires."
    ],
@@ -395,7 +395,7 @@
    "q": "Selon ce texte, quelle est la différence entre la sous-location et la cession de bail ?",
    "o": [
     "En cas de sous-location, le locataire d'origine reste responsable.",
-    "Seule la cession de bail demande d'aviser le propriétaire par écrit.",
+    "Seule la cession exige un avis écrit.",
     "Le propriétaire ne peut jamais refuser une sous-location, même pour un motif sérieux.",
     "Sans réponse du propriétaire en quinze jours, la cession est refusée."
    ],
@@ -431,7 +431,7 @@
    "q": "Comment l'auteur explique-t-il le retour du vinyle ?",
    "o": [
     "Sa contrainte même est devenue une qualité recherchée.",
-    "Il offre un son de meilleure qualité que la musique numérique.",
+    "Il offre un meilleur son.",
     "Il est devenu plus pratique que la musique en ligne pour les jeunes.",
     "La radio et la télévision en ont fait la promotion pendant des années."
    ],
@@ -463,8 +463,8 @@
   },
   {
    "kind": "Extrait de roman",
-   "doc": "Elle n'avait jamais aimé les gares, ces lieux où l'on fait semblant de partir alors qu'on ne fait qu'attendre. Ce soir-là pourtant, assise sur un banc du quai désert, elle se surprit à espérer que le train eût du retard. Non qu'elle redoutât l'arrivée ; elle redoutait plutôt ce qu'elle ne pourrait plus différer. Tant que le train n'était pas là, la décision restait suspendue, réversible, presque légère. Quand enfin les phares percèrent la brume, elle se leva, ajusta son manteau, et comprit qu'elle avait choisi depuis longtemps.",
-   "q": "Pourquoi le personnage espère-t-il que le train ait du retard ?",
+   "doc": "Elle n'avait jamais aimé les gares, ces lieux où l'on fait semblant de partir alors qu'on ne fait qu'attendre. Ce soir-là pourtant, assise sur un banc du quai désert, elle se surprit à espérer que le train aurait du retard. Non qu'elle redoutât l'arrivée ; elle redoutait plutôt ce qu'elle ne pourrait plus différer. Tant que le train n'était pas là, la décision restait suspendue, réversible, presque légère. Quand enfin les phares percèrent la brume, elle se leva, ajusta son manteau, et comprit qu'elle avait choisi depuis longtemps.",
+   "q": "Pourquoi le personnage espère-t-il que le train aura du retard ?",
    "o": [
     "Pour repousser le moment où sa décision deviendra définitive",
     "Parce qu'elle a peur de la personne qui doit arriver par ce train",
