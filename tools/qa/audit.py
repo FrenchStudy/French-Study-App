@@ -135,6 +135,25 @@ def run_jobs(jobs):
         b.close()
     return rows
 
+def sample_lengths():
+    """Sample answers of the writing tasks within the task's word range, counted as the Writing page counts
+    (W1 60–120, W2 120–150, W3 120–180 with a summary of 40–60 words and an opinion of 80–120)."""
+    import re
+    count = lambda t: len(re.findall(r"[\w'’-]+", t))
+    rng = {'W1': (60, 120), 'W2': (120, 150), 'W3': (120, 180)}
+    out = []
+    for f in sorted(glob.glob(os.path.join(R, 'content', 'tcf', '*.json'))):
+        th = json.load(open(f))
+        for pr in th.get('prompts', []) if isinstance(th, dict) else []:
+            t = pr.get('task')
+            if t not in rng: continue
+            txt = ' '.join(pr['answer']); n = count(txt)
+            if not rng[t][0] <= n <= rng[t][1]: out.append(f"{th['slug']} {pr['id']}: {n} words ({rng[t][0]}–{rng[t][1]})")
+            m = re.search(r'Synthèse\.?(.*?)Opinion\.?(.*)', txt, re.S) if t == 'W3' else None
+            if m and not (40 <= count(m.group(1)) <= 60 and 80 <= count(m.group(2)) <= 120):
+                out.append(f"{th['slug']} {pr['id']}: summary {count(m.group(1))} (40–60), opinion {count(m.group(2))} (80–120) words")
+    return out
+
 def option_bias():
     """Exam tests: if the right option (always the first in the file) is too often the shortest or the longest,
     picking by length beats chance. Flag a test where either happens in more than 30% of its questions."""
@@ -176,11 +195,13 @@ def main():
     probs = [r for r in rows if r['errors'] or r['wide'] or r['tiny'] or r.get('fail') or r['textLen'] < 20]
     offs = [r for r in rows if r['off']]
     bias = option_bias()
+    lens = sample_lengths()
     lines = [f'# App check: {len(rows)} screens ({sum(r["view"] == "phone" for r in rows)} on a phone, {sum(r["view"] == "desktop" for r in rows)} on a desktop)', '',
              f'- JavaScript errors: {sum(bool(r["errors"]) for r in rows)} screens', f'- Wider than the screen: {sum(r["wide"] for r in rows)}',
              f'- Text under 12px: {sum(bool(r["tiny"]) for r in rows)}', f'- Text outside the size scale: {len(offs)}', f'- Empty screens: {sum(r["textLen"] < 20 for r in rows)}',
              f'- Words shown twice on one step: {sum(bool(r.get("twice")) for r in rows)}', f'- Boxes with their own scroll bar: {sum(bool(r.get("scroll")) for r in rows)}', f'- Main picture or video not in the first screen (computer): {sum(bool(r.get("below")) for r in rows)}',
-             f'- Exam tests where the right answer can be guessed by its length: {len(bias)}', '']
+             f'- Exam tests where the right answer can be guessed by its length: {len(bias)}',
+             f'- Writing sample answers outside the word range: {len(lens)}', '']
     for r in probs:
         lines.append(f'## {r["view"]} · {r["where"]}')
         if r['errors']: lines.append('- errors: ' + '; '.join(r['errors'])[:400])
@@ -202,11 +223,14 @@ def main():
     if offs:
         lines.append('## Text outside the scale')
         for r in offs[:40]: lines.append(f'- {r["view"]} · {r["where"]}: ' + ' | '.join(r['off'][:4]))
+    if lens:
+        lines.append('## Writing sample answers outside the word range')
+        lines += [f'- {x}' for x in lens] + ['']
     if bias:
         lines.append('## Exam answers guessable by length')
         lines += [f'- {b}' for b in bias] + ['']
     open(os.path.join(OUT, 'report.md'), 'w').write('\n'.join(lines) + '\n')
-    print('\n'.join(lines[:12])); print('report:', os.path.join(OUT, 'report.md'))
+    print('\n'.join(lines[:13])); print('report:', os.path.join(OUT, 'report.md'))
 
 if __name__ == '__main__':
     main()
