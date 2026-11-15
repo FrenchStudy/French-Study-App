@@ -1,0 +1,764 @@
+{
+  "id": "listening-3",
+  "part": "listening",
+  "title": "Compréhension orale · Test 3",
+  "minutes": 35,
+  "note": "Each recording is heard once. In every question the first option is the right one; the page shuffles them. Voices: f = woman, m = man, n = announcer.",
+  "questions": [
+    {
+      "kind": "Annonce à l'aéroport",
+      "lines": [
+        [
+          "n",
+          "Les passagers du vol AC 412 à destination de Toronto sont priés de se présenter à la porte 18. Embarquement immédiat."
+        ]
+      ],
+      "q": "À quelle porte les passagers doivent-ils aller ?",
+      "o": [
+        "Porte 18",
+        "Porte 8",
+        "Porte 412",
+        "Porte 80"
+      ],
+      "why": "« se présenter à la porte 18 ». 412 is the flight number."
+    },
+    {
+      "kind": "Au marché",
+      "lines": [
+        [
+          "f",
+          "Je voudrais un kilo de pommes, s'il vous plaît."
+        ],
+        [
+          "m",
+          "Voilà. Trois dollars le kilo… et avec les deux citrons, ça fait quatre dollars."
+        ]
+      ],
+      "q": "Combien la femme paie-t-elle en tout ?",
+      "o": [
+        "4 $",
+        "3 $",
+        "2 $",
+        "5 $"
+      ],
+      "why": "« avec les deux citrons, ça fait quatre dollars ». The apples alone are $3."
+    },
+    {
+      "kind": "Message vocal",
+      "lines": [
+        [
+          "m",
+          "Bonjour, c'est Ahmed. Je ne peux pas venir à la réunion de demain, je suis chez le médecin. On peut la faire jeudi ?"
+        ]
+      ],
+      "q": "Que propose Ahmed ?",
+      "o": [
+        "De faire la réunion jeudi",
+        "D'aller chez le médecin jeudi",
+        "De venir à la réunion demain",
+        "D'annuler la réunion"
+      ],
+      "why": "« On peut la faire jeudi ? »"
+    },
+    {
+      "kind": "À l'hôtel",
+      "lines": [
+        [
+          "f",
+          "Bonjour, à quelle heure est le petit-déjeuner ?"
+        ],
+        [
+          "m",
+          "De sept heures à dix heures, au premier étage."
+        ]
+      ],
+      "q": "Où sert-on le petit-déjeuner ?",
+      "o": [
+        "Au premier étage",
+        "Au rez-de-chaussée",
+        "Dans les chambres",
+        "Au dixième étage"
+      ],
+      "why": "« au premier étage »."
+    },
+    {
+      "kind": "Au téléphone",
+      "lines": [
+        [
+          "f",
+          "Clinique dentaire, bonjour."
+        ],
+        [
+          "m",
+          "Bonjour, j'ai rendez-vous demain à dix heures, mais je dois travailler. Est-ce que je peux venir plus tard ?"
+        ],
+        [
+          "f",
+          "J'ai une place à seize heures, ou alors lundi matin."
+        ],
+        [
+          "m",
+          "Seize heures demain, très bien."
+        ]
+      ],
+      "q": "Quand l'homme va-t-il chez le dentiste ?",
+      "o": [
+        "Demain à 16 h",
+        "Demain à 10 h",
+        "Lundi matin",
+        "Lundi à 16 h"
+      ],
+      "why": "« Seize heures demain, très bien »."
+    },
+    {
+      "kind": "Météo à la radio",
+      "lines": [
+        [
+          "n",
+          "Ce week-end, à Québec, il fera beau samedi, avec un peu de vent. Dimanche, la pluie arrivera dès le matin et durera toute la journée. Les températures resteront douces, autour de quinze degrés."
+        ]
+      ],
+      "q": "Quel temps fera-t-il dimanche ?",
+      "o": [
+        "Il pleuvra toute la journée.",
+        "Il fera beau, avec un peu de vent.",
+        "Il neigera pendant la matinée.",
+        "Il fera très froid."
+      ],
+      "why": "« Dimanche, la pluie arrivera dès le matin et durera toute la journée ». Sun and wind are on Saturday."
+    },
+    {
+      "kind": "Entre amis",
+      "lines": [
+        [
+          "f",
+          "Tu as vu le match hier ?"
+        ],
+        [
+          "m",
+          "Non, je voulais le regarder, mais mon frère est arrivé avec ses enfants, alors on a joué à des jeux de société toute la soirée."
+        ]
+      ],
+      "q": "Qu'a fait l'homme hier soir ?",
+      "o": [
+        "Il a joué avec sa famille.",
+        "Il a regardé le match.",
+        "Il est allé chez son frère.",
+        "Il s'est couché tôt."
+      ],
+      "why": "« on a joué à des jeux de société toute la soirée ». His brother came to him."
+    },
+    {
+      "kind": "Annonce au supermarché",
+      "lines": [
+        [
+          "n",
+          "Chers clients, notre boulangerie vous propose aujourd'hui deux baguettes pour le prix d'une, jusqu'à midi. Les fraises du Québec sont à trois dollars la barquette toute la semaine."
+        ]
+      ],
+      "q": "Quelle offre se termine à midi ?",
+      "o": [
+        "Celle sur les baguettes",
+        "Celle sur les fraises",
+        "Celle sur toute la boulangerie",
+        "Celle sur toutes les barquettes"
+      ],
+      "why": "« deux baguettes pour le prix d'une, jusqu'à midi ». The strawberries are all week."
+    },
+    {
+      "kind": "Au centre sportif",
+      "lines": [
+        [
+          "m",
+          "Bonjour, je voudrais m'inscrire au cours de yoga du mardi."
+        ],
+        [
+          "f",
+          "Désolée, il est complet. Il reste des places le samedi matin, ou je peux vous mettre sur la liste d'attente pour mardi."
+        ],
+        [
+          "m",
+          "Mettez-moi sur la liste d'attente : le samedi, je travaille."
+        ]
+      ],
+      "q": "Que décide l'homme ?",
+      "o": [
+        "D'attendre une place le mardi",
+        "De prendre le cours du samedi",
+        "De choisir un autre sport",
+        "De changer de centre sportif"
+      ],
+      "why": "« Mettez-moi sur la liste d'attente » for Tuesday: he works on Saturdays."
+    },
+    {
+      "kind": "Au restaurant",
+      "lines": [
+        [
+          "f",
+          "Excusez-moi, j'ai commandé une soupe, et vous m'avez apporté une salade."
+        ],
+        [
+          "m",
+          "Oh, pardon, madame ! Je vous apporte votre soupe tout de suite, et le dessert vous est offert."
+        ]
+      ],
+      "q": "Que propose le serveur, en plus de la soupe ?",
+      "o": [
+        "Un dessert gratuit",
+        "Une salade",
+        "Le remboursement du repas",
+        "Une table plus calme"
+      ],
+      "why": "« le dessert vous est offert » = the dessert is free."
+    },
+    {
+      "kind": "Conversation",
+      "lines": [
+        [
+          "m",
+          "Tu as aimé ton cours de cuisine ?"
+        ],
+        [
+          "f",
+          "Beaucoup ! Le chef explique très bien et on cuisine en petits groupes. Mais c'est loin de chez moi : je mets quarante minutes en métro. Je vais voir s'il existe le même cours plus près."
+        ]
+      ],
+      "q": "Qu'est-ce qui ne plaît pas à la femme ?",
+      "o": [
+        "La distance jusqu'au cours",
+        "La façon dont le chef explique",
+        "Le travail en petits groupes",
+        "Le prix élevé du cours"
+      ],
+      "why": "« c'est loin de chez moi : je mets quarante minutes en métro »."
+    },
+    {
+      "kind": "Nouvelles locales",
+      "lines": [
+        [
+          "n",
+          "À partir de lundi, les bus de la ligne 25 passeront toutes les dix minutes aux heures de pointe, au lieu de quinze. En revanche, le dernier départ du soir sera avancé de vingt-trois heures à vingt-deux heures trente, faute de passagers."
+        ]
+      ],
+      "q": "Qu'est-ce qui change le soir ?",
+      "o": [
+        "Le dernier bus partira plus tôt.",
+        "Les bus passeront toutes les dix minutes.",
+        "Le dernier bus partira plus tard qu'avant.",
+        "La ligne 25 disparaîtra."
+      ],
+      "why": "The last departure « sera avancé de vingt-trois heures à vingt-deux heures trente ». Every ten minutes is at rush hour."
+    },
+    {
+      "kind": "Entre voisins",
+      "lines": [
+        [
+          "f",
+          "Vous partez en vacances bientôt ?"
+        ],
+        [
+          "m",
+          "Oui, mais seulement une semaine, et on reste dans la région : les billets d'avion sont trop chers cet été. On va sans doute louer un chalet au bord d'un lac."
+        ]
+      ],
+      "q": "Que va probablement faire l'homme ?",
+      "o": [
+        "Louer un chalet dans la région",
+        "Prendre l'avion pour l'étranger",
+        "Rester chez lui toute la semaine",
+        "Partir un mois au bord de la mer"
+      ],
+      "why": "« on reste dans la région… louer un chalet au bord d'un lac »."
+    },
+    {
+      "kind": "Message vocal",
+      "lines": [
+        [
+          "f",
+          "Bonjour, monsieur Nguyen, ici Sarah Côté, de l'agence Logis-Plus. Le propriétaire a accepté votre dossier pour l'appartement de la rue Saint-Denis. Il faudrait passer à l'agence avant vendredi pour signer le bail et payer le premier mois de loyer. Sinon, l'appartement sera proposé à quelqu'un d'autre."
+        ]
+      ],
+      "q": "Pourquoi Sarah Côté appelle-t-elle ?",
+      "o": [
+        "Pour annoncer une bonne nouvelle, avec un délai",
+        "Pour dire que le dossier de M. Nguyen est refusé",
+        "Pour proposer à M. Nguyen un autre appartement",
+        "Pour demander des documents supplémentaires"
+      ],
+      "why": "The file is accepted, but he must sign « avant vendredi »."
+    },
+    {
+      "kind": "Entretien",
+      "lines": [
+        [
+          "f",
+          "Pourquoi avez-vous quitté la grande ville pour la campagne ?"
+        ],
+        [
+          "m",
+          "Au début, c'était pour le prix des maisons. Mais aujourd'hui, ce que j'apprécie le plus, c'est le temps : je ne passe plus deux heures par jour dans les bouchons, et je peux dîner avec mes enfants."
+        ]
+      ],
+      "q": "Qu'est-ce qu'il apprécie le plus aujourd'hui ?",
+      "o": [
+        "Le temps qu'il a gagné",
+        "Le prix des maisons",
+        "Le calme de la campagne",
+        "Son nouveau travail"
+      ],
+      "why": "« ce que j'apprécie le plus, c'est le temps ». The price was the first reason."
+    },
+    {
+      "kind": "Au guichet de la gare",
+      "lines": [
+        [
+          "m",
+          "Un aller-retour pour Ottawa, s'il vous plaît, pour vendredi."
+        ],
+        [
+          "f",
+          "Si vous réservez sur notre site au moins une semaine à l'avance, c'est vingt pour cent moins cher. Pour vendredi, je ne peux vous proposer que le plein tarif."
+        ]
+      ],
+      "q": "Comment peut-on payer moins cher ?",
+      "o": [
+        "En réservant en ligne une semaine avant",
+        "En achetant un aller simple au guichet",
+        "En partant un vendredi plutôt qu'un lundi",
+        "En payant directement au guichet de la gare"
+      ],
+      "why": "« Si vous réservez sur notre site au moins une semaine à l'avance, c'est vingt pour cent moins cher »."
+    },
+    {
+      "kind": "Conseil",
+      "lines": [
+        [
+          "m",
+          "Je dors très mal depuis quelques semaines."
+        ],
+        [
+          "f",
+          "Tu bois du café l'après-midi ? Moi, j'ai arrêté après midi, et ça a tout changé. Et essaie de te coucher à la même heure tous les soirs, même le week-end."
+        ]
+      ],
+      "q": "Que conseille la femme ?",
+      "o": [
+        "Ne plus boire de café l'après-midi",
+        "Boire du café seulement le week-end",
+        "Se coucher plus tard le week-end",
+        "Faire du sport tous les soirs"
+      ],
+      "why": "« j'ai arrêté après midi, et ça a tout changé », plus the same bedtime every night."
+    },
+    {
+      "kind": "Annonce dans le train",
+      "lines": [
+        [
+          "n",
+          "Mesdames et messieurs, en raison d'un incident sur la voie, notre train aura un retard d'environ vingt minutes. Les voyageurs en correspondance pour Québec sont priés de s'adresser au personnel à l'arrivée : un car les attendra."
+        ]
+      ],
+      "q": "Que doivent faire les voyageurs qui continuent vers Québec ?",
+      "o": [
+        "Parler au personnel à l'arrivée",
+        "Descendre au prochain arrêt",
+        "Prendre le train suivant",
+        "Rester vingt minutes à bord"
+      ],
+      "why": "« sont priés de s'adresser au personnel à l'arrivée : un car les attendra »."
+    },
+    {
+      "kind": "Conversation",
+      "lines": [
+        [
+          "f",
+          "Tu t'inscris à la formation en gestion de projet ?"
+        ],
+        [
+          "m",
+          "J'y ai pensé, mais c'est le soir, trois fois par semaine, et j'ai déjà mes cours de français. Je vais attendre la session d'automne : elle sera en ligne et le week-end."
+        ]
+      ],
+      "q": "Qu'est-ce que l'homme va faire ?",
+      "o": [
+        "Suivre la formation à l'automne",
+        "S'inscrire tout de suite",
+        "Arrêter ses cours de français pour la formation",
+        "Suivre la formation trois soirs par semaine"
+      ],
+      "why": "« Je vais attendre la session d'automne »."
+    },
+    {
+      "kind": "Entretien à la radio",
+      "lines": [
+        [
+          "f",
+          "On dit souvent que les jeunes ne lisent plus."
+        ],
+        [
+          "m",
+          "C'est faux, mais ils lisent autrement. Les ventes de romans pour jeunes adultes ont doublé en cinq ans, souvent grâce aux recommandations sur les réseaux sociaux. Ce qui recule, c'est la lecture du journal et des magazines. Le problème n'est donc pas la lecture en général, mais la lecture de l'actualité."
+        ]
+      ],
+      "q": "Selon l'expert, qu'est-ce qui recule chez les jeunes ?",
+      "o": [
+        "La lecture de la presse",
+        "La lecture de romans",
+        "L'usage des réseaux sociaux",
+        "L'achat de livres en ligne"
+      ],
+      "why": "« Ce qui recule, c'est la lecture du journal et des magazines ». Novel sales have doubled."
+    },
+    {
+      "kind": "Débat",
+      "lines": [
+        [
+          "f",
+          "Il faudrait rendre le vote obligatoire : c'est la seule façon de mettre fin à l'abstention."
+        ],
+        [
+          "m",
+          "Obliger les gens à voter ne les rendra pas plus intéressés par la politique. On aurait plus de votes, mais pas plus de citoyens informés. Il vaudrait mieux enseigner la vie politique à l'école."
+        ]
+      ],
+      "q": "Quel argument l'homme oppose-t-il à la femme ?",
+      "o": [
+        "L'obligation ne crée pas l'intérêt pour la politique.",
+        "Le vote obligatoire ferait baisser le nombre de votants.",
+        "Les jeunes votent déjà beaucoup plus que leurs parents.",
+        "L'école ne devrait jamais parler de politique aux élèves."
+      ],
+      "why": "« Obliger les gens à voter ne les rendra pas plus intéressés par la politique »."
+    },
+    {
+      "kind": "Bulletin d'information",
+      "lines": [
+        [
+          "n",
+          "Les refuges pour animaux de la région sont saturés. Pendant la pandémie, de nombreuses familles avaient adopté un chien ou un chat ; aujourd'hui, avec la hausse du coût de la vie, beaucoup n'arrivent plus à payer la nourriture et les soins vétérinaires. Les refuges observent un phénomène nouveau : les abandons concernent désormais surtout des animaux adultes, en bonne santé."
+        ]
+      ],
+      "q": "Quelle est la principale cause de la hausse des abandons ?",
+      "o": [
+        "Le coût de l'entretien des animaux",
+        "Les maladies des animaux devenus adultes",
+        "La fermeture de plusieurs refuges de la région",
+        "La fin du télétravail"
+      ],
+      "why": "« avec la hausse du coût de la vie, beaucoup n'arrivent plus à payer la nourriture et les soins ». The animals are « en bonne santé »."
+    },
+    {
+      "kind": "Au travail",
+      "lines": [
+        [
+          "m",
+          "Nadia, la nouvelle stagiaire commence lundi. Je serai en congé toute la semaine, alors j'aimerais que tu l'accueilles et que tu lui montres nos outils. Ne lui confie pas encore de dossiers clients : on verra ça ensemble à mon retour."
+        ]
+      ],
+      "q": "Que demande le gestionnaire à Nadia ?",
+      "o": [
+        "D'accueillir la stagiaire et de la former",
+        "De confier des dossiers clients à la stagiaire",
+        "De le remplacer complètement pendant ses congés",
+        "De recruter une deuxième stagiaire lundi"
+      ],
+      "why": "« que tu l'accueilles et que tu lui montres nos outils ». No client files yet."
+    },
+    {
+      "kind": "Entretien",
+      "lines": [
+        [
+          "m",
+          "Faut-il supprimer complètement le sucre ?"
+        ],
+        [
+          "f",
+          "C'est irréaliste, et souvent contre-productif : les interdictions totales mènent à des excès. Ce qui compte le plus, c'est de réduire les boissons sucrées, qui représentent la plus grande partie du sucre que nous consommons sans nous en rendre compte."
+        ]
+      ],
+      "q": "Selon la nutritionniste, sur quoi faut-il agir en priorité ?",
+      "o": [
+        "Les boissons sucrées",
+        "Tous les desserts",
+        "Le sucre dans le café",
+        "Les fruits trop sucrés"
+      ],
+      "why": "« Ce qui compte le plus, c'est de réduire les boissons sucrées »."
+    },
+    {
+      "kind": "Service client",
+      "lines": [
+        [
+          "f",
+          "Bonjour, j'ai été facturée deux fois pour ma commande."
+        ],
+        [
+          "m",
+          "Je vois, madame. En fait, vous n'avez pas été facturée deux fois : le premier montant est une simple autorisation temporaire de votre banque. Il disparaîtra de votre relevé d'ici trois à cinq jours."
+        ]
+      ],
+      "q": "Qu'est-ce qui explique le problème de la cliente ?",
+      "o": [
+        "Une autorisation bancaire temporaire",
+        "Une erreur dans sa commande en ligne",
+        "Un double paiement fait par la boutique",
+        "Un remboursement qui n'a pas encore été fait"
+      ],
+      "why": "« le premier montant est une simple autorisation temporaire de votre banque »."
+    },
+    {
+      "kind": "Podcast",
+      "lines": [
+        [
+          "m",
+          "En arrivant à Moncton, je pensais que le plus dur serait le français acadien, avec ses expressions anciennes. En fait, je m'y suis habitué en quelques semaines. Ce qui m'a pris beaucoup plus de temps, c'est de comprendre les codes au travail : ici, on tutoie vite son patron, et j'ai longtemps cru que c'était un manque de respect."
+        ]
+      ],
+      "q": "Qu'est-ce qui a été le plus difficile pour l'homme ?",
+      "o": [
+        "Comprendre les habitudes au travail",
+        "Comprendre le français acadien",
+        "Trouver un emploi à Moncton",
+        "Apprendre des expressions anciennes"
+      ],
+      "why": "« Ce qui m'a pris beaucoup plus de temps, c'est de comprendre les codes au travail ». He got used to Acadian French in weeks."
+    },
+    {
+      "kind": "Conférence",
+      "lines": [
+        [
+          "f",
+          "La voiture électrique est souvent présentée comme la solution au problème des transports. Elle réduit fortement les émissions pendant la conduite, c'est vrai. Mais elle ne règle ni les embouteillages, ni le coût élevé de la voiture pour les ménages, ni la place qu'occupent les parkings en ville. Remplacer chaque voiture à essence par une voiture électrique, c'est changer de moteur sans changer de modèle."
+        ]
+      ],
+      "q": "Quelle limite l'oratrice voit-elle à la voiture électrique ?",
+      "o": [
+        "Elle ne règle pas les autres problèmes de la voiture.",
+        "Elle émet autant que les voitures à essence quand elle roule.",
+        "Elle est trop lente pour circuler sur les autoroutes.",
+        "Elle oblige les villes à construire de nouvelles routes."
+      ],
+      "why": "It doesn't solve traffic jams, cost or parking space: « changer de moteur sans changer de modèle »."
+    },
+    {
+      "kind": "Conversation",
+      "lines": [
+        [
+          "m",
+          "Alors, ta demande de reconnaissance de diplôme ?"
+        ],
+        [
+          "f",
+          "Ils ont accepté une partie de mes cours, mais je dois encore faire un stage de six mois et passer un examen. J'ai demandé si je pouvais faire le stage à temps partiel, pour continuer à travailler, et ils ont dit oui."
+        ]
+      ],
+      "q": "Qu'est-ce que la femme a demandé ?",
+      "o": [
+        "De faire son stage à temps partiel",
+        "D'être dispensée de l'examen final",
+        "De faire reconnaître la totalité de ses cours",
+        "D'arrêter de travailler pendant six mois"
+      ],
+      "why": "« J'ai demandé si je pouvais faire le stage à temps partiel »."
+    },
+    {
+      "kind": "Information",
+      "lines": [
+        [
+          "n",
+          "Dès le mois prochain, les épiceries devront afficher le prix au kilo ou au litre de tous leurs produits, en caractères bien visibles. Selon le gouvernement, il ne s'agit pas de contrôler les prix, mais de permettre aux consommateurs de comparer facilement des emballages de tailles différentes."
+        ]
+      ],
+      "q": "Selon le gouvernement, quel est le but de la mesure ?",
+      "o": [
+        "Aider à comparer les prix",
+        "Baisser les prix",
+        "Réduire la taille des emballages",
+        "Contrôler les marges des épiceries"
+      ],
+      "why": "« permettre aux consommateurs de comparer facilement »; « il ne s'agit pas de contrôler les prix »."
+    },
+    {
+      "kind": "Conférence",
+      "lines": [
+        [
+          "m",
+          "Quand on veut apprendre, le réflexe le plus courant est de relire ses notes. C'est rassurant, car tout paraît de plus en plus familier. Mais cette impression de familiarité est trompeuse : reconnaître une information n'est pas la même chose que savoir la retrouver. Les recherches montrent qu'il est bien plus efficace de se tester, en essayant de se rappeler sans regarder, même si l'exercice est plus pénible et donne l'impression d'échouer."
+        ]
+      ],
+      "q": "Selon l'orateur, pourquoi relire ses notes est-il peu efficace ?",
+      "o": [
+        "On reconnaît sans savoir retrouver.",
+        "On oublie ses notes plus vite qu'un test.",
+        "On a trop vite l'impression d'échouer.",
+        "On relit rarement assez de fois pour retenir."
+      ],
+      "why": "« reconnaître une information n'est pas la même chose que savoir la retrouver ». The feeling of failure comes with self-testing."
+    },
+    {
+      "kind": "Débat",
+      "lines": [
+        [
+          "f",
+          "Faut-il taxer davantage les grandes fortunes ?"
+        ],
+        [
+          "m",
+          "La question n'est pas morale, elle est pratique. Une taxe très élevée, si elle pousse les plus riches à placer leur argent à l'étranger, rapportera moins qu'une taxe modérée mais réellement payée. Avant d'augmenter les taux, il faudrait d'abord fermer les échappatoires qui permettent aujourd'hui de ne presque rien payer."
+        ]
+      ],
+      "q": "Quelle est la position de l'homme ?",
+      "o": [
+        "Il faut d'abord fermer les échappatoires fiscales.",
+        "Il faut augmenter fortement les taux sur les plus riches.",
+        "Il faut supprimer l'impôt sur les grandes fortunes.",
+        "Il faut traiter la question avant tout comme un problème moral."
+      ],
+      "why": "« Avant d'augmenter les taux, il faudrait d'abord fermer les échappatoires »."
+    },
+    {
+      "kind": "Chronique",
+      "lines": [
+        [
+          "f",
+          "« Gratuit » : le mot accompagne la plupart des applications que nous installons. Il est pourtant trompeur. Ces services ne nous font pas payer en argent, mais en attention et en données : chaque minute passée à les utiliser est revendue à des annonceurs. Le prix existe donc bel et bien ; il est simplement moins visible, et c'est précisément ce qui le rend si efficace."
+        ]
+      ],
+      "q": "Que reproche la chroniqueuse au mot « gratuit » ?",
+      "o": [
+        "Il cache un prix payé en données et en attention.",
+        "Il fait payer les utilisateurs trop cher.",
+        "Il empêche les annonceurs de gagner de l'argent.",
+        "Il fait fuir les utilisateurs de ces applications."
+      ],
+      "why": "We pay « en attention et en données »: « Le prix existe donc bel et bien »."
+    },
+    {
+      "kind": "Entretien",
+      "lines": [
+        [
+          "m",
+          "On a dit de votre livre qu'il était contre la technologie."
+        ],
+        [
+          "f",
+          "Pas du tout. J'utilise mon téléphone comme tout le monde. Ce que je critique, c'est l'idée que chaque problème social aurait une solution technique. Une application ne remplace pas une infirmière, ni un enseignant. La technologie peut aider, à condition qu'on ne s'en serve pas pour éviter les vrais débats."
+        ]
+      ],
+      "q": "Que critique réellement l'autrice ?",
+      "o": [
+        "L'idée que la technique peut tout régler",
+        "L'usage du téléphone dans la vie de tous les jours",
+        "Le travail des infirmières et des enseignants",
+        "Les débats publics consacrés à la technologie"
+      ],
+      "why": "« Ce que je critique, c'est l'idée que chaque problème social aurait une solution technique »."
+    },
+    {
+      "kind": "Analyse",
+      "lines": [
+        [
+          "m",
+          "Quand on annonce que le salaire moyen a augmenté, beaucoup en concluent que la plupart des gens gagnent plus. Ce n'est pas forcément le cas. Il suffit que les plus hauts salaires progressent fortement pour que la moyenne monte, même si la majorité stagne. C'est pourquoi les statisticiens préfèrent souvent le salaire médian : celui qui sépare la population en deux moitiés égales."
+        ]
+      ],
+      "q": "Pourquoi préfère-t-on souvent le salaire médian ?",
+      "o": [
+        "Il dépend moins des très hauts salaires.",
+        "Il augmente toujours plus vite que la moyenne.",
+        "Il se calcule uniquement sur les hauts salaires.",
+        "Il prouve que la majorité gagne plus qu'avant."
+      ],
+      "why": "The average can rise when only top salaries grow; the median « sépare la population en deux moitiés »."
+    },
+    {
+      "kind": "Conférence",
+      "lines": [
+        [
+          "f",
+          "On croit souvent que les personnes âgées sont malheureuses de vieillir. Or, les enquêtes montrent l'inverse : en moyenne, la satisfaction de vivre baisse jusqu'à la cinquantaine, puis remonte. Les plus âgés se disent plus sereins, moins préoccupés par le regard des autres. Bien sûr, la santé et l'isolement restent des problèmes réels ; mais ils ne doivent pas faire oublier que la vieillesse est aussi, pour beaucoup, un âge apaisé."
+        ]
+      ],
+      "q": "Que montrent les enquêtes citées par l'oratrice ?",
+      "o": [
+        "La satisfaction remonte après la cinquantaine.",
+        "La satisfaction de vivre baisse sans cesse avec l'âge.",
+        "Toutes les personnes âgées souffrent d'isolement.",
+        "La santé n'a aucun effet sur le bien-être des aînés."
+      ],
+      "why": "« la satisfaction de vivre baisse jusqu'à la cinquantaine, puis remonte »."
+    },
+    {
+      "kind": "Réflexion à la radio",
+      "lines": [
+        [
+          "m",
+          "Promettre, c'est faire une chose étrange : engager aujourd'hui une personne qui n'existe pas encore, celle que nous serons demain. Rien ne garantit qu'elle partagera nos désirs ni nos raisons. La promesse est donc moins l'expression d'une certitude que le refus de laisser nos humeurs futures décider à notre place. C'est en cela qu'elle fonde la confiance : non parce que nous sommes sûrs de nous, mais parce que nous acceptons d'être liés."
+        ]
+      ],
+      "q": "Selon l'orateur, sur quoi repose la valeur d'une promesse ?",
+      "o": [
+        "Sur le fait d'accepter d'être lié",
+        "Sur la certitude de ne jamais changer d'avis",
+        "Sur nos désirs de demain",
+        "Sur la confiance que nous avons en nous-mêmes"
+      ],
+      "why": "« non parce que nous sommes sûrs de nous, mais parce que nous acceptons d'être liés »."
+    },
+    {
+      "kind": "Entretien",
+      "lines": [
+        [
+          "f",
+          "Faut-il défendre la langue contre les anglicismes ?"
+        ],
+        [
+          "m",
+          "Une langue n'est pas un monument qu'on protège derrière une vitre. Elle vit d'emprunts depuis toujours : « boulevard » vient du néerlandais, « algèbre » de l'arabe. Ce qui menace une langue, ce n'est pas qu'elle emprunte des mots, c'est qu'on cesse de l'utiliser dans certains domaines, la science ou les affaires, par exemple. Une langue meurt par les usages qu'elle perd, pas par les mots qu'elle reçoit."
+        ]
+      ],
+      "q": "Selon le linguiste, qu'est-ce qui menace réellement une langue ?",
+      "o": [
+        "Son abandon dans certains domaines",
+        "L'arrivée de mots venus de l'anglais",
+        "Les emprunts faits à des langues anciennes",
+        "L'absence de règles pour la protéger"
+      ],
+      "why": "« Une langue meurt par les usages qu'elle perd, pas par les mots qu'elle reçoit »."
+    },
+    {
+      "kind": "Chronique scientifique",
+      "lines": [
+        [
+          "f",
+          "Une étude affirme qu'une tasse de café par jour réduit le risque d'une maladie ; une autre, quelques mois plus tard, semble dire le contraire. Faut-il en conclure que la science ne sait rien ? Ce serait mal comprendre son fonctionnement. Une étude isolée n'est qu'un indice ; c'est l'accumulation de travaux convergents qui permet de conclure. Le problème vient moins des chercheurs que de la façon dont chaque résultat est présenté comme une découverte définitive."
+        ]
+      ],
+      "q": "Quelle conclusion la chroniqueuse tire-t-elle ?",
+      "o": [
+        "On conclut sur plusieurs études, pas sur une seule.",
+        "Les chercheurs se contredisent parce qu'ils travaillent mal.",
+        "Le café devient dangereux pour la santé à forte dose.",
+        "La science ne peut rien affirmer sur l'alimentation."
+      ],
+      "why": "« Une étude isolée n'est qu'un indice ; c'est l'accumulation de travaux convergents qui permet de conclure »."
+    },
+    {
+      "kind": "Lecture d'un récit",
+      "lines": [
+        [
+          "f",
+          "Ma mère n'a jamais appris à nager. Chaque été, pourtant, elle nous emmenait au lac et restait assise sur la rive, les pieds dans l'eau, à nous regarder plonger. Je croyais qu'elle s'ennuyait. Bien des années plus tard, en apprenant à nager à mon propre fils, j'ai compris ce qu'elle faisait là, immobile pendant des heures : elle ne nous quittait pas des yeux, et c'était sa manière à elle d'être dans l'eau avec nous."
+        ]
+      ],
+      "q": "Que comprend la narratrice plus tard ?",
+      "o": [
+        "Sa mère partageait ces moments à sa façon.",
+        "Sa mère s'ennuyait beaucoup au bord du lac.",
+        "Sa mère regrettait de ne pas savoir nager.",
+        "Sa mère voulait que son petit-fils apprenne à nager."
+      ],
+      "why": "« c'était sa manière à elle d'être dans l'eau avec nous »."
+    }
+  ]
+}

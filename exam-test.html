@@ -41,7 +41,16 @@
     const app = $('app');
     const P = new URLSearchParams(location.search);
     const part = ['reading', 'listening', 'writing'].includes(P.get('part')) ? P.get('part') : 'reading';
-    const SETS = { reading: ['reading-1'], listening: ['listening-1'] };
+    const SETS = { reading: ['reading-1', 'reading-2', 'reading-3'], listening: ['listening-1', 'listening-2', 'listening-3'] };
+    const setNo = (id) => Number(String(id).split('-')[1]) || 1;
+    // Which test to offer: ?set=… if given, else the first one not taken yet, else the one taken longest ago
+    let chosen = null;
+    function pickSet() {
+        const list = SETS[part] || [];
+        if (list.includes(P.get('set'))) return P.get('set');
+        const last = {}; NCLC.tests().filter(t => t.part === part).forEach(t => { last[t.set] = Math.max(last[t.set] || 0, t.at); });
+        return list.find(id => !last[id]) || list.slice().sort((a, b) => last[a] - last[b])[0];
+    }
     const LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
     const levelOf = (n) => n <= 4 ? 'A1' : n <= 10 ? 'A2' : n <= 19 ? 'B1' : n <= 29 ? 'B2' : n <= 35 ? 'C1' : 'C2';
     const fmt = (s) => `${Math.floor(s / 60)}:${String(Math.max(0, s) % 60).padStart(2, '0')}`;
@@ -81,14 +90,22 @@
     };
     function intro() {
         const I = INTRO[part];
-        const past = part === 'writing' ? [] : NCLC.tests().filter(t => t.part === part).sort((a, b) => b.at - a.at).slice(0, 3);
+        const all = part === 'writing' ? [] : NCLC.tests().filter(t => t.part === part).sort((a, b) => b.at - a.at);
+        const past = all.slice(0, 3);
+        if (part !== 'writing' && !chosen) chosen = pickSet();
+        const setInfo = (id) => { const t = all.find(x => x.set === id); return t ? `Last: ${t.score}/699 · ≈ ${NCLC.label(t.nclc)}` : 'Not taken yet'; };
+        const chooser = part === 'writing' ? '' : `<div class="space-y-2"><h2 class="text-sm font-bold uppercase tracking-wide text-slate-500">Choose a test</h2>
+                <div class="grid sm:grid-cols-3 gap-2" role="radiogroup">${SETS[part].map(id => `<button type="button" data-set="${id}" role="radio" aria-checked="${id === chosen}"
+                    class="text-left min-h-[56px] px-3 py-2 rounded-xl border ${id === chosen ? 'bg-indigo-50 border-indigo-500' : 'bg-white border-slate-200 hover:border-indigo-300'}">
+                    <span class="block font-bold text-slate-900">Test ${setNo(id)}</span><span class="block text-xs text-slate-500">${setInfo(id)}</span></button>`).join('')}</div></div>`;
         app.innerHTML = `
             <div><h1 class="text-2xl font-black text-slate-900">${I.emoji} ${I.title}</h1>
             <p class="text-sm text-slate-500 mt-1">TCF Canada format · ${I.time} minutes</p></div>
             <section class="${card} space-y-3">
                 <ul class="space-y-2 text-base text-slate-700">${I.lines.map(l => `<li class="flex gap-2"><span class="text-indigo-500">•</span><span>${l}</span></li>`).join('')}</ul>
                 ${part === 'listening' ? '<p id="voice-note" class="hidden text-sm bg-amber-50 border border-amber-200 text-amber-900 rounded-xl px-3 py-2"></p>' : ''}
-                ${part !== 'writing' ? `<p class="text-sm text-slate-500">Your score is an <b>estimate</b>: the app counts each question with the points usually given to its level (3 for A1 up to 33 for C2, 699 in all), then reads the NCLC level from IRCC's table. The real test is marked by France Éducation International.</p>` : '<p class="text-sm text-slate-500">Have a quiet hour. Your texts are saved on this device while you write.</p>'}
+                ${part !== 'writing' ? `<p class="text-sm text-slate-500">Your score is an <b>estimate</b>: the app counts each question with the points usually given to its level (3 for A1 up to 33 for C2, 699 in all), then reads the NCLC level from IRCC's table. The real test is marked by France Éducation international. These tests are original practice material; the app is not affiliated with France Éducation international or IRCC.</p>` : '<p class="text-sm text-slate-500">Have a quiet hour. Your texts are saved on this device while you write.</p>'}
+                ${chooser}
                 ${part === 'writing' && store.get('writing_exam', null) ? `<p class="text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2">You have an exam in progress. Start goes back to it, with the time that was left.</p>` : ''}
                 <div class="flex flex-wrap gap-2 pt-1">
                     <button id="start" type="button" class="${btn('bg-indigo-600 hover:bg-indigo-700 text-white')}">▶ Start the ${I.time}-minute ${part === 'writing' ? 'exam' : 'test'}</button>
@@ -96,9 +113,10 @@
                 </div>
             </section>
             ${past.length ? `<section class="${card} space-y-2"><h2 class="text-sm font-bold uppercase tracking-wide text-slate-500">Your last results</h2>
-                ${past.map(t => `<div class="flex flex-wrap items-center gap-2 text-sm"><span class="text-slate-500">${new Date(t.at).toLocaleDateString()}</span><b>${t.score}/699</b><span class="text-slate-500">${t.correct}/${t.total} right</span><span class="text-xs font-bold ${NCLC.tone(t.nclc)} px-2 py-0.5 rounded-full">≈ ${NCLC.label(t.nclc)}</span></div>`).join('')}
-                <p class="text-xs text-slate-500">Taking the same test again shows the questions you remember, not your level. More tests will be added.</p></section>` : ''}`;
+                ${past.map(t => `<div class="flex flex-wrap items-center gap-2 text-sm"><span class="text-slate-500">${new Date(t.at).toLocaleDateString()}</span><span class="font-semibold text-slate-700">Test ${setNo(t.set)}</span><b>${t.score}/699</b><span class="text-slate-500">${t.correct}/${t.total} right</span><span class="text-xs font-bold ${NCLC.tone(t.nclc)} px-2 py-0.5 rounded-full">≈ ${NCLC.label(t.nclc)}</span></div>`).join('')}
+                <p class="text-xs text-slate-500">Taking the same test again shows the questions you remember, not your level: try a test you haven't taken.</p></section>` : ''}`;
         $('start').onclick = () => part === 'writing' ? startWriting(false) : startQuiz();
+        app.querySelectorAll('[data-set]').forEach(b => b.onclick = () => { chosen = b.dataset.set; intro(); });
         if ($('restart')) $('restart').onclick = () => { store.set('writing_exam', null); startWriting(true); };
         if (part === 'listening') voiceCheck();
     }
@@ -108,7 +126,7 @@
     async function startQuiz() {
         app.innerHTML = '<p class="text-sm text-slate-400 animate-pulse">Loading the test…</p>';
         try {
-            const r = await fetch(`content/tcf/tests/${SETS[part][0]}.json`);
+            const r = await fetch(`content/tcf/tests/${chosen || pickSet()}.json`);
             if (!r.ok) throw new Error('Could not load the test.');
             test = await r.json();
         } catch (e) { app.innerHTML = `<p class="text-sm text-rose-700">${escapeHtml(e.message)}</p>`; return; }
