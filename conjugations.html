@@ -46,7 +46,7 @@
                             <span aria-hidden="true" class="text-slate-500">▾</span>
                         </button>
                         <div id="picker-panel" class="hidden absolute left-0 top-full mt-1 z-20 bg-white border border-slate-200 rounded-2xl shadow-lg p-3 space-y-3" style="width:min(22rem, calc(100vw - 2rem))">
-                            <input type="search" id="verb-search" placeholder="Verb or meaning" aria-label="Find a verb, in French or English"
+                            <input type="search" id="verb-search" placeholder="Verb, form (mangeons) or meaning" aria-label="Find a verb, in French or English"
                                    oninput="filterVerbList(this.value)" onkeydown="if(event.key==='Enter') conjugateTyped(this.value)"
                                    class="w-full text-base px-3 py-2.5 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
                             <div class="flex flex-wrap gap-1.5 text-sm">
@@ -171,14 +171,68 @@
             return String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').trim();
         }
 
+        // ---- Search by any conjugated form: "mangeons", "ai mangé", "irons" find the verb ----
+        let FORM_INDEX = null;
+        function buildFormIndex() {
+            FORM_INDEX = new Map();
+            const add = (key, entry) => {
+                if (!key) return;
+                let list = FORM_INDEX.get(key);
+                if (!list) { list = []; FORM_INDEX.set(key, list); }
+                if (!list.some(e => e.v === entry.v && e.why === entry.why)) list.push(entry);
+            };
+            C.verbs.forEach(v => C.tenses.forEach(t => {
+                let rows;
+                try { rows = C.forms(v, t.key); } catch (e) { return; }
+                (rows || []).forEach(r => {
+                    const marked = /\((e|s|es)\)/.test(r.cf);                       // allé(e)(s): accept allé, allée, allés, allées
+                    const bare = r.cf.replace(/\((e|s|es)\)/g, '');
+                    const person = r.cp.replace(/'$/, '').replace(/^j$/, 'je');
+                    const why = '“' + bare + '” = ' + t.name + ', ' + person;
+                    const withEnds = k => marked ? [k, k + 'e', k + 's', k + 'es'] : [k];
+                    const key = plain(bare);
+                    withEnds(key).forEach(k => add(k, { v, why }));
+                    const parts = key.split(' ');
+                    const last = parts[parts.length - 1];
+                    // "ai mangé" also answers to "mangé"; skip bare infinitives ("vais manger" must not tag every verb)
+                    if (parts.length > 1 && last !== plain(v.inf)) withEnds(last).forEach(k => add(k, { v, why }));
+                });
+            }));
+        }
+        const LEADING_PRONOUN = /^(je |j'|tu |il |elle |on |nous |vous |ils |elles |que |qu'|me |m'|te |t'|se |s'|ne |n')/;
+        function formMatches(query) {
+            const q0 = plain(query).replace(/’/g, "'");
+            if (q0.length < 2) return [];
+            if (!FORM_INDEX) buildFormIndex();
+            let q1 = q0, guard = 0;
+            while (LEADING_PRONOUN.test(q1) && guard++ < 4) {
+                const next = q1.replace(LEADING_PRONOUN, '');
+                if (!next) break;
+                q1 = next;
+            }
+            const keys = [...new Set([q0, q1, q1.split(' ').pop()])];
+            const found = new Map();
+            keys.forEach(k => (FORM_INDEX.get(k) || []).forEach(e => {
+                const whys = found.get(e.v) || [];
+                if (whys.length < 2 && !whys.includes(e.why)) whys.push(e.why);
+                found.set(e.v, whys);
+            }));
+            return [...found].map(([v, whys]) => ({ v, why: whys.join(' · ') }));
+        }
+
         function populateVerbList(searchQuery = '') {
             const container = document.getElementById('verb-list-container');
             if (!container) return;
             const q = plain(searchQuery);
-            const matches = C.verbs.filter(v =>
-                (currentFilter === 'all' || verbGroup(v) === currentFilter || (currentFilter === 'er' && verbGroup(v) === 'ersp')) &&
-                (!q || plain(v.disp).includes(q) || plain(v.gloss).includes(q))
-            );
+            const passFilter = v => currentFilter === 'all' || verbGroup(v) === currentFilter || (currentFilter === 'er' && verbGroup(v) === 'ersp');
+            let matches = C.verbs.filter(v => passFilter(v) && (!q || plain(v.disp).includes(q) || plain(v.gloss).includes(q)));
+            // A conjugated form ("mangeons", "ai mangé") finds its verb too; those verbs come first
+            const whyByVerb = new Map();
+            if (q) {
+                const formHits = formMatches(searchQuery).filter(h => passFilter(h.v));
+                formHits.forEach(h => whyByVerb.set(h.v, h.why));
+                matches = formHits.map(h => h.v).concat(matches.filter(v => !whyByVerb.has(v)));
+            }
 
             container.innerHTML = '';
             if (matches.length === 0) {
@@ -198,6 +252,7 @@
                     <div class="flex flex-col pr-2 overflow-hidden">
                         <span class="font-bold text-slate-900 truncate">${escapeHtml(v.disp)}</span>
                         <span class="text-xs text-slate-500 truncate">${escapeHtml(v.gloss)}</span>
+                        ${whyByVerb.has(v) ? `<span class="text-xs text-amber-700 truncate">${escapeHtml(whyByVerb.get(v))}</span>` : ''}
                     </div>
                 `;
                 item.addEventListener('click', () => { renderVerb(v); showTablesOnPhone(); });
@@ -216,7 +271,11 @@
 
         // Conjugate a verb typed in the search box, even if it is not in the list
         function conjugateTyped(text) {
-            const v = C.find(text);
+            let v = C.find(text);
+            if (!v || v.assumed) {            // not a listed infinitive: maybe a conjugated form
+                const hits = formMatches(text);
+                if (hits.length) v = hits[0].v;
+            }
             if (v) {
                 renderVerb(v);
                 showTablesOnPhone();
