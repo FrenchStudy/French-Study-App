@@ -398,6 +398,33 @@ function cjAssume(raw) {
 }
 
 
+/* A verb from the database (table conjugation_verbs, see supabase/conjugations): the engine's own verb when its rules
+   give exactly the stored forms (so regular and spelling-change verbs look like the built-in ones); otherwise a verb
+   built from the stored forms, shown as irregular. Returns null for a verb with missing forms (impersonal). */
+function cjFromRow(row) {
+  const f = row && row.forms;
+  if (!f || !f.p || f.p.some(x => !x)) return null;
+  const refl = !!row.pronominal, base = row.inf.replace(/^(se |s')/, "");
+  const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+  const kinds = /er$/.test(base) ? ["er", "e_è", "é_è", "ll", "tt", "yer"] : /ir$/.test(base) ? ["ir"] : /re$/.test(base) ? ["re"] : [];
+  const meta = (s, kind) => {
+    s.inf = base; s.disp = row.inf; s.refl = refl; s.kind = kind; s.gloss = row.english || "";
+    s.aux = refl ? "être" : row.aux; s.dual = false; s.fromDb = true;
+    return s;
+  };
+  for (const kind of kinds) {
+    try {
+      const s = cjFinish(cjMake(base, kind));
+      if (same(s.pres, f.p) && same(cjSimple(s, "impf"), f.im) && same(cjSimple(s, "fut"), f.f) && same(cjSimple(s, "cond"), f.c) &&
+          same(s.sj, f.s) && same(s.imp, f.ip) && s.pp === row.pp) return meta(s, kind);
+    } catch (e) { /* this kind does not fit this verb */ }
+  }
+  const s = { pres: f.p.slice(), pp: row.pp, fut: f.f[0].replace(/ai$/, ""), impf: f.im[3].replace(/ions$/, ""),
+              sj: f.s.slice(), imp: f.ip.slice(), nosplit: true };
+  if (/ger$/.test(base)) s.soft = "g"; else if (/cer$/.test(base)) s.soft = "c";
+  return cjFinish(meta(s, "single"));
+}
+
 window.Conjugator = {
     tenses: CJ_TENSES.map(([key, name, en, group]) => ({ key, name, en, group })),
     english: cjEnglish,
@@ -408,6 +435,7 @@ window.Conjugator = {
         return CJ_IDX[cjKey(text)] || cjAssume(text);
     },
     forms: cjForms,
+    fromRow: cjFromRow,
     highlight: cjHl,
     notes: cjNotes
 };

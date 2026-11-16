@@ -162,8 +162,10 @@
             populateVerbList(document.getElementById('verb-search').value);
         }
 
+        setTimeout(loadDbStubs, 0);
         function filterVerbList(query) {
             populateVerbList(query);
+            scheduleDbSearch(query);
         }
 
         // Accent-insensitive match: "etre" finds "être"
@@ -220,19 +222,101 @@
             return [...found].map(([v, whys]) => ({ v, why: whys.join(' · ') }));
         }
 
+        // ---- More verbs from the database (supabase/conjugations): about 2,060 verbs, found by name, meaning or any form ----
+        // The built-in 296 verbs show instantly; the database verbs are added a moment later. If the tables are not there
+        // (SQL not run) or the student is offline, nothing changes.
+        const dbCache = new Map();        // plain query -> [engine verbs from the database]
+        let dbStubs = [];                 // every verb in the database that is not built in: name and meaning only (full forms load on click)
+        async function loadDbStubs() {
+            if (dbBroken || !db || dbStubs.length) return;
+            try {
+                const r = await db.from('conjugation_verbs').select('inf,english,ending,grp,pronominal').limit(5000);
+                if (r.error) throw r.error;
+                dbStubs = (r.data || []).filter(x => !localHas(x.inf)).map(x => ({
+                    disp: x.inf, inf: x.inf.replace(/^(se |s')/, ''), gloss: x.english || '', refl: !!x.pronominal, dbStub: true,
+                    kind: x.pronominal ? 'refl' : x.ending === 'er' ? 'er' : x.ending === 'ir' && x.grp === 2 ? 'ir' : 'single'
+                }));
+                populateVerbList($('verb-search').value);
+            } catch (e) { console.warn('Conjugation tables not available:', e && e.message); dbBroken = true; }
+        }
+        var dbTimer = null, dbBroken = false;
+        const localHas = (inf) => C.verbs.some(v => v.disp === inf);
+        async function dbSearch(searchQuery) {
+            const q0 = plain(searchQuery).replace(/’/g, "'");
+            if (dbBroken || !db || q0.length < 2) return [];
+            if (dbCache.has(q0)) return dbCache.get(q0);
+            let q1 = q0, guard = 0;
+            while (LEADING_PRONOUN.test(q1) && guard++ < 4) { const n = q1.replace(LEADING_PRONOUN, ''); if (!n) break; q1 = n; }
+            const keys = [...new Set([q0, q1, q1.split(' ').pop()])].filter(k => k.length >= 2);
+            const found = new Map();            // inf -> why
+            try {
+                const byForm = await db.from('conjugation_forms').select('inf,tense,person,form').in('form_plain', keys).limit(40);
+                if (byForm.error) throw byForm.error;
+                (byForm.data || []).forEach(r => {
+                    if (!found.has(r.inf)) found.set(r.inf, '“' + r.form + '” = ' + r.tense.replace('participe_passe', 'participe passé').replace('imperatif', 'impératif') + (r.person ? ', ' + r.person : ''));
+                });
+                const safe = q1.replace(/[%_,()*\\]/g, '');
+                if (safe.length >= 3) {
+                    const byName = await db.from('conjugation_verbs').select('inf').or('inf.ilike.' + safe + '%,english.ilike.%' + safe + '%').limit(20);
+                    if (!byName.error) (byName.data || []).forEach(r => { if (!found.has(r.inf)) found.set(r.inf, ''); });
+                }
+                const infs = [...found.keys()].filter(inf => !localHas(inf));
+                let verbs = [];
+                if (infs.length) {
+                    const rows = await db.from('conjugation_verbs').select('*').in('inf', infs);
+                    if (rows.error) throw rows.error;
+                    verbs = (rows.data || []).map(r => { const v = C.fromRow(r); if (v) v.dbWhy = found.get(r.inf); return v; }).filter(Boolean);
+                    const order = (v) => plain(v.disp) === q1 || plain(v.inf) === q1 ? 0 : found.get(v.disp) ? 1 : 2;   // the verb itself, then form matches, then the rest
+                    verbs.sort((a, b) => order(a) - order(b));
+                }
+                dbCache.set(q0, verbs);
+                return verbs;
+            } catch (e) {
+                console.warn('Conjugation tables not available:', e && e.message);
+                dbBroken = true;               // tables missing or offline: stay with the built-in verbs
+                return [];
+            }
+        }
+        async function openListed(v) {
+            if (!v.dbStub) { renderVerb(v); return; }
+            try {
+                const r = await db.from('conjugation_verbs').select('*').eq('inf', v.disp).limit(1);
+                const full = !r.error && r.data && r.data[0] ? C.fromRow(r.data[0]) : null;
+                if (full) { renderVerb(full); return; }
+            } catch (e) { /* fall through */ }
+            $('rule-text').innerText = 'Could not load ' + v.disp + '. Check your connection and try again.';
+        }
+        function scheduleDbSearch(searchQuery) {
+            clearTimeout(dbTimer);
+            if (plain(searchQuery).length < 2) return;
+            dbTimer = setTimeout(async () => {
+                const verbs = await dbSearch(searchQuery);
+                if (verbs.length && $('verb-search').value === searchQuery) populateVerbList(searchQuery);
+            }, 250);
+        }
+
         function populateVerbList(searchQuery = '') {
             const container = document.getElementById('verb-list-container');
             if (!container) return;
             const q = plain(searchQuery);
             const passFilter = v => currentFilter === 'all' || verbGroup(v) === currentFilter || (currentFilter === 'er' && verbGroup(v) === 'ersp');
             let matches = C.verbs.filter(v => passFilter(v) && (!q || plain(v.disp).includes(q) || plain(v.gloss).includes(q)));
+            const cachedFull = dbCache.get(plain(searchQuery).replace(/\u2019/g, "'")) || [];
+            const haveFull = new Set(cachedFull.map(v => v.disp));
+            const stubMatches = dbStubs.filter(v => !haveFull.has(v.disp) && passFilter(v) && (!q || plain(v.disp).includes(q) || plain(v.gloss).includes(q)));
             // A conjugated form ("mangeons", "ai mangé") finds its verb too; those verbs come first
             const whyByVerb = new Map();
             if (q) {
                 const formHits = formMatches(searchQuery).filter(h => passFilter(h.v));
                 formHits.forEach(h => whyByVerb.set(h.v, h.why));
                 matches = formHits.map(h => h.v).concat(matches.filter(v => !whyByVerb.has(v)));
+                // database verbs for this search, once they have arrived (form matches first, then the rest)
+                cachedFull.filter(passFilter).forEach(v => {
+                    if (v.dbWhy) whyByVerb.set(v, v.dbWhy);
+                    matches.push(v);
+                });
             }
+            matches = matches.concat(stubMatches);
 
             container.innerHTML = '';
             if (matches.length === 0) {
@@ -255,7 +339,7 @@
                         ${whyByVerb.has(v) ? `<span class="text-xs text-amber-700 truncate">${escapeHtml(whyByVerb.get(v))}</span>` : ''}
                     </div>
                 `;
-                item.addEventListener('click', () => { renderVerb(v); showTablesOnPhone(); });
+                item.addEventListener('click', () => { openListed(v); showTablesOnPhone(); });
                 container.appendChild(item);
             });
             if (matches.length > FIRST_VERBS && !q) {
@@ -275,6 +359,15 @@
             if (!v || v.assumed) {            // not a listed infinitive: maybe a conjugated form
                 const hits = formMatches(text);
                 if (hits.length) v = hits[0].v;
+            }
+            if (!v || v.assumed) {            // not in the built-in list: ask the database (a verb or any of its forms)
+                dbSearch(text).then(verbs => {
+                    const hit = verbs[0];
+                    if (hit) { renderVerb(hit); showTablesOnPhone(); }
+                    else if (v) { renderVerb(v); showTablesOnPhone(); }
+                    else document.getElementById('rule-text').innerText = `\u201c${text.trim()}\u201d is not recognised as a verb or a verb form.`;
+                });
+                return;
             }
             if (v) {
                 renderVerb(v);
