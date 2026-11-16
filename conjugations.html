@@ -230,11 +230,18 @@
         async function loadDbStubs() {
             if (dbBroken || !db || dbStubs.length) return;
             try {
-                const r = await db.from('conjugation_verbs').select('inf,english,ending,grp,pronominal').limit(5000);
-                if (r.error) throw r.error;
-                dbStubs = (r.data || []).filter(x => !localHas(x.inf)).map(x => ({
+                // Supabase returns at most 1,000 rows per request, so read the verbs page by page
+                let rows = [];
+                for (let from = 0; ; from += 1000) {
+                    const r = await db.from('conjugation_verbs').select('inf,english,ending,grp,pronominal,pp').order('inf').range(from, from + 999);
+                    if (r.error) throw r.error;
+                    rows = rows.concat(r.data || []);
+                    if (!r.data || r.data.length < 1000) break;
+                }
+                dbStubs = rows.filter(x => !localHas(x.inf)).map(x => ({
                     disp: x.inf, inf: x.inf.replace(/^(se |s')/, ''), gloss: x.english || '', refl: !!x.pronominal, dbStub: true,
-                    kind: x.pronominal ? 'refl' : x.ending === 'er' ? 'er' : x.ending === 'ir' && x.grp === 2 ? 'ir' : 'single'
+                    kind: x.pronominal ? 'refl' : x.ending === 'er' ? 'er' : x.ending === 'ir' && x.grp === 2 ? 'ir'
+                          : (/dre$/.test(x.inf) && x.pp === x.inf.slice(0, -2) + 'u') ? 're' : 'single'   // vendre-type verbs are regular -re
                 }));
                 populateVerbList($('verb-search').value);
             } catch (e) { console.warn('Conjugation tables not available:', e && e.message); dbBroken = true; }
