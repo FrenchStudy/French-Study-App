@@ -1,0 +1,477 @@
+{
+  "id": "reading-3",
+  "part": "reading",
+  "title": "Compréhension écrite · Test 3",
+  "minutes": 60,
+  "note": "In every question the first option is the right one; the page shuffles them.",
+  "questions": [
+    {
+      "kind": "Affiche",
+      "doc": "MARCHÉ FERMIER\nTous les samedis, de 8 h à 13 h\nParking de l'église\nFruits, légumes, fromages et pain",
+      "q": "Quand a lieu le marché ?",
+      "o": [
+        "Le samedi matin",
+        "Tous les jours à 8 h",
+        "Le samedi après-midi",
+        "Le dimanche"
+      ],
+      "why": "« Tous les samedis, de 8 h à 13 h »."
+    },
+    {
+      "kind": "Texto",
+      "doc": "Maman, je suis chez Tom. On fait nos devoirs ensemble. Je rentre à 18 h. Bisous, Léo",
+      "q": "Où est Léo ?",
+      "o": [
+        "Chez un ami",
+        "À l'école",
+        "À la maison",
+        "Au travail"
+      ],
+      "why": "« je suis chez Tom »: he is doing homework at a friend's."
+    },
+    {
+      "kind": "Étiquette",
+      "doc": "Pull 100 % laine\nTaille : L\nPrix : 45 $\nLavage à la main, à l'eau froide",
+      "q": "Comment faut-il laver ce pull ?",
+      "o": [
+        "À la main, à l'eau froide",
+        "En machine, à l'eau chaude",
+        "À la main, à l'eau chaude",
+        "En machine, à l'eau froide"
+      ],
+      "why": "« Lavage à la main, à l'eau froide »."
+    },
+    {
+      "kind": "Horaires",
+      "doc": "BIBLIOTHÈQUE\nLundi : fermée\nDu mardi au vendredi : 10 h – 20 h\nSamedi et dimanche : 10 h – 17 h",
+      "q": "Le samedi, à quelle heure la bibliothèque ferme-t-elle ?",
+      "o": [
+        "À 17 h",
+        "À 20 h",
+        "À 10 h",
+        "Elle est fermée toute la journée"
+      ],
+      "why": "« Samedi et dimanche : 10 h – 17 h ». It is closed on Monday."
+    },
+    {
+      "kind": "E-mail",
+      "doc": "Bonjour Paul,\nJe ne pourrai pas venir au bureau demain : mon fils est malade. Je travaillerai de la maison. Peux-tu donner mon rapport à M. Lebrun ? Il est sur mon bureau, dans la chemise bleue.\nMerci !\nClaire",
+      "q": "Que demande Claire à Paul ?",
+      "o": [
+        "De donner un document à M. Lebrun",
+        "De garder son fils malade demain",
+        "De travailler de la maison demain",
+        "D'acheter une chemise bleue"
+      ],
+      "why": "« Peux-tu donner mon rapport à M. Lebrun ? ». Here « chemise » is a folder, not a shirt."
+    },
+    {
+      "kind": "Règlement",
+      "doc": "Camping du Lac-Vert\n• Arrivée à partir de 14 h, départ avant 11 h.\n• Silence entre 23 h et 7 h.\n• Les feux sont autorisés seulement dans les foyers prévus à cet effet.\n• Les chiens doivent être tenus en laisse.",
+      "q": "Où peut-on faire un feu ?",
+      "o": [
+        "Dans les foyers prévus",
+        "Partout dans le camping",
+        "Près du lac, après 23 h",
+        "Nulle part : c'est interdit"
+      ],
+      "why": "« Les feux sont autorisés seulement dans les foyers prévus »."
+    },
+    {
+      "kind": "Lettre",
+      "doc": "Chère Sophie,\nMerci pour ton invitation au mariage ! Malheureusement, je ne pourrai pas venir : je commence un nouveau travail à Vancouver le même week-end. Je t'envoie un cadeau et je t'appelle bientôt pour tout savoir.\nAvec toute mon amitié,\nJulien",
+      "q": "Pourquoi Julien ne va-t-il pas au mariage ?",
+      "o": [
+        "Il commence un nouvel emploi.",
+        "Il n'a pas reçu d'invitation.",
+        "Il va à un autre mariage ce week-end-là.",
+        "Il n'a pas assez d'argent pour le voyage."
+      ],
+      "why": "« je commence un nouveau travail à Vancouver le même week-end »."
+    },
+    {
+      "kind": "Mode d'emploi",
+      "doc": "Cafetière : mode d'emploi\n1. Remplissez le réservoir d'eau froide.\n2. Mettez un filtre et le café moulu.\n3. Appuyez sur le bouton vert.\nAttention : n'ouvrez pas le couvercle pendant que le café coule. Nettoyez la cafetière avec du vinaigre une fois par mois.",
+      "q": "D'après le mode d'emploi, quelle phrase est vraie ?",
+      "o": [
+        "Il faut remplir le réservoir avec de l'eau froide.",
+        "On peut ouvrir le couvercle pendant que le café coule.",
+        "On nettoie la cafetière une fois par semaine.",
+        "On appuie sur le bouton vert avant de mettre l'eau."
+      ],
+      "why": "Step 1: « Remplissez le réservoir d'eau froide ». Cleaning is monthly."
+    },
+    {
+      "kind": "Offre d'emploi",
+      "doc": "La crèche Les Petits Pas cherche un éducateur ou une éducatrice pour remplacer un congé de maternité, de septembre à juin. Horaires : du lundi au vendredi, de 7 h 30 à 15 h 30. Diplôme en petite enfance exigé. Vous aimez travailler en équipe ? Écrivez-nous !",
+      "q": "Quel type de contrat est proposé ?",
+      "o": [
+        "Un remplacement de quelques mois",
+        "Un emploi permanent à temps plein",
+        "Un travail le soir et le week-end",
+        "Un stage non payé pour étudiants"
+      ],
+      "why": "« pour remplacer un congé de maternité, de septembre à juin »: a temporary job."
+    },
+    {
+      "kind": "Mot sur le frigo",
+      "doc": "Les enfants,\nJe rentre tard ce soir. Il y a des lasagnes dans le congélateur : mettez-les au four 40 minutes à 180 degrés. Ne mangez pas le gâteau, c'est pour l'anniversaire de mamie demain !\nPapa",
+      "q": "Pourquoi les enfants ne doivent-ils pas manger le gâteau ?",
+      "o": [
+        "Il est réservé pour une fête demain.",
+        "Il n'est pas encore assez cuit.",
+        "Il est pour le dîner de leur père ce soir.",
+        "Il est resté trop longtemps au congélateur."
+      ],
+      "why": "« c'est pour l'anniversaire de mamie demain »."
+    },
+    {
+      "kind": "Article",
+      "doc": "Depuis trois ans, le toit d'un supermarché de Montréal accueille un potager de 3 000 m². Les légumes, cultivés sans pesticides, sont vendus directement dans le magasin, quelques heures après la récolte. Le projet a demandé des travaux importants pour renforcer le toit, mais le gérant ne le regrette pas : les clients apprécient la fraîcheur des produits, et la végétation aide à garder le bâtiment plus frais en été.",
+      "q": "Quel autre avantage du potager le gérant cite-t-il, en plus de la fraîcheur des légumes ?",
+      "o": [
+        "Il rafraîchit le bâtiment en été.",
+        "Il a demandé très peu de travaux.",
+        "Il remplace tous les autres légumes vendus.",
+        "Il permet de vendre les légumes moins cher."
+      ],
+      "why": "« la végétation aide à garder le bâtiment plus frais en été ». The roof needed « des travaux importants »."
+    },
+    {
+      "kind": "Lettre de réclamation",
+      "doc": "Madame, Monsieur,\nJ'ai pris votre vol Montréal-Paris du 2 juillet. À l'arrivée, ma valise n'était pas là. Elle m'a été livrée à mon hôtel trois jours plus tard. Pendant ce temps, j'ai dû acheter des vêtements et des produits de toilette, pour un total de 240 $. Vous trouverez les reçus ci-joints. Je vous demande de me rembourser ces achats.\nVeuillez agréer, Madame, Monsieur, mes salutations distinguées.\nOmar Sylla",
+      "q": "Que demande M. Sylla ?",
+      "o": [
+        "Le remboursement de ses achats",
+        "Le remboursement de son billet d'avion",
+        "Une nouvelle valise de la même taille",
+        "Trois nuits gratuites dans son hôtel"
+      ],
+      "why": "« Je vous demande de me rembourser ces achats » (clothes and toiletries, $240)."
+    },
+    {
+      "kind": "Blog",
+      "doc": "Pendant des années, j'ai fait mes courses au supermarché le samedi, comme tout le monde. Puis j'ai essayé un panier de légumes livré chaque semaine par une ferme de la région. Au début, je ne savais pas quoi faire des panais ou du chou-rave ! Mais j'ai appris de nouvelles recettes, et je jette beaucoup moins, car je n'achète plus au hasard. Le prix ? À peu près le même.",
+      "q": "Qu'est-ce qui a changé pour l'auteur ?",
+      "o": [
+        "Il gaspille moins et cuisine autrement.",
+        "Il dépense beaucoup moins d'argent qu'avant.",
+        "Il fait maintenant ses courses le samedi.",
+        "Il ne mange plus de légumes de la région."
+      ],
+      "why": "« j'ai appris de nouvelles recettes, et je jette beaucoup moins ». The price is « à peu près le même »."
+    },
+    {
+      "kind": "Avis",
+      "doc": "Coupure d'eau\nLe mardi 9 avril, de 9 h à 15 h, l'eau sera coupée rues Champlain et Cartier pour le remplacement d'une conduite. Après la remise en service, l'eau pourrait être brunâtre pendant quelques minutes : laissez couler le robinet d'eau froide jusqu'à ce qu'elle redevienne claire. Ne faites pas de lessive avant.",
+      "q": "Que faut-il faire si l'eau est colorée après la coupure ?",
+      "o": [
+        "Laisser couler l'eau froide un moment",
+        "Appeler tout de suite la mairie",
+        "Faire bouillir l'eau avant de la boire",
+        "Lancer une lessive pour nettoyer les tuyaux"
+      ],
+      "why": "« laissez couler le robinet d'eau froide jusqu'à ce qu'elle redevienne claire ». No laundry before."
+    },
+    {
+      "kind": "Information municipale",
+      "doc": "Vignette de stationnement pour résidents\nÀ partir du 1er mai, les résidents du quartier Saint-Roch devront avoir une vignette pour se garer dans la rue entre 9 h et 18 h. La vignette coûte 120 $ par an. Elle est gratuite pour les personnes de plus de 65 ans. Pour l'obtenir, présentez votre permis de conduire et un justificatif de domicile au bureau d'arrondissement.",
+      "q": "Qui n'a pas à payer la vignette ?",
+      "o": [
+        "Les résidents de plus de 65 ans",
+        "Les résidents qui se garent après 18 h",
+        "Tous les résidents du quartier Saint-Roch",
+        "Les titulaires d'un permis"
+      ],
+      "why": "« Elle est gratuite pour les personnes de plus de 65 ans »."
+    },
+    {
+      "kind": "Témoignage",
+      "doc": "Je suis arrivé au Canada avec un diplôme d'ingénieur, mais il n'était pas reconnu. Pendant deux ans, j'ai travaillé dans un entrepôt. C'était difficile, mais j'ai suivi des cours du soir et passé les examens de l'ordre professionnel. Ce qui m'a le plus aidé, c'est un mentor, un ingénieur à la retraite, qui m'a expliqué comment fonctionne le monde du travail ici.",
+      "q": "Selon lui, qu'est-ce qui l'a le plus aidé ?",
+      "o": [
+        "Les conseils d'un ingénieur à la retraite",
+        "Ses deux années de travail dans un entrepôt",
+        "La reconnaissance rapide de son diplôme",
+        "Les examens de l'ordre professionnel"
+      ],
+      "why": "« Ce qui m'a le plus aidé, c'est un mentor, un ingénieur à la retraite »."
+    },
+    {
+      "kind": "Programme",
+      "doc": "Journée portes ouvertes du cégep\n9 h 30 : accueil et café dans le hall\n10 h : présentation des programmes (amphithéâtre A)\n11 h : visite des laboratoires (groupes de 15, inscription à l'accueil)\n12 h 30 : déjeuner offert aux futurs étudiants",
+      "q": "Que faut-il faire pour visiter les laboratoires ?",
+      "o": [
+        "S'inscrire à l'accueil",
+        "Arriver avant 9 h 30",
+        "Aller à l'amphithéâtre A",
+        "Déjeuner avec les étudiants"
+      ],
+      "why": "« visite des laboratoires (… inscription à l'accueil) »."
+    },
+    {
+      "kind": "Conseils",
+      "doc": "Vous partez en randonnée en hiver ? Dites toujours à quelqu'un où vous allez et à quelle heure vous pensez rentrer. Habillez-vous en plusieurs couches plutôt qu'avec un seul gros manteau : vous pourrez en enlever si vous avez chaud. Enfin, partez tôt : en décembre, la nuit tombe avant 17 h.",
+      "q": "Pourquoi conseille-t-on de partir tôt ?",
+      "o": [
+        "Parce qu'il fait nuit très tôt en décembre",
+        "Parce qu'il fait moins froid le matin",
+        "Parce que les sentiers sont plus calmes le matin",
+        "Parce qu'il faut d'abord prévenir quelqu'un"
+      ],
+      "why": "« partez tôt : en décembre, la nuit tombe avant 17 h »."
+    },
+    {
+      "kind": "Lettre de l'école",
+      "doc": "Chers parents,\nÀ partir du 15 janvier, les élèves devront laisser leur téléphone dans leur casier pendant les cours. Ils pourront l'utiliser à la récréation et à midi. En cas d'urgence, vous pourrez toujours joindre votre enfant en appelant le secrétariat. Une réunion d'information aura lieu le 10 janvier à 19 h.",
+      "q": "Comment les parents pourront-ils joindre leur enfant en cas d'urgence ?",
+      "o": [
+        "En téléphonant au secrétariat de l'école",
+        "En appelant directement le téléphone de l'enfant",
+        "En venant à la réunion du 10 janvier",
+        "En attendant la récréation de midi"
+      ],
+      "why": "« vous pourrez toujours joindre votre enfant en appelant le secrétariat »."
+    },
+    {
+      "kind": "Article",
+      "doc": "Dans de nombreuses régions, trouver un médecin de famille relève de l'exploit. Pour réduire l'attente, plusieurs provinces confient désormais davantage de responsabilités aux infirmières praticiennes et aux pharmaciens : ces derniers peuvent, par exemple, prescrire des traitements pour des infections courantes. Les associations de patients saluent cette évolution. Certains médecins s'inquiètent toutefois d'un suivi plus morcelé : un patient vu par trois professionnels différents risque de ne plus avoir personne qui connaisse l'ensemble de son dossier.",
+      "q": "Quelle inquiétude certains médecins expriment-ils ?",
+      "o": [
+        "Le suivi des patients risque d'être plus éclaté.",
+        "Les pharmaciens prescriraient beaucoup trop de médicaments.",
+        "Les infirmières praticiennes seraient moins bien formées.",
+        "Les patients devraient attendre encore plus longtemps."
+      ],
+      "why": "« un suivi plus morcelé »: no one would know the whole file."
+    },
+    {
+      "kind": "Chronique",
+      "doc": "Chaque soir, dans des milliers de foyers, la même scène se répète : un enfant fatigué, un parent pressé, une feuille d'exercices qui tourne au conflit. On justifie les devoirs par la nécessité de consolider les apprentissages. Pourtant, les recherches montrent qu'à l'école primaire, leur effet sur la réussite est faible. Ils creusent même les inégalités : certains enfants sont aidés par des parents disponibles, d'autres sont seuls. Plutôt que de les supprimer, on pourrait les remplacer par de la lecture libre, dont les bienfaits sont démontrés.",
+      "q": "Quelle solution le chroniqueur propose-t-il ?",
+      "o": [
+        "Remplacer les exercices par de la lecture",
+        "Supprimer tous les devoirs",
+        "Donner plus de devoirs aux élèves en difficulté",
+        "Demander aux parents d'aider davantage leurs enfants"
+      ],
+      "why": "« Plutôt que de les supprimer, on pourrait les remplacer par de la lecture libre »."
+    },
+    {
+      "kind": "Courrier des lecteurs",
+      "doc": "Je lis souvent que les jeunes ne veulent plus travailler. Je dirige un restaurant, et je dois reconnaître que j'ai eu du mal à recruter. Mais ce n'est pas par paresse : les jeunes que je rencontre refusent les horaires imprévisibles et les salaires qui ne permettent pas de payer un loyer. Depuis que j'affiche les horaires deux semaines à l'avance et que j'ai augmenté les salaires, je n'ai plus de postes vacants.",
+      "q": "Qu'est-ce que la directrice reconnaît ?",
+      "o": [
+        "Elle a eu du mal à embaucher.",
+        "Les jeunes sont moins travailleurs qu'avant.",
+        "Ses salaires étaient trop élevés.",
+        "Les jeunes apprécient les horaires imprévisibles."
+      ],
+      "why": "« je dois reconnaître que j'ai eu du mal à recruter ». She rejects the idea that young people are lazy."
+    },
+    {
+      "kind": "Vulgarisation",
+      "doc": "On répand du sel sur les routes en hiver parce qu'il abaisse la température à laquelle l'eau gèle. Mélangée à du sel, l'eau reste liquide jusqu'à environ moins neuf degrés. En dessous, le sel devient presque inefficace : c'est pourquoi, par grand froid, les services municipaux utilisent plutôt du sable ou des graviers, qui ne font pas fondre la glace mais améliorent l'adhérence des pneus.",
+      "q": "Pourquoi utilise-t-on du sable par grand froid ?",
+      "o": [
+        "Le sel n'agit presque plus à ces températures.",
+        "Le sable fait fondre la glace plus vite que le sel.",
+        "Le sel abîme les pneus quand il fait très froid.",
+        "Le sable coûte beaucoup moins cher que le sel."
+      ],
+      "why": "Below about −9 °C « le sel devient presque inefficace ». Sand doesn't melt ice: it improves grip."
+    },
+    {
+      "kind": "Politique d'entreprise",
+      "doc": "Remboursement des frais de déplacement\nLes repas sont remboursés jusqu'à 60 $ par jour, sur présentation des reçus. L'alcool n'est pas remboursé. Les déplacements en voiture personnelle sont remboursés à 0,55 $ du kilomètre, à condition que le trajet ait été approuvé à l'avance par le gestionnaire. Les demandes doivent être envoyées dans les 30 jours qui suivent le déplacement.",
+      "q": "Un employé a pris sa voiture sans l'accord de son gestionnaire. Que se passe-t-il ?",
+      "o": [
+        "Ses kilomètres ne lui seront pas remboursés.",
+        "Il sera remboursé à 0,55 $ du kilomètre.",
+        "Il a 30 jours pour obtenir un remboursement.",
+        "Ses repas ne lui seront pas remboursés."
+      ],
+      "why": "Car travel is paid « à condition que le trajet ait été approuvé à l'avance »."
+    },
+    {
+      "kind": "Critique",
+      "doc": "Ce premier roman raconte trois générations de femmes dans une ferme laitière du Bas-Saint-Laurent. L'écriture est sobre, précise, parfois très belle, et l'autrice a le don de rendre passionnants les gestes les plus ordinaires. On peut regretter quelques longueurs au milieu du livre, mais la dernière partie, bouleversante, les fait vite oublier. Une voix à suivre.",
+      "q": "Que pense le critique de ce roman ?",
+      "o": [
+        "Il est très réussi malgré quelques longueurs.",
+        "Il est trop long pour être vraiment réussi.",
+        "Il est raté, à part sa dernière partie.",
+        "Il est banal, car il parle de gestes ordinaires."
+      ],
+      "why": "Mostly praise; the « longueurs » are quickly forgotten. « Une voix à suivre » = a writer to watch."
+    },
+    {
+      "kind": "Article",
+      "doc": "Les paiements en espèces reculent rapidement : ils ne représentent plus qu'un achat sur dix. Plusieurs commerces refusent même désormais les billets. Cette évolution inquiète les associations qui défendent les personnes âgées et les personnes à faible revenu, dont beaucoup n'ont pas de carte bancaire ou préfèrent l'argent liquide pour mieux contrôler leur budget. Certains pays ont réagi en obligeant les commerces à accepter les espèces.",
+      "q": "Pourquoi certaines associations s'inquiètent-elles ?",
+      "o": [
+        "Certaines personnes ont encore besoin des espèces.",
+        "Les cartes bancaires coûtent trop cher aux commerces.",
+        "Les achats en espèces augmentent beaucoup chez les jeunes.",
+        "Les commerces n'ont plus le droit de refuser les billets."
+      ],
+      "why": "Many older or low-income people « n'ont pas de carte bancaire ou préfèrent l'argent liquide »."
+    },
+    {
+      "kind": "E-mail officiel",
+      "doc": "Objet : convocation à l'examen de citoyenneté\nMonsieur,\nVous êtes convoqué à l'examen de citoyenneté le 14 mars à 10 h. L'examen se déroulera en ligne. Vous devez vous connecter seul, dans une pièce calme, avec une pièce d'identité valide. Si vous ne pouvez pas vous présenter à cette date, signalez-le au moins 48 heures à l'avance : une nouvelle date vous sera proposée. Une absence non signalée pourrait entraîner la fermeture de votre dossier.",
+      "q": "Que risque une personne qui ne se présente pas sans prévenir ?",
+      "o": [
+        "La fermeture de son dossier de citoyenneté",
+        "Le paiement d'une amende importante",
+        "Une nouvelle date d'examen dans 48 heures",
+        "L'obligation de passer l'examen en personne"
+      ],
+      "why": "« Une absence non signalée pourrait entraîner la fermeture de votre dossier ». A new date is offered only if you warn 48 h ahead."
+    },
+    {
+      "kind": "Entretien",
+      "doc": "— Votre restaurant n'utilise que des produits du Québec. N'est-ce pas trop limitant en hiver ?\n— C'est justement ce qui m'oblige à être créatif. En février, je n'ai pas de tomates fraîches, alors je travaille les légumes racines, les conserves que nous avons préparées en été, les fermentations. Mes clients ne viennent pas manger la même chose qu'ailleurs : ils viennent goûter la saison.",
+      "q": "Comment le chef voit-il la contrainte de l'hiver ?",
+      "o": [
+        "Comme une occasion de se montrer créatif",
+        "Comme un problème qui lui fait perdre des clients",
+        "Comme une raison d'importer des tomates",
+        "Comme une période où il vaut mieux fermer"
+      ],
+      "why": "« C'est justement ce qui m'oblige à être créatif »."
+    },
+    {
+      "kind": "Article",
+      "doc": "Une étude menée auprès de 20 000 adultes suggère que passer deux heures par semaine dans la nature améliore nettement le bien-être. Peu importe que ces deux heures soient prises en une seule fois ou réparties sur plusieurs jours ; en revanche, en dessous de ce seuil, aucun effet n'est mesuré. Les chercheurs recommandent donc aux villes de multiplier les espaces verts accessibles à pied, plutôt que de concentrer leurs efforts sur quelques grands parcs éloignés.",
+      "q": "Que recommandent les chercheurs ?",
+      "o": [
+        "Créer des espaces verts près des habitations",
+        "Passer deux heures d'affilée dans la nature",
+        "Aménager quelques très grands parcs en périphérie",
+        "Faire du sport en plein air tous les jours"
+      ],
+      "why": "« multiplier les espaces verts accessibles à pied ». The two hours can be split: « Peu importe »."
+    },
+    {
+      "kind": "Éditorial",
+      "doc": "Face à la crise du logement, la tentation est grande de geler les loyers. La mesure est populaire et protège immédiatement les locataires en place. Mais les économistes, de tous bords, rappellent ses effets pervers : lorsque les loyers ne peuvent plus augmenter, certains propriétaires cessent d'entretenir leurs immeubles ou les retirent du marché locatif pour les vendre. À terme, l'offre diminue, et ce sont les nouveaux arrivants, sans bail à protéger, qui en paient le prix. Protéger les locataires est une nécessité ; encore faut-il ne pas le faire au détriment de ceux qui cherchent un toit.",
+      "q": "Selon l'auteur, qui pourrait souffrir d'un gel des loyers ?",
+      "o": [
+        "Les personnes qui cherchent un logement",
+        "Les locataires qui ont déjà un bail",
+        "Les économistes qui conseillent l'État",
+        "Les propriétaires qui gardent leurs immeubles"
+      ],
+      "why": "« ce sont les nouveaux arrivants, sans bail à protéger, qui en paient le prix »: people looking for a home."
+    },
+    {
+      "kind": "Essai",
+      "doc": "Nous avons déclaré la guerre à l'ennui. Au moindre temps mort, dans une file d'attente ou un ascenseur, le téléphone est là pour combler le vide. Pourtant, l'ennui n'est pas seulement un inconfort : c'est souvent le moment où l'esprit, privé de stimulation extérieure, se met à vagabonder, à relier des idées lointaines, à imaginer. En le supprimant, nous ne gagnons pas seulement du divertissement ; nous perdons peut-être l'un des terreaux de la créativité.",
+      "q": "Quelle idée le texte défend-il ?",
+      "o": [
+        "L'ennui nourrit la réflexion et l'imagination.",
+        "Le téléphone rend les files d'attente plus agréables.",
+        "L'ennui est un inconfort qu'il faut éviter à tout prix.",
+        "La créativité dépend surtout des stimulations extérieures."
+      ],
+      "why": "Boredom lets the mind « vagabonder… imaginer »: it is « l'un des terreaux de la créativité »."
+    },
+    {
+      "kind": "Analyse",
+      "doc": "Pour réduire les embouteillages, la solution semble évidente : élargir les routes. Les études menées depuis cinquante ans montrent pourtant que les nouvelles voies se remplissent en quelques années. En rendant la voiture plus pratique, on encourage des trajets qui n'auraient pas eu lieu, on favorise l'installation en banlieue lointaine, et la circulation revient à son niveau antérieur, parfois au-delà. Les spécialistes parlent de « demande induite ».",
+      "q": "Que désigne l'expression « demande induite » dans ce texte ?",
+      "o": [
+        "Des trajets créés par l'ajout de nouvelles routes",
+        "Le besoin de construire plus de routes en banlieue",
+        "La baisse durable des embouteillages après des travaux",
+        "Les trajets évités grâce aux transports en commun"
+      ],
+      "why": "Wider roads « encourage[nt] des trajets qui n'auraient pas eu lieu », so traffic comes back."
+    },
+    {
+      "kind": "Texte juridique",
+      "doc": "Le salarié qui souhaite démissionner doit en informer son employeur en respectant un préavis raisonnable, généralement de deux semaines, sauf disposition contraire du contrat. L'employeur peut renoncer à ce préavis et demander au salarié de partir immédiatement ; il reste alors tenu de lui verser le salaire correspondant à la période de préavis. Le salarié qui part sans préavis, en revanche, peut être tenu responsable du préjudice causé à l'employeur, si celui-ci est démontré.",
+      "q": "Que se passe-t-il si l'employeur demande au salarié de partir tout de suite ?",
+      "o": [
+        "L'employeur doit tout de même payer le préavis.",
+        "Le salarié doit indemniser l'employeur du préjudice.",
+        "Le salarié perd son droit au salaire du préavis.",
+        "Le contrat de travail est prolongé de deux semaines."
+      ],
+      "why": "« il reste alors tenu de lui verser le salaire correspondant à la période de préavis »."
+    },
+    {
+      "kind": "Chronique",
+      "doc": "Bonne nouvelle : grâce aux caisses en libre-service, vous pouvez désormais faire vous-même le travail du caissier, sans formation ni salaire. Quand l'appareil signale un « article inattendu dans la zone d'emballage », un employé, le dernier du magasin, accourt pour vous aider : preuve que l'on a pensé à tout. Le progrès, décidément, ne recule devant rien.",
+      "q": "Quel est le ton du chroniqueur ?",
+      "o": [
+        "Ironique envers les caisses automatiques",
+        "Enthousiaste devant cette nouvelle technologie",
+        "Neutre : il décrit simplement un appareil",
+        "Inquiet pour la sécurité des clients du magasin"
+      ],
+      "why": "« Bonne nouvelle », « preuve que l'on a pensé à tout »: he says the opposite of what he means."
+    },
+    {
+      "kind": "Tribune",
+      "doc": "La fermeture des journaux locaux est souvent présentée comme une conséquence inévitable du numérique. Elle a pourtant un coût rarement mesuré : là où il n'y a plus de journaliste pour assister aux conseils municipaux, les études observent une baisse de la participation aux élections et une hausse des dépenses publiques. Le journalisme local ne disparaîtra pas forcément ; il devra sans doute s'appuyer sur d'autres modèles, coopératifs ou financés par des fondations, pour continuer à jouer son rôle de vigie.",
+      "q": "Selon l'auteur, quel est le rôle essentiel du journalisme local ?",
+      "o": [
+        "Surveiller la vie publique locale",
+        "Concurrencer Internet",
+        "Aider les municipalités à réduire leurs dépenses",
+        "Remplacer les élections municipales par des débats"
+      ],
+      "why": "« son rôle de vigie » = watchdog: without journalists, turnout falls and spending rises."
+    },
+    {
+      "kind": "Essai",
+      "doc": "On ne choisit pas un lieu seulement pour ce qu'il offre, mais pour ce qu'il nous permet de devenir. Les petites annonces vantent la superficie, la luminosité, la proximité des commerces ; elles taisent l'essentiel, qui ne se mesure pas : la manière dont un quartier modifie nos habitudes, nos rencontres, jusqu'au rythme de nos pensées. Déménager, c'est toujours un peu changer de vie, et l'on s'étonne ensuite d'avoir changé avec elle.",
+      "q": "Selon l'auteur, que taisent les petites annonces ?",
+      "o": [
+        "L'effet d'un lieu sur ce que nous devenons",
+        "La superficie et la luminosité réelles du logement",
+        "Le prix des commerces situés dans le quartier",
+        "Les difficultés pratiques de tout déménagement"
+      ],
+      "why": "They don't say « la manière dont un quartier modifie nos habitudes, nos rencontres… nos pensées »."
+    },
+    {
+      "kind": "Essai",
+      "doc": "On attend des experts qu'ils nous rassurent par des certitudes. Le savoir scientifique, pourtant, ne progresse qu'en se corrigeant : une théorie n'est jamais vraie que jusqu'à nouvel ordre. Reprocher à un chercheur d'avoir changé d'avis, c'est donc lui reprocher de faire son métier. La confiance qu'il mérite ne tient pas à l'infaillibilité de ses conclusions, mais à la rigueur de la méthode qui permet de les réviser. Exiger des scientifiques qu'ils ne se trompent jamais, c'est préparer le terrain à ceux qui ne se trompent jamais parce qu'ils ne vérifient rien.",
+      "q": "Quelle thèse l'auteur défend-il ?",
+      "o": [
+        "La science mérite notre confiance parce qu'elle se corrige.",
+        "Les scientifiques devraient éviter de changer d'avis.",
+        "Les experts doivent d'abord rassurer le public.",
+        "Les théories scientifiques sont rarement fiables."
+      ],
+      "why": "Trust rests on « la rigueur de la méthode qui permet de les réviser », not on never being wrong."
+    },
+    {
+      "kind": "Article de fond",
+      "doc": "On attribue volontiers la montée de la solitude aux réseaux sociaux, accusés de remplacer les liens réels par des échanges superficiels. Le diagnostic n'est pas sans fondement, mais il a l'inconvénient de faire porter toute la responsabilité à un outil. Or le phénomène a commencé bien avant les smartphones : déclin des associations, mobilité professionnelle, urbanisme qui sépare les lieux de vie et de travail. Les réseaux ont sans doute accéléré une tendance ; ils ne l'ont pas créée.",
+      "q": "Quelle est la position de l'auteur sur le rôle des réseaux sociaux ?",
+      "o": [
+        "Ils ont accéléré un phénomène plus ancien.",
+        "Ils sont la cause principale de la solitude.",
+        "Ils n'ont aucun lien avec la montée de la solitude.",
+        "Ils ont permis de réduire la solitude des citadins."
+      ],
+      "why": "« Les réseaux ont sans doute accéléré une tendance ; ils ne l'ont pas créée »."
+    },
+    {
+      "kind": "Extrait de roman",
+      "doc": "Il avait gardé la lettre trois jours dans la poche intérieure de sa veste, sans l'ouvrir. Il la sentait contre lui comme une petite chaleur, ou une menace, il n'aurait su le dire. Tant qu'elle restait fermée, tout demeurait possible : le pardon, le reproche ou, pire, l'indifférence. Le quatrième jour, il la posa sur la table de la cuisine, prépara du café et s'assit en face d'elle, comme on s'assoit en face de quelqu'un.",
+      "q": "Pourquoi l'homme n'ouvre-t-il pas la lettre ?",
+      "o": [
+        "Il retarde le moment de savoir ce qu'elle dit.",
+        "Il a oublié qu'elle était dans sa veste.",
+        "Il sait déjà exactement ce qu'elle contient.",
+        "Il attend que quelqu'un vienne la lire avec lui."
+      ],
+      "why": "« Tant qu'elle restait fermée, tout demeurait possible »: he puts off knowing."
+    }
+  ]
+}

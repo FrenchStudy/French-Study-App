@@ -1,0 +1,477 @@
+{
+  "id": "reading-2",
+  "part": "reading",
+  "title": "Compréhension écrite · Test 2",
+  "minutes": 60,
+  "note": "In every question the first option is the right one; the page shuffles them.",
+  "questions": [
+    {
+      "kind": "Affiche",
+      "doc": "PISCINE MUNICIPALE\nOuverte tous les jours de 9 h à 20 h\nCours de natation : mercredi et samedi matin\nEntrée : 4 $ – Enfants : 2 $",
+      "q": "Quand y a-t-il des cours de natation ?",
+      "o": [
+        "Le mercredi et le samedi matin",
+        "Tous les jours, de 9 h à 20 h",
+        "Le mercredi et le samedi soir",
+        "Seulement le samedi"
+      ],
+      "why": "« Cours de natation : mercredi et samedi matin »."
+    },
+    {
+      "kind": "Texto",
+      "doc": "Salut Léa ! Je suis malade, je ne viens pas au cours de yoga ce soir. Tu peux le dire au professeur ? Merci ! Inès",
+      "q": "Que demande Inès à Léa ?",
+      "o": [
+        "De prévenir le professeur",
+        "De venir chez elle ce soir",
+        "D'annuler le cours de yoga",
+        "D'acheter des médicaments"
+      ],
+      "why": "« Tu peux le dire au professeur ? » = tell the teacher."
+    },
+    {
+      "kind": "Panneau",
+      "doc": "PARKING DU CENTRE COMMERCIAL\nGratuit les 2 premières heures\nEnsuite : 3 $ de l'heure\nFermé de minuit à 6 h",
+      "q": "Combien coûte le parking pour deux heures ?",
+      "o": [
+        "Rien",
+        "3 $",
+        "6 $ en tout",
+        "3 $ par heure"
+      ],
+      "why": "« Gratuit les 2 premières heures »: you only pay after two hours."
+    },
+    {
+      "kind": "Invitation",
+      "doc": "Anniversaire de Paul : 8 ans !\nSamedi 14 juin, de 14 h à 17 h\n12, rue des Érables\nApporte ton maillot de bain : il y a une piscine !",
+      "q": "Qu'est-ce que les enfants doivent apporter ?",
+      "o": [
+        "Un maillot de bain",
+        "Un gâteau d'anniversaire",
+        "Une serviette et un ballon",
+        "Un cadeau pour la piscine"
+      ],
+      "why": "« Apporte ton maillot de bain » = bring your swimsuit."
+    },
+    {
+      "kind": "E-mail",
+      "doc": "Bonjour madame Diallo,\nDes ouvriers vont repeindre les couloirs de l'immeuble du 3 au 5 mars. Pendant ces trois jours, l'ascenseur ne fonctionnera pas le matin, de 8 h à 12 h.\nMerci de votre compréhension.\nLa gérance",
+      "q": "Qu'est-ce qui ne sera pas possible le matin, du 3 au 5 mars ?",
+      "o": [
+        "Prendre l'ascenseur",
+        "Entrer dans l'immeuble",
+        "Utiliser l'eau chaude",
+        "Passer dans les couloirs"
+      ],
+      "why": "« l'ascenseur ne fonctionnera pas le matin » = the lift won't work in the morning."
+    },
+    {
+      "kind": "Règlement",
+      "doc": "Salle de sport : règlement\n• Une serviette est obligatoire sur les machines.\n• Les chaussures de ville sont interdites dans la salle.\n• Les casiers doivent être vidés chaque soir ; sinon, le cadenas sera coupé.\n• Les enfants de moins de 14 ans doivent être accompagnés d'un adulte.",
+      "q": "Que se passe-t-il si on laisse ses affaires dans un casier la nuit ?",
+      "o": [
+        "Le cadenas est coupé.",
+        "On doit payer une amende.",
+        "On ne peut plus revenir à la salle.",
+        "Les affaires sont données à un adulte."
+      ],
+      "why": "« Les casiers doivent être vidés chaque soir ; sinon, le cadenas sera coupé »."
+    },
+    {
+      "kind": "Carte postale",
+      "doc": "Chers parents,\nNous sommes arrivés à Québec mardi. Il fait froid mais très beau. Hier, nous avons visité le Vieux-Québec à pied et mangé dans une crêperie. Demain, nous partons voir les baleines à Tadoussac.\nJe vous embrasse,\nCamille",
+      "q": "Que va faire Camille demain ?",
+      "o": [
+        "Aller voir des baleines",
+        "Visiter le Vieux-Québec",
+        "Manger dans une crêperie",
+        "Rentrer chez ses parents"
+      ],
+      "why": "« Demain, nous partons voir les baleines ». The visit and the crêperie were yesterday."
+    },
+    {
+      "kind": "Notice",
+      "doc": "Sirop contre la toux\nAdultes : une cuillère trois fois par jour, après les repas.\nEnfants de 6 à 12 ans : une demi-cuillère deux fois par jour.\nNe pas donner aux enfants de moins de 6 ans.\nÀ conserver au réfrigérateur après ouverture.",
+      "q": "D'après la notice, quelle phrase est vraie ?",
+      "o": [
+        "Un enfant de 8 ans prend une demi-cuillère deux fois par jour.",
+        "Les adultes prennent le sirop avant les repas.",
+        "On peut donner ce sirop à un enfant de 4 ans sans problème.",
+        "On garde le flacon au frais avant de l'ouvrir."
+      ],
+      "why": "Children from 6 to 12: « une demi-cuillère deux fois par jour ». Adults take it after meals, and it goes in the fridge after opening."
+    },
+    {
+      "kind": "Offre d'emploi",
+      "doc": "La pharmacie Santé Plus cherche un caissier ou une caissière à temps partiel (20 heures par semaine), le soir et le samedi. Une expérience dans la vente est appréciée mais pas obligatoire. Vous devez parler français et anglais. Envoyez votre CV avant le 30 avril.",
+      "q": "Pour ce poste, il faut…",
+      "o": [
+        "parler deux langues",
+        "avoir déjà travaillé dans la vente",
+        "être libre le dimanche",
+        "travailler à temps plein"
+      ],
+      "why": "« Vous devez parler français et anglais ». Experience is « appréciée mais pas obligatoire »."
+    },
+    {
+      "kind": "Message",
+      "doc": "Bonjour,\nJe pars en vacances deux semaines à partir de samedi. Est-ce que vous pourriez arroser mes plantes et prendre mon courrier ? Je laisse la clé dans votre boîte aux lettres. Pour vous remercier, je vous invite à dîner à mon retour !\nNadia, appartement 5",
+      "q": "Pourquoi Nadia écrit-elle ce message ?",
+      "o": [
+        "Pour demander un service à sa voisine",
+        "Pour inviter sa voisine à partir en vacances avec elle",
+        "Pour rendre une clé à sa voisine",
+        "Pour remercier sa voisine d'un dîner"
+      ],
+      "why": "She asks her neighbour to water the plants and take the mail. The dinner is to thank her later."
+    },
+    {
+      "kind": "Article",
+      "doc": "À Gatineau, une « bibliothèque d'objets » a ouvert ses portes en janvier. Comme dans une bibliothèque classique, les membres empruntent gratuitement, mais il s'agit ici de perceuses, de tentes, de machines à coudre ou d'appareils à raclette. L'abonnement coûte 20 $ par an. Selon la fondatrice, l'objectif est double : faire des économies et réduire les déchets, puisqu'une perceuse ne sert en moyenne que treize minutes dans toute sa vie. Plus de 600 personnes se sont déjà inscrites.",
+      "q": "Quel est le but de ce projet, selon la fondatrice ?",
+      "o": [
+        "Faire économiser et limiter le gaspillage",
+        "Vendre des outils moins cher qu'en magasin",
+        "Remplacer la bibliothèque municipale",
+        "Apprendre aux gens à bricoler"
+      ],
+      "why": "« l'objectif est double : faire des économies et réduire les déchets »."
+    },
+    {
+      "kind": "Lettre de réclamation",
+      "doc": "Madame, Monsieur,\nLe 12 octobre, j'ai commandé sur votre site un manteau d'hiver en taille M. J'ai reçu le bon modèle, mais en taille XL. J'ai essayé de faire l'échange en ligne, mais la taille M n'est plus disponible. Je vous renvoie donc le manteau et je vous demande de me rembourser la totalité de la somme, y compris les frais de livraison, puisque l'erreur ne vient pas de moi.\nCordialement,\nAmina Benali",
+      "q": "Que demande la cliente ?",
+      "o": [
+        "Un remboursement complet, livraison comprise",
+        "Un manteau du même modèle en taille M",
+        "Un échange contre un autre modèle",
+        "Le remboursement des seuls frais de livraison"
+      ],
+      "why": "« me rembourser la totalité de la somme, y compris les frais de livraison ». An exchange is no longer possible."
+    },
+    {
+      "kind": "Blog",
+      "doc": "Quand je suis arrivé à Montréal, je voulais absolument parler français tout le temps. Résultat : j'étais épuisé et je n'osais plus ouvrir la bouche. Une collègue m'a conseillé de m'accorder des « pauses » en anglais et de me fixer de petits objectifs : commander au café, puis téléphoner au propriétaire, puis participer aux réunions. Aujourd'hui, je pense que les progrès viennent moins d'un effort constant que de la régularité.",
+      "q": "Quelle leçon l'auteur tire-t-il de son expérience ?",
+      "o": [
+        "Mieux vaut progresser régulièrement, par petites étapes.",
+        "Il faut parler français à tout moment, même quand on est fatigué.",
+        "Les pauses en anglais l'ont empêché de progresser.",
+        "Les réunions sont le meilleur moyen d'apprendre."
+      ],
+      "why": "Small goals step by step, and « les progrès viennent… de la régularité »."
+    },
+    {
+      "kind": "Avis",
+      "doc": "Avis aux usagers\nEn raison de travaux sur la ligne verte, les stations d'Atwater à Berri-UQAM seront fermées les week-ends du 5 au 27 octobre. Des bus gratuits relieront ces stations toutes les cinq minutes. Le trajet sera allongé d'environ vingt minutes. Les personnes à mobilité réduite peuvent réserver un transport adapté au moins 24 heures à l'avance.",
+      "q": "Que se passera-t-il les week-ends d'octobre ?",
+      "o": [
+        "Des bus remplaceront le métro sur une partie de la ligne.",
+        "Toute la ligne verte sera fermée.",
+        "Le métro sera gratuit pour tous les usagers pendant les travaux.",
+        "Les rames passeront toutes les cinq minutes."
+      ],
+      "why": "Only some stations close, and « des bus gratuits relieront ces stations ». The buses, not the metro, are free."
+    },
+    {
+      "kind": "Information municipale",
+      "doc": "Collecte des feuilles mortes\nCet automne, la collecte des feuilles aura lieu les lundis 21 et 28 octobre et 4 novembre. Les feuilles doivent être placées dans des sacs en papier : les sacs en plastique ne seront plus ramassés. Des sacs en papier sont distribués gratuitement à l'hôtel de ville, dans la limite de dix par foyer. Les branches de plus de 2 cm de diamètre ne sont pas acceptées.",
+      "q": "Qu'est-ce qui change cette année ?",
+      "o": [
+        "Les sacs en plastique ne sont plus acceptés.",
+        "La collecte a lieu le mardi.",
+        "Les sacs en papier sont payants.",
+        "Les branches sont ramassées avec les feuilles."
+      ],
+      "why": "« les sacs en plastique ne seront plus ramassés ». Paper bags are free and branches are not accepted."
+    },
+    {
+      "kind": "Témoignage",
+      "doc": "J'ai commencé le bénévolat à la banque alimentaire pour rencontrer des gens, car je ne connaissais personne dans le quartier. Au début, je triais les boîtes de conserve. Aujourd'hui, je coordonne une équipe de quinze bénévoles. Ce qui m'a surprise, c'est que cette expérience m'a servi professionnellement : lors de mon dernier entretien d'embauche, la recruteuse m'a surtout posé des questions sur ce rôle de coordinatrice.",
+      "q": "Qu'est-ce qui a surpris la narratrice ?",
+      "o": [
+        "Son bénévolat l'a aidée à trouver du travail.",
+        "Elle a enfin rencontré beaucoup de gens de son quartier.",
+        "Le tri des conserves était très difficile.",
+        "La banque alimentaire manquait de bénévoles."
+      ],
+      "why": "« Ce qui m'a surprise, c'est que cette expérience m'a servi professionnellement »."
+    },
+    {
+      "kind": "Programme",
+      "doc": "Festival des lumières : programme du samedi\n16 h : atelier de lanternes pour enfants (inscription obligatoire, places limitées)\n18 h : concert de musique traditionnelle, place du Marché (gratuit)\n20 h : défilé aux lanternes dans le Vieux-Port\n21 h 30 : feu d'artifice sur le fleuve (annulé en cas de vent fort)",
+      "q": "Pour quelle activité faut-il s'inscrire à l'avance ?",
+      "o": [
+        "L'atelier de lanternes",
+        "Le concert sur la place du Marché",
+        "Le défilé dans le Vieux-Port",
+        "Le feu d'artifice sur le fleuve"
+      ],
+      "why": "Only the workshop says « inscription obligatoire »."
+    },
+    {
+      "kind": "Conseils",
+      "doc": "Avant de signer un bail, visitez le logement en plein jour et ouvrez les robinets pour vérifier la pression de l'eau. Demandez au propriétaire le montant moyen des factures de chauffage : en hiver, elles peuvent doubler le coût du logement. Enfin, prenez des photos de chaque pièce le jour de votre arrivée : elles vous protégeront si on vous reproche des dégâts au moment de partir.",
+      "q": "Pourquoi conseille-t-on de prendre des photos le premier jour ?",
+      "o": [
+        "Pour prouver l'état du logement à l'arrivée",
+        "Pour montrer le logement à des amis",
+        "Pour calculer combien coûtera le chauffage en hiver",
+        "Pour vérifier la pression de l'eau"
+      ],
+      "why": "The photos « vous protégeront si on vous reproche des dégâts »: they prove the state of the flat when you moved in."
+    },
+    {
+      "kind": "Lettre de l'école",
+      "doc": "Chers parents,\nLa sortie au musée des sciences prévue le 15 mai aura bien lieu, mais le car coûte plus cher que prévu. Pour ne pas demander davantage aux familles, l'école organise une vente de gâteaux le vendredi 2 mai. Nous cherchons des parents prêts à préparer des gâteaux ou à tenir le stand pendant la récréation. Merci de répondre avant le 25 avril.",
+      "q": "Que demande l'école aux parents ?",
+      "o": [
+        "D'aider à organiser une vente de gâteaux",
+        "De payer plus cher pour la sortie",
+        "D'accompagner les enfants au musée",
+        "De choisir un autre jour pour la sortie au musée"
+      ],
+      "why": "« Nous cherchons des parents prêts à préparer des gâteaux ou à tenir le stand ». The school does not want to ask families for more money."
+    },
+    {
+      "kind": "Article",
+      "doc": "Depuis cette année, plusieurs provinces obligent les employeurs à indiquer une fourchette de salaire dans leurs offres d'emploi. L'objectif affiché est de réduire les écarts de rémunération entre hommes et femmes, ces dernières négociant souvent moins leur salaire à l'embauche. Les premiers bilans sont encourageants : les offres qui affichent un salaire reçoivent davantage de candidatures. Certains recruteurs regrettent toutefois que des entreprises publient des fourchettes très larges, par exemple de 50 000 à 95 000 $, ce qui vide la mesure de son sens. Des spécialistes proposent donc de limiter l'écart autorisé entre le minimum et le maximum.",
+      "q": "Quel problème certains recruteurs soulignent-ils ?",
+      "o": [
+        "Des fourchettes trop larges rendent l'information inutile.",
+        "Les candidats postulent moins quand le salaire est affiché.",
+        "Les femmes négocient désormais trop leur salaire à l'embauche.",
+        "La plupart des entreprises refusent d'indiquer un salaire."
+      ],
+      "why": "Very wide ranges « vide[nt] la mesure de son sens »: they make the information meaningless. Ads with a salary get more applications, not fewer."
+    },
+    {
+      "kind": "Chronique",
+      "doc": "Avant d'aller au restaurant, de choisir un plombier ou même un médecin, nous consultons les notes laissées par des inconnus. L'habitude paraît rationnelle : mieux vaut l'avis de cent clients que celui d'un seul ami. Pourtant, les notes en ligne en disent souvent moins sur la qualité d'un service que sur l'humeur de ceux qui prennent la peine d'écrire, c'est-à-dire les très satisfaits et les très mécontents. Quant aux faux avis, ils représenteraient jusqu'à un sur dix. Plutôt que de se fier à la moyenne, il serait plus sage de lire les commentaires détaillés, et surtout les plus modérés.",
+      "q": "Que conseille le chroniqueur ?",
+      "o": [
+        "Lire les avis nuancés plutôt que se fier à la note moyenne",
+        "Demander l'avis d'un ami plutôt que consulter Internet",
+        "Ne plus jamais consulter les avis laissés en ligne",
+        "Faire surtout confiance aux clients les plus satisfaits du service"
+      ],
+      "why": "« Plutôt que de se fier à la moyenne… lire les commentaires détaillés, et surtout les plus modérés »."
+    },
+    {
+      "kind": "Courrier des lecteurs",
+      "doc": "Votre article sur la fermeture des bureaux de poste ruraux m'a fait réagir. Je reconnais que ces bureaux coûtent cher et que nous envoyons beaucoup moins de lettres qu'avant. Mais dans mon village, le bureau de poste est aussi l'endroit où les personnes âgées retirent de l'argent, envoient des colis à leurs petits-enfants et, surtout, parlent à quelqu'un. Le fermer au nom de la rentabilité, c'est oublier qu'un service public ne se mesure pas seulement en dollars. Pourquoi ne pas le partager avec la bibliothèque ou la mairie ?",
+      "q": "Quelle concession le lecteur fait-il ?",
+      "o": [
+        "Il admet que ces bureaux coûtent cher et servent moins.",
+        "Il admet que les personnes âgées n'ont plus besoin de la poste.",
+        "Il admet que la bibliothèque du village pourrait fermer à la place.",
+        "Il admet que la rentabilité doit rester le seul critère."
+      ],
+      "why": "« Je reconnais que ces bureaux coûtent cher et que nous envoyons beaucoup moins de lettres »: he grants this point before arguing against closure."
+    },
+    {
+      "kind": "Vulgarisation",
+      "doc": "Il semble logique qu'en coupant le chauffage la nuit, on économise beaucoup d'énergie. C'est en partie vrai, mais l'économie dépend fortement de l'isolation. Dans une maison mal isolée, les murs se refroidissent vite, et il faut ensuite beaucoup d'énergie le matin pour les réchauffer. Les spécialistes conseillent donc de baisser la température de trois ou quatre degrés plutôt que de tout éteindre : on économise environ 10 % sans créer d'humidité ni d'inconfort au réveil.",
+      "q": "Pourquoi déconseille-t-on d'éteindre complètement le chauffage la nuit ?",
+      "o": [
+        "Il faut beaucoup d'énergie pour tout réchauffer le matin.",
+        "Cela ne permet de faire aucune économie d'énergie.",
+        "Cela abîme rapidement les appareils de chauffage.",
+        "Les maisons bien isolées se refroidissent trop vite la nuit."
+      ],
+      "why": "« il faut ensuite beaucoup d'énergie le matin pour les réchauffer ». The text says switching off is « en partie vrai », so some saving exists."
+    },
+    {
+      "kind": "Politique d'entreprise",
+      "doc": "Politique de télétravail\nLes employés peuvent travailler à distance jusqu'à deux jours par semaine, après leur période d'essai de trois mois. Les jours de télétravail sont choisis avec le gestionnaire et restent les mêmes pendant au moins un trimestre. L'employé doit être joignable de 9 h à 16 h. L'entreprise rembourse 30 $ par mois de frais d'Internet, sur présentation d'une facture. Le matériel informatique fourni reste la propriété de l'entreprise.",
+      "q": "Une employée embauchée il y a deux mois veut télétravailler le vendredi. Que lui répond-on ?",
+      "o": [
+        "Elle doit d'abord finir sa période d'essai.",
+        "C'est possible si son gestionnaire est d'accord.",
+        "C'est possible, mais sans remboursement d'Internet.",
+        "Elle doit choisir un autre jour que le vendredi."
+      ],
+      "why": "Remote work is allowed « après leur période d'essai de trois mois ». After two months, she is still on probation."
+    },
+    {
+      "kind": "Critique",
+      "doc": "Pour son deuxième long métrage, la réalisatrice suit une famille de pêcheurs gaspésiens pendant le dernier été avant la vente de leur bateau. Les images de la mer sont superbes et les acteurs, presque tous non professionnels, d'un naturel désarmant. On regrette pourtant que le scénario s'essouffle dans la seconde moitié : les conflits annoncés n'éclatent jamais vraiment, et le film se contente de répéter ce qu'il a déjà montré. Un beau film, donc, mais qui laisse sur sa faim.",
+      "q": "Quel est le jugement global du critique ?",
+      "o": [
+        "Il trouve le film beau mais un peu décevant.",
+        "Il trouve le film raté du début à la fin.",
+        "Il admire surtout la force du scénario.",
+        "Il reproche aux acteurs leur manque de naturel."
+      ],
+      "why": "« Un beau film, donc, mais qui laisse sur sa faim » = beautiful but leaves you wanting more. He criticises the script and praises the actors."
+    },
+    {
+      "kind": "Article",
+      "doc": "Il y a dix ans, la plupart des ménages faisaient leurs courses une fois par semaine, dans un grand supermarché en périphérie. Aujourd'hui, selon une étude, ils fréquentent en moyenne trois magasins différents et font des achats plus petits, plus souvent. La hausse des prix explique en partie ce changement : les consommateurs comparent davantage et profitent des promotions d'une enseigne à l'autre. Mais le télétravail joue aussi un rôle, puisqu'il permet de passer au commerce du quartier en milieu de journée.",
+      "q": "D'après l'étude, comment les habitudes ont-elles changé ?",
+      "o": [
+        "On fait de plus petites courses dans plusieurs magasins.",
+        "On achète surtout en ligne, sans sortir de chez soi.",
+        "On va une fois par semaine dans un grand supermarché.",
+        "On évite désormais les promotions des grandes enseignes."
+      ],
+      "why": "« trois magasins différents… des achats plus petits, plus souvent ». The weekly big shop was ten years ago."
+    },
+    {
+      "kind": "E-mail officiel",
+      "doc": "Objet : renouvellement de votre permis de travail\nMadame,\nNous avons bien reçu votre demande de renouvellement le 3 février. Vous pouvez continuer à travailler aux mêmes conditions jusqu'à ce qu'une décision soit prise, à condition de rester au Canada. Si vous quittez le pays pendant le traitement de votre demande, vous perdrez ce droit et devrez attendre la décision avant de reprendre le travail. Le délai de traitement est actuellement de 180 jours.",
+      "q": "Que se passe-t-il si la personne quitte le Canada pendant le traitement ?",
+      "o": [
+        "Elle ne pourra plus travailler avant la décision.",
+        "Sa demande de renouvellement sera automatiquement refusée.",
+        "Le délai de traitement sera prolongé.",
+        "Elle devra déposer une nouvelle demande."
+      ],
+      "why": "« vous perdrez ce droit et devrez attendre la décision avant de reprendre le travail ». Nothing says the application is refused."
+    },
+    {
+      "kind": "Entretien",
+      "doc": "— Qu'est-ce qui vous a le plus aidée à lancer votre entreprise ?\n— Paradoxalement, mon premier échec. Ma première boutique a fermé au bout d'un an : j'avais choisi un local trop cher et je n'avais pas assez étudié ma clientèle. Pour la deuxième, j'ai commencé par vendre en ligne et sur les marchés pendant deux ans, pour tester mes produits sans gros investissement. À ceux qui se lancent, je dirais : n'ayez pas peur d'échouer, mais faites en sorte que l'échec vous coûte le moins cher possible.",
+      "q": "Quel conseil donne-t-elle aux futurs entrepreneurs ?",
+      "o": [
+        "Limiter les risques en testant d'abord à petite échelle",
+        "Ouvrir tout de suite une boutique dans un bon quartier",
+        "Éviter à tout prix l'échec, qui coûte toujours trop cher",
+        "Vendre uniquement en ligne, jamais en boutique"
+      ],
+      "why": "« faites en sorte que l'échec vous coûte le moins cher possible », as she did by testing online and at markets first."
+    },
+    {
+      "kind": "Article",
+      "doc": "Une équipe de chercheurs a suivi pendant un an 2 000 adolescents pour mesurer l'effet des écrans sur leur sommeil. Leur conclusion est nuancée : ce n'est pas tant la durée totale d'écran qui pose problème que son usage dans l'heure qui précède le coucher. Les jeunes qui gardaient leur téléphone dans leur chambre dormaient en moyenne quarante minutes de moins. Les auteurs recommandent donc aux familles de fixer une heure à partir de laquelle les appareils sont rangés hors de la chambre, plutôt que d'imposer une limite quotidienne stricte.",
+      "q": "Que recommandent les chercheurs ?",
+      "o": [
+        "Ranger les appareils hors de la chambre le soir",
+        "Limiter le temps d'écran à une heure par jour",
+        "Interdire les téléphones aux adolescents",
+        "Coucher les adolescents quarante minutes plus tôt"
+      ],
+      "why": "« fixer une heure à partir de laquelle les appareils sont rangés hors de la chambre, plutôt que d'imposer une limite quotidienne »."
+    },
+    {
+      "kind": "Éditorial",
+      "doc": "La gratuité des transports en commun séduit de plus en plus de villes. L'argument est simple : si le bus ne coûte rien, les automobilistes laisseront leur voiture au garage. Les expériences menées jusqu'ici invitent pourtant à la prudence. Là où la gratuité a été instaurée, la fréquentation a certes augmenté, mais les nouveaux usagers sont souvent d'anciens piétons ou cyclistes, bien plus que des automobilistes convertis. Ce qui détourne vraiment de la voiture, c'est la fréquence et la fiabilité du service. Or, en se privant des recettes de la billetterie, une ville risque précisément de ne plus pouvoir financer ces améliorations. La gratuité, présentée comme une mesure écologique, pourrait ainsi se retourner contre son propre objectif.",
+      "q": "Pourquoi l'auteur juge-t-il la gratuité risquée ?",
+      "o": [
+        "Elle peut priver la ville des moyens d'améliorer le service.",
+        "Elle pousse les automobilistes à prendre davantage leur voiture.",
+        "Elle fait baisser la fréquentation des transports en commun.",
+        "Elle oblige les piétons et les cyclistes à payer davantage."
+      ],
+      "why": "Without ticket revenue, a city « risque… de ne plus pouvoir financer ces améliorations » (frequency, reliability). Ridership actually rises."
+    },
+    {
+      "kind": "Essai",
+      "doc": "On tient généralement pour acquis que plus de choix signifie plus de liberté. Devant un rayon de quarante sortes de confitures, pourtant, beaucoup de consommateurs repartent les mains vides, et ceux qui achètent se déclarent moins satisfaits que lorsqu'ils n'avaient que six possibilités. C'est que chaque option écartée devient un regret possible : plus l'éventail s'élargit, plus il est facile d'imaginer qu'on aurait pu mieux choisir. La liberté de choisir, poussée à l'extrême, finit par peser sur celui qu'elle était censée libérer.",
+      "q": "Quelle idée le texte développe-t-il ?",
+      "o": [
+        "Trop de possibilités peut rendre un choix moins satisfaisant.",
+        "Les consommateurs préfèrent toujours disposer de plus de choix.",
+        "Les magasins devraient proposer encore davantage de produits.",
+        "Le regret disparaît quand on dispose de nombreuses options."
+      ],
+      "why": "With forty jams, buyers are « moins satisfaits », because each option left aside « devient un regret possible »."
+    },
+    {
+      "kind": "Analyse",
+      "doc": "Les moteurs consomment aujourd'hui bien moins de carburant qu'il y a trente ans. On aurait pu s'attendre à une baisse nette de la consommation totale. Il n'en a rien été : les véhicules sont devenus plus lourds, plus nombreux, et l'on parcourt davantage de kilomètres. Les économistes appellent ce phénomène « effet rebond » : lorsqu'une technologie rend l'usage d'une ressource moins coûteux, on a tendance à en consommer davantage, ce qui annule tout ou partie du gain. Il ne s'agit pas de renoncer au progrès technique, mais de reconnaître qu'il ne suffit pas sans politiques qui encadrent la demande.",
+      "q": "Que conclut l'auteur ?",
+      "o": [
+        "Le progrès technique doit s'accompagner d'une action sur la demande.",
+        "Il faudrait renoncer aux moteurs qui consomment moins de carburant.",
+        "Chaque moteur consomme aujourd'hui plus qu'il y a trente ans.",
+        "La consommation totale de carburant a nettement baissé."
+      ],
+      "why": "« Il ne s'agit pas de renoncer au progrès technique… il ne suffit pas sans politiques qui encadrent la demande »."
+    },
+    {
+      "kind": "Texte juridique",
+      "doc": "Lors de la vente d'un immeuble, le vendeur est tenu à la garantie des vices cachés. Un vice est dit caché lorsqu'il existait au moment de la vente, qu'il n'était pas apparent pour un acheteur raisonnablement attentif et qu'il est assez grave pour rendre le bien impropre à son usage ou en diminuer fortement la valeur. Un défaut que l'acheteur aurait pu constater lors d'une visite normale, comme une fissure visible au plafond, n'est donc pas couvert. L'acheteur n'est toutefois pas obligé d'ouvrir les murs ou de faire des sondages pour bénéficier de la garantie.",
+      "q": "Dans quel cas la garantie ne s'applique-t-elle pas ?",
+      "o": [
+        "Le défaut était visible lors d'une visite ordinaire.",
+        "Le défaut existait déjà au moment où la vente a été conclue.",
+        "Le défaut fait fortement baisser la valeur du bien.",
+        "L'acheteur n'a pas fait de sondages dans les murs."
+      ],
+      "why": "A defect « que l'acheteur aurait pu constater lors d'une visite normale… n'est donc pas couvert ». The buyer does not have to open the walls."
+    },
+    {
+      "kind": "Chronique",
+      "doc": "Il existe dans toute entreprise une espèce particulière de réunion : celle qui rassemble douze personnes pour annoncer une information qu'un e-mail de trois lignes aurait suffi à transmettre. On y fait un tour de table, chacun précise qu'il n'a « rien de spécial à signaler », et l'on se quitte en convenant de se revoir la semaine suivante pour faire le point. Il serait injuste de prétendre que ces réunions ne servent à rien : elles permettent au moins de constater que tout le monde est très occupé.",
+      "q": "Quel est le ton de la dernière phrase ?",
+      "o": [
+        "Ironique : elle souligne l'inutilité de ces réunions.",
+        "Admiratif : elle salue l'efficacité des employés.",
+        "Neutre : elle décrit simplement le déroulement d'une réunion.",
+        "Indigné : elle accuse la direction de mentir."
+      ],
+      "why": "It pretends to defend the meetings, but their only « use » is to show that everyone is busy: irony."
+    },
+    {
+      "kind": "Tribune",
+      "doc": "On annonce régulièrement la mort des bibliothèques : à quoi bon emprunter des livres quand tout est en ligne ? Les chiffres de fréquentation disent pourtant l'inverse. Ce qui change, c'est la fonction de ces lieux. Les usagers y viennent moins pour les collections que pour ce qu'ils ne trouvent nulle part ailleurs : un espace chauffé, calme et gratuit, une aide pour remplir un formulaire en ligne, un atelier de conversation pour les nouveaux arrivants. La bibliothèque de demain sera moins un entrepôt de livres qu'un service public de proximité, à condition qu'on lui en donne les moyens.",
+      "q": "Selon l'auteur, comment le rôle des bibliothèques évolue-t-il ?",
+      "o": [
+        "Elles deviennent des lieux de services plus que de prêt.",
+        "Elles vont disparaître à cause des contenus en ligne.",
+        "Elles attirent beaucoup moins de visiteurs qu'il y a quelques années.",
+        "Elles se recentrent sur leurs collections de livres."
+      ],
+      "why": "« moins un entrepôt de livres qu'un service public de proximité ». The visitor numbers « disent… l'inverse » of their death."
+    },
+    {
+      "kind": "Essai",
+      "doc": "Jamais nous n'avons tant photographié, et jamais peut-être nous ne nous sommes si peu souvenus. Le geste qui devait préserver l'instant semble parfois nous en dispenser : confiant à l'appareil le soin de retenir, l'esprit relâche son attention. Des expériences l'ont montré : les visiteurs d'un musée invités à photographier les œuvres s'en souviennent moins bien que ceux qui se contentent de les regarder. Ce n'est pas l'image qui fait défaut, c'est le regard qu'elle prétendait servir. La mémoire, au fond, n'est pas un stock d'images ; c'est une manière d'être présent à ce qui a lieu.",
+      "q": "Selon l'auteur, pourquoi photographier peut-il nuire au souvenir ?",
+      "o": [
+        "On s'en remet à l'appareil et l'attention se relâche.",
+        "Les photos numériques se perdent plus facilement qu'avant.",
+        "Les musées interdisent de plus en plus les photographies.",
+        "Les photos sont trop nombreuses pour être toutes regardées."
+      ],
+      "why": "« confiant à l'appareil le soin de retenir, l'esprit relâche son attention »."
+    },
+    {
+      "kind": "Essai",
+      "doc": "On réduit volontiers la politesse à un ensemble de conventions désuètes, au mieux inutiles, au pire hypocrites : pourquoi remercier quand on n'éprouve aucune gratitude ? Ce reproche manque l'essentiel. La politesse ne prétend pas exprimer ce que l'on ressent ; elle ménage un espace où l'on peut coexister sans avoir à tout se dire. Elle est moins un mensonge qu'une retenue, une façon de reconnaître autrui avant même de savoir ce qu'on pense de lui. À ce titre, elle n'est pas le contraire de la sincérité, mais ce qui la rend supportable.",
+      "q": "Quelle thèse l'auteur soutient-il ?",
+      "o": [
+        "La politesse permet de vivre ensemble sans tout se dire.",
+        "La politesse est une hypocrisie qu'il faudrait abandonner.",
+        "La politesse doit toujours exprimer des sentiments sincères.",
+        "La politesse est une convention dépassée mais inoffensive."
+      ],
+      "why": "« elle ménage un espace où l'on peut coexister sans avoir à tout se dire ». The hypocrisy charge is the view he rejects."
+    },
+    {
+      "kind": "Article de fond",
+      "doc": "Pour expliquer la baisse des naissances dans les pays riches, on invoque souvent le coût de la vie : logement, garde d'enfants, études. L'hypothèse est séduisante, et sans doute en partie juste. Elle peine toutefois à rendre compte d'un fait gênant : la natalité recule aussi dans des pays qui ont multiplié les aides aux familles, et parfois chez les ménages les plus aisés. Sans écarter le facteur économique, il faut donc admettre qu'une transformation plus profonde est à l'œuvre : l'enfant n'est plus une évidence, mais un projet parmi d'autres, que l'on reporte, que l'on pèse, et auquel on renonce parfois sans drame.",
+      "q": "Quelle est la position de l'auteur sur l'explication économique ?",
+      "o": [
+        "Il la juge en partie juste mais insuffisante.",
+        "Il la rejette entièrement comme fausse.",
+        "Il la considère comme la seule explication valable.",
+        "Il pense qu'elle s'applique surtout aux ménages aisés."
+      ],
+      "why": "« sans doute en partie juste », but it « peine… à rendre compte » of all the facts; « Sans écarter le facteur économique » he adds a deeper cause."
+    },
+    {
+      "kind": "Extrait de roman",
+      "doc": "Le notaire avait lu le testament d'une voix égale, sans lever les yeux, comme on récite une leçon apprise. Autour de la table, chacun faisait mine de ne pas compter. Seule Hélène regardait la fenêtre, où la pluie dessinait des chemins qui ne menaient nulle part. La maison lui revenait. Elle aurait dû s'en réjouir ; elle ne ressentait qu'une sorte de fatigue, celle d'avoir désormais à porter, en plus des murs, tous les silences qu'ils avaient abrités.",
+      "q": "Que ressent Hélène en apprenant qu'elle hérite de la maison ?",
+      "o": [
+        "Un poids, lié à tout ce que la maison a gardé de non-dit",
+        "Une grande joie qu'elle cache au reste de sa famille",
+        "De la colère contre le notaire et sa voix froide",
+        "De la jalousie envers les autres membres de la famille réunis"
+      ],
+      "why": "« Elle aurait dû s'en réjouir ; elle ne ressentait qu'une sorte de fatigue… porter… tous les silences »."
+    }
+  ]
+}
