@@ -2,7 +2,7 @@
 // Pages and app files: always fetched fresh when online (so updates show at once); the saved copy is
 // used only when there is no connection. The libraries from the CDNs are reused from the cache and
 // refreshed in the background. Sign-in, the database and the AI are never cached.
-const CACHE = 'fs-v3';
+const CACHE = 'fs-v4';
 const CORE = ['./', './index.html', './login.html', './config.js', './css/app.css', './js/ai.js', './manifest.json', './icons/icon-192.png'];
 
 self.addEventListener('install', (e) => {
