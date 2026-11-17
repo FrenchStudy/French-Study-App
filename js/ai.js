@@ -62,6 +62,60 @@ async function askGroqDirect(messages, options) {
     return (data.choices?.[0]?.message?.content || '').trim();
 }
 
+// Speech to text: the AI recognises French or English by itself (nothing to choose).
+// transcribeAudio(blob) -> { text, language: 'fr' | 'en' | another language code | '' }
+async function transcribeAudio(blob) {
+    const base64 = await new Promise((ok, no) => {
+        const r = new FileReader();
+        r.onload = () => ok(String(r.result).split(',')[1] || '');
+        r.onerror = () => no(new Error('The recording could not be read.'));
+        r.readAsDataURL(blob);
+    });
+    const server = await AIServer.request({ transcribe: true, audio: base64, mime: blob.type || 'audio/webm' });
+    let data;
+    if (server.notDeployed) data = await transcribeGroqDirect(blob);
+    else if (server.ok) data = server.data;
+    else {
+        const code = server.data && server.data.code, text = (server.data && server.data.error) || '';
+        const shown = ['signin', 'busy'].includes(code) || server.status === 413;
+        // An older AI function answers a recording with this message: it has not been updated yet
+        const oldFunction = server.status === 400 && /Nothing to send/.test(text);
+        const err = new Error(oldFunction ? 'Voice recognition is not switched on yet. Please type for now.'
+            : shown ? text : 'Could not recognise your voice just now. Try again, or type instead.');
+        err.code = code;
+        throw err;
+    }
+    const names = { french: 'fr', english: 'en' };
+    const language = String(data.language || '').toLowerCase();
+    return { text: String(data.text || '').trim(), language: names[language] || language };
+}
+
+// Before the Edge Function is deployed: Whisper on Groq with the key from the Admin page
+async function transcribeGroqDirect(blob) {
+    const apiKey = CONFIG.getApiKey();
+    if (!apiKey) throw new Error('AI is not set up yet: the AI function is not deployed and there is no key on the Admin page.');
+    const form = new FormData();
+    form.append('file', blob, 'speech.' + (/mp4/.test(blob.type) ? 'm4a' : /ogg/.test(blob.type) ? 'ogg' : 'webm'));
+    form.append('model', 'whisper-large-v3-turbo');
+    form.append('response_format', 'verbose_json');
+    form.append('temperature', '0');
+    form.append('prompt', 'Bonjour, comment ça va ? Hello, how are you?');
+    let response;
+    try {
+        response = await (AIServer._fetch || fetch)(CONFIG.getApiUrl().replace('/chat/completions', '/audio/transcriptions'), {
+            method: 'POST', headers: { 'Authorization': `Bearer ${apiKey}` }, body: form
+        });
+    } catch (err) {
+        throw new Error('Could not reach the AI service. Check your connection and try again.');
+    }
+    if (response.status === 429) throw new Error('The AI is busy right now. Please wait a minute and try again.');
+    if (!response.ok) throw new Error(`The speech service returned an error (${response.status}).`);
+    const data = await response.json();
+    const segments = Array.isArray(data.segments) ? data.segments : [];
+    const silent = segments.length > 0 && segments.every(x => Number(x.no_speech_prob) > 0.6);
+    return { text: silent ? '' : data.text, language: data.language };
+}
+
 // Escape text before putting it into HTML.
 function escapeHtml(value) {
     return String(value ?? '')

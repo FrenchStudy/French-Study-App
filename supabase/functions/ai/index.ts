@@ -12,6 +12,7 @@
 //   DAILY_LIMIT     activities a premium account can start per day         (default 100)
 //   SESSION_LIMIT   AI requests inside one activity                        (default 40)
 //   GROQ_MODEL      model name                                             (default openai/gpt-oss-120b)
+//   GROQ_STT_MODEL  speech-to-text model (Speak button)                    (default whisper-large-v3-turbo)
 // Admins (profiles.role = 'admin') have no limits. Premium = profiles.is_premium.
 //
 // Written without TypeScript-only syntax so the same rules can be tested with Node.
@@ -30,13 +31,15 @@ export function settings(env) {
         sessionLimit: num('SESSION_LIMIT', 40),
         model: env('GROQ_MODEL') || 'openai/gpt-oss-120b',
         groqUrl: env('GROQ_URL') || 'https://api.groq.com/openai/v1/chat/completions',
+        sttModel: env('GROQ_STT_MODEL') || 'whisper-large-v3-turbo',
+        sttUrl: env('GROQ_STT_URL') || 'https://api.groq.com/openai/v1/audio/transcriptions',
         groqKey: env('GROQ_API_KEY') || ''
     };
 }
 
 const reply = (status, body) => new Response(JSON.stringify(body), { status, headers: { ...CORS, 'Content-Type': 'application/json' } });
 
-// deps: { env(name), userFromToken(token), store: { profile, used, usedToday, session, start, bump }, groq(body) }
+// deps: { env(name), userFromToken(token), store: { profile, used, usedToday, session, start, bump }, groq(body), transcribe(cfg, { audio, mime }) }
 export async function handle(req, deps) {
     if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS });
     if (req.method !== 'POST') return reply(405, { error: 'Use POST.' });
@@ -48,6 +51,23 @@ export async function handle(req, deps) {
 
     let body;
     try { body = await req.json(); } catch (e) { return reply(400, { error: 'The request could not be read.' }); }
+
+    // Speech to text (the Speak button): the AI recognises French or English by itself.
+    // Needs a sign-in but does not count as one of the free uses; the translation that follows does.
+    if (body.transcribe) {
+        if (!cfg.groqKey) return reply(500, { error: 'The AI key is not set on the server yet (GROQ_API_KEY).', code: 'setup' });
+        const audio = typeof body.audio === 'string' ? body.audio : '';
+        if (!audio) return reply(400, { error: 'No recording was sent.' });
+        if (audio.length > 4000000) return reply(413, { error: 'That recording is too long. Keep it under 30 seconds.' });
+        let res;
+        try { res = await deps.transcribe(cfg, { audio, mime: String(body.mime || 'audio/webm').slice(0, 60) }); }
+        catch (e) { return reply(502, { error: 'Could not reach the speech service.' }); }
+        if (!res.ok) return reply(res.status === 429 ? 429 : 502, { error: 'The speech service could not answer just now.', code: res.status === 429 ? 'busy' : undefined });
+        const data = await res.json();
+        const segments = Array.isArray(data.segments) ? data.segments : [];
+        const silent = segments.length > 0 && segments.every(x => Number(x.no_speech_prob) > 0.6);
+        return reply(200, { text: silent ? '' : String(data.text || '').trim(), language: String(data.language || '').toLowerCase() });
+    }
 
     const profile = (await deps.store.profile(user.id)) || {};
     const admin = profile.role === 'admin';
@@ -153,7 +173,18 @@ if (typeof Deno !== 'undefined') {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${cfg.groqKey}` },
             body: JSON.stringify(body)
-        })
+        }),
+        transcribe: (cfg, { audio, mime }) => {
+            const bytes = Uint8Array.from(atob(audio), c => c.charCodeAt(0));
+            const ext = /mp4|aac/.test(mime) ? 'm4a' : /ogg/.test(mime) ? 'ogg' : /wav/.test(mime) ? 'wav' : 'webm';
+            const form = new FormData();
+            form.append('file', new Blob([bytes], { type: mime }), 'speech.' + ext);
+            form.append('model', cfg.sttModel);
+            form.append('response_format', 'verbose_json');
+            form.append('temperature', '0');
+            form.append('prompt', 'Bonjour, comment ça va ? Hello, how are you?');
+            return fetch(cfg.sttUrl, { method: 'POST', headers: { 'Authorization': `Bearer ${cfg.groqKey}` }, body: form });
+        }
     };
     Deno.serve((req) => handle(req, deps));
 }

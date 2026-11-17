@@ -48,20 +48,19 @@
                         <span id="q-dir" class="inline-flex items-center gap-1.5 min-h-[36px] px-3 text-sm font-bold text-indigo-700 bg-indigo-50 rounded-full" title="The language is detected for you: French becomes English, anything else becomes French"><span id="q-from">English</span><span aria-hidden="true">⇄</span><span id="q-to">French</span></span>
                     </div>
                     <label for="q-source" class="sr-only">Text to translate</label>
-                    <textarea id="q-source" rows="3" maxlength="1000" spellcheck="false" autocapitalize="sentences" class="block w-full px-4 py-2 text-lg leading-relaxed text-slate-900 resize-y focus:outline-none" style="padding-right:3.25rem" placeholder="Type or speak in English or in French…"></textarea>
-                    <div style="position:relative;height:0">
-                        <button type="button" id="q-say-src" class="w-9 h-9 rounded-full hover:bg-slate-100 text-lg" style="position:absolute;right:0.75rem;top:-3.9rem" aria-label="Listen to the text above" title="Listen to the text above">🔊</button>
+                    <div class="flex items-start gap-2" style="padding-right:.75rem">
+                        <textarea id="q-source" rows="3" maxlength="1000" spellcheck="false" autocapitalize="sentences" class="block flex-1 min-w-0 px-4 py-2 text-lg leading-relaxed text-slate-900 resize-y focus:outline-none" placeholder="Type or speak in English or in French…"></textarea>
+                        <button type="button" id="q-say-src" class="hover:bg-slate-50" style="display:inline-flex;align-items:center;gap:.25rem;white-space:nowrap;min-height:28px;padding:0 .75rem;font-size:.75rem;font-weight:600;color:#475569;background:#fff;border:1px solid #e2e8f0;border-radius:9999px;margin-top:.5rem" aria-label="Listen to the text you wrote" title="Listen to the text you wrote">🔊 <span>Listen · French</span></button>
                     </div>
                     <div id="q-result" class="hidden px-4 pb-3">
                         <div class="flex items-start gap-2 bg-slate-50 border border-slate-100 rounded-xl px-3 py-2">
                             <p id="q-output" class="flex-1 min-w-0 text-lg leading-relaxed text-slate-900"></p>
-                            <button type="button" id="q-say" class="shrink-0 w-9 h-9 rounded-full hover:bg-slate-100 text-lg" aria-label="Listen">🔊</button>
+                            <button type="button" id="q-say" class="shrink-0 hover:bg-slate-50" style="display:inline-flex;align-items:center;gap:.25rem;white-space:nowrap;min-height:28px;padding:0 .75rem;font-size:.75rem;font-weight:600;color:#475569;background:#fff;border:1px solid #e2e8f0;border-radius:9999px" aria-label="Listen to the translation">🔊 <span>Listen · English</span></button>
                         </div>
                         <p id="q-error" class="hidden text-sm text-rose-600 mt-1"></p>
                     </div>
                     <div class="flex items-center gap-2 px-3 py-2 border-t border-slate-100">
-                        <button type="button" id="q-mic-en" data-lang="en" class="inline-flex items-center gap-1 min-h-[36px] px-3 text-sm font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-full">🎙️ Speak English</button>
-                        <button type="button" id="q-mic-fr" data-lang="fr" class="inline-flex items-center gap-1 min-h-[36px] px-3 text-sm font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-full">🎙️ Speak French</button>
+                        <button type="button" id="q-mic" class="inline-flex items-center gap-1 min-h-[36px] px-3 text-sm font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-full">🎙️ Speak</button>
                         <a id="q-more" href="translator.html" class="text-sm font-semibold text-indigo-600 hover:underline px-1">Notes and tutor →</a>
                         <button type="button" id="q-go" class="ml-auto inline-flex items-center min-h-[36px] px-4 text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 rounded-full">Translate</button>
                     </div>
@@ -251,8 +250,7 @@
         }
 
         // ---------- Translate (French → English or English → French, detected automatically) ----------
-        // QT.mic is only the language the microphone listens for: a browser cannot detect speech language by itself.
-        const QT = { mic: LocalStore.get('translator_from', 'en') === 'fr' ? 'fr' : 'en', last: null, busy: false,
+                const QT = { last: null, busy: false,
             session: 'home-translate-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6) };
         function qtMore() {
             const q = $('q-source').value.trim();
@@ -267,13 +265,19 @@
             $('q-error').classList.toggle('hidden', !error);
         }
         // Shows the detected direction once there is a translation; before that, both languages
+        // The two speakers say which language they play
+        function qtListenLabels() {
+            const text = $('q-source').value.trim(), src = text ? qtGuess(text) : 'fr';
+            $('q-say-src').lastElementChild.textContent = 'Listen · ' + (src === 'fr' ? 'French' : 'English');
+            $('q-say').lastElementChild.textContent = 'Listen · ' + (QT.last && QT.last.from === 'fr' ? 'English' : 'French');
+        }
         function qtDirection() {
             const fr = QT.last && QT.last.from === 'fr';
             $('q-from').textContent = !QT.last ? 'English' : fr ? 'French' : 'English';
             $('q-to').textContent = !QT.last ? 'French' : fr ? 'English' : 'French';
             $('q-dir').lastElementChild.previousElementSibling.textContent = QT.last ? '→' : '⇄';
             $('q-output').lang = !QT.last ? 'fr' : fr ? 'en' : 'fr';
-            qtMore();
+            qtMore(); qtListenLabels();
         }
         $('q-source').addEventListener('input', () => { QT.last = null; qtShow(''); qtDirection(); });
         $('q-source').addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); qtTranslate(); } });
@@ -323,34 +327,56 @@ Give 2 to 6 notes about the most useful French words or grammar points. The text
             const FR = new Set(['le','la','les','un','une','des','du','de','je','tu','il','elle','nous','vous','ils','est','et','que','qui','pas','pour','dans','avec','sur','ce','cette','ne','au','aux','mon','ma','mes','suis','bonjour','merci']);
             const EN = new Set(['the','is','are','and','to','of','a','i','you','it','he','she','we','they','in','on','with','for','that','this','not','my','your','was','be','have','hello','thanks']);
             let f = 0, e = 0; w.forEach(x => { if (FR.has(x)) f++; if (EN.has(x)) e++; });
-            return f > e ? 'fr' : f < e ? 'en' : QT.mic;
+            return f > e ? 'fr' : 'en';   // a tie with no accent is far more likely to be English
         }
         $('q-say').addEventListener('click', () => { if (QT.last) qtPlay(QT.last.translation, QT.last.from === 'en' ? 'fr' : 'en'); });
         $('q-say-src').addEventListener('click', () => { const t = $('q-source').value.trim(); qtPlay(t, qtGuess(t)); });
-        // Speak instead of typing: the words replace the box and are translated straight away.
-        // Two buttons because a browser cannot detect the spoken language by itself.
+        // Speak instead of typing: one button, the AI recognises French or English by itself.
+        // Records until you pause (or tap again), then the words replace the box and are translated.
         (() => {
-            const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-            const BTN = { en: $('q-mic-en'), fr: $('q-mic-fr') }, LABEL = { en: '🎙️ Speak English', fr: '🎙️ Speak French' };
-            let rec = null, active = null;
-            if (!SR) { BTN.en.classList.add('hidden'); BTN.fr.classList.add('hidden'); return; }
-            const reset = () => { for (const k in BTN) { BTN[k].textContent = LABEL[k]; BTN[k].classList.remove('bg-rose-500', 'text-white', 'opacity-50'); BTN[k].disabled = false; } };
-            for (const lang in BTN) BTN[lang].addEventListener('click', () => {
-                if (rec) { rec.stop(); return; }
-                QT.mic = lang; LocalStore.set('translator_from', lang);
-                rec = new SR(); rec.lang = lang === 'fr' ? 'fr-FR' : 'en-GB'; rec.interimResults = false;
-                let heard = '';
-                rec.onresult = (e) => { heard = (heard + ' ' + e.results[0][0].transcript).trim(); };
-                rec.onerror = (e) => { if (e.error === 'not-allowed') qtShow('', 'The microphone is blocked. Allow it in your browser settings, or type instead.'); };
-                rec.onend = () => {
-                    rec = null; reset();
-                    if (heard) { $('q-source').value = heard; QT.last = null; qtDirection(); qtTranslate(); }
+            const btn = $('q-mic');
+            if (!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia && window.MediaRecorder)) { btn.classList.add('hidden'); return; }
+            let recorder = null;
+            const ready = () => { btn.textContent = '🎙️ Speak'; btn.classList.remove('bg-rose-500', 'text-white'); btn.disabled = false; };
+            const miss = "Didn't catch anything. Tap Speak and try again.";
+            btn.addEventListener('click', async () => {
+                if (recorder) { if (recorder.state !== 'inactive') recorder.stop(); return; }
+                qtShow('');
+                let stream;
+                try { stream = await navigator.mediaDevices.getUserMedia({ audio: true }); }
+                catch (e) { qtShow('', 'The microphone is blocked. Allow it in your browser settings, or type instead.'); return; }
+                const type = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4', 'audio/ogg;codecs=opus'].find(t => MediaRecorder.isTypeSupported(t));
+                const chunks = [], AC = window.AudioContext || window.webkitAudioContext, t0 = Date.now();
+                let ctx = null, tick = null, spoke = !AC, lastLoud = 0;
+                recorder = new MediaRecorder(stream, type ? { mimeType: type } : undefined);
+                const stop = () => { if (recorder && recorder.state !== 'inactive') recorder.stop(); };
+                recorder.ondataavailable = (e) => { if (e.data && e.data.size) chunks.push(e.data); };
+                recorder.onstop = async () => {
+                    clearInterval(tick); stream.getTracks().forEach(t => t.stop()); if (ctx) ctx.close().catch(() => {});
+                    const mime = recorder.mimeType; recorder = null;
+                    if (!spoke || !chunks.length) { ready(); qtShow('', miss); return; }
+                    btn.textContent = 'Recognising…'; btn.disabled = true; btn.classList.remove('bg-rose-500', 'text-white');
+                    try {
+                        const heard = await transcribeAudio(new Blob(chunks, { type: mime }));
+                        if (!heard.text) { qtShow('', miss); }
+                        else { $('q-source').value = heard.text; QT.last = null; qtDirection(); ready(); await qtTranslate(); }
+                    } catch (err) { qtShow('', err.code === 'signin' ? 'Please sign in to use the Translator.' : err.message); }
+                    ready();
                 };
-                try {
-                    rec.start(); reset();
-                    BTN[lang].textContent = '⏹ Stop'; BTN[lang].classList.add('bg-rose-500', 'text-white');
-                    const other = BTN[lang === 'fr' ? 'en' : 'fr']; other.disabled = true; other.classList.add('opacity-50');
-                } catch (e) { rec = null; }
+                if (AC) {   // stop by itself: 1.5 s of quiet after you spoke, 8 s if you never spoke, 30 s at most
+                    ctx = new AC(); const an = ctx.createAnalyser(); an.fftSize = 1024;
+                    ctx.createMediaStreamSource(stream).connect(an);
+                    const buf = new Uint8Array(an.fftSize);
+                    tick = setInterval(() => {
+                        an.getByteTimeDomainData(buf);
+                        let peak = 0; for (const v of buf) peak = Math.max(peak, Math.abs(v - 128));
+                        const now = Date.now();
+                        if (peak > 14) { spoke = true; lastLoud = now; }
+                        if ((spoke && now - lastLoud > 1500) || (!spoke && now - t0 > 8000) || now - t0 > 30000) stop();
+                    }, 100);
+                } else setTimeout(stop, 15000);
+                recorder.start();
+                btn.textContent = '⏹ Stop'; btn.classList.add('bg-rose-500', 'text-white');
             });
         })();
         qtDirection();
