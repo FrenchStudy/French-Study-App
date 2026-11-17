@@ -28,6 +28,7 @@ Optional secrets (only if you want to change the defaults):
 | `DAILY_LIMIT` | `100` | AI activities a premium account can start per day |
 | `SESSION_LIMIT` | `40` | AI requests inside one activity (e.g. messages in one conversation) |
 | `GROQ_MODEL` | `openai/gpt-oss-120b` | The Groq model |
+| `GROQ_STT_MODEL` | `whisper-large-v3-turbo` | The Groq speech-to-text model (the Speak button on Home) |
 
 ## 3. Deploy the function (2 minutes)
 
@@ -63,3 +64,11 @@ The payment step (Stripe) will later set `is_premium` automatically.
 
 **Table Editor → ai_usage**: one row per activity, with the student, the feature
 (`writing-check`, `speaking-chat`, …), the number of AI requests and the date.
+
+## Updating the function later (the Speak button)
+
+The Speak button on the Home page records your voice and the AI recognises French or English by itself.
+It needs the **updated** `index.ts`: Supabase → **Edge Functions** → `ai` → **Code**, paste the whole of
+`supabase/functions/ai/index.ts` again, and **Deploy**. No new secret is needed (it uses `GROQ_API_KEY`).
+Until then Speak says that voice recognition is not switched on yet, and typing keeps working.
+Recognising a voice does not use up one of the free AI uses; the translation that follows does.
