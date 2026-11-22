@@ -1743,7 +1743,7 @@
                 const on = lv === level && !words.length;
                 return `<button type="button" role="tab" aria-selected="${on}" data-level="${lv}" class="shrink-0 px-3.5 py-1.5 rounded-lg text-sm font-bold transition ${on ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-800'}">
                     ${levelLabel(lv)}<span class="ml-1.5 text-xs font-semibold ${on ? lvStyle(lv)[0] : 'text-slate-400'}">${n}/${list.length}${lv === 'TOP' ? ' sets' : ''}</span></button>`;
-            }).join('') + `<button type="button" role="tab" aria-selected="${level === 'EAR' && !words.length}" data-level="EAR" class="shrink-0 px-3.5 py-1.5 rounded-lg text-sm font-bold transition ${level === 'EAR' && !words.length ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-800'}">🎧 Words by ear<span class="ml-1.5 text-xs font-semibold text-slate-400">2,007</span></button>`;
+            }).join('') + `<button type="button" role="tab" aria-selected="${level === 'EAR' && !words.length}" data-level="EAR" style="white-space:nowrap" class="shrink-0 px-3.5 py-1.5 rounded-lg text-sm font-bold transition ${level === 'EAR' && !words.length ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-800'}">🎧 Words by ear<span class="ml-1.5 text-xs font-semibold text-slate-400">2,007</span></button>`;
             const ear = level === 'EAR' && !words.length;
             $('ear-words').classList.toggle('hidden', !ear); $('topic-grid').classList.toggle('hidden', ear); $('topic-tools').classList.toggle('hidden', ear);
             if (ear) { mountEarWords(); return; }
