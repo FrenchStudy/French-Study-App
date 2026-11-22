@@ -17,17 +17,43 @@ const END = 'text-emerald-700 font-bold', HELP = 'text-violet-700 font-bold', ST
 const ER_KINDS = ['er', 'e_è', 'é_è', 'll', 'tt', 'yer', 'envoyer'];
 const BASIC = ['être', 'avoir', 'aller', 'venir'];   // the verbs the tenses are built from
 
-// The tenses, in the order of the tense sheet; « from » says what each one is built from
-// Three tables: the present; the past and the conditional; the future and the subjonctif (each simple tense next to its
-// compound partner)
+// The tenses, in the order of the tense notes; « from » says what each one is built from
+// Two tables: the everyday tenses (the present and the tenses built on être, venir, aller and avoir), then the tenses built
+// from the basic forms (each simple tense next to its compound partner)
 const HALVES = [
-    [['pres', 'Présent', ''], ['imp', 'Impératif', 'present, no subject'], ['prog', 'Présent progressif', 'être + en train de + infinitive'],
-     ['fp', 'Futur proche', 'aller + infinitive'], ['recent', 'Passé récent', 'venir + de + infinitive']],
-    [['pc', 'Passé composé', 'ai / suis + PP'], ['impf', 'Imparfait', 'nous form − ons + ais'], ['pqp', 'Plus-que-parfait', 'avais / étais + PP'],
-     ['cond', 'Conditionnel', 'futur stem + ais'], ['cp', 'Conditionnel passé', 'aurais / serais + PP']],
-    [['fut', 'Futur simple', 'infinitive + ai'], ['fa', 'Futur antérieur', 'aurai / serai + PP'], ['subj', 'Subjonctif', 'que + ils form − ent + e'],
-     ['sp', 'Subjonctif passé', 'que + aie / sois + PP']]
+    [['pres', 'Présent', 'stem + ending'], ['prog', 'Présent progressif', 'être + en train de + infinitive'], ['recent', 'Passé récent', 'venir + de + infinitive'],
+     ['fp', 'Futur proche', 'aller + infinitive'], ['imp', 'Impératif', 'present, no subject'], ['pc', 'Passé composé', 'ai / suis + PP']],
+    [['impf', 'Imparfait', 'nous form − ons + ais'], ['pqp', 'Plus-que-parfait', 'avais / étais + PP'], ['cond', 'Conditionnel', 'futur stem + ais'],
+     ['cp', 'Conditionnel passé', 'aurais / serais + PP'], ['fut', 'Futur simple', 'infinitive + ai'], ['fa', 'Futur antérieur', 'aurai / serai + PP'],
+     ['subj', 'Subjonctif', 'que + ils form − ent + e'], ['sp', 'Subjonctif passé', 'que + aie / sois + PP']]
 ];
+const HALF_TITLES = ['Everyday tenses', 'Built from the basic forms'];
+
+// « built from » for this verb: the stem each tense really uses (nous finissons → finiss-, viennent → vienn-, future stem ir-)
+function builtFrom(v, key) {
+    const aux = v.aux === 'être' || v.refl ? 'être' : 'avoir';
+    const AUXT = { pc: 'présent', pqp: 'imparfait', cp: 'conditionnel', fa: 'futur', sp: 'subjonctif' };
+    if (AUXT[key]) return `${aux} (${AUXT[key]}) + ${v.pp}`;
+    const P = v.pres || [], nous = P[3] || '', ils = P[5] || '';
+    const nst = /ons$/.test(nous) ? nous.slice(0, -3) : '', ist = /ent$/.test(ils) ? ils.slice(0, -3) : '';
+    const fexp = /re$/.test(v.inf) ? v.inf.slice(0, -1) : v.inf;
+    const bare = (x) => String(x || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/y/g, 'i').replace(/([a-z])\1/g, '$1');
+    switch (key) {
+        case 'pres': return groupShort(v) === 'irregular' ? 'irregular: learn it' : groupShort(v) === 'basic form' ? 'a basic form' : groupShort(v);
+        case 'prog': return 'être + en train de';
+        case 'recent': return 'venir de';
+        case 'fp': return 'aller';
+        case 'imp': { const tu = (v.imp || [])[0]; return !tu ? 'no impératif' : tu === P[1] ? 'présent tu / nous / vous' : tu + 's' === P[1] ? 'présent, tu drops the -s' : 'irregular'; }
+        case 'impf': { const s = v.impf || ''; return nst && (s === nst || s.replace(/e$/, '') === nst.replace(/e$/, '')) ? `nous ${nous} − ons → ${s}-` : `${s}- (irregular)`; }
+        case 'fut': case 'cond': { const f = v.fut || ''; return f === fexp ? `future stem ${f}-` : bare(f) === bare(fexp) ? `future stem ${f}- (spelling change)` : `future stem ${f}- (irregular)`; }
+        case 'subj': {
+            const sj = v.sj || [], s0 = (sj[0] || '').replace(/e$/, ''), s3 = (sj[3] || '').replace(/ions$/, '');
+            if (ist && s0 === ist) return `ils ${ils} − ent → ${ist}-` + (s3 && s3 !== ist ? ` · nous / vous: ${s3}-` : '');
+            return `irregular: ${sj[0] || ''}${s3 && s3 !== s0 ? ' / ' + sj[3] : ''}`;
+        }
+    }
+    return '';
+}
 
 // A fourth table: the forms that do not change with the person
 const OTHER = [['ppr', 'Participe présent', 'nous form − ons + ant'], ['ger', 'Gérondif', 'en + participe présent'],
@@ -141,10 +167,10 @@ function renderOther(v) {
     if (S.wide) {
         return `<div style="width:84%"><table class="w-full text-sm" style="table-layout:fixed">
             <thead><tr><th class="w-16"></th>${OTHER.map(([k, name, from]) => `<th class="text-left align-top py-1.5 px-2 border-b border-slate-200 text-slate-900">${esc(name)}<span class="block font-normal text-xs text-slate-500 leading-snug">${esc(from)}</span></th>`).join('')}</tr></thead>
-            <tbody><tr><td class="py-1.5 px-2 border-b border-slate-100 text-slate-500"></td>${OTHER.map(([k]) => `<td class="align-top py-1.5 px-2 border-b border-slate-100 text-slate-800">${cellOf(k)}</td>`).join('')}</tr>
+            <tbody><tr><td class="py-1.5 px-2 border-b border-slate-100 text-slate-500"></td>${OTHER.map(([k]) => `<td class="align-top py-1.5 px-2 border-b border-slate-100 text-slate-800"${k === 'ppr' || k === 'ger' ? ` style="background:${NOUS}"` : ''}>${cellOf(k)}</td>`).join('')}</tr>
             <tr><td class="py-1.5 px-2 text-xs text-slate-400 align-top">means</td>${OTHER.map(([k]) => `<td class="align-top py-1.5 px-2 text-xs text-slate-500 italic">${esc(C.english(v, k))}</td>`).join('')}</tr></tbody></table></div>`;
     }
-    return `<div class="grid grid-cols-2 gap-2">${OTHER.map(([k, name, from]) => `<div class="bg-white border border-slate-200 rounded-xl p-3">
+    return `<div class="grid grid-cols-2 gap-2">${OTHER.map(([k, name, from]) => `<div class="bg-white border border-slate-200 rounded-xl p-3"${k === 'ppr' || k === 'ger' ? ` style="background:${NOUS}"` : ''}>
         <div class="text-sm font-bold text-slate-900">${esc(name)}</div><div class="text-xs text-slate-500">${esc(from)}</div>
         <div class="text-base text-slate-800 mt-1">${cellOf(k)}</div><div class="text-xs text-slate-500 italic">${esc(C.english(v, k))}</div></div>`).join('')}</div>`;
 }
@@ -228,6 +254,19 @@ function renderBasic(v) {
         ${basicTable(helpers, null)}`;
 }
 
+// ---------- The two stems: the nous form (blue) and the ils form (pink), and the forms built from them ----------
+// nous form − ons → the imparfait, and nous / vous in the subjonctif; ils form − ent → je, tu, il, ils in the subjonctif
+const NOUS_SRC = '#bae6fd', NOUS = '#e0f2fe', ILS_SRC = '#fbcfe8', ILS = '#fce7f3';
+function stemBg(k, i) {
+    if (k === 'pres' && i === 3) return NOUS_SRC;
+    if (k === 'pres' && i === 5) return ILS_SRC;
+    if (k === 'impf') return NOUS;
+    if (k === 'subj') return i === 3 || i === 4 ? NOUS : ILS;
+    return '';
+}
+const stemStyle = (k, i) => { const c = stemBg(k, i); return c ? ` style="background:${c}${c === NOUS_SRC || c === ILS_SRC ? ';box-shadow:inset 0 -2px 0 ' + (c === NOUS_SRC ? '#0284c7' : '#db2777') : ''}"` : ''; };
+const STEM_KEY = `<span style="background:${NOUS_SRC};padding:0 4px;border-radius:4px">nous</span> → imparfait, subjonctif nous / vous, participe présent · <span style="background:${ILS_SRC};padding:0 4px;border-radius:4px">ils</span> → subjonctif je, tu, il, ils`;
+
 // ---------- The verb in every tense ----------
 function cellHtml(v, key, i) {
     const c = cell(v, key, i);
@@ -239,14 +278,16 @@ function renderHalf(v, tenses) {
     if (S.wide) {
         return `<table class="w-full text-sm" style="table-layout:fixed">
             <thead><tr><th class="w-16"></th>${tenses.map(([k, name, from]) => `<th class="text-left align-top py-1.5 px-2 border-b border-slate-200 text-slate-900">${esc(name)}${from ? `<span class="block font-normal text-xs text-slate-500 leading-snug">${esc(from)}</span>` : ''}</th>`).join('')}</tr></thead>
-            <tbody>${PERSONS.map((p, i) => `<tr><td class="py-1.5 px-2 border-b border-slate-100 text-slate-500 align-top">${p}</td>${tenses.map(([k]) => `<td class="align-top py-1.5 px-2 border-b border-slate-100 text-slate-800">${cellHtml(v, k, i)}</td>`).join('')}</tr>`).join('')}
-            <tr><td class="py-1.5 px-2 text-xs text-slate-400 align-top">means</td>${tenses.map(([k]) => `<td class="align-top py-1.5 px-2 text-xs text-slate-500 italic">${esc(C.english(v, k))}</td>`).join('')}</tr></tbody></table>`;
+            <tbody>${PERSONS.map((p, i) => `<tr><td class="py-1.5 px-2 border-b border-slate-100 text-slate-500 align-top">${p}</td>${tenses.map(([k]) => `<td class="align-top py-1.5 px-2 border-b border-slate-100 text-slate-800"${stemStyle(k, i)}${k === 'pres' && (i === 3 || i === 5) ? ` title="${i === 3 ? 'nous form: the stem for the imparfait and subjonctif nous / vous' : 'ils form: the stem for the subjonctif'}"` : ''}>${cellHtml(v, k, i)}</td>`).join('')}</tr>`).join('')}
+            <tr><td class="py-1.5 px-2 text-xs text-slate-400 align-top">means</td>${tenses.map(([k]) => `<td class="align-top py-1.5 px-2 text-xs text-slate-500 italic">${esc(C.english(v, k))}</td>`).join('')}</tr>
+            <tr class="bg-slate-50"><td class="py-1.5 px-2 text-xs text-slate-400 align-top">built from</td>${tenses.map(([k]) => `<td class="align-top py-1.5 px-2 text-xs text-slate-600">${esc(builtFrom(v, k))}</td>`).join('')}</tr></tbody></table>`;
     }
     return tenses.map(([k, name, from]) => `<div class="bg-white border border-slate-200 rounded-xl p-3">
         <div class="text-base font-bold text-slate-900">${esc(name)}</div>
         ${from ? `<div class="text-xs text-slate-500">${esc(from)}</div>` : ''}
-        <div class="text-xs text-slate-500 italic mb-2">${esc(C.english(v, k))}</div>
-        ${PERSONS.map((p, i) => `<div class="flex items-center gap-2 py-1 border-b border-slate-100 text-sm"><span class="w-16 shrink-0 text-slate-500">${p}</span><span class="flex-1 min-w-0 text-slate-800">${cellHtml(v, k, i)}</span></div>`).join('')}
+        <div class="text-xs text-slate-500 italic">${esc(C.english(v, k))}</div>
+        <div class="text-xs text-slate-600 mb-2">built from: ${esc(builtFrom(v, k))}</div>
+        ${PERSONS.map((p, i) => `<div class="flex items-center gap-2 py-1 border-b border-slate-100 text-sm"${stemStyle(k, i)}><span class="w-16 shrink-0 text-slate-500">${p}</span><span class="flex-1 min-w-0 text-slate-800">${cellHtml(v, k, i)}</span></div>`).join('')}
     </div>`).join('');
 }
 
@@ -319,12 +360,13 @@ function render() {
         return;
     }
     S.wide = matchMedia('(min-width: 1024px)').matches;
-    const half = (h) => S.wide ? `<div${h.length < 5 ? ` style="width:${Math.round(h.length / 5 * 100 + 4)}%"` : ''}>${renderHalf(v, h)}</div>` : `<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">${renderHalf(v, h)}</div>`;
+    const half = (h, n) => `<h3 class="text-xs font-bold uppercase tracking-wide text-slate-500${n ? ' pt-2' : ''}">${HALF_TITLES[n]}</h3>` + (S.wide ? `<div>${renderHalf(v, h)}</div>` : `<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">${renderHalf(v, h)}</div>`);
     el.innerHTML = `
     <div class="space-y-4">
         <section class="bg-white border border-slate-200 rounded-2xl p-3 sm:p-4 space-y-3">
             <div class="flex flex-wrap items-center gap-x-4 gap-y-2">
                 <span class="text-sm text-slate-500"><span class="${END}">ending</span> · <span class="${HELP}">from the basic forms</span> · <span class="${STEM}">stem change</span> · tap a form to hear it</span>
+                <span class="text-sm text-slate-500 w-full">The two stems: ${STEM_KEY}</span>
                 ${S.practise ? `<span class="sm:ml-auto flex flex-wrap items-center gap-2">
                     <button type="button" id="tt-check" class="min-h-[40px] px-4 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold rounded-xl">Check</button>
                     <button type="button" id="tt-again" class="min-h-[40px] px-4 bg-white border border-slate-200 hover:border-indigo-300 text-sm font-semibold rounded-xl">New blanks</button>
@@ -381,7 +423,24 @@ function mount(el) {
     matchMedia('(min-width: 1024px)').addEventListener('change', render);
 }
 function showStructure() { S.structure = true; S.verb = null; render(); }
+// The pattern of every tense, drawn into another element (Conjugations → Patterns & notes)
+function structureInto(el) {
+    S.wide = matchMedia('(min-width: 1024px)').matches;
+    el.innerHTML = `<div class="space-y-4">
+        <section class="space-y-3">
+            <span class="text-sm text-slate-500"><span class="${END}">ending</span> · <span class="${HELP}">from the basic forms</span> · -er / -ir / -re = the infinitive</span>
+            ${renderStructure()}
+        </section>
+        <section id="tt-basic-p" class="bg-white border border-slate-200 rounded-2xl p-3 sm:p-4 space-y-3">
+            <h2 class="text-base font-black text-slate-900">Basic forms <span class="font-normal text-sm text-slate-500">· every tense above uses these</span></h2>
+            ${renderBasic(null)}
+        </section></div>`;
+    if (!el.dataset.ttMounted) {
+        el.dataset.ttMounted = '1';
+        el.addEventListener('click', (e) => { if (e.target.closest('[data-jump]')) { const b = el.querySelector('#tt-basic-p'); if (b) b.scrollIntoView({ behavior: 'smooth', block: 'start' }); } });
+    }
+}
 function show(v) { S.structure = false; S.verb = v; if (S.practise) pickHidden(v); render(); }
 function setPractise(on) { S.practise = !!on; if (S.practise && S.verb) pickHidden(S.verb); render(); }
-window.TenseTable = { mount, show, showStructure, prepNote, otherCell, setPractise, cell, isRight, groupShort };
+window.TenseTable = { mount, show, showStructure, structureInto, builtFrom, prepNote, otherCell, setPractise, cell, isRight, groupShort };
 })();

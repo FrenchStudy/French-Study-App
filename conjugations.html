@@ -18,64 +18,140 @@
     <script src="js/ai.js"></script>
     <script src="js/conjugate.js"></script>
     <script src="js/tense-table.js"></script>
+    <script src="js/by-ear-kit.js"></script>
 </head>
 <body class="h-full bg-slate-100 flex flex-col overflow-hidden font-sans text-slate-800">
 
     <header id="app-header" class="bg-white border-b border-slate-200 sticky top-0 z-50 shrink-0 h-14"></header>
 
+    <style>
+        /* Verbs bar, filters and the notes (own styles: no Tailwind build needed) */
+        .cj-bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+        .cj-search{flex:1 1 260px;min-width:0;min-height:44px;font-size:16px;padding:0 14px;background:#fff;border:1px solid #cbd5e1;border-radius:12px}
+        .cj-search:focus{outline:none;box-shadow:0 0 0 2px #6366f1}
+        .cj-btn{min-height:44px;padding:0 14px;border-radius:12px;border:1px solid #e2e8f0;background:#fff;color:#334155;font-size:14px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+        .cj-btn:hover{border-color:#a5b4fc}
+        .cj-btn.pri{background:#4f46e5;border-color:#4f46e5;color:#fff}
+        .cj-btn.pri:hover{background:#4338ca}
+        .cj-btn[aria-expanded="true"]{background:#eef2ff;border-color:#818cf8;color:#3730a3}
+        .cj-badge{font-size:12px;background:#4f46e5;color:#fff;border-radius:999px;padding:0 7px;line-height:20px}
+        .cj-panel[hidden]{display:none}
+        .cj-panel{background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:14px 16px;display:flex;flex-direction:column;gap:12px}
+        .cj-opts{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;font-size:14px;color:#334155;border-top:1px solid #f1f5f9;padding-top:12px}
+        .cj-opts label{display:inline-flex;align-items:center;gap:8px;min-height:36px;cursor:pointer}
+        .cj-opts input{width:16px;height:16px;accent-color:#4f46e5}
+        .cj-opts select{min-height:36px;font-size:14px;border:1px solid #e2e8f0;border-radius:10px;padding:0 8px;background:#fff}
+        .cj-count{font-size:14px;color:#64748b}
+        .cj-count b{color:#0f172a}
+        .cj-count button{border:0;background:none;color:#4338ca;font-weight:700;font-size:14px;cursor:pointer;padding:0 4px}
+        .cj-toast{position:fixed;left:50%;bottom:84px;transform:translateX(-50%);background:#0f172a;color:#fff;font-size:14px;font-weight:600;padding:10px 16px;border-radius:12px;z-index:70}
+        .cj-note{font-size:14px;color:#78350f;background:#fffbeb;border:1px solid #fde68a;border-radius:12px;padding:8px 12px;margin-bottom:10px}
+        .cj-dtools{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px}
+        .cj-dtools label{display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:0 12px;border:1px solid #e2e8f0;border-radius:12px;font-size:14px;font-weight:600;color:#334155;background:#fff;cursor:pointer}
+        .cj-dtools input{width:16px;height:16px;accent-color:#4f46e5}
+        .tn{background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:16px 18px;font-size:14px;line-height:1.6;color:#334155}
+        .tn h2{font-size:18px;font-weight:900;color:#0f172a;margin:0 0 4px}
+        .tn h3{font-size:16px;font-weight:800;color:#4338ca;margin:16px 0 4px}
+        .tn ul{margin:2px 0;padding-left:20px;list-style:disc}
+        .tn ul ul{list-style:circle}
+        .tn li{margin:3px 0}
+        .tn .k{font-weight:700;color:#0f172a}
+        .tn .g{color:#64748b;font-style:italic}
+        .tn .x{font-style:italic;color:#047857}
+        .tn .box{border:1px solid #e2e8f0;border-left:4px solid #f43f5e;border-radius:10px;background:#fff7f8;padding:8px 14px;margin:8px 0}
+        @media (max-width: 767px){ .cj-search{flex-basis:100%} }
+    </style>
+
     <main id="scroller" class="flex-1 overflow-y-auto">
         <div class="max-w-6xl mx-auto px-4 py-5 space-y-4">
             <div>
                 <h1 class="text-2xl font-black text-slate-900">Conjugations</h1>
-                <p class="text-sm text-slate-500 mt-1">296 verbs in every tense, with the basic forms they are built from, and practice. The verb tense lessons are in <a href="lesson.html" class="text-indigo-700 font-semibold hover:underline">Grammar</a>.</p>
+                <p class="text-sm text-slate-500 mt-1">2,062 verbs in every tense, each with a picture and a memory hook; the pattern every tense follows, with notes; and practice. The verb tense lessons are in <a href="lesson.html" class="text-indigo-700 font-semibold hover:underline">Grammar</a>.</p>
             </div>
 
             <nav class="flex gap-1 sm:gap-6 text-sm font-semibold overflow-x-auto overflow-y-hidden shadow-[inset_0_-1px_0_#e2e8f0]" role="tablist" aria-label="Conjugations">
                 <button data-tab="tables" role="tab" class="tab-btn shrink-0 min-h-[44px] px-2 sm:px-0 border-b-2">Verbs</button>
+                <button data-tab="patterns" role="tab" class="tab-btn shrink-0 min-h-[44px] px-2 sm:px-0 border-b-2">Patterns &amp; notes</button>
                 <button data-tab="practice" role="tab" class="tab-btn shrink-0 min-h-[44px] px-2 sm:px-0 border-b-2">Practice</button>
             </nav>
 
-            <!-- ===== VERBS: the list, then the chosen verb in every tense (js/tense-table.js) ===== -->
-            <section id="tab-tables" class="space-y-4">
-                <!-- One bar: the verb picker (a dropdown with the search, filters and list), the pattern, and the tools -->
-                <div class="flex flex-wrap items-center gap-2">
-                    <div id="picker" class="relative">
-                        <button id="picker-btn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="picker-panel" style="width:20rem"
-                                class="max-w-full min-h-[44px] flex items-center justify-between gap-2 px-3 bg-white border-2 border-indigo-300 rounded-xl text-left">
-                            <span class="min-w-0 truncate"><b id="atelier-title" class="text-base font-black text-slate-900" lang="fr">Choose a verb</b> <span id="atelier-category" class="text-sm text-slate-500"></span></span>
-                            <span aria-hidden="true" class="text-slate-500">▾</span>
-                        </button>
-                        <div id="picker-panel" class="hidden absolute left-0 top-full mt-1 z-20 bg-white border border-slate-200 rounded-2xl shadow-lg p-3 space-y-3" style="width:min(22rem, calc(100vw - 2rem))">
-                            <input type="search" id="verb-search" placeholder="Verb, form (mangeons) or meaning" aria-label="Find a verb, in French or English"
-                                   oninput="filterVerbList(this.value)" onkeydown="if(event.key==='Enter') conjugateTyped(this.value)"
-                                   class="w-full text-base px-3 py-2.5 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                            <div class="flex flex-wrap gap-1.5 text-sm">
-                                <button onclick="filterVerbs('all', this)" class="filter-pill shrink-0 min-h-[40px] px-2.5 rounded-lg font-medium bg-indigo-600 border border-indigo-600 text-white">All</button>
-                                <button onclick="filterVerbs('er', this)" class="filter-pill shrink-0 min-h-[40px] px-2.5 rounded-lg font-medium bg-white border border-slate-200 text-slate-700 hover:bg-slate-50">-er</button>
-                                <button onclick="filterVerbs('ir', this)" class="filter-pill shrink-0 min-h-[40px] px-2.5 rounded-lg font-medium bg-white border border-slate-200 text-slate-700 hover:bg-slate-50">-ir</button>
-                                <button onclick="filterVerbs('re', this)" class="filter-pill shrink-0 min-h-[40px] px-2.5 rounded-lg font-medium bg-white border border-slate-200 text-slate-700 hover:bg-slate-50">-re</button>
-                                <button onclick="filterVerbs('irr', this)" class="filter-pill shrink-0 min-h-[40px] px-2.5 rounded-lg font-medium bg-white border border-slate-200 text-slate-700 hover:bg-slate-50">Irreg.</button>
-                                <button onclick="filterVerbs('refl', this)" class="filter-pill shrink-0 min-h-[40px] px-2.5 rounded-lg font-medium bg-white border border-slate-200 text-slate-700 hover:bg-slate-50">Refl.</button>
-                            </div>
-                            <div id="verb-list-container" class="space-y-1">
-                                <p class="text-sm text-slate-400 p-2">Loading verbs…</p>
-                            </div>
-                        </div>
-                    </div>
-                    <button id="pattern-btn" type="button" class="min-h-[44px] px-3 bg-white border border-slate-200 hover:border-indigo-300 text-slate-700 text-sm font-semibold rounded-xl">The pattern (all verbs)</button>
-                    <div id="verb-tools" class="sm:ml-auto flex items-center gap-2 flex-wrap">
-                        <button onclick="playNativeAudio()" class="min-h-[44px] px-3 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold rounded-xl">🔊 Listen</button>
-                        <button onclick="adjustSpeed()" id="speed-btn" class="min-h-[44px] px-3 bg-white border border-slate-200 text-slate-700 text-sm font-semibold rounded-xl">⚡ 1x</button>
-                        <label class="inline-flex items-center gap-2 min-h-[44px] px-3 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700"><input type="checkbox" id="tt-practise" class="w-4 h-4 accent-indigo-600"> Hide some to practise</label>
+            <!-- ===== VERBS: the 2,062 verbs (content/by-ear/verbs.json); open one for every tense (js/tense-table.js) ===== -->
+            <section id="tab-tables" class="space-y-3">
+                <div class="cj-bar">
+                    <input type="search" id="verb-search" class="cj-search" placeholder="Verb, form (mangeons), meaning or hook" aria-label="Find a verb, in French or English, or any of its forms">
+                    <button type="button" id="filter-btn" class="cj-btn" aria-expanded="false" aria-controls="filter-panel">Filters <span id="filter-badge" class="cj-badge" hidden></span></button>
+                    <button type="button" id="play-btn" class="cj-btn pri"><span id="play-ico"></span> Play list</button>
+                    <button type="button" id="copy-btn" class="cj-btn" title="Copy the verbs shown, to paste into Excel or Sheets">Copy</button>
+                </div>
+                <div id="filter-panel" class="cj-panel" hidden>
+                    <div id="filter-chips"></div>
+                    <div class="cj-opts">
+                        <span class="font-bold text-slate-700">Play list reads the verb, then</span>
+                        <label><input type="checkbox" id="opt-mean"> its meaning</label>
+                        <label><input type="checkbox" id="opt-hook"> its memory hook</label>
+                        <label>Speed <select id="opt-rate"><option value="1">Normal</option><option value="0.85">A little slower</option><option value="0.7">Slow</option></select></label>
+                        <label><input type="checkbox" id="opt-learned"> Hide verbs I've ticked as learned</label>
                     </div>
                 </div>
+                <p id="verb-count" class="cj-count">Loading the verbs…</p>
+                <div id="verb-list" class="be-list" role="list"></div>
+                <div id="tt-home" hidden><div id="tense-grid"></div></div>
+            </section>
 
-                <div id="rule-box" class="bg-amber-50 border border-amber-200 rounded-2xl p-4">
-                    <div id="rule-title" class="text-sm font-bold text-amber-900 mb-1">💡 About this verb</div>
-                    <div id="rule-text" class="text-base text-amber-900 leading-relaxed">Pick a verb to see its forms. Tap any form to hear it.</div>
+            <!-- ===== PATTERNS & NOTES: the pattern of every tense for -er / -ir / -re, and the tense notes ===== -->
+            <section id="tab-patterns" class="hidden space-y-4">
+                <div id="pattern-grid"></div>
+                <div class="tn" id="tense-notes">
+                    <h2>Tense notes</h2>
+                    <p class="g">Three stems build almost every tense: the infinitive (future stem), the nous form and the ils form.</p>
+
+                    <h3>Stems</h3>
+                    <ul>
+                        <li><span class="k">Infinitive ✓</span> → stays the same (parler, finir, vendre): used after aller, venir de, en train de</li>
+                        <li><span class="k">Future stem:</span> er, ir → the infinitive (parler-, finir-); re → r (vendre → vendr-)
+                            <ul><li>Irregular future stems: être → ser-, avoir → aur-, aller → ir-, faire → fer-, venir → viendr-, pouvoir → pourr-, vouloir → voudr-, devoir → devr-, savoir → saur-, voir → verr-, falloir → faudr-</li></ul></li>
+                        <li><span class="k">nous stem:</span> nous form − ons (venons → ven-) → the imparfait, and nous / vous in the subjonctif</li>
+                        <li><span class="k">ils stem:</span> ils form − ent (viennent → vienn-) → the subjonctif</li>
+                        <li><span class="k">Past participle:</span> er → é, ir → i, re → u
+                            <ul><li>Irregular: être → été, avoir → eu, faire → fait, prendre → pris, mettre → mis, dire → dit, écrire → écrit, voir → vu, venir → venu, ouvrir → ouvert, mourir → mort, naître → né</li></ul></li>
+                    </ul>
+
+                    <h3>Everyday tenses</h3>
+                    <ul>
+                        <li><span class="k">Présent progressif</span> → être + en train de + infinitive <span class="g">(I am in the middle of doing)</span></li>
+                        <li><span class="k">Passé récent</span> → venir de + infinitive <span class="g">(I have just done)</span></li>
+                        <li><span class="k">Futur proche</span> → aller + infinitive <span class="g">(I am going to do)</span></li>
+                        <li><span class="k">Impératif</span> → the présent of tu / nous / vous <span class="g">(do! / let's do!)</span>
+                            <ul><li>-er verbs and aller drop the s in the tu form: <span class="x">Parle ! Va !</span></li>
+                                <li>Irregular: être → sois, avoir → aie, savoir → sache</li></ul></li>
+                        <li><span class="k">Passé composé</span> → avoir / être + past participle <span class="g">(I did / I have done)</span>
+                            <div class="box"><ul>
+                                <li><b>Use être with:</b>
+                                    <ul><li>the 17 <b>DR &amp; MRS VANDERTRAMP</b> verbs: devenir, revenir, monter, rester, sortir, venir, aller, naître, descendre, entrer, rentrer, tomber, retourner, arriver, mourir, partir, passer (and their compounds: redevenir, remonter, repartir…)</li>
+                                        <li>all reflexive verbs: <span class="x">je me suis levé(e), elle s'est promenée</span></li></ul></li>
+                                <li><b>With être, the past participle agrees with the subject:</b> <span class="x">elle est allée, ils sont partis, elles sont venues</span></li>
+                                <li><b>Exception:</b> monter, descendre, sortir, rentrer, retourner and passer take avoir when they have a direct object: <span class="x">je suis sorti → j'ai sorti la poubelle; je suis monté → j'ai monté les valises</span></li>
+                                <li><b>Everything else uses avoir</b>, including être and avoir themselves: <span class="x">j'ai été, j'ai eu</span></li>
+                                <li>Memory hook: a house 🏠: you're born, arrive, enter, go up, stay, come down, fall, go out, leave and die</li>
+                            </ul></div></li>
+                    </ul>
+
+                    <h3>Built from the basic forms</h3>
+                    <ul>
+                        <li><span class="k">Imparfait</span> → nous − ons + imparfait endings <span class="g">(I was doing / I used to do)</span>
+                            <ul><li>Exception: être → ét- (j'étais)</li></ul></li>
+                        <li><span class="k">Plus-que-parfait</span> → imparfait of avoir / être + past participle <span class="g">(I had done)</span></li>
+                        <li><span class="k">Conditionnel</span> → future stem + imparfait endings <span class="g">(I would do)</span></li>
+                        <li><span class="k">Conditionnel passé</span> → conditionnel of avoir / être + past participle <span class="g">(I would have done)</span></li>
+                        <li><span class="k">Futur simple</span> → future stem + future endings <span class="g">(I will do)</span></li>
+                        <li><span class="k">Futur antérieur</span> → futur of avoir / être + past participle <span class="g">(I will have done)</span></li>
+                        <li><span class="k">Subjonctif</span> → que + ils − ent + subjonctif endings <span class="g">(that I do: after il faut que, je veux que…)</span>
+                            <ul><li>nous / vous use the nous stem: <span class="x">que nous venions, que vous veniez</span> (but <span class="x">que je vienne</span>)</li>
+                                <li>Irregular: être → sois, avoir → aie, aller → aille (que nous allions), faire → fasse, pouvoir → puisse, savoir → sache, vouloir → veuille (que nous voulions)</li></ul></li>
+                        <li><span class="k">Subjonctif passé</span> → que + subjonctif of avoir / être + past participle <span class="g">(that I have done)</span></li>
+                    </ul>
+                    <p>Every compound tense follows the same être rules as the passé composé: <span class="x">elle était partie, elle serait venue</span>.</p>
                 </div>
-
-                <div id="tense-grid"></div>
             </section>
 
             <!-- ===== PRACTICE ===== -->
@@ -94,7 +170,7 @@
                             <option value="re">Regular -re verbs</option>
                             <option value="irr">Irregular verbs</option>
                             <option value="refl">Reflexive verbs</option>
-                            <option value="all">All 296 verbs</option>
+                            <option value="all">All 2,062 verbs</option>
                         </select>
                     </label>
                     <button id="pr-new" type="button" class="min-h-[44px] px-4 bg-white border border-slate-200 hover:border-indigo-300 font-semibold rounded-xl">🔀 Another verb</button>
@@ -124,334 +200,209 @@
     </main>
 
     <script>
-        const db = window.mySupabase;
         const $ = (id) => document.getElementById(id);
-        let currentPlaybackSpeed = 1.0;
-        let currentFilter = 'all';
-        let showAllVerbs = false;   // the list shows the first verbs, then a button for the rest (no scroll box)
-        const FIRST_VERBS = matchMedia('(max-width: 767px)').matches ? 6 : 12;
-        const PILL_OFF = 'filter-pill shrink-0 min-h-[40px] px-2.5 rounded-lg font-medium bg-white border border-slate-200 text-slate-700 hover:bg-slate-50';
-        const PILL_ON = 'filter-pill shrink-0 min-h-[40px] px-2.5 rounded-lg font-medium bg-indigo-600 border border-indigo-600 text-white';
-
-        // Accent-insensitive match: "etre" finds "être"
-        function plain(s) {
-            return String(s).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
-        }
-
-        // ---- Conjugation engine (js/conjugate.js): no AI, no network ----
         const C = window.Conjugator;
+        const esc = ByEar.esc, norm = ByEar.norm;
+        let currentPlaybackSpeed = ByEar.rate();
+        window.speakText = (text) => ByEar.say(text, 'fr');
+
         const SPELLING_KINDS = ['e_è', 'é_è', 'll', 'tt', 'yer', 'envoyer'];
         const GROUP_LABELS = { er: 'regular -er', ersp: '-er, spelling change', ir: 'regular -ir', re: 'regular -re', irr: 'irregular', refl: 'reflexive' };
-        let activeVerb = null;
-
         function verbGroup(v) {
             if (v.refl) return 'refl';
             if (v.kind === 'er' || v.kind === 'ir' || v.kind === 're') return v.kind;
             if (SPELLING_KINDS.includes(v.kind)) return 'ersp';
             return 'irr';
         }
+        const plain = (s) => norm(s);
 
+        // ---------- The verbs (content/by-ear/verbs.json, made by tools/by-ear/build.py) ----------
+        let DATA = [];
+        const LEVELS = [['essential', 'Essential'], ['common', 'Common'], ['inter', 'Intermediate'], ['advanced', 'Advanced'], ['unrated', 'Unrated']];
+        const TYPES = [['er', 'Regular -er'], ['ir', 'Regular -ir (finir)'], ['re', 'Regular -re (vendre)'], ['irr', 'Irregular']];
+        const GROUPS = [
+            { key: 'l', label: 'Level', items: LEVELS },
+            { key: 'en', label: 'Verb type', items: TYPES },
+            { key: 'rf', label: 'Reflexive?', items: [['no', 'Not reflexive'], ['yes', 'Reflexive (se …)']] },
+            { key: 't', label: 'Like English?', items: [['yes', 'Looks like English'], ['close', 'Close'], ['false friend', 'False friend'], ['no', 'Not like English']] }
+        ];
+        const TYPE_TAG = { er: '-er regular', ir: '-ir regular', re: '-re regular', irr: 'irregular' };
+        const LIKE_TAG = { yes: ['yes', 'like English'], close: ['close', 'close to English'], 'false friend': ['ff', 'false friend'], no: ['', 'not like English'] };
+        const keyOf = (d, g) => g === 'rf' ? (d.rf ? 'yes' : 'no') : d[g];
+        const F = Object.assign({ l: [], en: [], rf: [], t: [] }, LocalStore.get('conj_filters', {}));
+        const opts = Object.assign({ mean: true, hook: true, hideLearned: false }, LocalStore.get('conj_play', {}));
+        const learned = new Set(LocalStore.get('conj_learned', []));
+        let query = '', shownN = 60, list = [], openO = null;
 
-        function filterVerbs(category, buttonElement) {
-            currentFilter = category;
-            document.querySelectorAll('.filter-pill').forEach(btn => {
-                btn.className = PILL_OFF;
-            });
-            buttonElement.className = PILL_ON;
-            if (category === 'all') { $('verb-search').value = ''; showAllVerbs = false; }
-            populateVerbList(document.getElementById('verb-search').value);
+        // Search by any form: « mangeons », « irons », « pris » find their verb
+        let FORMS = null;
+        function formIndex() {
+            FORMS = new Map();
+            DATA.forEach(d => ['p', 'im', 'fu', 'co', 'su', 'ip'].forEach(k => (d[k] || []).concat(k === 'p' ? [d.pp] : []).forEach(f => {
+                const key = norm(f); if (!key) return;
+                if (!FORMS.has(key)) FORMS.set(key, new Set());
+                FORMS.get(key).add(d.o);
+            })));
         }
-
-        setTimeout(loadDbStubs, 0);
-        function filterVerbList(query) {
-            populateVerbList(query);
-            scheduleDbSearch(query);
+        const PRONOUN = /^(je |j'|tu |il |elle |on |nous |vous |ils |elles |que |qu'|me |m'|te |t'|se |s'|ne |n')/;
+        function passes(d, skip) {
+            if (opts.hideLearned && learned.has(d.o)) return false;
+            return GROUPS.every(g => g.key === skip || !F[g.key].length || F[g.key].includes(keyOf(d, g.key)));
         }
-
-        // Accent-insensitive match: "etre" finds "être"
-        function plain(s) {
-            return String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').trim();
+        function computeList() {
+            const q = norm(query).replace(/[’]/g, "'");
+            let base = DATA.filter(d => passes(d));
+            if (!q) return base;
+            if (!FORMS) formIndex();
+            let q1 = q, n = 0; while (PRONOUN.test(q1) && n++ < 4) q1 = q1.replace(PRONOUN, '');
+            const byForm = FORMS.get(q1) || FORMS.get(q1.split(' ').pop()) || new Set();
+            const score = (d) => { const v = norm(d.v), b = v.replace(/^(se |s')/, '');
+                if (v === q || b === q1) return 0; if (b.startsWith(q1)) return 1; if (byForm.has(d.o)) return 2;
+                if (norm(d.e).includes(q)) return 3; if (v.includes(q)) return 4; if (norm(d.m).includes(q)) return 5; return 9; };
+            return base.map(d => [score(d), d]).filter(x => x[0] < 9).sort((a, b) => a[0] - b[0] || a[1].o - b[1].o).map(x => x[1]);
         }
-
-        // ---- Search by any conjugated form: "mangeons", "ai mangé", "irons" find the verb ----
-        let FORM_INDEX = null;
-        function buildFormIndex() {
-            FORM_INDEX = new Map();
-            const add = (key, entry) => {
-                if (!key) return;
-                let list = FORM_INDEX.get(key);
-                if (!list) { list = []; FORM_INDEX.set(key, list); }
-                if (!list.some(e => e.v === entry.v && e.why === entry.why)) list.push(entry);
-            };
-            C.verbs.forEach(v => C.tenses.forEach(t => {
-                let rows;
-                try { rows = C.forms(v, t.key); } catch (e) { return; }
-                (rows || []).forEach(r => {
-                    const marked = /\((e|s|es)\)/.test(r.cf);                       // allé(e)(s): accept allé, allée, allés, allées
-                    const bare = r.cf.replace(/\((e|s|es)\)/g, '');
-                    const person = r.cp.replace(/'$/, '').replace(/^j$/, 'je');
-                    const why = '“' + bare + '” = ' + t.name + ', ' + person;
-                    const withEnds = k => marked ? [k, k + 'e', k + 's', k + 'es'] : [k];
-                    const key = plain(bare);
-                    withEnds(key).forEach(k => add(k, { v, why }));
-                    const parts = key.split(' ');
-                    const last = parts[parts.length - 1];
-                    // "ai mangé" also answers to "mangé"; skip bare infinitives ("vais manger" must not tag every verb)
-                    if (parts.length > 1 && last !== plain(v.inf)) withEnds(last).forEach(k => add(k, { v, why }));
-                });
-            }));
+        const LVL = Object.fromEntries(LEVELS);
+        function rowHtml(d) {
+            const like = LIKE_TAG[d.t] || ['', d.t];
+            return `<div class="be-item${d.o === openO ? ' be-open' : ''}${learned.has(d.o) ? ' be-done' : ''}" data-o="${d.o}" role="listitem">
+                <div class="be-top">
+                    <button type="button" class="be-chev" data-act="open" aria-expanded="${d.o === openO}" aria-label="All the tenses of ${esc(d.v)}">${ByEar.icons.CHEV}</button>
+                    <span class="be-num">${d.o}</span>
+                    <div class="be-w"><div class="be-word"><button type="button" class="be-spk main" data-act="say" aria-label="Hear ${esc(d.v)}">${ByEar.icons.SPK}</button><span lang="fr">${esc(d.v)}</span></div><span class="be-mean">${esc(d.e)}</span></div>
+                    <div class="be-tags"><span class="be-tag ${d.en}">${TYPE_TAG[d.en] || ''}</span>${d.rf ? '<span class="be-tag rf">reflexive</span>' : ''}<span class="be-tag ${like[0]}">${esc(like[1])}</span><span class="be-lvl">${esc(LVL[d.l] || '')}</span></div>
+                    <div class="be-hook">${d.pic ? `<span class="be-pic" role="img" aria-label="Picture for ${esc(d.v)}">${d.pic}</span>` : ''}${d.m ? `<button type="button" class="be-spk" data-act="hook" aria-label="Hear the memory hook">${ByEar.icons.SPK}</button><span>${esc(d.m)}</span>` : '<span class="be-empty">Same as the English word</span>'}</div>
+                    <button type="button" class="be-learn" data-act="learn" aria-pressed="${learned.has(d.o)}" aria-label="Learned">${ByEar.icons.TICK}</button>
+                </div>
+                <div class="be-detail"${d.o === openO ? '' : ' hidden'}></div>
+            </div>`;
         }
-        const LEADING_PRONOUN = /^(je |j'|tu |il |elle |on |nous |vous |ils |elles |que |qu'|me |m'|te |t'|se |s'|ne |n')/;
-        function formMatches(query) {
-            const q0 = plain(query).replace(/’/g, "'");
-            if (q0.length < 2) return [];
-            if (!FORM_INDEX) buildFormIndex();
-            let q1 = q0, guard = 0;
-            while (LEADING_PRONOUN.test(q1) && guard++ < 4) {
-                const next = q1.replace(LEADING_PRONOUN, '');
-                if (!next) break;
-                q1 = next;
+        function draw() {
+            list = computeList();
+            const box = $('verb-list');
+            parkTable();
+            box.innerHTML = list.slice(0, shownN).map(rowHtml).join('') +
+                (list.length > shownN ? `<button type="button" class="be-more" data-act="more">Show ${Math.min(60, list.length - shownN)} more of ${list.length.toLocaleString()} verbs</button>` : '');
+            if (!list.length) box.innerHTML = `<p class="p-4 text-sm text-slate-500">No verb matches. Try fewer filters or another spelling.</p>`;
+            const nf = GROUPS.reduce((n, g) => n + (F[g.key].length ? 1 : 0), 0) + (opts.hideLearned ? 1 : 0);
+            $('filter-badge').hidden = !nf; $('filter-badge').textContent = nf;
+            $('verb-count').innerHTML = `Showing <b>${list.length.toLocaleString()}</b> of ${DATA.length.toLocaleString()} verbs${nf || query ? ` <button type="button" id="clear-all">Clear search and filters</button>` : ''}`;
+            const c = $('clear-all'); if (c) c.onclick = () => { query = ''; $('verb-search').value = ''; GROUPS.forEach(g => F[g.key] = []); opts.hideLearned = false; $('opt-learned').checked = false; saveF(); chipsUi.redraw(); shownN = 60; draw(); };
+            if (openO != null) { const d = DATA.find(x => x.o === openO); if (d && list.slice(0, shownN).includes(d)) fillDetail(d); }
+        }
+        const saveF = () => LocalStore.set('conj_filters', F);
+        let chipsUi = { redraw() {} };
+
+        // ---------- One verb, opened: every tense (the same table as before, moved into the row) ----------
+        function engineOf(d) {
+            if (d._ev !== undefined) return d._ev;
+            let ev = null;
+            const b = C.find(d.v);
+            if (b && !b.assumed && b.disp === d.v) ev = b;
+            else {
+                try { ev = C.fromRow({ inf: d.v, english: d.e, pronominal: !!d.rf, aux: d.a || 'avoir', pp: d.pp, forms: { p: d.p, im: d.im, f: d.fu, c: d.co, s: d.su, ip: d.ip || [] } }); }
+                catch (e) { ev = null; }
+                if (ev) ev.gloss = d.e;
             }
-            const keys = [...new Set([q0, q1, q1.split(' ').pop()])];
-            const found = new Map();
-            keys.forEach(k => (FORM_INDEX.get(k) || []).forEach(e => {
-                const whys = found.get(e.v) || [];
-                if (whys.length < 2 && !whys.includes(e.why)) whys.push(e.why);
-                found.set(e.v, whys);
-            }));
-            return [...found].map(([v, whys]) => ({ v, why: whys.join(' · ') }));
+            return (d._ev = ev);
         }
-
-        // ---- More verbs from the database (supabase/conjugations): about 2,060 verbs, found by name, meaning or any form ----
-        // The built-in 296 verbs show instantly; the database verbs are added a moment later. If the tables are not there
-        // (SQL not run) or the student is offline, nothing changes.
-        const dbCache = new Map();        // plain query -> [engine verbs from the database]
-        let dbStubs = [];                 // every verb in the database that is not built in: name and meaning only (full forms load on click)
-        async function loadDbStubs() {
-            if (dbBroken || !db || dbStubs.length) return;
-            try {
-                // Supabase returns at most 1,000 rows per request, so read the verbs page by page
-                let rows = [];
-                for (let from = 0; ; from += 1000) {
-                    const r = await db.from('conjugation_verbs').select('inf,english,ending,grp,pronominal,pp').order('inf').range(from, from + 999);
-                    if (r.error) throw r.error;
-                    rows = rows.concat(r.data || []);
-                    if (!r.data || r.data.length < 1000) break;
-                }
-                dbStubs = rows.filter(x => !localHas(x.inf)).map(x => ({
-                    disp: x.inf, inf: x.inf.replace(/^(se |s')/, ''), gloss: x.english || '', refl: !!x.pronominal, dbStub: true,
-                    kind: x.pronominal ? 'refl' : x.ending === 'er' ? 'er' : x.ending === 'ir' && x.grp === 2 ? 'ir'
-                          : (/dre$/.test(x.inf) && x.pp === x.inf.slice(0, -2) + 'u') ? 're' : 'single'   // vendre-type verbs are regular -re
-                }));
-                populateVerbList($('verb-search').value);
-            } catch (e) { console.warn('Conjugation tables not available:', e && e.message); dbBroken = true; }
-        }
-        var dbTimer = null, dbBroken = false;
-        const localHas = (inf) => C.verbs.some(v => v.disp === inf);
-        async function dbSearch(searchQuery) {
-            const q0 = plain(searchQuery).replace(/’/g, "'");
-            if (dbBroken || !db || q0.length < 2) return [];
-            if (dbCache.has(q0)) return dbCache.get(q0);
-            let q1 = q0, guard = 0;
-            while (LEADING_PRONOUN.test(q1) && guard++ < 4) { const n = q1.replace(LEADING_PRONOUN, ''); if (!n) break; q1 = n; }
-            const keys = [...new Set([q0, q1, q1.split(' ').pop()])].filter(k => k.length >= 2);
-            const found = new Map();            // inf -> why
-            try {
-                const byForm = await db.from('conjugation_forms').select('inf,tense,person,form').in('form_plain', keys).limit(40);
-                if (byForm.error) throw byForm.error;
-                (byForm.data || []).forEach(r => {
-                    if (!found.has(r.inf)) found.set(r.inf, '“' + r.form + '” = ' + r.tense.replace('participe_passe', 'participe passé').replace('imperatif', 'impératif') + (r.person ? ', ' + r.person : ''));
-                });
-                const safe = q1.replace(/[%_,()*\\]/g, '');
-                if (safe.length >= 3) {
-                    const byName = await db.from('conjugation_verbs').select('inf').or('inf.ilike.' + safe + '%,english.ilike.%' + safe + '%').limit(20);
-                    if (!byName.error) (byName.data || []).forEach(r => { if (!found.has(r.inf)) found.set(r.inf, ''); });
-                }
-                const infs = [...found.keys()].filter(inf => !localHas(inf));
-                let verbs = [];
-                if (infs.length) {
-                    const rows = await db.from('conjugation_verbs').select('*').in('inf', infs);
-                    if (rows.error) throw rows.error;
-                    verbs = (rows.data || []).map(r => { const v = C.fromRow(r); if (v) v.dbWhy = found.get(r.inf); return v; }).filter(Boolean);
-                    const order = (v) => plain(v.disp) === q1 || plain(v.inf) === q1 ? 0 : found.get(v.disp) ? 1 : 2;   // the verb itself, then form matches, then the rest
-                    verbs.sort((a, b) => order(a) - order(b));
-                }
-                dbCache.set(q0, verbs);
-                return verbs;
-            } catch (e) {
-                console.warn('Conjugation tables not available:', e && e.message);
-                dbBroken = true;               // tables missing or offline: stay with the built-in verbs
-                return [];
-            }
-        }
-        async function openListed(v) {
-            if (!v.dbStub) { renderVerb(v); return; }
-            try {
-                const r = await db.from('conjugation_verbs').select('*').eq('inf', v.disp).limit(1);
-                const full = !r.error && r.data && r.data[0] ? C.fromRow(r.data[0]) : null;
-                if (full) { renderVerb(full); return; }
-            } catch (e) { /* fall through */ }
-            $('rule-text').innerText = 'Could not load ' + v.disp + '. Check your connection and try again.';
-        }
-        function scheduleDbSearch(searchQuery) {
-            clearTimeout(dbTimer);
-            if (plain(searchQuery).length < 2) return;
-            dbTimer = setTimeout(async () => {
-                const verbs = await dbSearch(searchQuery);
-                if (verbs.length && $('verb-search').value === searchQuery) populateVerbList(searchQuery);
-            }, 250);
-        }
-
-        function populateVerbList(searchQuery = '') {
-            const container = document.getElementById('verb-list-container');
-            if (!container) return;
-            const q = plain(searchQuery);
-            const passFilter = v => currentFilter === 'all' || verbGroup(v) === currentFilter || (currentFilter === 'er' && verbGroup(v) === 'ersp');
-            let matches = C.verbs.filter(v => passFilter(v) && (!q || plain(v.disp).includes(q) || plain(v.gloss).includes(q)));
-            const cachedFull = dbCache.get(plain(searchQuery).replace(/\u2019/g, "'")) || [];
-            const haveFull = new Set(cachedFull.map(v => v.disp));
-            const stubMatches = dbStubs.filter(v => !haveFull.has(v.disp) && passFilter(v) && (!q || plain(v.disp).includes(q) || plain(v.gloss).includes(q)));
-            // A conjugated form ("mangeons", "ai mangé") finds its verb too; those verbs come first
-            const whyByVerb = new Map();
-            if (q) {
-                const formHits = formMatches(searchQuery).filter(h => passFilter(h.v));
-                formHits.forEach(h => whyByVerb.set(h.v, h.why));
-                matches = formHits.map(h => h.v).concat(matches.filter(v => !whyByVerb.has(v)));
-                // database verbs for this search, once they have arrived (form matches first, then the rest)
-                cachedFull.filter(passFilter).forEach(v => {
-                    if (v.dbWhy) whyByVerb.set(v, v.dbWhy);
-                    matches.push(v);
-                });
-            }
-            matches = matches.concat(stubMatches);
-
-            container.innerHTML = '';
-            if (matches.length === 0) {
-                const typed = escapeHtml(searchQuery.trim());
-                container.innerHTML = typed
-                    ? `<p class="text-sm text-slate-500 p-2">No verb found. Press Enter to conjugate “${typed}”.</p>`
-                    : `<p class="text-sm text-slate-400 p-2">No verb found.</p>`;
+        function parkTable() { const g = $('tense-grid'); if (g.parentElement !== $('tt-home')) $('tt-home').appendChild(g); }
+        function fillDetail(d) {
+            const row = document.querySelector(`.be-item[data-o="${d.o}"]`); if (!row) return;
+            const box = row.querySelector('.be-detail'); box.hidden = false;
+            const ev = engineOf(d);
+            if (!ev) {
+                const il = (k) => (d[k] || [])[2];
+                box.innerHTML = `<div class="cj-note">${esc(d.v)} is only used with <b>il</b> (it): ${[['Présent', 'p'], ['Imparfait', 'im'], ['Futur', 'fu'], ['Conditionnel', 'co'], ['Subjonctif', 'su']].filter(([, k]) => il(k)).map(([n, k]) => `${n} <b lang="fr">il ${esc(il(k))}</b>`).join(' · ')}${d.pp ? ` · Passé composé <b lang="fr">il a ${esc(d.pp)}</b>` : ''}</div>`;
                 return;
             }
+            const note = [...C.notes(ev), TenseTable.prepNote(ev)].filter(Boolean).join(' ');
+            box.innerHTML = `${note ? `<div class="cj-note">💡 ${esc(note)}</div>` : ''}
+                <div class="cj-dtools"><label><input type="checkbox" data-act="practise"${practiseOn ? ' checked' : ''}> Hide some to practise</label></div>`;
+            box.appendChild($('tense-grid'));
+            TenseTable.show(ev);
+        }
+        let practiseOn = false;
+        function toggleOpen(d) {
+            const was = openO;
+            if (was != null) { const r = document.querySelector(`.be-item[data-o="${was}"]`); if (r) { parkTable(); r.classList.remove('be-open'); r.querySelector('.be-detail').hidden = true; r.querySelector('.be-detail').innerHTML = ''; r.querySelector('[data-act="open"]').setAttribute('aria-expanded', 'false'); } }
+            openO = was === d.o ? null : d.o;
+            if (openO != null) {
+                const r = document.querySelector(`.be-item[data-o="${d.o}"]`);
+                r.classList.add('be-open'); r.querySelector('[data-act="open"]').setAttribute('aria-expanded', 'true');
+                fillDetail(d);
+                history.replaceState({}, '', 'conjugations.html?verb=' + encodeURIComponent(d.v));
+            } else history.replaceState({}, '', 'conjugations.html');
+        }
 
-            const shown = (showAllVerbs || q) ? matches : matches.slice(0, FIRST_VERBS);
-            shown.forEach(v => {
-                const item = document.createElement('button');
-                item.type = 'button';
-                item.className = 'w-full text-left px-3 py-2 min-h-[48px] rounded-lg text-sm bg-slate-50 hover:bg-indigo-50 transition flex items-center justify-between border border-slate-100' + (activeVerb === v ? ' ring-2 ring-indigo-400' : '');
-                item.innerHTML = `
-                    <div class="flex flex-col pr-2 overflow-hidden">
-                        <span class="font-bold text-slate-900 truncate">${escapeHtml(v.disp)}</span>
-                        <span class="text-xs text-slate-500 truncate">${escapeHtml(v.gloss)}</span>
-                        ${whyByVerb.has(v) ? `<span class="text-xs text-amber-700 truncate">${escapeHtml(whyByVerb.get(v))}</span>` : ''}
-                    </div>
-                `;
-                item.addEventListener('click', () => { openListed(v); showTablesOnPhone(); });
-                container.appendChild(item);
-            });
-            if (matches.length > FIRST_VERBS && !q) {
-                const more = document.createElement('button');
-                more.type = 'button';
-                more.className = 'w-full min-h-[44px] rounded-lg text-sm font-semibold text-indigo-700 hover:bg-indigo-50';
-                more.textContent = showAllVerbs ? 'Show fewer verbs' : `Show all ${matches.length} verbs`;
-                more.addEventListener('click', () => { showAllVerbs = !showAllVerbs; populateVerbList(searchQuery); });
-                container.appendChild(more);
+        $('verb-list').addEventListener('click', (e) => {
+            const a = e.target.closest('[data-act]'); if (!a) return;
+            if (a.dataset.act === 'more') { shownN += 60; draw(); return; }
+            const row = a.closest('.be-item'); const d = row && DATA.find(x => x.o === +row.dataset.o); if (!d) return;
+            if (a.dataset.act === 'open') toggleOpen(d);
+            else if (a.dataset.act === 'say') ByEar.say(d.v, 'fr');
+            else if (a.dataset.act === 'hook') ByEar.say(d.m, 'en');
+            else if (a.dataset.act === 'practise') { practiseOn = a.checked; TenseTable.setPractise(practiseOn); }
+            else if (a.dataset.act === 'learn') {
+                learned.has(d.o) ? learned.delete(d.o) : learned.add(d.o);
+                LocalStore.set('conj_learned', [...learned]);
+                a.setAttribute('aria-pressed', learned.has(d.o)); row.classList.toggle('be-done', learned.has(d.o));
+                if (learned.has(d.o) && typeof Activity !== 'undefined') Activity.record();
             }
+        });
+        // tap the word itself to open it too
+        $('verb-list').addEventListener('click', (e) => {
+            if (e.target.closest('[data-act],button,input,.be-detail')) return;
+            const row = e.target.closest('.be-item'); if (!row || !e.target.closest('.be-w')) return;
+            const d = DATA.find(x => x.o === +row.dataset.o); if (d) toggleOpen(d);
+        });
 
-        }
+        let searchTimer = null;
+        $('verb-search').addEventListener('input', (e) => { clearTimeout(searchTimer); searchTimer = setTimeout(() => { query = e.target.value; shownN = 60; openO = null; draw(); }, 150); });
+        $('verb-search').addEventListener('keydown', (e) => { if (e.key === 'Enter' && list[0]) { openO = null; toggleOpen(list[0]); } });
+        $('filter-btn').addEventListener('click', () => { const p = $('filter-panel'); p.hidden = !p.hidden; $('filter-btn').setAttribute('aria-expanded', String(!p.hidden)); });
 
-        // Conjugate a verb typed in the search box, even if it is not in the list
-        function conjugateTyped(text) {
-            let v = C.find(text);
-            if (!v || v.assumed) {            // not a listed infinitive: maybe a conjugated form
-                const hits = formMatches(text);
-                if (hits.length) v = hits[0].v;
-            }
-            if (!v || v.assumed) {            // not in the built-in list: ask the database (a verb or any of its forms)
-                dbSearch(text).then(verbs => {
-                    const hit = verbs[0];
-                    if (hit) { renderVerb(hit); showTablesOnPhone(); }
-                    else if (v) { renderVerb(v); showTablesOnPhone(); }
-                    else document.getElementById('rule-text').innerText = `\u201c${text.trim()}\u201d is not recognised as a verb or a verb form.`;
-                });
-                return;
-            }
-            if (v) {
-                renderVerb(v);
-                showTablesOnPhone();
-            } else if (text.trim()) {
-                document.getElementById('rule-text').innerText = `“${text.trim()}” is not recognised as an -er, -ir or -re infinitive.`;
-            }
-        }
+        // ---------- Play list: the verbs shown, one after another ----------
+        const player = new ByEar.Player({
+            steps: (d) => [[d.v, 'fr']].concat(opts.mean ? [[d.e, 'en']] : [], opts.hook && d.m ? [[d.m, 'en']] : []),
+            label: (d) => d.v,
+            onItem: (d, i) => {
+                if (i >= shownN) { shownN = Math.ceil((i + 1) / 60) * 60; draw(); }
+                document.querySelectorAll('.be-item.be-now').forEach(r => r.classList.remove('be-now'));
+                const r = document.querySelector(`.be-item[data-o="${d.o}"]`);
+                if (r) { r.classList.add('be-now'); r.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+            },
+            onDone: () => { document.querySelectorAll('.be-item.be-now').forEach(r => r.classList.remove('be-now')); $('play-btn').innerHTML = `${MEDIA_ICON.play(16)} Play list`; }
+        });
+        $('play-btn').innerHTML = `${MEDIA_ICON.play(16)} Play list`;
+        $('play-btn').addEventListener('click', () => {
+            if (ByEar.Player.current === player) { player.stop(); return; }
+            if (!list.length) return;
+            const at = openO != null ? Math.max(0, list.findIndex(d => d.o === openO)) : 0;
+            player.start(list, at);
+            $('play-btn').innerHTML = `${MEDIA_ICON.stop(16)} Stop`;
+        });
+        ['mean', 'hook'].forEach(k => { $('opt-' + k).checked = !!opts[k]; $('opt-' + k).addEventListener('change', (e) => { opts[k] = e.target.checked; LocalStore.set('conj_play', opts); }); });
+        $('opt-learned').checked = !!opts.hideLearned;
+        $('opt-learned').addEventListener('change', (e) => { opts.hideLearned = e.target.checked; LocalStore.set('conj_play', opts); shownN = 60; draw(); });
+        $('opt-rate').value = String(ByEar.rate());
+        $('opt-rate').addEventListener('change', (e) => { ByEar.setRate(+e.target.value); currentPlaybackSpeed = +e.target.value; });
 
-        function formatForm(row) {
-            // "j'" + "aime" has no space; "je" + "parle" does
-            return /'$/.test(row.cp) ? row.cp + row.cf : row.cp + ' ' + row.cf;
-        }
-
-        // « All »: no verb, the pattern of every tense for -er, -ir and -re
-        function showStructure() {
-            activeVerb = null;
-            $('atelier-title').innerText = 'Choose a verb';
-            $('atelier-category').innerText = '';
-            $('pattern-btn').classList.add('bg-indigo-50', 'border-indigo-300', 'text-indigo-700'); $('pattern-btn').classList.remove('bg-white', 'border-slate-200', 'text-slate-700');
-            closePicker();
-            $('verb-tools').classList.add('hidden');
-            $('rule-box').classList.add('hidden');   // the pattern needs no note: more room for the cards
-            TenseTable.showStructure();
-            populateVerbList($('verb-search').value);
-        }
-
-        function renderVerb(v) {
-            if (!v) return;
-            activeVerb = v;
-            $('verb-tools').classList.remove('hidden');
-            $('pattern-btn').classList.remove('bg-indigo-50', 'border-indigo-300', 'text-indigo-700'); $('pattern-btn').classList.add('bg-white', 'border-slate-200', 'text-slate-700');
-            $('rule-box').classList.remove('hidden');
-
-            const title = document.getElementById('atelier-title');
-            title.dataset.activeVerb = v.disp;
-            title.innerText = v.disp;
-            document.getElementById('atelier-category').innerText = String(v.gloss || '').replace(/\s*[;,].*$/, '');
-            document.querySelectorAll('#verb-list-container button').forEach(b => b.classList.remove('ring-2', 'ring-indigo-400'));
-            TenseTable.show(v);
-            document.getElementById('rule-text').innerText = [...C.notes(v), TenseTable.prepNote(v)].filter(Boolean).join(' ');
-        }
-
-
-        window.speakText = function(text) {
-            if (!('speechSynthesis' in window)) return;
-            window.speechSynthesis.cancel();
-            const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = 'fr-FR';
-            utterance.rate = currentPlaybackSpeed;
-            window.speechSynthesis.speak(utterance);
-        };
-
-        function playNativeAudio() {
-            if (activeVerb) speakText(activeVerb.disp);
-        }
-
-        function adjustSpeed() {
-            const speeds = [1.0, 0.75, 0.5];
-            const idx = speeds.indexOf(currentPlaybackSpeed);
-            currentPlaybackSpeed = speeds[(idx + 1) % speeds.length];
-            const btn = document.getElementById('speed-btn');
-            if (btn) btn.innerText = `⚡ ${currentPlaybackSpeed}x`;
-        }
-
-        // On phones the list sits above the tables: jump down to the tables after picking a verb
-        // The verb picker: a dropdown with the search, the filters and the list; it closes when a verb is picked
-        function openPicker() {
-            $('picker-panel').classList.remove('hidden'); $('picker-btn').setAttribute('aria-expanded', 'true');
-            if (window.innerWidth >= 768) $('verb-search').focus();
-        }
-        function closePicker() { $('picker-panel').classList.add('hidden'); $('picker-btn').setAttribute('aria-expanded', 'false'); }
-        $('picker-btn').addEventListener('click', () => $('picker-panel').classList.contains('hidden') ? openPicker() : closePicker());
-        document.addEventListener('click', (e) => { if (!e.composedPath().includes($('picker'))) closePicker(); });   // the path survives the list being redrawn
-        document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('picker-panel').classList.contains('hidden')) { closePicker(); $('picker-btn').focus(); } });
-        $('pattern-btn').addEventListener('click', () => showStructure());
-        function showTablesOnPhone() { closePicker(); }
+        // ---------- Copy: the verbs shown, one row each, to paste into Excel or Sheets ----------
+        function toast(t) { const el = document.createElement('div'); el.className = 'cj-toast'; el.textContent = t; document.body.appendChild(el); setTimeout(() => el.remove(), 2200); }
+        $('copy-btn').addEventListener('click', async () => {
+            const PR = ['je', 'tu', 'il', 'nous', 'vous', 'ils'];
+            const q = (s) => '"' + String(s ?? '').replace(/"/g, '""') + '"';
+            const lines = [['No.', 'French', 'Meaning', 'Type', 'Memory hook', 'Présent', 'Passé composé'].map(q).join('\t')].concat(list.map(d => {
+                const ev = engineOf(d);
+                const pres = ev ? C.forms(ev, 'pres').map(r => r.say).join(', ') : (d.p || []).map((f, i) => f ? PR[i] + ' ' + f : '').filter(Boolean).join(', ');
+                const pc = ev ? C.forms(ev, 'pc')[0].say : '';
+                return [d.o, q(d.v), q(d.e), q([TYPE_TAG[d.en], d.rf ? 'reflexive' : '', (LIKE_TAG[d.t] || [, ''])[1], LVL[d.l]].filter(Boolean).join(' · ')), q(d.m || ''), q(pres), q(pc)].join('\t');
+            }));
+            const text = lines.join('\n');
+            try { await navigator.clipboard.writeText(text); }
+            catch (e) { const ta = document.createElement('textarea'); ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0'; document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); } catch (x) {} ta.remove(); }
+            toast(`Copied ${list.length.toLocaleString()} verbs: paste into Excel or Sheets`);
+        });
 
         // ---------- Practice: fill in the six forms ----------
         const COMMON = ['être', 'avoir', 'aller', 'faire', 'dire', 'pouvoir', 'vouloir', 'savoir', 'venir', 'devoir', 'prendre', 'voir', 'mettre', 'parler',
@@ -481,7 +432,9 @@
         function poolVerbs() {
             const kind = $('pr-pool').value;
             if (kind === 'common') return COMMON.map(v => C.find(v)).filter(Boolean);
-            return C.verbs.filter(v => kind === 'all' || verbGroup(v) === kind);
+            if (!DATA.length) return C.verbs.filter(v => kind === 'all' || verbGroup(v) === kind);
+            const want = (d) => kind === 'all' || (kind === 'refl' ? d.rf : !d.rf && d.en === kind);
+            return DATA.filter(want).map(engineOf).filter(Boolean);
         }
         function pickVerb() {
             const list = poolVerbs().filter(v => C.forms(v, pr.tense).length && v !== pr.verb);
@@ -556,6 +509,7 @@
         document.addEventListener('click', (e) => { const b = e.target.closest('#pr-rows [data-say]'); if (b) speakText(b.dataset.say); });
 
         // ---------- Tabs ----------
+        let patternsDrawn = false;
         function setTab(name, push) {
             document.querySelectorAll('.tab-btn').forEach(b => {
                 const on = b.dataset.tab === name;
@@ -563,32 +517,45 @@
                 b.classList.toggle('border-transparent', !on); b.classList.toggle('text-slate-500', !on); b.classList.toggle('hover:text-slate-800', !on);
                 b.setAttribute('aria-selected', on);
             });
-            $('tab-tables').classList.toggle('hidden', name !== 'tables');
-            $('tab-practice').classList.toggle('hidden', name !== 'practice');
+            ['tables', 'patterns', 'practice'].forEach(t => $('tab-' + t).classList.toggle('hidden', name !== t));
+            if (name !== 'tables' && ByEar.Player.current) ByEar.Player.current.stop();
             LocalStore.set('conj_tab', name);
-            if (name === 'practice' && !pr.verb) startPractice(activeVerb && COMMON.includes(activeVerb.disp) ? activeVerb : null);
-            if (push) history.pushState({}, '', name !== 'tables' ? 'conjugations.html?tab=' + name : 'conjugations.html' + (activeVerb ? '?verb=' + encodeURIComponent(activeVerb.disp) : ''));
+            if (name === 'patterns' && !patternsDrawn) { TenseTable.structureInto($('pattern-grid')); patternsDrawn = true; }
+            if (name === 'practice' && !pr.verb) startPractice(null);
+            if (push) history.pushState({}, '', name !== 'tables' ? 'conjugations.html?tab=' + name : 'conjugations.html');
         }
         document.querySelectorAll('.tab-btn').forEach(b => b.addEventListener('click', () => setTab(b.dataset.tab, true)));
-        $('tt-practise').addEventListener('change', (e) => TenseTable.setPractise(e.target.checked));
 
-        // ---------- Routing: ?verb=finir, ?tab=practice; old lesson links go to Grammar ----------
+        // ---------- Routing: ?verb=finir, ?tab=patterns / practice; old lesson links go to Grammar ----------
+        function openVerbByName(name) {
+            const n = norm(name);
+            const d = DATA.find(x => norm(x.v) === n) || DATA.find(x => norm(x.v).replace(/^(se |s')/, '') === n);
+            if (!d) return false;
+            query = d.v; $('verb-search').value = d.v; shownN = 60; openO = null; draw();
+            toggleOpen(d);
+            return true;
+        }
         function route() {
             const p = new URLSearchParams(location.search);
             if (p.get('lesson')) return location.replace('lesson.html?c=' + encodeURIComponent(p.get('lesson')));
             if (p.get('tab') === 'lessons') return location.replace('lesson.html');
-            if (p.get('verb')) { const v = C.find(p.get('verb')); if (v) { setTab('tables', false); renderVerb(v); populateVerbList($('verb-search').value); return; } }
+            if (p.get('verb') && DATA.length) { setTab('tables', false); if (openVerbByName(p.get('verb'))) return; }
             const saved = !p.get('verb') && !p.get('tab') ? LocalStore.get('conj_tab', 'tables') : '';
             const want = p.get('tab') || saved;
-            setTab(want === 'practice' ? 'practice' : 'tables', false);   // the old « All tenses » tab is now the Verbs view
-            if (!activeVerb) showStructure();
+            setTab(['patterns', 'practice'].includes(want) ? want : 'tables', false);
         }
         pr.tense = LocalStore.get('conj_practice_tense', 'pres');
         $('pr-tense').value = pr.tense;
         window.addEventListener('popstate', route);
         TenseTable.mount($('tense-grid'));
-        populateVerbList();
         route();
+        ByEar.load('content/by-ear/verbs.json').then(data => {
+            DATA = data;
+            chipsUi = ByEar.chips($('filter-chips'), GROUPS, F, (g, v) => DATA.filter(d => passes(d, g) && keyOf(d, g) === v).length, () => { saveF(); shownN = 60; draw(); });
+            const p = new URLSearchParams(location.search);
+            if (p.get('verb') && openVerbByName(p.get('verb'))) return;
+            draw();
+        }).catch(err => { $('verb-count').textContent = err.message + ' Reload the page to try again.'; });
     </script>
 </body>
 </html>

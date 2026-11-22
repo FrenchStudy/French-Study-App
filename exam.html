@@ -20,6 +20,8 @@
     <script src="js/nclc.js"></script>
     <script src="js/lessons-index.js"></script>
     <script src="js/progress.js"></script>
+    <script src="js/by-ear-kit.js"></script>
+    <script src="js/word-list.js"></script>
 </head>
 <body class="h-full bg-slate-100 flex flex-col overflow-hidden font-sans text-slate-800">
 
@@ -29,7 +31,7 @@
         <div class="max-w-5xl mx-auto px-4 py-5 flex flex-col gap-5 sm:block sm:space-y-5">
             <div>
                 <h1 class="text-2xl font-black text-slate-900">Exam guide</h1>
-                <p class="text-sm text-slate-500 mt-1">How a French exam is built, and where to practise each part. The questions live in each skill's page: in Writing, pick <b>Writing 1, 2 or 3</b> and a topic; in Speaking, open the <b>🎯 Questions</b> tab.</p>
+                <p class="text-sm text-slate-500 mt-1">How a French exam is built, and where to practise each part. The questions live in each skill's page: in Writing, pick <b>Writing 1, 2 or 3</b> and a topic; in Speaking, open the <b>🎯 Questions</b> tab. For the words of the exam themes, see <a href="#lexique" class="text-indigo-700 font-semibold hover:underline">Mon lexique TCF</a> below.</p>
             </div>
 
             <!-- Your four skills as NCLC levels (js/nclc.js) -->
@@ -81,6 +83,13 @@
                     </ul>
                 </div>
             </details>
+
+            <!-- Mon lexique TCF: 1,066 words for the 24 exam themes (content/by-ear/lexique.json), shown by js/word-list.js -->
+            <section id="lexique" class="order-last bg-white border border-slate-200 rounded-2xl p-4 space-y-2 scroll-mt-4" aria-labelledby="lexique-title">
+                <h2 id="lexique-title" class="font-black text-slate-900">Mon lexique TCF</h2>
+                <p class="text-sm text-slate-500">1,066 words and phrases for the 24 exam themes, from the core words to the specialised ones, each with a memory hook. Pick a theme, then press Play list to hear them one after another.</p>
+                <div id="lexique-list"></div>
+            </section>
         </div>
     </main>
 
@@ -157,6 +166,33 @@
                     <p class="mt-2 text-sm text-slate-600">Do one about once a month, then every two weeks in the last two months before the test. The AI marks speaking from what the microphone hears, not your pronunciation: have a tutor or a language partner listen to you as well.</p>
                 </details>
                 <p class="text-xs text-slate-500">This practice is original material in the style of the TCF and TEF. The app is not affiliated with France Éducation international, the CCI Paris Île-de-France or IRCC. <a href="terms.html" class="underline">Terms</a></p>`;
+        })();
+
+        // ---------- Mon lexique TCF ----------
+        (function () {
+            const G = { 'm.': 'masculine', 'f.': 'feminine', 'm.pl.': 'masculine plural', 'f.pl.': 'feminine plural', 'pl.': 'plural' };
+            const TIER = { core: 'Core', useful: 'Useful', spec: 'Specialised' };
+            const kind = (w) => w.v ? 'verb' : /^m/.test(w.g) ? 'masc' : /^f/.test(w.g) ? 'fem' : 'other';
+            const like = (w) => w.ff ? 'ff' : w.cog ? 'yes' : 'no';
+            WordList.mount(document.getElementById('lexique-list'), {
+                url: 'content/by-ear/lexique.json', key: 'exam_lex', noun: 'words',
+                placeholder: 'Search French or English, e.g. chômage, deposit',
+                groups: [
+                    { key: 'tier', label: 'How useful', items: [['core', 'Core'], ['useful', 'Useful'], ['spec', 'Specialised']] },
+                    { key: 'like', label: 'Like English?', items: [['yes', 'Looks like English'], ['ff', 'False friend'], ['no', 'Not like English']] },
+                    { key: 'type', label: 'Kind', items: [['masc', 'Masculine nouns'], ['fem', 'Feminine nouns'], ['verb', 'Verbs'], ['other', 'Other phrases']] }
+                ],
+                prep: (j) => ({
+                    topics: j.topics,
+                    items: j.words.map((w, i) => ({
+                        id: String(w.i), n: i + 1, fr: w.fr, say: w.fr.replace(/\s*\([^)]*\)/g, ''), en: w.en, hooks: w.h || [], g: { tier: w.tier, like: like(w), type: kind(w) }, topics: w.t || [],
+                        tags: [[w.tier === 'core' ? 'yes' : w.tier === 'useful' ? 'close' : '', TIER[w.tier]], [{ ff: 'ff', yes: 'yes', no: '' }[like(w)], { ff: 'false friend', yes: 'like English', no: 'not like English' }[like(w)]]].concat(G[w.g] ? [['lvl', G[w.g]]] : []),
+                        key: ByEar.norm(w.fr + ' ' + w.en + ' ' + (w.h || []).join(' ')),
+                        detail: [w.ff ? `<div><b>False friend:</b> ${escapeHtml(w.ff)}</div>` : '', w.gh ? `<div><b>Gender tip:</b> ${escapeHtml(w.gh)}</div>` : '',
+                            `<div class="m">${escapeHtml(w.grp)} · ${escapeHtml((w.t || []).map(t => (j.topics.find(x => x.id === t) || {}).name || t).join(' · '))}</div>`].join('')
+                    }))
+                })
+            });
         })();
 
         TCF.index().then(ix => {
