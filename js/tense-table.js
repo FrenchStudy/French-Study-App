@@ -21,7 +21,7 @@ const BASIC = ['être', 'avoir', 'aller', 'venir'];   // the verbs the tenses ar
 // Two tables: the everyday tenses (the present and the tenses built on être, venir, aller and avoir), then the tenses built
 // from the basic forms (each simple tense next to its compound partner)
 const HALVES = [
-    [['pres', 'Présent', 'stem + ending'], ['prog', 'Présent progressif', 'être + en train de + infinitive'], ['recent', 'Passé récent', 'venir + de + infinitive'],
+    [['pres', 'Présent', 'stem + ending'], ['prog', 'Présent progressif', "être + en train de (d') + infinitive"], ['recent', 'Passé récent', "venir + de (d') + infinitive"],
      ['fp', 'Futur proche', 'aller + infinitive'], ['imp', 'Impératif', 'present, no subject'], ['pc', 'Passé composé', 'ai / suis + PP']],
     [['impf', 'Imparfait', 'nous form − ons + ais'], ['pqp', 'Plus-que-parfait', 'avais / étais + PP'], ['cond', 'Conditionnel', 'futur stem + ais'],
      ['cp', 'Conditionnel passé', 'aurais / serais + PP'], ['fut', 'Futur simple', 'infinitive + ai'], ['fa', 'Futur antérieur', 'aurai / serai + PP'],
@@ -300,7 +300,7 @@ function pickHidden(v) {
 
 // ---------- « All »: the pattern of every tense for regular -ER, -IR and -RE verbs (endings only, no example verb) ----------
 const GROUPS = ['er', 'ir', 're'];
-const STRUCT_NOTE = { subj: 'que + ils form − ent + ending', sp: 'que + aie / sois + past participle', pres: 'stem + ending', fut: 'infinitive + ending (-RE drops the e)', cond: 'infinitive + imparfait ending (-RE drops the e)',
+const STRUCT_NOTE = { impf: 'nous form − ons + ending (-ger → -geais, -cer → -çais)', subj: 'que + ils form − ent + ending (nous / vous: nous form − ons)', sp: 'que + aie / sois + past participle', pres: 'stem + ending', fut: 'infinitive + ending (-RE drops the e)', cond: 'infinitive + imparfait ending (-RE drops the e)',
     pc: 'avoir + past participle (some verbs take être)', imp: 'present, no subject' };
 function structCell(key, g, i) {
     const E = (t) => wrap(END + ' whitespace-nowrap', t), nw = (h) => `<span class="whitespace-nowrap">${h}</span>`;
@@ -309,9 +309,9 @@ function structCell(key, g, i) {
     switch (key) {
         case 'pres': { const e = PRES_ENDS[g][i]; return e ? E('-' + e) : '—'; }
         case 'imp': { const k = { 1: 0, 3: 1, 4: 2 }[i]; if (k == null) return null; return E('-' + { er: ['e', 'ons', 'ez'], ir: ['is', 'issons', 'issez'], re: ['s', 'ons', 'ez'] }[g][k]) + ' !'; }
-        case 'prog': return jump(form('être', 'pres', i)) + ' en train de ' + nw(esc(inf));
+        case 'prog': return jump(form('être', 'pres', i)) + " en train de (d') " + nw(esc(inf));
         case 'fp': return nw(jump(form('aller', 'pres', i)) + ' ' + esc(inf));
-        case 'recent': return jump(form('venir', 'pres', i)) + ' ' + nw('de ' + esc(inf));
+        case 'recent': return jump(form('venir', 'pres', i)) + ' ' + nw("de (d') " + esc(inf));
         case 'impf': return E('-' + iss + ENDS.impf[i]);
         case 'fut': case 'cond': return nw(esc(futStem) + E(ENDS[key][i]));
         case 'subj': return E('-' + iss + ENDS.subj[i]);   // « que » is in the card's note
@@ -324,7 +324,7 @@ function renderStructure() {
         <div class="text-base font-bold text-slate-900">${esc(name)}</div>
         <div class="text-xs text-slate-500 mb-2">${esc(STRUCT_NOTE[k] || from)}</div>
         <table class="w-full text-sm" style="table-layout:fixed">
-            <thead><tr><th class="w-14"></th>${GROUPS.map(g => `<th class="text-left py-1 px-1 border-b border-slate-200 text-slate-900">-${g.toUpperCase()}</th>`).join('')}</tr></thead>
+            <thead><tr><th class="w-14"></th>${GROUPS.map(g => `<th class="text-left py-1 px-1 border-b border-slate-200 text-slate-900">-${g.toUpperCase()}${g === 'ir' ? ' <span class="font-normal text-slate-500">(finir)</span>' : ''}</th>`).join('')}</tr></thead>
             <tbody>${PERSONS.map((p, i) => `<tr><td class="py-1 px-1 border-b border-slate-100 text-slate-500 align-top">${p}</td>${GROUPS.map(g => { const c = structCell(k, g, i); return `<td class="py-1 px-1 border-b border-slate-100 text-slate-800 align-top">${c == null ? '<span class="text-slate-400">—</span>' : c}</td>`; }).join('')}</tr>`).join('')}</tbody>
         </table></div>`).join('')}${otherPatternCard()}</div>`;
 }
@@ -333,12 +333,12 @@ function otherPatternCard() {
     const rows = [['part. présent', { er: E('-ant'), ir: E('-issant'), re: E('-ant') }],
         ['gérondif', { er: 'en ' + E('-ant'), ir: 'en ' + E('-issant'), re: 'en ' + E('-ant') }],
         ['part. passé', { er: E('-é'), ir: E('-i'), re: E('-u') }],
-        ['inf. passé', { er: jump('avoir') + ' ' + E('-é'), ir: jump('avoir') + ' ' + E('-i'), re: jump('avoir') + ' ' + E('-u') }]];
+        ['inf. passé', { er: jump('avoir') + ' / ' + jump('être') + ' ' + E('-é'), ir: jump('avoir') + ' / ' + jump('être') + ' ' + E('-i'), re: jump('avoir') + ' / ' + jump('être') + ' ' + E('-u') }]];
     return `<div class="bg-white border border-slate-200 rounded-xl p-3">
         <div class="text-base font-bold text-slate-900">Other forms</div>
         <div class="text-xs text-slate-500 mb-2">the same for every person</div>
         <table class="w-full text-sm" style="table-layout:fixed">
-            <thead><tr><th style="width:6.5rem"></th>${GROUPS.map(g => `<th class="text-left py-1 px-1 border-b border-slate-200 text-slate-900">-${g.toUpperCase()}</th>`).join('')}</tr></thead>
+            <thead><tr><th style="width:6.5rem"></th>${GROUPS.map(g => `<th class="text-left py-1 px-1 border-b border-slate-200 text-slate-900">-${g.toUpperCase()}${g === 'ir' ? ' <span class="font-normal text-slate-500">(finir)</span>' : ''}</th>`).join('')}</tr></thead>
             <tbody>${rows.map(([label, c]) => `<tr><td class="py-1 px-1 border-b border-slate-100 text-slate-500 align-top">${label}</td>${GROUPS.map(g => `<td class="py-1 px-1 border-b border-slate-100 text-slate-800 align-top">${c[g]}</td>`).join('')}</tr>`).join('')}</tbody>
         </table></div>`;
 }
@@ -350,7 +350,7 @@ function render() {
     if (S.structure) {
         el.innerHTML = `<div class="space-y-4">
             <section class="space-y-3">
-                <span class="text-sm text-slate-500"><span class="${END}">ending</span> · <span class="${HELP}">from the basic forms</span> · -er / -ir / -re = the infinitive</span>
+                <span class="text-sm text-slate-500"><span class="${END}">ending</span> · <span class="${HELP}">from the basic forms</span> · -er / -ir / -re = the infinitive · <b>-IR (finir)</b> is the regular -ir verbs (finir, choisir); irregular -ir verbs (partir, dormir, sortir, ouvrir) drop the -iss-: je partais, que je parte, partant</span>
                 ${renderStructure()}
             </section>
             <section id="tt-basic" class="bg-white border border-slate-200 rounded-2xl p-3 sm:p-4 space-y-3">
@@ -428,7 +428,7 @@ function structureInto(el) {
     S.wide = matchMedia('(min-width: 1024px)').matches;
     el.innerHTML = `<div class="space-y-4">
         <section class="space-y-3">
-            <span class="text-sm text-slate-500"><span class="${END}">ending</span> · <span class="${HELP}">from the basic forms</span> · -er / -ir / -re = the infinitive</span>
+            <span class="text-sm text-slate-500"><span class="${END}">ending</span> · <span class="${HELP}">from the basic forms</span> · -er / -ir / -re = the infinitive · <b>-IR (finir)</b> is the regular -ir verbs (finir, choisir); irregular -ir verbs (partir, dormir, sortir, ouvrir) drop the -iss-: je partais, que je parte, partant</span>
             ${renderStructure()}
         </section>
         <section id="tt-basic-p" class="bg-white border border-slate-200 rounded-2xl p-3 sm:p-4 space-y-3">
