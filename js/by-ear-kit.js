@@ -35,7 +35,8 @@ const CSS = `
 .be-chev svg{transition:transform .15s}
 .be-item.be-open .be-chev svg{transform:rotate(90deg)}
 .be-num{font-size:12px;color:#94a3b8;padding-top:6px;font-variant-numeric:tabular-nums}
-.be-word{font-size:18px;font-weight:800;color:#0f172a;line-height:1.3;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.be-word{font-size:18px;font-weight:800;color:#0f172a;line-height:1.3;display:flex;align-items:center;gap:8px}
+.be-word > span{min-width:0}
 .be-mean{display:block;font-size:14px;color:#64748b;font-weight:400;margin-top:2px}
 .be-spk{flex:none;width:32px;height:32px;border-radius:50%;border:1px solid #e2e8f0;background:#fff;color:#4f46e5;display:inline-grid;place-items:center;cursor:pointer}
 .be-spk:hover{background:#eef2ff}

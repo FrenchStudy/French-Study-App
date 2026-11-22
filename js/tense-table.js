@@ -167,10 +167,10 @@ function renderOther(v) {
     if (S.wide) {
         return `<div style="width:84%"><table class="w-full text-sm" style="table-layout:fixed">
             <thead><tr><th class="w-16"></th>${OTHER.map(([k, name, from]) => `<th class="text-left align-top py-1.5 px-2 border-b border-slate-200 text-slate-900">${esc(name)}<span class="block font-normal text-xs text-slate-500 leading-snug">${esc(from)}</span></th>`).join('')}</tr></thead>
-            <tbody><tr><td class="py-1.5 px-2 border-b border-slate-100 text-slate-500"></td>${OTHER.map(([k]) => `<td class="align-top py-1.5 px-2 border-b border-slate-100 text-slate-800">${cellOf(k)}</td>`).join('')}</tr>
+            <tbody><tr><td class="py-1.5 px-2 border-b border-slate-100 text-slate-500"></td>${OTHER.map(([k]) => `<td class="align-top py-1.5 px-2 border-b border-slate-100 text-slate-800"${k === 'ppr' || k === 'ger' ? ` style="background:${NOUS}"` : ''}>${cellOf(k)}</td>`).join('')}</tr>
             <tr><td class="py-1.5 px-2 text-xs text-slate-400 align-top">means</td>${OTHER.map(([k]) => `<td class="align-top py-1.5 px-2 text-xs text-slate-500 italic">${esc(C.english(v, k))}</td>`).join('')}</tr></tbody></table></div>`;
     }
-    return `<div class="grid grid-cols-2 gap-2">${OTHER.map(([k, name, from]) => `<div class="bg-white border border-slate-200 rounded-xl p-3">
+    return `<div class="grid grid-cols-2 gap-2">${OTHER.map(([k, name, from]) => `<div class="bg-white border border-slate-200 rounded-xl p-3"${k === 'ppr' || k === 'ger' ? ` style="background:${NOUS}"` : ''}>
         <div class="text-sm font-bold text-slate-900">${esc(name)}</div><div class="text-xs text-slate-500">${esc(from)}</div>
         <div class="text-base text-slate-800 mt-1">${cellOf(k)}</div><div class="text-xs text-slate-500 italic">${esc(C.english(v, k))}</div></div>`).join('')}</div>`;
 }
@@ -254,6 +254,19 @@ function renderBasic(v) {
         ${basicTable(helpers, null)}`;
 }
 
+// ---------- The two stems: the nous form (blue) and the ils form (pink), and the forms built from them ----------
+// nous form − ons → the imparfait, and nous / vous in the subjonctif; ils form − ent → je, tu, il, ils in the subjonctif
+const NOUS_SRC = '#bae6fd', NOUS = '#e0f2fe', ILS_SRC = '#fbcfe8', ILS = '#fce7f3';
+function stemBg(k, i) {
+    if (k === 'pres' && i === 3) return NOUS_SRC;
+    if (k === 'pres' && i === 5) return ILS_SRC;
+    if (k === 'impf') return NOUS;
+    if (k === 'subj') return i === 3 || i === 4 ? NOUS : ILS;
+    return '';
+}
+const stemStyle = (k, i) => { const c = stemBg(k, i); return c ? ` style="background:${c}${c === NOUS_SRC || c === ILS_SRC ? ';box-shadow:inset 0 -2px 0 ' + (c === NOUS_SRC ? '#0284c7' : '#db2777') : ''}"` : ''; };
+const STEM_KEY = `<span style="background:${NOUS_SRC};padding:0 4px;border-radius:4px">nous</span> → imparfait, subjonctif nous / vous, participe présent · <span style="background:${ILS_SRC};padding:0 4px;border-radius:4px">ils</span> → subjonctif je, tu, il, ils`;
+
 // ---------- The verb in every tense ----------
 function cellHtml(v, key, i) {
     const c = cell(v, key, i);
@@ -265,7 +278,7 @@ function renderHalf(v, tenses) {
     if (S.wide) {
         return `<table class="w-full text-sm" style="table-layout:fixed">
             <thead><tr><th class="w-16"></th>${tenses.map(([k, name, from]) => `<th class="text-left align-top py-1.5 px-2 border-b border-slate-200 text-slate-900">${esc(name)}${from ? `<span class="block font-normal text-xs text-slate-500 leading-snug">${esc(from)}</span>` : ''}</th>`).join('')}</tr></thead>
-            <tbody>${PERSONS.map((p, i) => `<tr><td class="py-1.5 px-2 border-b border-slate-100 text-slate-500 align-top">${p}</td>${tenses.map(([k]) => `<td class="align-top py-1.5 px-2 border-b border-slate-100 text-slate-800${k === 'pres' && (i === 3 || i === 5) ? ' bg-indigo-50' : ''}"${k === 'pres' && (i === 3 || i === 5) ? ` title="${i === 3 ? 'nous form: the stem for the imparfait' : 'ils form: the stem for the subjonctif'}"` : ''}>${cellHtml(v, k, i)}</td>`).join('')}</tr>`).join('')}
+            <tbody>${PERSONS.map((p, i) => `<tr><td class="py-1.5 px-2 border-b border-slate-100 text-slate-500 align-top">${p}</td>${tenses.map(([k]) => `<td class="align-top py-1.5 px-2 border-b border-slate-100 text-slate-800"${stemStyle(k, i)}${k === 'pres' && (i === 3 || i === 5) ? ` title="${i === 3 ? 'nous form: the stem for the imparfait and subjonctif nous / vous' : 'ils form: the stem for the subjonctif'}"` : ''}>${cellHtml(v, k, i)}</td>`).join('')}</tr>`).join('')}
             <tr><td class="py-1.5 px-2 text-xs text-slate-400 align-top">means</td>${tenses.map(([k]) => `<td class="align-top py-1.5 px-2 text-xs text-slate-500 italic">${esc(C.english(v, k))}</td>`).join('')}</tr>
             <tr class="bg-slate-50"><td class="py-1.5 px-2 text-xs text-slate-400 align-top">built from</td>${tenses.map(([k]) => `<td class="align-top py-1.5 px-2 text-xs text-slate-600">${esc(builtFrom(v, k))}</td>`).join('')}</tr></tbody></table>`;
     }
@@ -274,7 +287,7 @@ function renderHalf(v, tenses) {
         ${from ? `<div class="text-xs text-slate-500">${esc(from)}</div>` : ''}
         <div class="text-xs text-slate-500 italic">${esc(C.english(v, k))}</div>
         <div class="text-xs text-slate-600 mb-2">built from: ${esc(builtFrom(v, k))}</div>
-        ${PERSONS.map((p, i) => `<div class="flex items-center gap-2 py-1 border-b border-slate-100 text-sm"><span class="w-16 shrink-0 text-slate-500">${p}</span><span class="flex-1 min-w-0 text-slate-800">${cellHtml(v, k, i)}</span></div>`).join('')}
+        ${PERSONS.map((p, i) => `<div class="flex items-center gap-2 py-1 border-b border-slate-100 text-sm"${stemStyle(k, i)}><span class="w-16 shrink-0 text-slate-500">${p}</span><span class="flex-1 min-w-0 text-slate-800">${cellHtml(v, k, i)}</span></div>`).join('')}
     </div>`).join('');
 }
 
@@ -352,7 +365,8 @@ function render() {
     <div class="space-y-4">
         <section class="bg-white border border-slate-200 rounded-2xl p-3 sm:p-4 space-y-3">
             <div class="flex flex-wrap items-center gap-x-4 gap-y-2">
-                <span class="text-sm text-slate-500"><span class="${END}">ending</span> · <span class="${HELP}">from the basic forms</span> · <span class="${STEM}">stem change</span> · <span class="bg-indigo-50">nous and ils</span> give the stems for the imparfait and the subjonctif · tap a form to hear it</span>
+                <span class="text-sm text-slate-500"><span class="${END}">ending</span> · <span class="${HELP}">from the basic forms</span> · <span class="${STEM}">stem change</span> · tap a form to hear it</span>
+                <span class="text-sm text-slate-500 w-full">The two stems: ${STEM_KEY}</span>
                 ${S.practise ? `<span class="sm:ml-auto flex flex-wrap items-center gap-2">
                     <button type="button" id="tt-check" class="min-h-[40px] px-4 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold rounded-xl">Check</button>
                     <button type="button" id="tt-again" class="min-h-[40px] px-4 bg-white border border-slate-200 hover:border-indigo-300 text-sm font-semibold rounded-xl">New blanks</button>
