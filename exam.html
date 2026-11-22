@@ -31,9 +31,15 @@
         <div class="max-w-5xl mx-auto px-4 py-5 flex flex-col gap-5 sm:block sm:space-y-5">
             <div>
                 <h1 class="text-2xl font-black text-slate-900">Exam guide</h1>
-                <p class="text-sm text-slate-500 mt-1">How a French exam is built, and where to practise each part. The questions live in each skill's page: in Writing, pick <b>Writing 1, 2 or 3</b> and a topic; in Speaking, open the <b>🎯 Questions</b> tab. For the words of the exam themes, see <a href="#lexique" class="text-indigo-700 font-semibold hover:underline">Mon lexique TCF</a> below.</p>
+                <p class="text-sm text-slate-500 mt-1">How a French exam is built, and where to practise each part. The questions live in each skill's page: in Writing, pick <b>Writing 1, 2 or 3</b> and a topic; in Speaking, open the <b>🎯 Questions</b> tab. The words of the 24 exam themes are in the <b>Mon lexique TCF</b> tab.</p>
             </div>
 
+            <nav class="flex gap-1 sm:gap-6 text-sm font-semibold shadow-[inset_0_-1px_0_#e2e8f0]" role="tablist" aria-label="Exam guide">
+                <button data-tab="guide" role="tab" class="tab-btn shrink-0 min-h-[44px] px-2 sm:px-0 border-b-2">Guide</button>
+                <button data-tab="lexique" role="tab" class="tab-btn shrink-0 min-h-[44px] px-2 sm:px-0 border-b-2">Mon lexique TCF</button>
+            </nav>
+
+            <div id="tab-guide" class="flex flex-col gap-5 sm:block sm:space-y-5">
             <!-- Your four skills as NCLC levels (js/nclc.js) -->
             <section id="nclc" class="bg-white border border-slate-200 rounded-2xl p-4 space-y-3" aria-labelledby="nclc-title"></section>
 
@@ -83,10 +89,10 @@
                     </ul>
                 </div>
             </details>
+            </div>
 
             <!-- Mon lexique TCF: 1,066 words for the 24 exam themes (content/by-ear/lexique.json), shown by js/word-list.js -->
-            <section id="lexique" class="order-last bg-white border border-slate-200 rounded-2xl p-4 space-y-2 scroll-mt-4" aria-labelledby="lexique-title">
-                <h2 id="lexique-title" class="font-black text-slate-900">Mon lexique TCF</h2>
+            <section id="tab-lexique" class="hidden space-y-2" aria-label="Mon lexique TCF">
                 <p class="text-sm text-slate-500">1,066 words and phrases for the 24 exam themes, from the core words to the specialised ones, each with a memory hook. Pick a theme, then press Play list to hear them one after another.</p>
                 <div id="lexique-list"></div>
             </section>
@@ -168,8 +174,28 @@
                 <p class="text-xs text-slate-500">This practice is original material in the style of the TCF and TEF. The app is not affiliated with France Éducation international, the CCI Paris Île-de-France or IRCC. <a href="terms.html" class="underline">Terms</a></p>`;
         })();
 
+        // ---------- Tabs: Guide · Mon lexique TCF (?tab=lexique, or #lexique from old links) ----------
+        let lexMounted = false;
+        function setExamTab(name, push) {
+            document.querySelectorAll('.tab-btn').forEach(b => {
+                const on = b.dataset.tab === name;
+                b.classList.toggle('border-indigo-600', on); b.classList.toggle('text-indigo-700', on);
+                b.classList.toggle('border-transparent', !on); b.classList.toggle('text-slate-500', !on); b.classList.toggle('hover:text-slate-800', !on);
+                b.setAttribute('aria-selected', on);
+            });
+            document.getElementById('tab-guide').style.display = name === 'guide' ? '' : 'none';   // sm:block would beat « hidden »
+            document.getElementById('tab-lexique').classList.toggle('hidden', name !== 'lexique');
+            if (name !== 'lexique' && window.ByEar && ByEar.Player.current) ByEar.Player.current.stop();
+            if (name === 'lexique' && !lexMounted) { lexMounted = true; mountLexique(); }
+            LocalStore.set('exam_tab', name);
+            if (push) history.pushState({}, '', name === 'lexique' ? 'exam.html?tab=lexique' : 'exam.html');
+        }
+        document.querySelectorAll('.tab-btn').forEach(b => b.addEventListener('click', () => setExamTab(b.dataset.tab, true)));
+        const examRoute = () => { const t = new URLSearchParams(location.search).get('tab') || (location.hash === '#lexique' ? 'lexique' : LocalStore.get('exam_tab', 'guide')); setExamTab(t === 'lexique' ? 'lexique' : 'guide', false); };
+        window.addEventListener('popstate', examRoute);
+
         // ---------- Mon lexique TCF ----------
-        (function () {
+        function mountLexique() {
             const G = { 'm.': 'masculine', 'f.': 'feminine', 'm.pl.': 'masculine plural', 'f.pl.': 'feminine plural', 'pl.': 'plural' };
             const TIER = { core: 'Core', useful: 'Useful', spec: 'Specialised' };
             const kind = (w) => w.v ? 'verb' : /^m/.test(w.g) ? 'masc' : /^f/.test(w.g) ? 'fem' : 'other';
@@ -193,7 +219,8 @@
                     }))
                 })
             });
-        })();
+        }
+        examRoute();
 
         TCF.index().then(ix => {
             const total = ix.themes.length * 60, n = TCF.practised().size;
