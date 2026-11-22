@@ -81,7 +81,7 @@
                     <input type="search" id="verb-search" class="cj-search" placeholder="Verb, form (mangeons), meaning or hook" aria-label="Find a verb, in French or English, or any of its forms">
                     <button type="button" id="filter-btn" class="cj-btn" aria-expanded="false" aria-controls="filter-panel">Filters <span id="filter-badge" class="cj-badge" hidden></span></button>
                     <button type="button" id="play-btn" class="cj-btn pri"><span id="play-ico"></span> Play list</button>
-                    <button type="button" id="copy-btn" class="cj-btn" title="Copy the verbs shown, to paste into Excel or Sheets">Copy</button>
+                    <button type="button" id="copy-btn" class="cj-btn" title="Copy the verbs shown with every tense, to paste into Excel or Sheets">Copy</button>
                 </div>
                 <div id="filter-panel" class="cj-panel" hidden>
                     <div id="filter-chips"></div>
@@ -390,13 +390,21 @@
         // ---------- Copy: the verbs shown, one row each, to paste into Excel or Sheets ----------
         function toast(t) { const el = document.createElement('div'); el.className = 'cj-toast'; el.textContent = t; document.body.appendChild(el); setTimeout(() => el.remove(), 2200); }
         $('copy-btn').addEventListener('click', async () => {
-            const PR = ['je', 'tu', 'il', 'nous', 'vous', 'ils'];
-            const q = (s) => '"' + String(s ?? '').replace(/"/g, '""') + '"';
-            const lines = [['No.', 'French', 'Meaning', 'Type', 'Memory hook', 'Présent', 'Passé composé'].map(q).join('\t')].concat(list.map(d => {
+            // every tense, in the order of the tables: one column each, the six forms in it
+            const TENSES = [['pres', 'Présent'], ['prog', 'Présent progressif'], ['recent', 'Passé récent'], ['fp', 'Futur proche'], ['imp', 'Impératif'], ['pc', 'Passé composé'],
+                ['impf', 'Imparfait'], ['pqp', 'Plus-que-parfait'], ['cond', 'Conditionnel'], ['cp', 'Conditionnel passé'], ['fut', 'Futur simple'], ['fa', 'Futur antérieur'],
+                ['subj', 'Subjonctif'], ['sp', 'Subjonctif passé']];
+            const ONLY_IL = { pres: 'p', impf: 'im', fut: 'fu', cond: 'co', subj: 'su' };
+            const q = ByEar.cell;
+            const TYPE_NAME = { er: 'Regular -er', ir: 'Regular -ir', re: 'Regular -re', irr: 'Irregular' };
+            const lines = [['No.', 'French', 'Meaning', 'Type', 'Memory hook'].concat(TENSES.map(t => t[1])).map(q).join('\t')].concat(list.map(d => {
                 const ev = engineOf(d);
-                const pres = ev ? C.forms(ev, 'pres').map(r => r.say).join(', ') : (d.p || []).map((f, i) => f ? PR[i] + ' ' + f : '').filter(Boolean).join(', ');
-                const pc = ev ? C.forms(ev, 'pc')[0].say : '';
-                return [d.o, q(d.v), q(d.e), q([TYPE_TAG[d.en], d.rf ? 'reflexive' : '', (LIKE_TAG[d.t] || [, ''])[1], LVL[d.l]].filter(Boolean).join(' · ')), q(d.m || ''), q(pres), q(pc)].join('\t');
+                const forms = TENSES.map(([k]) => {
+                    if (ev) { try { return [0, 1, 2, 3, 4, 5].map(i => { const c = TenseTable.cell(ev, k, i); return c ? TenseTable.sayFor(k, i, c.text) : ''; }).filter(Boolean).join(', '); } catch (e) { return ''; } }   // the same text as the table
+                    const f = ONLY_IL[k] && (d[ONLY_IL[k]] || [])[2];   // verbs used only with il (falloir, pleuvoir…)
+                    return f ? (k === 'subj' ? "qu'il " : 'il ') + f : k === 'pc' && d.pp ? 'il a ' + d.pp : '';
+                });
+                return [d.o, q(d.v), q(d.e), q([TYPE_NAME[d.en], d.rf ? 'reflexive' : '', (LIKE_TAG[d.t] || [, ''])[1], LVL[d.l]].filter(Boolean).join(' · ')), q(d.m || '')].concat(forms.map(q)).join('\t');
             }));
             const text = lines.join('\n');
             try { await navigator.clipboard.writeText(text); }
