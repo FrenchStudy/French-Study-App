@@ -151,7 +151,7 @@ function mount(el, cfg) {
         player.start(list, at); R('play').innerHTML = `${MEDIA_ICON.stop(16)} Stop`;
     });
     R('copy').addEventListener('click', async () => {
-        const q = (s) => '"' + String(s ?? '').replace(/"/g, '""') + '"';
+        const q = ByEar.cell;
         const head = ['No.', 'French', 'Meaning', 'Tags', 'Memory hook'].concat(cfg.example ? ['Example', 'Example in English'] : []);
         const text = [head.map(q).join('\t')].concat(list.map(it => [it.n, q(it.fr), q(it.en), q(it.tags.map(x => x[1]).join(' · ')), q(it.hooks.join(' '))]
             .concat(cfg.example ? [q(it.ex || ''), q(it.exe || '')] : []).join('\t'))).join('\n');

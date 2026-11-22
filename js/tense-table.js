@@ -442,5 +442,5 @@ function structureInto(el) {
 }
 function show(v) { S.structure = false; S.verb = v; if (S.practise) pickHidden(v); render(); }
 function setPractise(on) { S.practise = !!on; if (S.practise && S.verb) pickHidden(S.verb); render(); }
-window.TenseTable = { mount, show, showStructure, structureInto, builtFrom, prepNote, otherCell, setPractise, cell, isRight, groupShort };
+window.TenseTable = { mount, show, showStructure, structureInto, builtFrom, prepNote, otherCell, setPractise, cell, sayFor, isRight, groupShort };
 })();

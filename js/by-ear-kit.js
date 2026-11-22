@@ -213,8 +213,15 @@ const SPK = '<svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true">
 const CHEV = '<svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M6 3.5 10.5 8 6 12.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const TICK = '<svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M3.5 8.3 6.6 11.2 12.5 4.8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const rateNow = () => rate;
+// One cell for Excel or Google Sheets: no « = » (written « means »), nothing at the start that a spreadsheet reads as a
+// formula (= + - @), quotes doubled and the whole cell in quotes, so tabs and line breaks stay inside it.
+function cell(s) {
+    let t = String(s ?? '').replace(/\s*=\s*/g, ' means ').replace(/[\t\r\n]+/g, ' ').trim();
+    if (/^[=+\-@]/.test(t)) t = ' ' + t;
+    return '"' + t.replace(/"/g, '""') + '"';
+}
 const setRate = (r) => { rate = r; LocalStore.set('byear_rate', r); };
 
 addCss();
-window.ByEar = { load, chips, Player, say, norm, esc, icons: { SPK, CHEV, TICK }, rate: rateNow, setRate };
+window.ByEar = { load, chips, Player, say, norm, esc, cell, icons: { SPK, CHEV, TICK }, rate: rateNow, setRate };
 })();
